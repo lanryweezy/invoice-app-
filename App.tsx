@@ -105,7 +105,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800 font-sans">
+    <div className="h-screen flex flex-col bg-slate-50 text-slate-800 font-sans overflow-hidden selection:bg-teal-100 selection:text-teal-900">
       <Toast 
         message={toast.message} 
         isVisible={toast.isVisible} 
@@ -113,8 +113,8 @@ const App: React.FC = () => {
         type={toast.type}
       />
 
-      {/* Main Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+      {/* Main Header - Fixed height */}
+      <header className="flex-none bg-white border-b border-slate-200 z-50">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="bg-teal-600 text-white p-2 rounded-xl shadow-md shadow-teal-200">
@@ -133,8 +133,8 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      {/* COMMAND BAR (Sub-Nav) - The "Under Nav" */}
-      <div className="sticky top-16 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all">
+      {/* COMMAND BAR (Sub-Nav) - Fixed height below header */}
+      <div className="flex-none z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all">
         <div className="max-w-[1600px] mx-auto">
             
             {/* Desktop Command Bar Content */}
@@ -205,14 +205,14 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Layout */}
-      <main className="flex-1 max-w-[1600px] w-full mx-auto md:h-[calc(100vh-8rem)] md:overflow-hidden">
+      {/* Main Layout - Flex-1 fills remaining space */}
+      <main className="flex-1 min-h-0 w-full max-w-[1600px] mx-auto">
         <div className="flex flex-col md:flex-row h-full">
           
-          {/* LEFT COLUMN: Editor Form */}
-          <div className={`w-full md:w-[45%] lg:w-[40%] bg-white md:border-r border-slate-200 md:overflow-y-auto custom-scrollbar ${activeMobileTab === 'edit' ? 'block' : 'hidden md:block'}`}>
-            <div className="p-4 sm:p-6 lg:p-8 pb-32 md:pb-8">
-              <div className="max-w-xl mx-auto">
+          {/* LEFT COLUMN: Editor Form - Independent Scroll */}
+          <div className={`w-full md:w-[45%] lg:w-[40%] bg-white md:border-r border-slate-200 h-full overflow-y-auto custom-scrollbar flex flex-col ${activeMobileTab === 'edit' ? 'block' : 'hidden md:flex'}`}>
+            <div className="p-4 sm:p-6 lg:p-8 flex-1">
+              <div className="max-w-xl mx-auto pb-8">
                 <InvoiceForm
                   invoice={invoice}
                   updateInvoice={updateInvoice}
@@ -224,16 +224,16 @@ const App: React.FC = () => {
                 />
               </div>
             </div>
-            {/* Desktop Footer in Sidebar */}
-            <div className="hidden md:block px-8 py-6 border-t border-slate-100 bg-slate-50/50">
+            {/* Footer */}
+            <div className="px-8 py-6 border-t border-slate-100 bg-slate-50/50 mt-auto">
                <p className="text-xs text-slate-400 text-center font-medium">
                   © {new Date().getFullYear()} Naija Invoice Generator. Built for Nigerian Businesses.
                </p>
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Preview */}
-          <div className={`w-full md:w-[55%] lg:w-[60%] bg-slate-100/50 md:overflow-y-auto custom-scrollbar flex flex-col ${activeMobileTab === 'preview' ? 'block' : 'hidden md:flex'}`}>
+          {/* RIGHT COLUMN: Preview - Independent Scroll */}
+          <div className={`w-full md:w-[55%] lg:w-[60%] bg-slate-100/50 h-full overflow-y-auto custom-scrollbar flex flex-col ${activeMobileTab === 'preview' ? 'block' : 'hidden md:flex'}`}>
             {/* Background Pattern */}
             <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0" style={{ backgroundImage: 'radial-gradient(#0f766e 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
             
@@ -250,14 +250,8 @@ const App: React.FC = () => {
                  </div>
               </div>
 
-              {/* Mobile Footer */}
-               <div className="md:hidden py-8 mt-auto">
-                 <p className="text-xs text-slate-400 text-center font-medium">
-                  © {new Date().getFullYear()} Naija Invoice Generator.
-               </p>
-               </div>
-
-              <div className="h-12"></div> {/* Spacer */}
+              {/* Spacer */}
+              <div className="h-12"></div>
             </div>
           </div>
 
