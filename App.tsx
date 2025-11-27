@@ -8,16 +8,16 @@ import { ActionButtons } from './components/ActionButtons';
 import { EmailModal } from './components/EmailModal';
 import { useInvoice } from './hooks/useInvoice';
 import { generateEmailTemplate } from './utils/emailGenerator';
-import type { Invoice, TemplateId } from './types';
+import type { Invoice, TemplateId, Client } from './types';
 import { TemplateSelector } from './components/TemplateSelector';
-import { EditIcon, EyeIcon, SaveIcon } from './components/Icons';
+import { EditIcon, EyeIcon } from './components/Icons';
 import { Toast } from './components/Toast';
 
 // Lazy load heavy preview component
 const InvoicePreview = React.lazy(() => import('./components/InvoicePreview').then(module => ({ default: module.InvoicePreview })));
 
 const App: React.FC = () => {
-  const { invoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, calculateTotals } = useInvoice();
+  const { invoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, calculateTotals, savedClients, saveClient } = useInvoice();
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [generatedEmail, setGeneratedEmail] = useState('');
   
@@ -52,8 +52,15 @@ const App: React.FC = () => {
 
   const handleSaveDraft = () => {
       // Logic handled by useInvoice internal debounced localstorage, but we trigger a visual feedback here
-      // and ensure immediate save if needed (omitted for simplicity as debouncer catches it)
       showToast('Draft saved successfully');
+  };
+
+  const handleSaveClient = (client: Client) => {
+      if (saveClient(client)) {
+          showToast('Client saved to list');
+      } else {
+          showToast('Client name is required', 'error');
+      }
   };
 
   const handleDownloadPdf = async () => {
@@ -125,29 +132,9 @@ const App: React.FC = () => {
             </div>
           </div>
           
-          <div className="flex items-center gap-2 sm:gap-4">
-              <button 
-                onClick={handleSaveDraft}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-slate-600 hover:text-teal-600 hover:bg-slate-50 rounded-lg transition-colors"
-              >
-                  <SaveIcon className="w-5 h-5" />
-                  <span className="hidden sm:inline">Save Draft</span>
-              </button>
-              
-              <div className="h-6 w-px bg-slate-200 hidden sm:block"></div>
-
-              {/* Actions */}
-              <ActionButtons 
-                onGenerateEmail={handleGenerateEmail} 
-                onDownloadPdf={handleDownloadPdf} 
-                isMobile={true} // Render mobile icon version for small screens automatically via CSS or logic? 
-                                // Actually let's use the component's internal media queries or just always show icons on very small screens?
-                                // Let's rely on CSS in ActionButtons if we want responsive, but here I passed a prop. 
-                                // I'll use a wrapper to switch.
-              />
-              <div className="hidden md:block">
-                 {/* Desktop Full Actions */}
-              </div>
+          {/* Header Actions Removed as requested */}
+          <div className="text-xs font-medium text-slate-400">
+             Fast & Professional
           </div>
         </div>
       </header>
@@ -184,21 +171,33 @@ const App: React.FC = () => {
                   addLineItem={addLineItem}
                   removeLineItem={removeLineItem}
                   updateLineItem={updateLineItem}
+                  savedClients={savedClients}
+                  onSaveClient={handleSaveClient}
                 />
               </div>
+            </div>
+            {/* Desktop Footer in Sidebar */}
+            <div className="hidden md:block px-8 py-6 border-t border-slate-100 bg-slate-50/50">
+               <p className="text-xs text-slate-400 text-center font-medium">
+                  © {new Date().getFullYear()} Naija Invoice Generator. Built for Nigerian Businesses.
+               </p>
             </div>
           </div>
 
           {/* RIGHT COLUMN: Preview & Actions */}
-          <div className={`w-full md:w-[55%] lg:w-[60%] bg-slate-50/50 md:bg-slate-100 md:overflow-y-auto custom-scrollbar flex flex-col ${activeMobileTab === 'preview' ? 'block' : 'hidden md:flex'}`}>
-            <div className="p-4 sm:p-6 lg:p-8 min-h-full flex flex-col items-center">
+          <div className={`w-full md:w-[55%] lg:w-[60%] bg-slate-100/50 md:overflow-y-auto custom-scrollbar flex flex-col ${activeMobileTab === 'preview' ? 'block' : 'hidden md:flex'}`}>
+            {/* Subtle background pattern */}
+            <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0" style={{ backgroundImage: 'radial-gradient(#0f766e 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+            
+            <div className="p-4 sm:p-6 lg:p-8 min-h-full flex flex-col items-center relative z-10">
               
               {/* Sticky Toolbar for Desktop */}
               <div className="w-full max-w-[210mm] mb-8 sticky top-0 z-20 hidden md:block">
-                  <div className="bg-white/80 backdrop-blur-md border border-slate-200/60 shadow-lg shadow-slate-200/50 p-4 rounded-2xl">
+                  <div className="bg-white/90 backdrop-blur-md border border-slate-200/60 shadow-lg shadow-slate-200/50 p-4 rounded-2xl transition-all hover:bg-white">
                      <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
                         <TemplateSelector selectedTemplate={template} onSelectTemplate={setTemplate} />
                         <ActionButtons 
+                            onSaveDraft={handleSaveDraft}
                             onGenerateEmail={handleGenerateEmail} 
                             onDownloadPdf={handleDownloadPdf} 
                         />
@@ -206,27 +205,40 @@ const App: React.FC = () => {
                   </div>
               </div>
 
-              {/* Mobile Template Selector */}
+              {/* Mobile Preview Toolbar */}
               <div className="md:hidden w-full mb-6 sticky top-0 z-20">
-                 <div className="bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm p-3 -mx-4 -mt-4 mb-4">
-                    <TemplateSelector selectedTemplate={template} onSelectTemplate={setTemplate} />
+                 <div className="bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm p-3 -mx-4 -mt-4 mb-4 space-y-3">
+                    <div className="flex justify-between items-center">
+                        <ActionButtons 
+                            onSaveDraft={handleSaveDraft}
+                            onGenerateEmail={handleGenerateEmail} 
+                            onDownloadPdf={handleDownloadPdf}
+                            isMobile={true}
+                        />
+                    </div>
+                    <div className="pt-2 border-t border-slate-100">
+                        <TemplateSelector selectedTemplate={template} onSelectTemplate={setTemplate} />
+                    </div>
                  </div>
               </div>
 
               {/* A4 Paper Preview */}
-              <div className="relative w-full max-w-[210mm] transition-all duration-500 ease-in-out">
-                 <div id="invoice-preview-container" className="bg-white text-slate-900 shadow-2xl shadow-slate-300/60 rounded-sm min-h-[297mm] w-full origin-top transform transition-transform">
+              <div className="relative w-full max-w-[210mm] transition-all duration-500 ease-in-out pb-20 md:pb-0">
+                 <div id="invoice-preview-container" className="bg-white text-slate-900 shadow-2xl shadow-slate-300/60 rounded-sm min-h-[297mm] w-full origin-top transform transition-transform border border-slate-200">
                     <div className="p-8 md:p-12 h-full flex flex-col relative">
                         <Suspense fallback={<div className="flex items-center justify-center h-96 text-slate-400">Loading Preview...</div>}>
                             <InvoicePreview invoice={invoice} totals={totals} template={template} />
                         </Suspense>
-                        
-                        <div className="mt-auto pt-12 text-center opacity-40 hover:opacity-100 transition-opacity print:hidden">
-                           <p className="text-[10px] text-slate-400 font-medium">Generated with Naija Invoice</p>
-                        </div>
                     </div>
                  </div>
               </div>
+
+              {/* Mobile Footer */}
+               <div className="md:hidden py-8 mt-auto">
+                 <p className="text-xs text-slate-400 text-center font-medium">
+                  © {new Date().getFullYear()} Naija Invoice Generator.
+               </p>
+               </div>
 
               <div className="h-12"></div> {/* Spacer */}
             </div>

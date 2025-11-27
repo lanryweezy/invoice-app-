@@ -1,19 +1,20 @@
+
 import { useState, useCallback, useEffect } from 'react';
-import type { Invoice, LineItem, Currency, InvoiceStatus, User } from '../types';
+import type { Invoice, LineItem, Currency, InvoiceStatus, User, Client } from '../types';
 
 const DEFAULT_USER: User = {
-  name: 'Your Business Name',
-  email: 'your.email@business.com',
-  address: 'Your Business Address, Lagos',
-  bankName: 'Your Bank',
-  accountNumber: '0123456789',
+  name: '',
+  email: '',
+  address: '',
+  bankName: '',
+  accountNumber: '',
   logo: undefined,
 };
 
 const getInitialInvoiceState = (): Invoice => {
   const today = new Date();
   const dueDate = new Date();
-  dueDate.setDate(today.getDate() + 14);
+  dueDate.setDate(today.getDate() + 7); // Default 7 days due date is common for freelancers
 
   const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
@@ -31,18 +32,18 @@ const getInitialInvoiceState = (): Invoice => {
   return {
     user: savedUser,
     client: {
-      name: 'Client Business Name',
-      email: 'client.email@example.com',
-      address: 'Client Business Address, Abuja',
+      name: '',
+      email: '',
+      address: '',
     },
-    invoiceNumber: `INV-${new Date().getFullYear()}-001`,
+    invoiceNumber: `INV-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
     issueDate: formatDate(today),
     dueDate: formatDate(dueDate),
     lineItems: [
-      { id: crypto.randomUUID(), description: 'e.g. Website design services', quantity: 1, price: 50000 },
+      { id: crypto.randomUUID(), description: 'Professional Services', quantity: 1, price: 0 },
     ],
-    notes: 'Thank you for your business!',
-    terms: 'Payment is due within 14 days. Late payments may be subject to a 5% fee.',
+    notes: 'Thank you for your patronage! We look forward to working with you again.',
+    terms: 'Please make payment into the bank account listed above. \nGoods remain the property of the seller until paid for in full.',
     taxRate: 7.5, // Standard VAT in Nigeria
     currency: (localStorage.getItem('invoiceCurrency') as Currency) || 'NGN',
     status: (localStorage.getItem('invoiceStatus') as InvoiceStatus) || 'Draft',
@@ -52,6 +53,7 @@ const getInitialInvoiceState = (): Invoice => {
 
 export const useInvoice = () => {
   const [invoice, setInvoice] = useState<Invoice>(getInitialInvoiceState());
+  const [savedClients, setSavedClients] = useState<Client[]>([]);
   
   // Persist Currency
   useEffect(() => {
@@ -70,6 +72,16 @@ export const useInvoice = () => {
     }, 500); // Debounce save to avoid performance hits with large logo strings
     return () => clearTimeout(timeoutId);
   }, [invoice.user]);
+
+  // Load saved clients
+  useEffect(() => {
+    try {
+        const stored = localStorage.getItem('invoiceSavedClients');
+        if (stored) {
+            setSavedClients(JSON.parse(stored));
+        }
+    } catch(e) { console.error('Failed to load saved clients', e); }
+  }, []);
 
   const updateInvoice = useCallback(<K extends keyof Invoice>(key: K, value: Invoice[K]) => {
     setInvoice(prev => ({ ...prev, [key]: value }));
@@ -111,6 +123,30 @@ export const useInvoice = () => {
     return { subtotal, tax, total };
   }, [invoice.lineItems, invoice.taxRate]);
 
+  const saveClient = useCallback((client: Client) => {
+    if (!client.name.trim()) return false;
+
+    setSavedClients(prev => {
+        // Check if exists, update if so, otherwise add
+        const normalizedName = client.name.trim().toLowerCase();
+        const existingIndex = prev.findIndex(c => c.name.toLowerCase() === normalizedName);
+        
+        let newClients;
+        if (existingIndex >= 0) {
+            newClients = [...prev];
+            newClients[existingIndex] = client;
+        } else {
+            newClients = [...prev, client];
+        }
+        
+        // Sort alphabetically
+        newClients.sort((a, b) => a.name.localeCompare(b.name));
+        
+        localStorage.setItem('invoiceSavedClients', JSON.stringify(newClients));
+        return newClients;
+    });
+    return true;
+  }, []);
 
   return {
     invoice,
@@ -120,5 +156,7 @@ export const useInvoice = () => {
     removeLineItem,
     updateLineItem,
     calculateTotals,
+    savedClients,
+    saveClient
   };
 };
