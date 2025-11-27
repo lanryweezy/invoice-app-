@@ -51,7 +51,6 @@ const App: React.FC = () => {
   }, [invoice, totals]);
 
   const handleSaveDraft = () => {
-      // Logic handled by useInvoice internal debounced localstorage, but we trigger a visual feedback here
       showToast('Draft saved successfully');
   };
 
@@ -67,7 +66,6 @@ const App: React.FC = () => {
     if (activeMobileTab === 'edit' && window.innerWidth < 768) {
         showToast('Switching to preview...', 'success');
         setActiveMobileTab('preview');
-        // Wait for render
         await new Promise(resolve => setTimeout(resolve, 500));
     }
 
@@ -76,7 +74,6 @@ const App: React.FC = () => {
       showToast('Generating PDF...', 'success');
       const originalStyle = input.style.cssText;
       
-      // Force exact dimensions for cleaner PDF
       input.style.width = '210mm';
       input.style.minHeight = '297mm';
       
@@ -100,7 +97,6 @@ const App: React.FC = () => {
           console.error(e);
           showToast('Failed to generate PDF', 'error');
       } finally {
-          // Reset style
           input.style.cssText = originalStyle;
       }
     } else {
@@ -117,8 +113,8 @@ const App: React.FC = () => {
         type={toast.type}
       />
 
-      {/* Sticky Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+      {/* Main Header */}
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="bg-teal-600 text-white p-2 rounded-xl shadow-md shadow-teal-200">
@@ -126,39 +122,91 @@ const App: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 7h6m0 4h6m-6 4h6M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
-            <div className="hidden sm:block">
-              <h1 className="text-lg font-bold text-slate-900 leading-tight">Naija Invoice</h1>
-              <p className="text-[10px] uppercase tracking-wider text-teal-600 font-bold">Generator</p>
+            <div>
+              <h1 className="text-lg font-bold text-slate-900 leading-none">Naija Invoice</h1>
+              <p className="text-[10px] uppercase tracking-widest text-teal-600 font-bold leading-none mt-1">Generator</p>
             </div>
           </div>
-          
-          {/* Header Actions Removed as requested */}
-          <div className="text-xs font-medium text-slate-400">
+          <div className="hidden sm:block text-xs font-medium text-slate-400">
              Fast & Professional
           </div>
         </div>
       </header>
 
-      {/* Mobile View Toggle */}
-      <div className="md:hidden bg-white border-b border-slate-200 sticky top-16 z-30 shadow-sm">
-        <div className="grid grid-cols-2 p-1 gap-1">
-          <button
-            onClick={() => setActiveMobileTab('edit')}
-            className={`py-3 text-sm font-bold flex items-center justify-center gap-2 rounded-lg transition-all ${activeMobileTab === 'edit' ? 'bg-teal-50 text-teal-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            <EditIcon className="w-4 h-4" /> Editor
-          </button>
-          <button
-            onClick={() => setActiveMobileTab('preview')}
-            className={`py-3 text-sm font-bold flex items-center justify-center gap-2 rounded-lg transition-all ${activeMobileTab === 'preview' ? 'bg-teal-50 text-teal-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            <EyeIcon className="w-4 h-4" /> Preview
-          </button>
+      {/* COMMAND BAR (Sub-Nav) - The "Under Nav" */}
+      <div className="sticky top-16 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all">
+        <div className="max-w-[1600px] mx-auto">
+            
+            {/* Desktop Command Bar Content */}
+            <div className="hidden md:flex items-center justify-between px-6 py-3">
+                 {/* Left: Status */}
+                <div className="flex items-center gap-3">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border
+                        ${invoice.status === 'Paid' ? 'bg-teal-100 text-teal-800 border-teal-200' : 
+                          invoice.status === 'Sent' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                          'bg-slate-100 text-slate-800 border-slate-200'}`}>
+                        {invoice.status}
+                    </span>
+                    <span className="text-sm text-slate-400 font-mono">#{invoice.invoiceNumber}</span>
+                </div>
+
+                {/* Center: Template Selector */}
+                <div className="flex-1 flex justify-center">
+                    <TemplateSelector selectedTemplate={template} onSelectTemplate={setTemplate} />
+                </div>
+
+                {/* Right: Actions */}
+                <ActionButtons 
+                    onSaveDraft={handleSaveDraft}
+                    onGenerateEmail={handleGenerateEmail} 
+                    onDownloadPdf={handleDownloadPdf}
+                    isMobile={false}
+                />
+            </div>
+
+            {/* Mobile Command Bar Content */}
+            <div className="md:hidden">
+                {/* Row 1: Switcher & Actions */}
+                <div className="flex items-center justify-between px-4 py-2 gap-4">
+                    {/* Segmented Control */}
+                    <div className="flex bg-slate-100 p-1 rounded-lg flex-1 max-w-[200px]">
+                        <button
+                            onClick={() => setActiveMobileTab('edit')}
+                            className={`flex-1 py-1.5 text-xs font-bold flex items-center justify-center gap-1.5 rounded-md transition-all ${activeMobileTab === 'edit' ? 'bg-white text-teal-700 shadow-sm' : 'text-slate-500'}`}
+                        >
+                            <EditIcon className="w-3.5 h-3.5" /> Editor
+                        </button>
+                        <button
+                            onClick={() => setActiveMobileTab('preview')}
+                            className={`flex-1 py-1.5 text-xs font-bold flex items-center justify-center gap-1.5 rounded-md transition-all ${activeMobileTab === 'preview' ? 'bg-white text-teal-700 shadow-sm' : 'text-slate-500'}`}
+                        >
+                            <EyeIcon className="w-3.5 h-3.5" /> Preview
+                        </button>
+                    </div>
+
+                    {/* Compact Actions */}
+                    <div className="flex items-center">
+                        <ActionButtons 
+                            onSaveDraft={handleSaveDraft}
+                            onGenerateEmail={handleGenerateEmail} 
+                            onDownloadPdf={handleDownloadPdf}
+                            isMobile={true}
+                        />
+                    </div>
+                </div>
+
+                {/* Row 2: Templates (Only visible in Preview) */}
+                {activeMobileTab === 'preview' && (
+                    <div className="px-4 py-2 border-t border-slate-100 bg-slate-50/50 overflow-x-auto">
+                         <TemplateSelector selectedTemplate={template} onSelectTemplate={setTemplate} />
+                    </div>
+                )}
+            </div>
         </div>
       </div>
 
       {/* Main Layout */}
-      <main className="flex-1 max-w-[1600px] w-full mx-auto md:h-[calc(100vh-4rem)] md:overflow-hidden">
+      <main className="flex-1 max-w-[1600px] w-full mx-auto md:h-[calc(100vh-8rem)] md:overflow-hidden">
         <div className="flex flex-col md:flex-row h-full">
           
           {/* LEFT COLUMN: Editor Form */}
@@ -184,47 +232,16 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Preview & Actions */}
+          {/* RIGHT COLUMN: Preview */}
           <div className={`w-full md:w-[55%] lg:w-[60%] bg-slate-100/50 md:overflow-y-auto custom-scrollbar flex flex-col ${activeMobileTab === 'preview' ? 'block' : 'hidden md:flex'}`}>
-            {/* Subtle background pattern */}
+            {/* Background Pattern */}
             <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0" style={{ backgroundImage: 'radial-gradient(#0f766e 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
             
-            <div className="p-4 sm:p-6 lg:p-8 min-h-full flex flex-col items-center relative z-10">
+            <div className="p-4 sm:p-6 lg:p-8 min-h-full flex flex-col items-center relative z-10 pt-8">
               
-              {/* Sticky Toolbar for Desktop */}
-              <div className="w-full max-w-[210mm] mb-8 sticky top-0 z-20 hidden md:block">
-                  <div className="bg-white/90 backdrop-blur-md border border-slate-200/60 shadow-lg shadow-slate-200/50 p-4 rounded-2xl transition-all hover:bg-white">
-                     <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
-                        <TemplateSelector selectedTemplate={template} onSelectTemplate={setTemplate} />
-                        <ActionButtons 
-                            onSaveDraft={handleSaveDraft}
-                            onGenerateEmail={handleGenerateEmail} 
-                            onDownloadPdf={handleDownloadPdf} 
-                        />
-                     </div>
-                  </div>
-              </div>
-
-              {/* Mobile Preview Toolbar */}
-              <div className="md:hidden w-full mb-6 sticky top-0 z-20">
-                 <div className="bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm p-3 -mx-4 -mt-4 mb-4 space-y-3">
-                    <div className="flex justify-between items-center">
-                        <ActionButtons 
-                            onSaveDraft={handleSaveDraft}
-                            onGenerateEmail={handleGenerateEmail} 
-                            onDownloadPdf={handleDownloadPdf}
-                            isMobile={true}
-                        />
-                    </div>
-                    <div className="pt-2 border-t border-slate-100">
-                        <TemplateSelector selectedTemplate={template} onSelectTemplate={setTemplate} />
-                    </div>
-                 </div>
-              </div>
-
               {/* A4 Paper Preview */}
               <div className="relative w-full max-w-[210mm] transition-all duration-500 ease-in-out pb-20 md:pb-0">
-                 <div id="invoice-preview-container" className="bg-white text-slate-900 shadow-2xl shadow-slate-300/60 rounded-sm min-h-[297mm] w-full origin-top transform transition-transform border border-slate-200">
+                 <div id="invoice-preview-container" className="bg-white text-slate-900 shadow-xl shadow-slate-300/40 rounded-sm min-h-[297mm] w-full origin-top transform transition-transform border border-slate-200/60">
                     <div className="p-8 md:p-12 h-full flex flex-col relative">
                         <Suspense fallback={<div className="flex items-center justify-center h-96 text-slate-400">Loading Preview...</div>}>
                             <InvoicePreview invoice={invoice} totals={totals} template={template} />
