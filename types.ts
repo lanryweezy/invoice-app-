@@ -1,8 +1,9 @@
+
 export interface LineItem {
   id: string;
   description: string;
   quantity: number;
-  price: number;
+  price: number | '';
 }
 
 export interface Client {
@@ -14,6 +15,7 @@ export interface Client {
 export interface User {
   name: string;
   email: string;
+  phoneNumber?: string;
   address: string;
   bankName: string;
   accountNumber: string;
@@ -34,9 +36,11 @@ export interface Invoice {
   notes: string;
   terms: string;
   taxRate: number;
+  discountRate: number;
   currency: Currency;
   status: InvoiceStatus;
   subtotal?: number;
+  discountAmount?: number;
   tax?: number;
   total?: number;
 }

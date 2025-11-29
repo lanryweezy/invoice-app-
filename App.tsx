@@ -41,18 +41,14 @@ const App: React.FC = () => {
       setToast({ message, isVisible: true, type });
   };
 
-  const totals = useMemo(() => calculateTotals(), [invoice.lineItems, invoice.taxRate, calculateTotals]);
+  const totals = useMemo(() => calculateTotals(), [invoice.lineItems, invoice.taxRate, invoice.discountRate, calculateTotals]);
 
   const handleGenerateEmail = useCallback(() => {
-    const fullInvoice: Invoice = { ...invoice, subtotal: totals.subtotal, tax: totals.tax, total: totals.total };
+    const fullInvoice: Invoice = { ...invoice, subtotal: totals.subtotal, tax: totals.tax, total: totals.total, discountAmount: totals.discountAmount };
     const emailContent = generateEmailTemplate(fullInvoice);
     setGeneratedEmail(emailContent);
     setIsEmailModalOpen(true);
   }, [invoice, totals]);
-
-  const handleSaveDraft = () => {
-      showToast('Draft saved successfully');
-  };
 
   const handleSaveClient = (client: Client) => {
       if (saveClient(client)) {
@@ -72,32 +68,43 @@ const App: React.FC = () => {
     const input = document.getElementById('invoice-preview-container');
     if (input) {
       showToast('Generating PDF...', 'success');
-      const originalStyle = input.style.cssText;
       
+      // Store current style to restore later
+      const originalStyle = input.style.cssText;
+      const parent = input.parentElement;
+      const originalParentStyle = parent ? parent.style.cssText : '';
+
+      // Force fixed dimensions for capture to ensure A4 proportions
       input.style.width = '210mm';
       input.style.minHeight = '297mm';
+      input.style.transform = 'none'; // Remove any mobile scaling
       
       try {
+          // Use slightly lower scale (1.5) and JPEG compression to reduce size
           const canvas = await html2canvas(input, {
-            scale: 2, 
+            scale: 1.5, // Reduced from 2 to 1.5 for better file size
             useCORS: true,
             backgroundColor: '#ffffff',
-            logging: false
+            logging: false,
+            allowTaint: true,
           });
           
-          const imgData = canvas.toDataURL('image/png');
+          // Use JPEG with 0.6 (60%) quality for significant compression
+          const imgData = canvas.toDataURL('image/jpeg', 0.6);
           const pdf = new jsPDF('p', 'mm', 'a4');
           const pdfWidth = pdf.internal.pageSize.getWidth();
           const pdfHeight = pdf.internal.pageSize.getHeight();
           
-          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+          pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
           pdf.save(`Invoice-${invoice.invoiceNumber}.pdf`);
           showToast('PDF Downloaded!');
       } catch (e) {
           console.error(e);
           showToast('Failed to generate PDF', 'error');
       } finally {
+          // Restore styles
           input.style.cssText = originalStyle;
+          if (parent) parent.style.cssText = originalParentStyle;
       }
     } else {
         showToast('Preview not available', 'error');
@@ -113,22 +120,25 @@ const App: React.FC = () => {
         type={toast.type}
       />
 
-      {/* Main Header - Fixed height */}
-      <header className="flex-none bg-white border-b border-slate-200 z-50">
+      {/* Main Header - Fixed height, Dark Theme */}
+      <header className="flex-none bg-slate-900 border-b border-slate-800 z-50 text-white">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="bg-teal-600 text-white p-2 rounded-xl shadow-md shadow-teal-200">
+            <div className="bg-teal-500 text-white p-2 rounded-xl shadow-lg shadow-teal-900/50 ring-1 ring-white/10">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 7h6m0 4h6m-6 4h6M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
             <div>
-              <h1 className="text-lg font-bold text-slate-900 leading-none">Naija Invoice</h1>
-              <p className="text-[10px] uppercase tracking-widest text-teal-600 font-bold leading-none mt-1">Generator</p>
+              <h1 className="text-lg font-bold text-white leading-none tracking-tight">Naija Invoice</h1>
+              <p className="text-[10px] uppercase tracking-widest text-teal-400 font-bold leading-none mt-1">Generator</p>
             </div>
           </div>
-          <div className="hidden sm:block text-xs font-medium text-slate-400">
-             Fast & Professional
+          <div className="hidden sm:flex items-center gap-4">
+             <div className="text-xs font-medium text-slate-400 border-r border-slate-700 pr-4">
+                Fast & Professional
+             </div>
+             <div className="text-xs font-bold text-slate-300">v1.1</div>
           </div>
         </div>
       </header>
@@ -157,7 +167,6 @@ const App: React.FC = () => {
 
                 {/* Right: Actions */}
                 <ActionButtons 
-                    onSaveDraft={handleSaveDraft}
                     onGenerateEmail={handleGenerateEmail} 
                     onDownloadPdf={handleDownloadPdf}
                     isMobile={false}
@@ -187,7 +196,6 @@ const App: React.FC = () => {
                     {/* Compact Actions */}
                     <div className="flex items-center">
                         <ActionButtons 
-                            onSaveDraft={handleSaveDraft}
                             onGenerateEmail={handleGenerateEmail} 
                             onDownloadPdf={handleDownloadPdf}
                             isMobile={true}
@@ -225,23 +233,57 @@ const App: React.FC = () => {
               </div>
             </div>
             {/* Footer */}
-            <div className="px-8 py-6 border-t border-slate-100 bg-slate-50/50 mt-auto">
-               <p className="text-xs text-slate-400 text-center font-medium">
-                  © {new Date().getFullYear()} Naija Invoice Generator. Built for Nigerian Businesses.
-               </p>
+            <div className="px-8 py-8 border-t border-slate-100 bg-slate-50/50">
+               <div className="max-w-xl mx-auto space-y-5">
+                   {/* Trust Badge */}
+                   <div className="flex items-center justify-center gap-3 mb-2">
+                       <div className="h-px bg-slate-200 w-12"></div>
+                       <span className="text-[10px] uppercase tracking-widest font-bold text-slate-400 flex items-center gap-1">
+                           <svg className="w-3 h-3 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                           Secure & Local
+                       </span>
+                       <div className="h-px bg-slate-200 w-12"></div>
+                   </div>
+                   
+                   <p className="text-xs text-slate-500 text-center leading-relaxed">
+                       Built for Nigerian freelancers & SMEs. Your data stays in your browser and is never stored on our servers.
+                   </p>
+
+                   {/* Links */}
+                   <div className="flex justify-center gap-6 text-xs font-bold text-slate-600">
+                       <button onClick={() => showToast('Privacy Policy coming soon', 'success')} className="hover:text-teal-600 transition-colors">Privacy</button>
+                       <span className="text-slate-300">•</span>
+                       <button onClick={() => showToast('Terms coming soon', 'success')} className="hover:text-teal-600 transition-colors">Terms</button>
+                       <span className="text-slate-300">•</span>
+                       <button onClick={() => showToast('Contact: hello@naijainvoice.ng', 'success')} className="hover:text-teal-600 transition-colors">Contact</button>
+                   </div>
+
+                   {/* Copyright */}
+                   <div className="pt-4 border-t border-slate-200/50 text-center">
+                       <p className="text-[11px] text-slate-400 font-medium">
+                          © {new Date().getFullYear()} Naija Invoice Generator.
+                       </p>
+                       <p className="text-[11px] font-bold text-slate-600 mt-1 flex items-center justify-center gap-1">
+                           Made with <span className="text-red-500">❤️</span> in Lagos 🇳🇬
+                       </p>
+                   </div>
+               </div>
             </div>
           </div>
 
           {/* RIGHT COLUMN: Preview - Independent Scroll */}
-          <div className={`w-full md:w-[55%] lg:w-[60%] bg-slate-100/50 h-full overflow-y-auto custom-scrollbar flex flex-col ${activeMobileTab === 'preview' ? 'block' : 'hidden md:flex'}`}>
+          {/* Added overflow-x-auto to allow horizontal scrolling on mobile when scaled invoice exceeds width */}
+          <div className={`w-full md:w-[55%] lg:w-[60%] bg-slate-100/50 h-full overflow-y-auto overflow-x-auto custom-scrollbar flex flex-col ${activeMobileTab === 'preview' ? 'block' : 'hidden md:flex'}`}>
             {/* Background Pattern */}
             <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0" style={{ backgroundImage: 'radial-gradient(#0f766e 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
             
+            {/* Removed overflow-hidden to prevent clipping, added padding bottom for scroll space */}
             <div className="p-4 sm:p-6 lg:p-8 min-h-full flex flex-col items-center relative z-10 pt-8">
               
               {/* A4 Paper Preview */}
-              <div className="relative w-full max-w-[210mm] transition-all duration-500 ease-in-out pb-20 md:pb-0">
-                 <div id="invoice-preview-container" className="bg-white text-slate-900 shadow-xl shadow-slate-300/40 rounded-sm min-h-[297mm] w-full origin-top transform transition-transform border border-slate-200/60">
+              {/* Increased mobile scale to 0.6 for better readability, relying on parent overflow-x-auto for width */}
+              <div className="relative w-[210mm] transition-all duration-500 ease-in-out pb-32 md:pb-0 transform scale-[0.6] sm:scale-[0.7] md:scale-[0.7] lg:scale-[0.85] xl:scale-100 origin-top">
+                 <div id="invoice-preview-container" className="bg-white text-slate-900 shadow-2xl shadow-slate-400/30 rounded-sm min-h-[297mm] w-[210mm] origin-top border border-slate-200/60">
                     <div className="p-8 md:p-12 h-full flex flex-col relative">
                         <Suspense fallback={<div className="flex items-center justify-center h-96 text-slate-400">Loading Preview...</div>}>
                             <InvoicePreview invoice={invoice} totals={totals} template={template} />

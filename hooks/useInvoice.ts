@@ -5,6 +5,7 @@ import type { Invoice, LineItem, Currency, InvoiceStatus, User, Client } from '.
 const DEFAULT_USER: User = {
   name: '',
   email: '',
+  phoneNumber: '',
   address: '',
   bankName: '',
   accountNumber: '',
@@ -24,6 +25,8 @@ const getInitialInvoiceState = (): Invoice => {
     const stored = localStorage.getItem('invoiceUser');
     if (stored) {
         savedUser = JSON.parse(stored);
+        // Ensure phoneNumber exists if loading from old local storage data
+        if (!savedUser.phoneNumber) savedUser.phoneNumber = '';
     }
   } catch (e) {
     console.error("Failed to load saved user", e);
@@ -40,11 +43,12 @@ const getInitialInvoiceState = (): Invoice => {
     issueDate: formatDate(today),
     dueDate: formatDate(dueDate),
     lineItems: [
-      { id: crypto.randomUUID(), description: 'Professional Services', quantity: 1, price: 0 },
+      { id: crypto.randomUUID(), description: '', quantity: 1, price: '' },
     ],
-    notes: 'Thank you for your patronage! We look forward to working with you again.',
-    terms: 'Please make payment into the bank account listed above. \nGoods remain the property of the seller until paid for in full.',
+    notes: '',
+    terms: '',
     taxRate: 7.5, // Standard VAT in Nigeria
+    discountRate: 0,
     currency: (localStorage.getItem('invoiceCurrency') as Currency) || 'NGN',
     status: (localStorage.getItem('invoiceStatus') as InvoiceStatus) || 'Draft',
   };
@@ -92,7 +96,7 @@ export const useInvoice = () => {
       id: crypto.randomUUID(),
       description: '',
       quantity: 1,
-      price: 0,
+      price: '',
     };
     setInvoice(prev => ({
       ...prev,
@@ -117,11 +121,18 @@ export const useInvoice = () => {
   }, []);
 
   const calculateTotals = useCallback(() => {
-    const subtotal = invoice.lineItems.reduce((acc, item) => acc + (item.quantity * item.price), 0);
-    const tax = subtotal * (invoice.taxRate / 100);
-    const total = subtotal + tax;
-    return { subtotal, tax, total };
-  }, [invoice.lineItems, invoice.taxRate]);
+    const subtotal = invoice.lineItems.reduce((acc, item) => acc + (item.quantity * Number(item.price)), 0);
+    const discountAmount = subtotal * ((invoice.discountRate || 0) / 100);
+    const taxableAmount = subtotal - discountAmount;
+    const tax = taxableAmount + (invoice.taxRate / 100);
+    const total = taxableAmount + tax; 
+    
+    // Calculate final tax amount based on discounted subtotal
+    const taxAmount = (subtotal - discountAmount) * (invoice.taxRate / 100);
+    const finalTotal = (subtotal - discountAmount) + taxAmount;
+    
+    return { subtotal, discountAmount, tax: taxAmount, total: finalTotal };
+  }, [invoice.lineItems, invoice.taxRate, invoice.discountRate]);
 
   const saveClient = useCallback((client: Client) => {
     if (!client.name.trim()) return false;

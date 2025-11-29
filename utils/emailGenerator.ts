@@ -1,4 +1,3 @@
-
 import type { Invoice } from '../types';
 
 export const generateEmailTemplate = (invoice: Invoice): string => {
@@ -13,7 +12,7 @@ export const generateEmailTemplate = (invoice: Invoice): string => {
 
   // Create a simple list of items for the email body
   const itemsList = lineItems
-    .map(item => `- ${item.description} (${item.quantity} x ${currencyFormatter.format(item.price)})`)
+    .map(item => `- ${item.description} (${item.quantity} x ${currencyFormatter.format(Number(item.price))})`)
     .join('\n');
 
   return `Subject: Invoice ${invoiceNumber} from ${user.name}

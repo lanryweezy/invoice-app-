@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { Invoice, TemplateId, InvoiceStatus } from '../types';
 
@@ -5,6 +6,7 @@ interface InvoicePreviewProps {
   invoice: Invoice;
   totals: {
     subtotal: number;
+    discountAmount: number;
     tax: number;
     total: number;
   };
@@ -16,10 +18,10 @@ const StatusBadge: React.FC<{ status: InvoiceStatus; template: TemplateId }> = (
 
     const statusStyles: { [key in TemplateId]: { [key in InvoiceStatus]: string } } = {
         classic: {
-            Draft: 'bg-slate-100 text-slate-600 border-slate-200',
-            Sent: 'bg-blue-50 text-blue-700 border-blue-200',
-            Paid: 'bg-teal-50 text-teal-700 border-teal-200',
-            Overdue: 'bg-red-50 text-red-700 border-red-200',
+            Draft: 'bg-slate-100 text-slate-700 border-slate-300',
+            Sent: 'bg-blue-50 text-blue-800 border-blue-200',
+            Paid: 'bg-teal-50 text-teal-800 border-teal-200',
+            Overdue: 'bg-red-50 text-red-800 border-red-200',
         },
         modern: {
              Draft: 'bg-slate-200/20 text-slate-100 border-white/10',
@@ -34,10 +36,10 @@ const StatusBadge: React.FC<{ status: InvoiceStatus; template: TemplateId }> = (
             Overdue: 'bg-red-600 text-white border-red-900',
         },
         minimalist: {
-            Draft: 'bg-slate-50 text-slate-600 border-slate-200',
-            Sent: 'bg-blue-50 text-blue-600 border-blue-200',
-            Paid: 'bg-emerald-50 text-emerald-600 border-emerald-200',
-            Overdue: 'bg-rose-50 text-rose-600 border-rose-200',
+            Draft: 'bg-slate-100 text-slate-700 border-slate-300',
+            Sent: 'bg-blue-50 text-blue-700 border-blue-200',
+            Paid: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+            Overdue: 'bg-rose-50 text-rose-700 border-rose-200',
         },
         professional: {
             Draft: 'bg-white/10 text-white border-white/20',
@@ -46,16 +48,16 @@ const StatusBadge: React.FC<{ status: InvoiceStatus; template: TemplateId }> = (
             Overdue: 'bg-red-500 text-white border-red-600',
         },
         elegant: {
-            Draft: 'bg-stone-100 text-stone-600 border-stone-300',
+            Draft: 'bg-stone-100 text-stone-700 border-stone-300',
             Sent: 'bg-blue-50 text-blue-800 border-blue-200',
             Paid: 'bg-amber-50 text-amber-800 border-amber-200',
             Overdue: 'bg-red-50 text-red-800 border-red-200',
         },
         tech: {
-            Draft: 'bg-slate-100 text-slate-600 border-slate-400 border-dashed',
-            Sent: 'bg-cyan-50 text-cyan-700 border-cyan-400 border-dashed',
-            Paid: 'bg-green-50 text-green-700 border-green-400 border-dashed',
-            Overdue: 'bg-red-50 text-red-700 border-red-400 border-dashed',
+            Draft: 'bg-slate-100 text-slate-700 border-slate-400 border-dashed',
+            Sent: 'bg-cyan-50 text-cyan-800 border-cyan-400 border-dashed',
+            Paid: 'bg-green-50 text-green-800 border-green-400 border-dashed',
+            Overdue: 'bg-red-50 text-red-800 border-red-400 border-dashed',
         }
     };
     
@@ -69,22 +71,25 @@ const StatusBadge: React.FC<{ status: InvoiceStatus; template: TemplateId }> = (
 // --- HEADER COMPONENTS ---
 
 const ClassicHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, status: InvoiceStatus }> = ({ user, invoiceNumber, status }) => (
-    <div className="flex justify-between items-start mb-12 pb-8 border-b-2 border-slate-100">
+    <div className="flex justify-between items-start mb-12 pb-8 border-b-2 border-slate-200">
       <div className="flex items-start gap-6">
           {user.logo && (
               <img src={user.logo} alt="Company Logo" className="h-20 w-auto object-contain" />
           )}
           <div className="space-y-2">
-            <h2 className="text-3xl font-bold text-slate-800 tracking-tight">{user.name}</h2>
-            <div className="text-slate-500 text-sm leading-relaxed">
+            <h2 className="text-3xl font-bold text-slate-900 tracking-tight">{user.name}</h2>
+            <div className="text-slate-600 text-sm leading-relaxed font-medium">
                 <p>{user.address}</p>
-                <p>{user.email}</p>
+                <div className="flex gap-3">
+                    <p>{user.email}</p>
+                    {user.phoneNumber && <p>• {user.phoneNumber}</p>}
+                </div>
             </div>
           </div>
       </div>
       <div className="text-right space-y-2">
-        <h1 className="text-4xl font-light text-slate-300 uppercase tracking-[0.2em]">Invoice</h1>
-        <p className="text-slate-700 font-mono font-bold">#{invoiceNumber}</p>
+        <h1 className="text-4xl font-light text-slate-400 uppercase tracking-[0.2em]">Invoice</h1>
+        <p className="text-slate-800 font-mono font-bold">#{invoiceNumber}</p>
         <div><StatusBadge status={status} template="classic" /></div>
       </div>
     </div>
@@ -99,16 +104,17 @@ const ModernHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, sta
             <div className="flex flex-col justify-between h-full">
                 <h1 className="text-5xl font-bold tracking-tighter mb-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-200 to-white">INVOICE</h1>
                 <div className="flex items-center gap-4 mt-2">
-                    <p className="text-slate-400 font-mono text-lg">#{invoiceNumber}</p>
+                    <p className="text-slate-300 font-mono text-lg">#{invoiceNumber}</p>
                     <StatusBadge status={status} template="modern" />
                 </div>
             </div>
             <div className="flex items-center gap-5 text-right">
                 <div>
                     <h2 className="text-xl font-semibold mb-2 text-teal-50">{user.name}</h2>
-                    <div className="text-slate-400 text-sm space-y-0.5">
+                    <div className="text-slate-300 text-sm space-y-0.5">
                         <p>{user.address}</p>
                         <p>{user.email}</p>
+                        {user.phoneNumber && <p>{user.phoneNumber}</p>}
                     </div>
                 </div>
                 {user.logo && (
@@ -128,7 +134,10 @@ const BoldHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, statu
                 )}
                 <div>
                     <h2 className="text-5xl font-black text-black uppercase tracking-tighter leading-none">{user.name}</h2>
-                    <p className="text-slate-500 font-bold mt-2">{user.email}</p>
+                    <div className="text-slate-600 font-bold mt-2 flex flex-col sm:flex-row sm:gap-4">
+                        <p>{user.email}</p>
+                        {user.phoneNumber && <p>{user.phoneNumber}</p>}
+                    </div>
                 </div>
             </div>
              <div className="pt-2">
@@ -136,7 +145,7 @@ const BoldHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, statu
              </div>
         </div>
         <div className="mt-6 flex items-baseline gap-4">
-            <h1 className="text-7xl font-black text-slate-200 tracking-tighter">INVOICE</h1>
+            <h1 className="text-7xl font-black text-slate-300 tracking-tighter">INVOICE</h1>
             <span className="text-3xl text-black font-mono font-bold">#{invoiceNumber}</span>
         </div>
     </div>
@@ -150,11 +159,14 @@ const MinimalistHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string,
              <div className="h-12 w-12 bg-slate-900 rounded-full mx-auto mb-6"></div>
         )}
         
-        <h2 className="text-2xl font-medium tracking-wide text-slate-900 mb-2">{user.name}</h2>
-        <p className="text-slate-500 text-sm mb-8">{user.email} • {user.address}</p>
+        <h2 className="text-2xl font-bold tracking-wide text-slate-900 mb-2">{user.name}</h2>
+        <p className="text-slate-600 text-sm mb-8">
+            {user.email} • {user.address}
+            {user.phoneNumber && <> • {user.phoneNumber}</>}
+        </p>
         
         <div className="inline-flex flex-col items-center gap-2 border-y border-slate-200 py-4 w-full max-w-md mx-auto">
-             <h1 className="text-sm font-bold uppercase tracking-[0.3em] text-slate-400">Invoice No.</h1>
+             <h1 className="text-sm font-bold uppercase tracking-[0.3em] text-slate-500">Invoice No.</h1>
              <p className="text-3xl font-light text-slate-900">{invoiceNumber}</p>
              <div className="mt-1"><StatusBadge status={status} template="minimalist" /></div>
         </div>
@@ -168,17 +180,25 @@ const ProfessionalHeader: React.FC<{ user: Invoice['user'], invoiceNumber: strin
                  {user.logo && <img src={user.logo} className="h-16 w-auto bg-white p-1 rounded" alt="Logo"/>}
                  <div>
                      <h2 className="text-2xl font-bold">{user.name}</h2>
-                     <p className="text-teal-200 text-sm opacity-80">Business Invoice</p>
+                     <p className="text-teal-100 text-sm font-medium opacity-90">Business Invoice</p>
                  </div>
              </div>
              <div className="text-right">
-                 <h1 className="text-3xl font-bold opacity-90">INVOICE</h1>
-                 <p className="font-mono opacity-75">#{invoiceNumber}</p>
+                 <h1 className="text-3xl font-bold opacity-100">INVOICE</h1>
+                 <p className="font-mono opacity-90">#{invoiceNumber}</p>
              </div>
         </div>
         <div className="flex justify-between items-center border-b border-slate-200 pb-4">
-             <div className="text-sm text-slate-500">
-                 {user.address} | {user.email}
+             <div className="text-sm text-slate-600 font-medium flex gap-3">
+                 <span>{user.address}</span>
+                 <span>|</span>
+                 <span>{user.email}</span>
+                 {user.phoneNumber && (
+                     <>
+                        <span>|</span>
+                        <span>{user.phoneNumber}</span>
+                     </>
+                 )}
              </div>
              <StatusBadge status={status} template="professional" />
         </div>
@@ -191,11 +211,14 @@ const ElegantHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, st
              {user.logo && <img src={user.logo} className="h-24 w-auto mx-auto mb-6" alt="Logo"/>}
              <h2 className="text-4xl text-slate-900 tracking-wide italic mb-2">{user.name}</h2>
              <div className="h-1 w-16 bg-amber-400 mx-auto mb-4"></div>
-             <p className="text-slate-500 text-sm italic">{user.address}</p>
+             <p className="text-slate-600 text-sm italic">
+                {user.address} • {user.email}
+                {user.phoneNumber && <> • {user.phoneNumber}</>}
+             </p>
         </div>
         <div className="flex justify-between items-end border-b border-slate-200 pb-2">
             <div className="text-left">
-                 <p className="text-xs font-bold text-amber-600 uppercase tracking-widest">Invoice For</p>
+                 <p className="text-xs font-bold text-amber-700 uppercase tracking-widest">Invoice For</p>
             </div>
             <div className="text-right flex flex-col items-end">
                 <p className="text-2xl text-slate-900">{invoiceNumber}</p>
@@ -218,13 +241,14 @@ const TechHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, statu
                 {user.logo && <img src={user.logo} className="h-16 w-16 object-contain border border-slate-200 p-1" alt="Logo"/>}
                 <div>
                     <h2 className="text-xl font-bold uppercase mb-1">{user.name}</h2>
-                    <p className="text-xs text-slate-500">{`// ${user.email}`}</p>
-                    <p className="text-xs text-slate-500">{`// ${user.address}`}</p>
+                    <p className="text-xs text-slate-600 font-bold">{`// ${user.email}`}</p>
+                    <p className="text-xs text-slate-600 font-bold">{`// ${user.address}`}</p>
+                    {user.phoneNumber && <p className="text-xs text-slate-600 font-bold">{`// ${user.phoneNumber}`}</p>}
                 </div>
              </div>
              <div className="text-right">
                  <h1 className="text-2xl font-bold tracking-tighter mb-1">INV_OICE</h1>
-                 <p className="text-sm bg-slate-800 text-white px-2 py-0.5 inline-block">ID: {invoiceNumber}</p>
+                 <p className="text-sm bg-slate-800 text-white px-2 py-0.5 inline-block font-bold">ID: {invoiceNumber}</p>
              </div>
         </div>
         <div className="flex justify-end">
@@ -238,9 +262,9 @@ const getTemplateStyles = (template: TemplateId) => {
         case 'modern':
             return {
                 tableHead: 'bg-slate-50 border-y border-slate-200',
-                th: 'text-slate-500 uppercase tracking-wider text-[10px] font-bold py-3',
+                th: 'text-slate-600 uppercase tracking-wider text-[10px] font-bold py-3',
                 row: 'border-b border-slate-50 hover:bg-slate-50/50 transition-colors',
-                td: 'py-4 text-sm',
+                td: 'py-4 text-sm text-slate-700 font-medium',
                 totalLabel: 'text-slate-400 font-medium text-sm',
                 totalValue: 'text-white font-bold text-3xl',
                 totalBox: 'bg-slate-900 p-8 rounded-xl shadow-xl -mx-4 mt-4',
@@ -250,7 +274,7 @@ const getTemplateStyles = (template: TemplateId) => {
                 tableHead: 'bg-black text-white',
                 th: 'text-white uppercase tracking-widest text-xs font-black py-4',
                 row: 'border-b-2 border-slate-100',
-                td: 'py-5 text-base font-bold',
+                td: 'py-5 text-base font-bold text-slate-900',
                 totalLabel: 'text-black font-black text-xl uppercase',
                 totalValue: 'text-black font-black text-4xl',
                 totalBox: 'border-t-[6px] border-black pt-4 mt-4',
@@ -258,20 +282,20 @@ const getTemplateStyles = (template: TemplateId) => {
         case 'minimalist':
             return {
                 tableHead: 'border-b border-slate-200',
-                th: 'text-slate-400 font-medium text-xs uppercase tracking-widest py-4',
+                th: 'text-slate-600 font-bold text-xs uppercase tracking-widest py-4',
                 row: 'border-b border-slate-50',
-                td: 'py-6 text-sm text-slate-600 font-light',
-                totalLabel: 'text-slate-400 font-normal text-sm uppercase tracking-widest',
+                td: 'py-6 text-sm text-slate-700 font-medium',
+                totalLabel: 'text-slate-500 font-bold text-sm uppercase tracking-widest',
                 totalValue: 'text-slate-900 font-light text-4xl',
-                totalBox: 'pt-8 mt-4 text-center border-t border-slate-100',
+                totalBox: 'pt-8 mt-4 text-center border-t border-slate-200',
             };
         case 'professional':
             return {
                 tableHead: 'bg-teal-50 border-b-2 border-teal-800',
                 th: 'text-teal-900 font-bold text-xs uppercase py-3',
                 row: 'border-b border-slate-200',
-                td: 'py-3 text-sm text-slate-700',
-                totalLabel: 'text-teal-800 font-bold text-lg',
+                td: 'py-3 text-sm text-slate-700 font-medium',
+                totalLabel: 'text-teal-900 font-bold text-lg',
                 totalValue: 'text-teal-900 font-bold text-2xl',
                 totalBox: 'bg-teal-50 p-6 rounded-lg border border-teal-100 mt-2',
             };
@@ -281,17 +305,17 @@ const getTemplateStyles = (template: TemplateId) => {
                 th: 'text-amber-800 font-bold text-xs uppercase tracking-widest py-3 italic',
                 row: 'border-b border-slate-50 font-serif',
                 td: 'py-4 text-sm text-slate-700',
-                totalLabel: 'text-amber-800 font-serif italic text-lg',
+                totalLabel: 'text-amber-900 font-serif italic text-lg',
                 totalValue: 'text-slate-900 font-serif text-2xl',
                 totalBox: 'border-t-4 border-double border-amber-200 pt-4 mt-4',
             };
         case 'tech':
             return {
                 tableHead: 'bg-slate-100 border border-slate-300 font-mono',
-                th: 'text-slate-700 font-bold text-xs uppercase py-2 px-2 border-r border-slate-300 last:border-r-0',
+                th: 'text-slate-800 font-bold text-xs uppercase py-2 px-2 border-r border-slate-300 last:border-r-0',
                 row: 'border border-slate-200 font-mono hover:bg-slate-50',
-                td: 'py-2 px-2 text-xs text-slate-700 border-r border-slate-200 last:border-r-0',
-                totalLabel: 'text-slate-500 font-mono text-xs uppercase',
+                td: 'py-2 px-2 text-xs text-slate-800 font-medium border-r border-slate-200 last:border-r-0',
+                totalLabel: 'text-slate-600 font-mono text-xs uppercase font-bold',
                 totalValue: 'text-slate-900 font-mono font-bold text-xl',
                 totalBox: 'border border-slate-800 p-4 mt-4 bg-slate-50 shadow-[4px_4px_0px_0px_rgba(30,41,59,1)]',
             };
@@ -299,19 +323,19 @@ const getTemplateStyles = (template: TemplateId) => {
         default:
             return {
                 tableHead: 'border-b-2 border-teal-600',
-                th: 'text-teal-800 font-bold text-xs uppercase tracking-wide py-3',
+                th: 'text-teal-900 font-bold text-xs uppercase tracking-wide py-3',
                 row: 'border-b border-slate-100',
-                td: 'py-4 text-sm text-slate-600',
-                totalLabel: 'text-slate-600 font-bold text-lg',
-                totalValue: 'text-teal-700 font-bold text-2xl',
+                td: 'py-4 text-sm text-slate-700 font-medium',
+                totalLabel: 'text-slate-700 font-bold text-lg',
+                totalValue: 'text-teal-800 font-bold text-2xl',
                 totalBox: 'pt-4 border-t border-slate-200 mt-2',
             };
     }
 };
 
 export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals, template }) => {
-  const { user, client, issueDate, dueDate, lineItems, notes, terms, taxRate, currency } = invoice;
-  const { subtotal, tax, total } = totals;
+  const { user, client, issueDate, dueDate, lineItems, notes, terms, taxRate, discountRate, currency } = invoice;
+  const { subtotal, discountAmount, tax, total } = totals;
   const styles = getTemplateStyles(template);
 
   const currencyFormatter = new Intl.NumberFormat('en-US', {
@@ -323,40 +347,43 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
   const isCenterAligned = template === 'minimalist' || template === 'elegant';
 
   return (
-    <div className={`text-slate-800 h-full flex flex-col ${template === 'elegant' ? 'font-serif' : template === 'tech' ? 'font-mono' : 'font-sans'}`}>
+    <div className={`text-slate-900 h-full flex flex-col relative overflow-hidden ${template === 'elegant' ? 'font-serif' : template === 'tech' ? 'font-mono' : 'font-sans'}`}>
+      
       {/* Dynamic Header */}
-      {template === 'classic' && <ClassicHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
-      {template === 'modern' && <ModernHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
-      {template === 'bold' && <BoldHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
-      {template === 'minimalist' && <MinimalistHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
-      {template === 'professional' && <ProfessionalHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
-      {template === 'elegant' && <ElegantHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
-      {template === 'tech' && <TechHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
+      <div className="relative z-10">
+        {template === 'classic' && <ClassicHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
+        {template === 'modern' && <ModernHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
+        {template === 'bold' && <BoldHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
+        {template === 'minimalist' && <MinimalistHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
+        {template === 'professional' && <ProfessionalHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
+        {template === 'elegant' && <ElegantHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
+        {template === 'tech' && <TechHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
+      </div>
 
       {/* Bill To / Dates Grid */}
-      <div className={`grid grid-cols-2 gap-12 mb-12 ${isCenterAligned ? 'text-center' : ''}`}>
+      <div className={`grid grid-cols-2 gap-12 mb-12 relative z-10 ${isCenterAligned ? 'text-center' : ''}`}>
         <div className={isCenterAligned ? 'order-2' : ''}>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Bill To</p>
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Bill To</p>
           <h3 className="font-bold text-slate-900 text-xl mb-2">{client.name}</h3>
-          <div className="text-slate-600 text-sm space-y-1">
+          <div className="text-slate-700 text-sm space-y-1 font-medium">
              <p className="whitespace-pre-line">{client.address}</p>
-             <p className="text-teal-600">{client.email}</p>
+             <p className="text-teal-700 font-semibold">{client.email}</p>
           </div>
         </div>
         <div className={isCenterAligned ? 'order-1 flex justify-center gap-12' : 'grid grid-cols-2 gap-6'}>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Issued</p>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Issued</p>
             <p className="font-bold text-slate-900 text-lg">{issueDate}</p>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Due</p>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Due</p>
             <p className="font-bold text-slate-900 text-lg">{dueDate}</p>
           </div>
         </div>
       </div>
 
       {/* Line Items Table */}
-      <div className="flex-1 mb-8">
+      <div className="flex-1 mb-8 relative z-10">
         <table className={`min-w-full ${template === 'tech' ? 'border-collapse' : ''}`}>
             <thead className={styles.tableHead}>
             <tr>
@@ -369,12 +396,12 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
             <tbody className={template === 'modern' ? '' : (template === 'tech' ? '' : 'divide-y divide-slate-100')}>
             {lineItems.map(item => (
                 <tr key={item.id} className={styles.row}>
-                <td className={`pl-4 ${styles.td} text-slate-900 w-[50%]`}>
+                <td className={`pl-4 ${styles.td} text-slate-900 font-bold w-[50%]`}>
                     {item.description}
                 </td>
-                <td className={`text-center ${styles.td} text-slate-500`}>{item.quantity}</td>
-                <td className={`text-right ${styles.td} text-slate-500`}>{currencyFormatter.format(item.price)}</td>
-                <td className={`pr-4 text-right ${styles.td} text-slate-900`}>{currencyFormatter.format(item.quantity * item.price)}</td>
+                <td className={`text-center ${styles.td} text-slate-700`}>{item.quantity}</td>
+                <td className={`text-right ${styles.td} text-slate-700`}>{currencyFormatter.format(Number(item.price))}</td>
+                <td className={`pr-4 text-right ${styles.td} text-slate-900 font-bold`}>{currencyFormatter.format(item.quantity * Number(item.price))}</td>
                 </tr>
             ))}
             </tbody>
@@ -382,17 +409,25 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
       </div>
 
       {/* Totals Section */}
-      <div className={`flex ${isCenterAligned ? 'justify-center' : 'justify-end'} mb-16`}>
+      <div className={`flex ${isCenterAligned ? 'justify-center' : 'justify-end'} mb-16 relative z-10`}>
          <div className={`${isCenterAligned ? 'w-full max-w-md' : 'w-1/2 min-w-[250px]'}`}>
             <div className={`space-y-3 px-4 ${isCenterAligned ? 'text-center' : ''}`}>
                 <div className="flex justify-between text-sm">
-                    <span className="text-slate-500 font-medium">Subtotal</span>
+                    <span className="text-slate-600 font-bold">Subtotal</span>
                     <span className="text-slate-900 font-bold">{currencyFormatter.format(subtotal)}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                    <span className="text-slate-500 font-medium">VAT ({taxRate}%)</span>
-                    <span className="text-slate-900 font-bold">{currencyFormatter.format(tax)}</span>
-                </div>
+                {discountAmount > 0 && (
+                    <div className="flex justify-between text-sm text-slate-700">
+                        <span className="font-medium">Discount ({discountRate}%)</span>
+                        <span className="font-bold">-{currencyFormatter.format(discountAmount)}</span>
+                    </div>
+                )}
+                {taxRate > 0 && (
+                    <div className="flex justify-between text-sm">
+                        <span className="text-slate-600 font-bold">VAT ({taxRate}%)</span>
+                        <span className="text-slate-900 font-bold">{currencyFormatter.format(tax)}</span>
+                    </div>
+                )}
             </div>
             <div className={styles.totalBox}>
                 <div className={`flex justify-between items-end px-4 pb-2 ${isCenterAligned ? 'flex-col items-center gap-2' : ''}`}>
@@ -404,33 +439,35 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
       </div>
 
       {/* Footer */}
-      <div className="mt-auto pt-6 border-t border-slate-200">
-        <div className={`grid ${isCenterAligned ? 'grid-cols-1 text-center gap-6' : 'grid-cols-2 gap-8'} text-sm`}>
-            <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Bank Details</p>
-                <div className="space-y-1 text-slate-700">
-                    <p><span className="font-medium text-slate-900">{user.bankName}</span></p>
-                    <p className="font-mono">{user.accountNumber}</p>
-                    <p>{user.name}</p>
-                </div>
-            </div>
-            {(notes || terms) && (
+      <div className="mt-auto relative z-10">
+          <div className="pt-6 border-t border-slate-200">
+            <div className={`grid ${isCenterAligned ? 'grid-cols-1 text-center gap-6' : 'grid-cols-2 gap-8'} text-sm`}>
                 <div>
-                    {terms && (
-                        <div className="mb-4">
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Terms</p>
-                            <p className="text-slate-600 text-xs leading-relaxed">{terms}</p>
-                        </div>
-                    )}
-                    {notes && (
-                        <div>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Notes</p>
-                            <p className="text-slate-600 italic leading-relaxed">{notes}</p>
-                        </div>
-                    )}
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Bank Details</p>
+                    <div className="space-y-1 text-slate-800 font-medium">
+                        <p><span className="font-bold text-slate-900">{user.bankName}</span></p>
+                        <p className="font-mono text-slate-800">{user.accountNumber}</p>
+                        <p>{user.name}</p>
+                    </div>
                 </div>
-            )}
-        </div>
+                {(notes || terms) && (
+                    <div>
+                        {terms && (
+                            <div className="mb-4">
+                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Terms</p>
+                                <p className="text-slate-700 text-xs leading-relaxed font-medium">{terms}</p>
+                            </div>
+                        )}
+                        {notes && (
+                            <div>
+                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Notes</p>
+                                <p className="text-slate-700 italic leading-relaxed">{notes}</p>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+          </div>
       </div>
     </div>
   );

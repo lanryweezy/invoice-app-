@@ -7,7 +7,7 @@ interface TemplateSelectorProps {
   onSelectTemplate: (template: TemplateId) => void;
 }
 
-const templates: { id: TemplateId; name: string; }[] = [
+const templates: { id: TemplateId; name: string }[] = [
   { id: 'classic', name: 'Classic' },
   { id: 'modern', name: 'Modern' },
   { id: 'bold', name: 'Bold' },
@@ -21,15 +21,15 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({ selectedTemp
   return (
     <div className="flex items-center gap-3 overflow-x-auto hide-scrollbar max-w-full">
       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1 hidden lg:block whitespace-nowrap">Template:</span>
-      <div className="flex p-0.5 rounded-lg gap-1">
+      <div className="flex p-0.5 rounded-lg gap-2">
         {templates.map(template => (
             <button
               key={template.id}
               onClick={() => onSelectTemplate(template.id)}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap border ${
+              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all whitespace-nowrap border shadow-sm ${
                   selectedTemplate === template.id 
-                  ? 'bg-teal-50 text-teal-700 border-teal-200 shadow-sm' 
-                  : 'bg-transparent text-slate-500 border-transparent hover:bg-slate-100 hover:text-slate-700'
+                  ? 'bg-teal-600 text-white border-teal-600 shadow-md' 
+                  : 'bg-white text-slate-600 border-slate-200 hover:border-teal-400 hover:text-teal-700'
               }`}
             >
               {template.name}
