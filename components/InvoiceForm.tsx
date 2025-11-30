@@ -26,9 +26,10 @@ interface InputFieldProps {
   prefix?: string;
   noLabel?: boolean;
   autoComplete?: string;
+  step?: string;
 }
 
-const InputField: React.FC<InputFieldProps> = ({ id, label, value, onChange, type = 'text', placeholder, className, name, icon, prefix, noLabel, autoComplete }) => {
+const InputField: React.FC<InputFieldProps> = ({ id, label, value, onChange, type = 'text', placeholder, className, name, icon, prefix, noLabel, autoComplete, step }) => {
   const isDate = type === 'date';
   
   const handlePickerTrigger = (e: React.SyntheticEvent) => {
@@ -63,6 +64,7 @@ const InputField: React.FC<InputFieldProps> = ({ id, label, value, onChange, typ
           onChange={onChange}
           placeholder={placeholder}
           autoComplete={autoComplete}
+          step={step}
           onClick={handlePickerTrigger}
           onKeyDown={(e) => {
               if (isDate && (e.key === 'Enter' || e.key === ' ')) {
@@ -443,9 +445,11 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
                         <InputField 
                             label="Discount %"
                             name="discountRate" 
-                            value={invoice.discountRate || 0} 
-                            onChange={(e) => updateInvoice('discountRate', parseFloat(e.target.value) || 0)} 
+                            value={invoice.discountRate} 
+                            onChange={(e) => updateInvoice('discountRate', e.target.value)} 
                             type="number" 
+                            placeholder="0"
+                            step="0.1"
                         />
                     </div>
                 </div>

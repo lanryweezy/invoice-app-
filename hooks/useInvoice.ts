@@ -122,7 +122,9 @@ export const useInvoice = () => {
 
   const calculateTotals = useCallback(() => {
     const subtotal = invoice.lineItems.reduce((acc, item) => acc + (item.quantity * Number(item.price)), 0);
-    const discountAmount = subtotal * ((invoice.discountRate || 0) / 100);
+    // Safe cast discountRate to number
+    const safeDiscountRate = Number(invoice.discountRate) || 0;
+    const discountAmount = subtotal * (safeDiscountRate / 100);
     const taxableAmount = subtotal - discountAmount;
     const tax = taxableAmount + (invoice.taxRate / 100);
     const total = taxableAmount + tax; 

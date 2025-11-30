@@ -36,7 +36,7 @@ export interface Invoice {
   notes: string;
   terms: string;
   taxRate: number;
-  discountRate: number;
+  discountRate: number | string; // Changed to allow string input for decimals
   currency: Currency;
   status: InvoiceStatus;
   subtotal?: number;

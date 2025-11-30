@@ -59,38 +59,63 @@ const App: React.FC = () => {
   };
 
   const handleDownloadPdf = async () => {
-    if (activeMobileTab === 'edit' && window.innerWidth < 768) {
-        showToast('Switching to preview...', 'success');
-        setActiveMobileTab('preview');
-        await new Promise(resolve => setTimeout(resolve, 500));
+    // Determine the source element
+    let sourceElement = document.getElementById('invoice-preview-container');
+
+    // If on mobile and in edit mode, the preview might not be rendered or updated.
+    // We switch to preview tab briefly if needed, but the Clone strategy below 
+    // is robust enough to handle the element as long as it exists in the DOM.
+    if (!sourceElement && activeMobileTab === 'edit' && window.innerWidth < 768) {
+         showToast('Switching to preview to generate PDF...', 'success');
+         setActiveMobileTab('preview');
+         // Small delay to allow render
+         await new Promise(resolve => setTimeout(resolve, 500));
+         sourceElement = document.getElementById('invoice-preview-container');
     }
 
-    const input = document.getElementById('invoice-preview-container');
-    if (input) {
+    if (sourceElement) {
       showToast('Generating PDF...', 'success');
       
-      // Store current style to restore later
-      const originalStyle = input.style.cssText;
-      const parent = input.parentElement;
-      const originalParentStyle = parent ? parent.style.cssText : '';
-
-      // Force fixed dimensions for capture to ensure A4 proportions
-      input.style.width = '210mm';
-      input.style.minHeight = '297mm';
-      input.style.transform = 'none'; // Remove any mobile scaling
-      
       try {
-          // Use slightly lower scale (1.5) and JPEG compression to reduce size
-          const canvas = await html2canvas(input, {
-            scale: 1.5, // Reduced from 2 to 1.5 for better file size
+          // --- CLONE STRATEGY ---
+          // 1. Create a container that forces A4 dimensions, off-screen
+          const container = document.createElement('div');
+          container.style.position = 'absolute';
+          container.style.top = '-10000px';
+          container.style.left = '0';
+          container.style.width = '210mm'; // Force A4 width
+          container.style.minHeight = '297mm'; // Force A4 height
+          container.style.zIndex = '-1';
+          container.style.backgroundColor = '#ffffff';
+          document.body.appendChild(container);
+
+          // 2. Clone the invoice element
+          const clone = sourceElement.cloneNode(true) as HTMLElement;
+          
+          // 3. Clean up the clone's styles to ensure it flows correctly in the A4 container
+          // Remove any mobile-specific transforms or constraints
+          clone.style.transform = 'none';
+          clone.style.margin = '0';
+          clone.style.boxShadow = 'none';
+          clone.style.width = '100%';
+          clone.style.height = 'auto';
+          
+          container.appendChild(clone);
+
+          // 4. Generate Canvas from the CLONE (which is full size)
+          const canvas = await html2canvas(container, {
+            scale: 2, // High quality scale
             useCORS: true,
             backgroundColor: '#ffffff',
             logging: false,
-            allowTaint: true,
+            windowWidth: 1200, // FORCE DESKTOP WIDTH: Critical for fixing mobile layout issues
           });
+
+          // 5. Clean up DOM
+          document.body.removeChild(container);
           
-          // Use JPEG with 0.6 (60%) quality for significant compression
-          const imgData = canvas.toDataURL('image/jpeg', 0.6);
+          // 6. Generate PDF
+          const imgData = canvas.toDataURL('image/jpeg', 0.8);
           const pdf = new jsPDF('p', 'mm', 'a4');
           const pdfWidth = pdf.internal.pageSize.getWidth();
           const pdfHeight = pdf.internal.pageSize.getHeight();
@@ -98,16 +123,13 @@ const App: React.FC = () => {
           pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
           pdf.save(`Invoice-${invoice.invoiceNumber}.pdf`);
           showToast('PDF Downloaded!');
+
       } catch (e) {
           console.error(e);
           showToast('Failed to generate PDF', 'error');
-      } finally {
-          // Restore styles
-          input.style.cssText = originalStyle;
-          if (parent) parent.style.cssText = originalParentStyle;
       }
     } else {
-        showToast('Preview not available', 'error');
+        showToast('Preview not available. Please switch to Preview tab.', 'error');
     }
   };
 
