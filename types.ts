@@ -37,11 +37,13 @@ export interface Invoice {
   terms: string;
   taxRate: number;
   discountRate: number | string; // Changed to allow string input for decimals
+  shippingAmount: number | string; // Added shipping amount
   currency: Currency;
   status: InvoiceStatus;
   subtotal?: number;
   discountAmount?: number;
   tax?: number;
+  shipping?: number;
   total?: number;
 }
 

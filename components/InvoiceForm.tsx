@@ -387,8 +387,8 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
                 </div>
 
                 {/* Financials Row */}
-                <div className="grid grid-cols-2 gap-5">
-                    <div className="col-span-2 md:col-span-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="col-span-1">
                         <label htmlFor="currency" className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Currency</label>
                         <div className="relative">
                             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
@@ -410,46 +410,59 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
                         </div>
                     </div>
                     
-                    {/* Tax & Discount */}
-                    <div className="col-span-2 md:col-span-1 grid grid-cols-2 gap-4">
-                        <div className="flex flex-col">
-                            <div className="flex items-center justify-between mb-1.5">
-                                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                                    VAT %
-                                </label>
-                                <label className="flex items-center gap-1.5 cursor-pointer hover:opacity-80">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={invoice.taxRate > 0} 
-                                        onChange={handleVatToggle}
-                                        className="w-3.5 h-3.5 text-teal-600 rounded border-slate-300 focus:ring-teal-500 cursor-pointer accent-teal-600"
-                                    />
-                                    <span className="text-[9px] uppercase font-bold text-teal-600">Enable</span>
-                                </label>
-                            </div>
-                            {invoice.taxRate > 0 ? (
-                                <InputField 
-                                    noLabel
-                                    name="taxRate" 
-                                    value={invoice.taxRate} 
-                                    onChange={(e) => updateInvoice('taxRate', parseFloat(e.target.value) || 0)} 
-                                    type="number" 
-                                />
-                            ) : (
-                                <div className="block w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-400 text-sm font-normal italic text-center">
-                                    Off
+                    {/* Tax & Discount & Shipping */}
+                    <div className="col-span-1 space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                             <div className="flex flex-col">
+                                <div className="flex items-center justify-between mb-1.5">
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                        VAT %
+                                    </label>
+                                    <label className="flex items-center gap-1.5 cursor-pointer hover:opacity-80">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={invoice.taxRate > 0} 
+                                            onChange={handleVatToggle}
+                                            className="w-3.5 h-3.5 text-teal-600 rounded border-slate-300 focus:ring-teal-500 cursor-pointer accent-teal-600"
+                                        />
+                                        <span className="text-[9px] uppercase font-bold text-teal-600">Enable</span>
+                                    </label>
                                 </div>
-                            )}
+                                {invoice.taxRate > 0 ? (
+                                    <InputField 
+                                        noLabel
+                                        name="taxRate" 
+                                        value={invoice.taxRate} 
+                                        onChange={(e) => updateInvoice('taxRate', parseFloat(e.target.value) || 0)} 
+                                        type="number" 
+                                    />
+                                ) : (
+                                    <div className="block w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-400 text-sm font-normal italic text-center">
+                                        Off
+                                    </div>
+                                )}
+                            </div>
+                            
+                            <InputField 
+                                label="Discount %"
+                                name="discountRate" 
+                                value={invoice.discountRate} 
+                                onChange={(e) => updateInvoice('discountRate', e.target.value)} 
+                                type="number" 
+                                placeholder="0"
+                                step="0.1"
+                            />
                         </div>
-                        
-                        <InputField 
-                            label="Discount %"
-                            name="discountRate" 
-                            value={invoice.discountRate} 
-                            onChange={(e) => updateInvoice('discountRate', e.target.value)} 
+
+                         <InputField 
+                            label="Shipping"
+                            name="shippingAmount" 
+                            value={invoice.shippingAmount} 
+                            onChange={(e) => updateInvoice('shippingAmount', e.target.value)} 
                             type="number" 
-                            placeholder="0"
-                            step="0.1"
+                            placeholder="0.00"
+                            step="0.01"
+                            prefix={currencySymbol}
                         />
                     </div>
                 </div>

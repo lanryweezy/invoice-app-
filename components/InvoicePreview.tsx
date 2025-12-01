@@ -8,6 +8,7 @@ interface InvoicePreviewProps {
     subtotal: number;
     discountAmount: number;
     tax: number;
+    shipping: number;
     total: number;
   };
   template: TemplateId;
@@ -334,8 +335,8 @@ const getTemplateStyles = (template: TemplateId) => {
 };
 
 export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals, template }) => {
-  const { user, client, issueDate, dueDate, lineItems, notes, terms, taxRate, discountRate, currency } = invoice;
-  const { subtotal, discountAmount, tax, total } = totals;
+  const { user, client, issueDate, dueDate, lineItems, notes, terms, taxRate, discountRate, shippingAmount, currency } = invoice;
+  const { subtotal, discountAmount, tax, shipping, total } = totals;
   const styles = getTemplateStyles(template);
 
   const currencyFormatter = new Intl.NumberFormat('en-US', {
@@ -426,6 +427,12 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
                     <div className="flex justify-between text-sm">
                         <span className="text-slate-600 font-bold">VAT ({taxRate}%)</span>
                         <span className="text-slate-900 font-bold">{currencyFormatter.format(tax)}</span>
+                    </div>
+                )}
+                 {shipping > 0 && (
+                    <div className="flex justify-between text-sm">
+                        <span className="text-slate-600 font-bold">Shipping</span>
+                        <span className="text-slate-900 font-bold">{currencyFormatter.format(shipping)}</span>
                     </div>
                 )}
             </div>

@@ -49,6 +49,7 @@ const getInitialInvoiceState = (): Invoice => {
     terms: '',
     taxRate: 7.5, // Standard VAT in Nigeria
     discountRate: 0,
+    shippingAmount: 0,
     currency: (localStorage.getItem('invoiceCurrency') as Currency) || 'NGN',
     status: (localStorage.getItem('invoiceStatus') as InvoiceStatus) || 'Draft',
   };
@@ -124,17 +125,19 @@ export const useInvoice = () => {
     const subtotal = invoice.lineItems.reduce((acc, item) => acc + (item.quantity * Number(item.price)), 0);
     // Safe cast discountRate to number
     const safeDiscountRate = Number(invoice.discountRate) || 0;
+    const safeShipping = Number(invoice.shippingAmount) || 0;
+    
     const discountAmount = subtotal * (safeDiscountRate / 100);
     const taxableAmount = subtotal - discountAmount;
-    const tax = taxableAmount + (invoice.taxRate / 100);
-    const total = taxableAmount + tax; 
     
     // Calculate final tax amount based on discounted subtotal
-    const taxAmount = (subtotal - discountAmount) * (invoice.taxRate / 100);
-    const finalTotal = (subtotal - discountAmount) + taxAmount;
+    const taxAmount = taxableAmount * (invoice.taxRate / 100);
     
-    return { subtotal, discountAmount, tax: taxAmount, total: finalTotal };
-  }, [invoice.lineItems, invoice.taxRate, invoice.discountRate]);
+    // Total = (Subtotal - Discount) + Tax + Shipping
+    const finalTotal = taxableAmount + taxAmount + safeShipping;
+    
+    return { subtotal, discountAmount, tax: taxAmount, shipping: safeShipping, total: finalTotal };
+  }, [invoice.lineItems, invoice.taxRate, invoice.discountRate, invoice.shippingAmount]);
 
   const saveClient = useCallback((client: Client) => {
     if (!client.name.trim()) return false;
