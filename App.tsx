@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo, useEffect, Suspense } from 'react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -55,15 +54,30 @@ const App: React.FC = () => {
         const nav = navigator as any;
         const connection = nav.connection || nav.mozConnection || nav.webkitConnection;
 
+        const getSearchParam = (key: string) => {
+            const p = new URLSearchParams(window.location.search);
+            return p.get(key) || undefined;
+        };
+
+        const width = window.innerWidth;
+        let deviceType = 'desktop';
+        if (width < 768) deviceType = 'mobile';
+        else if (width < 1024) deviceType = 'tablet';
+
         const sessionDetails = {
-            // Source / Referrer
+            // Source / Referrer / Campaigns
             referrer: document.referrer || 'direct',
+            utm_source: getSearchParam('utm_source'),
+            utm_medium: getSearchParam('utm_medium'),
+            utm_campaign: getSearchParam('utm_campaign'),
             
             // Device Details
-            screen_width: window.innerWidth,
+            screen_width: width,
             screen_height: window.innerHeight,
             pixel_ratio: window.devicePixelRatio,
             is_touch: 'ontouchstart' in window || nav.maxTouchPoints > 0,
+            device_type: deviceType,
+            orientation: width > window.innerHeight ? 'landscape' : 'portrait',
             
             // User Settings
             language: navigator.language,
@@ -85,10 +99,10 @@ const App: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const totals = useMemo(() => calculateTotals(), [invoice.lineItems, invoice.taxRate, invoice.discountRate, calculateTotals]);
+  const totals = useMemo(() => calculateTotals(), [invoice.lineItems, invoice.taxRate, invoice.discountRate, invoice.shippingAmount, calculateTotals]);
 
   const handleGenerateEmail = useCallback(() => {
-    const fullInvoice: Invoice = { ...invoice, subtotal: totals.subtotal, tax: totals.tax, total: totals.total, discountAmount: totals.discountAmount };
+    const fullInvoice: Invoice = { ...invoice, subtotal: totals.subtotal, tax: totals.tax, total: totals.total, discountAmount: totals.discountAmount, shipping: totals.shipping };
     const emailContent = generateEmailTemplate(fullInvoice);
     setGeneratedEmail(emailContent);
     setIsEmailModalOpen(true);
