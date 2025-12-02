@@ -41,6 +41,50 @@ const App: React.FC = () => {
       setToast({ message, isVisible: true, type });
   };
 
+  // Helper for Analytics Tracking
+  const trackEvent = (eventName: string, params?: Record<string, any>) => {
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+          (window as any).gtag('event', eventName, params);
+      }
+  };
+
+  // Comprehensive Analytics - Session Start
+  useEffect(() => {
+    // We wrap this in a timeout to ensure GA script has likely loaded
+    const timer = setTimeout(() => {
+        const nav = navigator as any;
+        const connection = nav.connection || nav.mozConnection || nav.webkitConnection;
+
+        const sessionDetails = {
+            // Source / Referrer
+            referrer: document.referrer || 'direct',
+            
+            // Device Details
+            screen_width: window.innerWidth,
+            screen_height: window.innerHeight,
+            pixel_ratio: window.devicePixelRatio,
+            is_touch: 'ontouchstart' in window || nav.maxTouchPoints > 0,
+            
+            // User Settings
+            language: navigator.language,
+            userAgent: navigator.userAgent,
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Good proxy for detailed location
+            
+            // Network Info (if supported)
+            connection_type: connection ? connection.effectiveType : 'unknown',
+            connection_save_data: connection ? connection.saveData : false,
+            
+            // Platform
+            platform: nav.platform,
+            hardware_concurrency: nav.hardwareConcurrency // Number of logical processors
+        };
+        
+        trackEvent('app_session_detailed_start', sessionDetails);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const totals = useMemo(() => calculateTotals(), [invoice.lineItems, invoice.taxRate, invoice.discountRate, calculateTotals]);
 
   const handleGenerateEmail = useCallback(() => {
@@ -48,11 +92,13 @@ const App: React.FC = () => {
     const emailContent = generateEmailTemplate(fullInvoice);
     setGeneratedEmail(emailContent);
     setIsEmailModalOpen(true);
+    trackEvent('generate_email', { invoice_id: invoice.invoiceNumber });
   }, [invoice, totals]);
 
   const handleSaveClient = (client: Client) => {
       if (saveClient(client)) {
           showToast('Client saved to list');
+          trackEvent('save_client', { client_name: client.name });
       } else {
           showToast('Client name is required', 'error');
       }
@@ -75,6 +121,7 @@ const App: React.FC = () => {
 
     if (sourceElement) {
       showToast('Generating PDF...', 'success');
+      trackEvent('download_pdf_start', { invoice_id: invoice.invoiceNumber });
       
       try {
           // --- CLONE STRATEGY ---
@@ -123,10 +170,12 @@ const App: React.FC = () => {
           pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
           pdf.save(`Invoice-${invoice.invoiceNumber}.pdf`);
           showToast('PDF Downloaded!');
+          trackEvent('download_pdf_success', { invoice_id: invoice.invoiceNumber });
 
       } catch (e) {
           console.error(e);
           showToast('Failed to generate PDF', 'error');
+          trackEvent('download_pdf_error', { error: String(e) });
       }
     } else {
         showToast('Preview not available. Please switch to Preview tab.', 'error');
