@@ -462,13 +462,13 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
                         {terms && (
                             <div className="mb-4">
                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Terms</p>
-                                <p className="text-slate-700 text-xs leading-relaxed font-medium">{terms}</p>
+                                <p className="text-slate-700 text-xs leading-relaxed font-medium whitespace-pre-wrap">{terms}</p>
                             </div>
                         )}
                         {notes && (
                             <div>
                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Notes</p>
-                                <p className="text-slate-700 italic leading-relaxed">{notes}</p>
+                                <p className="text-slate-700 italic leading-relaxed whitespace-pre-wrap">{notes}</p>
                             </div>
                         )}
                     </div>

@@ -80,6 +80,66 @@ const InputField: React.FC<InputFieldProps> = ({ id, label, value, onChange, typ
   );
 };
 
+const RichTextarea: React.FC<{
+    label: string;
+    name: string;
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+    placeholder?: string;
+    rows?: number;
+}> = ({ label, name, value, onChange, placeholder, rows = 3 }) => {
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    const insertAtCursor = (text: string) => {
+        const textarea = textareaRef.current;
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const textValue = textarea.value;
+        
+        const newValue = textValue.substring(0, start) + text + textValue.substring(end);
+        
+        // Create synthetic event
+        const event = {
+            target: { value: newValue, name }
+        } as React.ChangeEvent<HTMLTextAreaElement>;
+        
+        onChange(event);
+        
+        // Reset focus and cursor position
+        setTimeout(() => {
+            textarea.focus();
+            textarea.setSelectionRange(start + text.length, start + text.length);
+        }, 0);
+    };
+
+    return (
+        <div>
+            <div className="flex items-center justify-between mb-1.5">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{label}</label>
+                <button
+                    type="button"
+                    onClick={() => insertAtCursor('• ')}
+                    className="flex items-center gap-1 text-[10px] font-bold text-teal-600 bg-teal-50 hover:bg-teal-100 px-2 py-0.5 rounded border border-teal-100 transition-colors"
+                >
+                    <ListIcon className="w-3 h-3" />
+                    Add Bullet
+                </button>
+            </div>
+            <textarea
+                ref={textareaRef}
+                name={name}
+                value={value}
+                onChange={onChange}
+                rows={rows}
+                placeholder={placeholder}
+                className="block w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-800 text-sm font-medium shadow-sm focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 hover:border-slate-300 transition-all resize-none leading-relaxed"
+            />
+        </div>
+    );
+};
+
 const CollapsibleSection: React.FC<{ title: string; children: React.ReactNode; defaultOpen?: boolean; highlight?: boolean; icon?: React.ReactNode }> = ({ title, children, defaultOpen = true, highlight = false, icon }) => {
     const [isOpen, setIsOpen] = useState(defaultOpen);
     return (
@@ -642,28 +702,22 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
 
         <CollapsibleSection title="Terms, Notes & Signature" defaultOpen={false} icon={<InfoIcon className="w-4 h-4"/>}>
             <div className="space-y-5">
-                <div>
-                    <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Terms & Conditions</label>
-                    <textarea
-                        name="terms"
-                        value={invoice.terms}
-                        onChange={(e) => updateInvoice('terms', e.target.value)}
-                        rows={3}
-                        placeholder="e.g. Payment due within 7 days..."
-                        className="block w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-800 text-sm font-medium shadow-sm focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 hover:border-slate-300 transition-all resize-none"
-                    />
-                </div>
-                <div>
-                    <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Additional Notes</label>
-                    <textarea
-                        name="notes"
-                        value={invoice.notes}
-                        onChange={(e) => updateInvoice('notes', e.target.value)}
-                        rows={2}
-                        placeholder="e.g. Thank you for your business!"
-                        className="block w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-800 text-sm font-medium shadow-sm focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 hover:border-slate-300 transition-all resize-none"
-                    />
-                </div>
+                <RichTextarea
+                    label="Terms & Conditions"
+                    name="terms"
+                    value={invoice.terms}
+                    onChange={(e) => updateInvoice('terms', e.target.value)}
+                    rows={3}
+                    placeholder="e.g. Payment due within 7 days..."
+                />
+                <RichTextarea
+                    label="Additional Notes"
+                    name="notes"
+                    value={invoice.notes}
+                    onChange={(e) => updateInvoice('notes', e.target.value)}
+                    rows={2}
+                    placeholder="e.g. Thank you for your business!"
+                />
             </div>
         </CollapsibleSection>
     </div>
