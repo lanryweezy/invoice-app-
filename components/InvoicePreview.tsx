@@ -348,7 +348,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
   const isCenterAligned = template === 'minimalist' || template === 'elegant';
 
   return (
-    <div className={`text-slate-900 h-full flex flex-col relative overflow-hidden ${template === 'elegant' ? 'font-serif' : template === 'tech' ? 'font-mono' : 'font-sans'}`}>
+    <article className={`text-slate-900 h-full flex flex-col relative overflow-hidden ${template === 'elegant' ? 'font-serif' : template === 'tech' ? 'font-mono' : 'font-sans'}`}>
       
       {/* Paid Stamp/Watermark */}
       {status === 'Paid' && (
@@ -360,7 +360,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
       )}
 
       {/* Dynamic Header */}
-      <div className="relative z-10">
+      <header className="relative z-10">
         {template === 'classic' && <ClassicHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
         {template === 'modern' && <ModernHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
         {template === 'bold' && <BoldHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
@@ -368,7 +368,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
         {template === 'professional' && <ProfessionalHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
         {template === 'elegant' && <ElegantHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
         {template === 'tech' && <TechHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
-      </div>
+      </header>
 
       {/* Bill To / Dates Grid */}
       <div className={`grid grid-cols-2 gap-12 mb-12 relative z-10 ${isCenterAligned ? 'text-center' : ''}`}>
@@ -455,7 +455,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
       </div>
 
       {/* Footer */}
-      <div className="mt-auto relative z-10">
+      <footer className="mt-auto relative z-10">
           <div className="pt-6 border-t border-slate-200">
             <div className={`grid ${isCenterAligned ? 'grid-cols-1 text-center gap-6' : 'grid-cols-2 gap-8'} text-sm`}>
                 <div>
@@ -484,7 +484,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
                 )}
             </div>
           </div>
-      </div>
-    </div>
+      </footer>
+    </article>
   );
 };
