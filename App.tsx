@@ -54,6 +54,25 @@ const App: React.FC = () => {
 
   const totals = useMemo(() => calculateTotals(), [invoice.lineItems, invoice.taxRate, invoice.discountRate, invoice.shippingAmount, calculateTotals]);
 
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+        // Ctrl/Cmd + P: Preview/Download PDF
+        if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+            e.preventDefault();
+            handleDownloadPdf();
+        }
+        // Ctrl/Cmd + E: Generate Email
+        if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+            e.preventDefault();
+            handleGenerateEmail();
+        }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [invoice, totals, activeMobileTab]);
+
   const handleGenerateEmail = useCallback(() => {
     const fullInvoice: Invoice = { ...invoice, subtotal: totals.subtotal, tax: totals.tax, total: totals.total, discountAmount: totals.discountAmount, shipping: totals.shipping };
     const emailContent = generateEmailTemplate(fullInvoice);
@@ -208,6 +227,8 @@ const App: React.FC = () => {
                     onGenerateEmail={handleGenerateEmail} 
                     onDownloadPdf={handleDownloadPdf}
                     isMobile={false}
+                    invoiceNumber={invoice.invoiceNumber}
+                    totalAmount={`${invoice.currency} ${totals.total.toLocaleString()}`}
                 />
             </div>
 
@@ -237,6 +258,8 @@ const App: React.FC = () => {
                             onGenerateEmail={handleGenerateEmail} 
                             onDownloadPdf={handleDownloadPdf}
                             isMobile={true}
+                            invoiceNumber={invoice.invoiceNumber}
+                            totalAmount={`${invoice.currency} ${totals.total.toLocaleString()}`}
                         />
                     </div>
                 </div>
@@ -323,7 +346,54 @@ const App: React.FC = () => {
               <div className="relative w-[210mm] transition-all duration-500 ease-in-out pb-32 md:pb-0 transform scale-[0.6] sm:scale-[0.7] md:scale-[0.7] lg:scale-[0.85] xl:scale-100 origin-top">
                  <div id="invoice-preview-container" className="bg-white text-slate-900 shadow-2xl shadow-slate-400/30 rounded-sm min-h-[297mm] w-[210mm] origin-top border border-slate-200/60">
                     <div className="p-8 md:p-12 h-full flex flex-col relative">
-                        <Suspense fallback={<div className="flex items-center justify-center h-96 text-slate-400">Loading Preview...</div>}>
+                        <Suspense fallback={
+                            <div className="animate-pulse space-y-8 w-full h-full p-4">
+                                <div className="flex justify-between items-start border-b-2 border-slate-100 pb-8">
+                                    <div className="flex items-start gap-6">
+                                        <div className="h-20 w-20 bg-slate-100 rounded-lg"></div>
+                                        <div className="space-y-3">
+                                            <div className="h-8 w-48 bg-slate-200 rounded"></div>
+                                            <div className="h-4 w-64 bg-slate-100 rounded"></div>
+                                            <div className="h-4 w-40 bg-slate-100 rounded"></div>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-3 flex flex-col items-end">
+                                        <div className="h-10 w-32 bg-slate-200 rounded"></div>
+                                        <div className="h-6 w-24 bg-slate-100 rounded"></div>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-12 pt-8">
+                                    <div className="space-y-3">
+                                        <div className="h-3 w-16 bg-slate-100 rounded"></div>
+                                        <div className="h-6 w-32 bg-slate-200 rounded"></div>
+                                        <div className="h-4 w-40 bg-slate-100 rounded"></div>
+                                    </div>
+                                    <div className="flex justify-center gap-12">
+                                        <div className="space-y-3">
+                                            <div className="h-3 w-16 bg-slate-100 rounded"></div>
+                                            <div className="h-5 w-24 bg-slate-200 rounded"></div>
+                                        </div>
+                                        <div className="space-y-3">
+                                            <div className="h-3 w-16 bg-slate-100 rounded"></div>
+                                            <div className="h-5 w-24 bg-slate-200 rounded"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="pt-12 space-y-4">
+                                    <div className="h-8 w-full bg-slate-50 rounded"></div>
+                                    <div className="h-12 w-full bg-slate-100 rounded"></div>
+                                    <div className="h-12 w-full bg-slate-100 rounded"></div>
+                                    <div className="h-12 w-full bg-slate-100 rounded"></div>
+                                </div>
+                                <div className="mt-auto pt-12 flex justify-end">
+                                    <div className="w-64 space-y-3">
+                                        <div className="flex justify-between"><div className="h-4 w-20 bg-slate-100 rounded"></div><div className="h-4 w-20 bg-slate-100 rounded"></div></div>
+                                        <div className="flex justify-between"><div className="h-4 w-20 bg-slate-100 rounded"></div><div className="h-4 w-20 bg-slate-100 rounded"></div></div>
+                                        <div className="h-16 w-full bg-slate-900/5 rounded-lg"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        }>
                             <InvoicePreview invoice={invoice} totals={totals} template={template} />
                         </Suspense>
                     </div>
