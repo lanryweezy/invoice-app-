@@ -503,15 +503,31 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
                                 )}
                             </div>
                             
-                            <InputField 
-                                label="Discount %"
-                                name="discountRate" 
-                                value={invoice.discountRate} 
-                                onChange={(e) => updateInvoice('discountRate', e.target.value)} 
-                                type="number" 
-                                placeholder="0"
-                                step="0.1"
-                            />
+                            <div className="flex flex-col">
+                                <div className="flex items-center justify-between mb-1.5">
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                        Discount
+                                    </label>
+                                    <select
+                                        value={invoice.discountType}
+                                        onChange={(e) => updateInvoice('discountType', e.target.value as 'percentage' | 'fixed')}
+                                        className="text-[9px] uppercase font-bold text-teal-600 bg-transparent border-none focus:ring-0 cursor-pointer"
+                                    >
+                                        <option value="percentage">%</option>
+                                        <option value="fixed">{currencySymbol}</option>
+                                    </select>
+                                </div>
+                                <InputField
+                                    noLabel
+                                    name="discountRate"
+                                    value={invoice.discountRate}
+                                    onChange={(e) => updateInvoice('discountRate', e.target.value)}
+                                    type="number"
+                                    placeholder="0"
+                                    step={invoice.discountType === 'percentage' ? "0.1" : "1"}
+                                    prefix={invoice.discountType === 'fixed' ? currencySymbol : undefined}
+                                />
+                            </div>
                         </div>
 
                          <InputField 
