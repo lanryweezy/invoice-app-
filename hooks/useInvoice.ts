@@ -49,6 +49,7 @@ const getInitialInvoiceState = (): Invoice => {
     terms: '',
     taxRate: 7.5, // Standard VAT in Nigeria
     discountRate: 0,
+    discountType: 'percentage',
     shippingAmount: 0,
     currency: (localStorage.getItem('invoiceCurrency') as Currency) || 'NGN',
     status: (localStorage.getItem('invoiceStatus') as InvoiceStatus) || 'Draft',
@@ -127,8 +128,11 @@ export const useInvoice = () => {
     const safeDiscountRate = Number(invoice.discountRate) || 0;
     const safeShipping = Number(invoice.shippingAmount) || 0;
     
-    const discountAmount = subtotal * (safeDiscountRate / 100);
-    const taxableAmount = subtotal - discountAmount;
+    const discountAmount = invoice.discountType === 'percentage'
+        ? subtotal * (safeDiscountRate / 100)
+        : safeDiscountRate;
+
+    const taxableAmount = Math.max(0, subtotal - discountAmount);
     
     // Calculate final tax amount based on discounted subtotal
     const taxAmount = taxableAmount * (invoice.taxRate / 100);

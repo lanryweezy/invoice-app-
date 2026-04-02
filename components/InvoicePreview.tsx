@@ -335,7 +335,7 @@ const getTemplateStyles = (template: TemplateId) => {
 };
 
 export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals, template }) => {
-  const { user, client, issueDate, dueDate, lineItems, notes, terms, taxRate, discountRate, shippingAmount, currency } = invoice;
+  const { user, client, issueDate, dueDate, lineItems, notes, terms, taxRate, discountRate, shippingAmount, currency, status } = invoice;
   const { subtotal, discountAmount, tax, shipping, total } = totals;
   const styles = getTemplateStyles(template);
 
@@ -348,10 +348,19 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
   const isCenterAligned = template === 'minimalist' || template === 'elegant';
 
   return (
-    <div className={`text-slate-900 h-full flex flex-col relative overflow-hidden ${template === 'elegant' ? 'font-serif' : template === 'tech' ? 'font-mono' : 'font-sans'}`}>
+    <article className={`text-slate-900 h-full flex flex-col relative overflow-hidden ${template === 'elegant' ? 'font-serif' : template === 'tech' ? 'font-mono' : 'font-sans'}`}>
       
+      {/* Paid Stamp/Watermark */}
+      {status === 'Paid' && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50 opacity-[0.15] select-none">
+            <div className="border-[12px] border-red-600 rounded-2xl p-6 rotate-[35deg]">
+                <span className="text-8xl font-black text-red-600 tracking-tighter uppercase leading-none">PAID</span>
+            </div>
+        </div>
+      )}
+
       {/* Dynamic Header */}
-      <div className="relative z-10">
+      <header className="relative z-10">
         {template === 'classic' && <ClassicHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
         {template === 'modern' && <ModernHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
         {template === 'bold' && <BoldHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
@@ -359,7 +368,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
         {template === 'professional' && <ProfessionalHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
         {template === 'elegant' && <ElegantHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
         {template === 'tech' && <TechHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
-      </div>
+      </header>
 
       {/* Bill To / Dates Grid */}
       <div className={`grid grid-cols-2 gap-12 mb-12 relative z-10 ${isCenterAligned ? 'text-center' : ''}`}>
@@ -419,7 +428,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
                 </div>
                 {discountAmount > 0 && (
                     <div className="flex justify-between text-sm text-slate-700">
-                        <span className="font-medium">Discount ({discountRate}%)</span>
+                        <span className="font-medium">Discount {invoice.discountType === 'percentage' ? `(${invoice.discountRate}%)` : ''}</span>
                         <span className="font-bold">-{currencyFormatter.format(discountAmount)}</span>
                     </div>
                 )}
@@ -446,7 +455,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
       </div>
 
       {/* Footer */}
-      <div className="mt-auto relative z-10">
+      <footer className="mt-auto relative z-10">
           <div className="pt-6 border-t border-slate-200">
             <div className={`grid ${isCenterAligned ? 'grid-cols-1 text-center gap-6' : 'grid-cols-2 gap-8'} text-sm`}>
                 <div>
@@ -475,7 +484,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
                 )}
             </div>
           </div>
-      </div>
-    </div>
+      </footer>
+    </article>
   );
 };

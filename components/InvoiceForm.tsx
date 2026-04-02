@@ -27,9 +27,10 @@ interface InputFieldProps {
   noLabel?: boolean;
   autoComplete?: string;
   step?: string;
+  error?: string;
 }
 
-const InputField: React.FC<InputFieldProps> = ({ id, label, value, onChange, type = 'text', placeholder, className, name, icon, prefix, noLabel, autoComplete, step }) => {
+const InputField: React.FC<InputFieldProps> = ({ id, label, value, onChange, type = 'text', placeholder, className, name, icon, prefix, noLabel, autoComplete, step, error }) => {
   const isDate = type === 'date';
   
   const handlePickerTrigger = (e: React.SyntheticEvent) => {
@@ -72,10 +73,11 @@ const InputField: React.FC<InputFieldProps> = ({ id, label, value, onChange, typ
                   handlePickerTrigger(e);
               }
           }}
-          className={`block w-full ${icon ? 'pl-10 pr-3' : (prefix ? 'pl-10 pr-3' : 'px-3')} py-2.5 bg-white border border-slate-200 rounded-lg text-slate-800 text-sm font-medium placeholder:text-slate-300 placeholder:font-normal
+          className={`block w-full ${icon ? 'pl-10 pr-3' : (prefix ? 'pl-10 pr-3' : 'px-3')} py-2.5 bg-white border ${error ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-200'} rounded-lg text-slate-800 text-sm font-medium placeholder:text-slate-300 placeholder:font-normal
           focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 hover:border-slate-300 transition-all duration-200 shadow-sm ${isDate ? 'cursor-pointer' : ''}`}
           />
       </div>
+      {error && <p className="mt-1 text-[10px] text-red-500 font-bold uppercase tracking-wide">{error}</p>}
     </div>
   );
 };
@@ -168,6 +170,12 @@ const CollapsibleSection: React.FC<{ title: string; children: React.ReactNode; d
 export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, savedClients, onSaveClient }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
+  const validateEmail = (email: string) => {
+    if (!email) return undefined;
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email) ? undefined : "Invalid Email Address";
+  };
+
   // Track previous length to detect new items
   const prevLineItemsLength = useRef(invoice.lineItems.length);
 
@@ -333,6 +341,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
                             type="email" 
                             autoComplete="email"
                             icon={<MailIcon className="w-4 h-4"/>}
+                            error={validateEmail(invoice.user.email)}
                         />
                         <InputField 
                             label="Phone Number" 
@@ -503,15 +512,31 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
                                 )}
                             </div>
                             
-                            <InputField 
-                                label="Discount %"
-                                name="discountRate" 
-                                value={invoice.discountRate} 
-                                onChange={(e) => updateInvoice('discountRate', e.target.value)} 
-                                type="number" 
-                                placeholder="0"
-                                step="0.1"
-                            />
+                            <div className="flex flex-col">
+                                <div className="flex items-center justify-between mb-1.5">
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                        Discount
+                                    </label>
+                                    <select
+                                        value={invoice.discountType}
+                                        onChange={(e) => updateInvoice('discountType', e.target.value as 'percentage' | 'fixed')}
+                                        className="text-[9px] uppercase font-bold text-teal-600 bg-transparent border-none focus:ring-0 cursor-pointer"
+                                    >
+                                        <option value="percentage">%</option>
+                                        <option value="fixed">{currencySymbol}</option>
+                                    </select>
+                                </div>
+                                <InputField
+                                    noLabel
+                                    name="discountRate"
+                                    value={invoice.discountRate}
+                                    onChange={(e) => updateInvoice('discountRate', e.target.value)}
+                                    type="number"
+                                    placeholder="0"
+                                    step={invoice.discountType === 'percentage' ? "0.1" : "1"}
+                                    prefix={invoice.discountType === 'fixed' ? currencySymbol : undefined}
+                                />
+                            </div>
                         </div>
 
                          <InputField 
@@ -674,6 +699,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
                             type="email" 
                             autoComplete="email"
                             icon={<MailIcon className="w-4 h-4"/>}
+                            error={validateEmail(invoice.client.email)}
                         />
                         <InputField 
                             label="Client Address" 
