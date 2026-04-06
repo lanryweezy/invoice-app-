@@ -360,7 +360,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
       )}
 
       {/* Dynamic Header */}
-      <header className="relative z-10">
+      <header className="relative z-10" aria-label="Invoice Header">
         {template === 'classic' && <ClassicHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
         {template === 'modern' && <ModernHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
         {template === 'bold' && <BoldHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
@@ -371,7 +371,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
       </header>
 
       {/* Bill To / Dates Grid */}
-      <div className={`grid grid-cols-2 gap-12 mb-12 relative z-10 ${isCenterAligned ? 'text-center' : ''}`}>
+      <section className={`grid grid-cols-2 gap-12 mb-12 relative z-10 ${isCenterAligned ? 'text-center' : ''}`} aria-label="Client and Date Information">
         <div className={isCenterAligned ? 'order-2' : ''}>
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Bill To</p>
           <h3 className="font-bold text-slate-900 text-xl mb-2">{client.name}</h3>
@@ -390,7 +390,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
             <p className="font-bold text-slate-900 text-lg">{dueDate}</p>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Line Items Table */}
       <div className="flex-1 mb-8 relative z-10">
@@ -419,7 +419,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
       </div>
 
       {/* Totals Section */}
-      <div className={`flex ${isCenterAligned ? 'justify-center' : 'justify-end'} mb-16 relative z-10`}>
+      <section className={`flex ${isCenterAligned ? 'justify-center' : 'justify-end'} mb-16 relative z-10`} aria-label="Invoice Totals">
          <div className={`${isCenterAligned ? 'w-full max-w-md' : 'w-1/2 min-w-[250px]'}`}>
             <div className={`space-y-3 px-4 ${isCenterAligned ? 'text-center' : ''}`}>
                 <div className="flex justify-between text-sm">
@@ -452,7 +452,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
                 </div>
             </div>
         </div>
-      </div>
+      </section>
 
       {/* Footer */}
       <footer className="mt-auto relative z-10">
