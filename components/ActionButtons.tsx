@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { DownloadIcon, MailIcon, WhatsAppIcon } from './Icons';
+import { DownloadIcon, MailIcon, WhatsAppIcon, XIcon, ShareIcon } from './Icons';
+import { trackEvent } from '../utils/analytics';
 
 interface ActionButtonsProps {
   onGenerateEmail: () => void;
@@ -17,9 +18,37 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
     invoiceNumber = '',
     totalAmount = ''
 }) => {
+    const shareText = `Hi, here is the invoice #${invoiceNumber} for ${totalAmount}. Built with Naija Invoice Generator.`;
+    const shareUrl = 'https://naijainvoice.ng/';
+
     const handleWhatsAppShare = () => {
-        const text = encodeURIComponent(`Hi, here is the invoice #${invoiceNumber} for ${totalAmount}. Built with Naija Invoice Generator.`);
+        trackEvent('share_whatsapp', { invoice_number: invoiceNumber });
+        const text = encodeURIComponent(`${shareText} ${shareUrl}`);
         window.open(`https://wa.me/?text=${text}`, '_blank');
+    };
+
+    const handleXShare = () => {
+        trackEvent('share_x', { invoice_number: invoiceNumber });
+        const text = encodeURIComponent(shareText);
+        const url = encodeURIComponent(shareUrl);
+        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=NaijaInvoice,Nigeria,Freelance`, '_blank');
+    };
+
+    const handleNativeShare = async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: `Invoice #${invoiceNumber} | Naija Invoice`,
+                    text: shareText,
+                    url: shareUrl,
+                });
+                trackEvent('share_native_success', { invoice_number: invoiceNumber });
+            } catch (error) {
+                console.error('Error sharing:', error);
+            }
+        } else {
+            handleXShare();
+        }
     };
 
   if (isMobile) {
@@ -40,6 +69,14 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
                 aria-label="Share via WhatsApp"
             >
                 <WhatsAppIcon className="w-4 h-4" />
+            </button>
+            <button
+                onClick={handleNativeShare}
+                className="p-1.5 text-slate-600 hover:text-blue-500 bg-slate-100 hover:bg-blue-50 rounded-lg transition-colors"
+                title="Share"
+                aria-label="Share Invoice"
+            >
+                <ShareIcon className="w-4 h-4" />
             </button>
             <button
                 onClick={onDownloadPdf}
@@ -68,7 +105,15 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         aria-label="Share via WhatsApp"
       >
         <WhatsAppIcon className="w-3.5 h-3.5 mr-1.5 text-green-500" />
-        WhatsApp
+        WA
+      </button>
+      <button
+        onClick={handleXShare}
+        className="flex-1 lg:flex-none inline-flex items-center justify-center px-3 py-1.5 border border-slate-200 text-xs font-bold rounded-lg text-slate-600 bg-white hover:bg-slate-50 hover:text-black hover:border-slate-300 transition-all shadow-sm"
+        aria-label="Share on X"
+      >
+        <XIcon className="w-3.5 h-3.5 mr-1.5 text-slate-900" />
+        X
       </button>
       <button
         onClick={onDownloadPdf}
