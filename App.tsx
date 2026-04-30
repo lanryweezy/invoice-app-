@@ -13,6 +13,8 @@ import { EditIcon, EyeIcon } from './components/Icons';
 import { Toast } from './components/Toast';
 import { trackEvent, collectSessionDetails } from './utils/analytics';
 import { Helmet } from 'react-helmet-async';
+import { useSubscription } from './hooks/useSubscription';
+import { PricingModal } from './components/PricingModal';
 
 // Lazy load heavy preview component
 const InvoicePreview = React.lazy(() => import('./components/InvoicePreview').then(module => ({ default: module.InvoicePreview })));
@@ -22,6 +24,11 @@ const App: React.FC = () => {
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [generatedEmail, setGeneratedEmail] = useState('');
   
+  // Subscription hooks
+  const { user, isPro, loading, login, logout, upgradeToPro } = useSubscription();
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+  const [pricingModalContent, setPricingModalContent] = useState({ title: 'Upgrade to Pro', message: 'Unlock advanced features to supercharge your business.' });
+
   // 'edit' vs 'preview' for mobile tabs
   const [activeMobileTab, setActiveMobileTab] = useState<'edit' | 'preview'>('edit');
   
@@ -83,11 +90,33 @@ const App: React.FC = () => {
   }, [invoice, totals]);
 
   const handleSaveClient = (client: Client) => {
+      // Free tier restriction: max 2 clients
+      if (!isPro && savedClients.length >= 2 && !savedClients.some(c => c.name.toLowerCase() === client.name.trim().toLowerCase())) {
+          setPricingModalContent({
+              title: "Client Limit Reached",
+              message: "Free accounts can only save up to 2 clients. Upgrade to Pro for unlimited clients."
+          });
+          setIsPricingModalOpen(true);
+          return;
+      }
+
       if (saveClient(client)) {
           showToast('Client saved to list');
           trackEvent('save_client', { client_name: client.name });
       } else {
           showToast('Client name is required', 'error');
+      }
+  };
+
+  const handleProFeatureClick = (featureName: string) => {
+      if (!isPro) {
+          setPricingModalContent({
+              title: `${featureName} is a Pro Feature`,
+              message: `Upgrade to Pro to unlock ${featureName.toLowerCase()} and much more.`
+          });
+          setIsPricingModalOpen(true);
+      } else {
+          showToast(`${featureName} feature coming soon for Pro users!`, 'success');
       }
   };
 
@@ -203,14 +232,28 @@ const App: React.FC = () => {
             </div>
             <div>
               <h1 className="text-lg font-bold text-white leading-none tracking-tight">Naija Invoice</h1>
-              <p className="text-[10px] uppercase tracking-widest text-teal-400 font-bold leading-none mt-1">Generator</p>
+              <p className="text-[10px] uppercase tracking-widest text-teal-400 font-bold leading-none mt-1">Generator {isPro && <span className="bg-gradient-to-r from-teal-400 to-teal-300 text-slate-900 px-1.5 py-0.5 rounded text-[9px] ml-1">PRO</span>}</p>
             </div>
           </div>
           <div className="hidden sm:flex items-center gap-4">
-             <div className="text-xs font-medium text-slate-400 border-r border-slate-700 pr-4">
-                Fast & Professional
-             </div>
-             <div className="text-xs font-bold text-slate-300">v1.1</div>
+             <button onClick={() => handleProFeatureClick('Multiple Branches')} className="text-xs font-medium text-slate-300 hover:text-white transition-colors">Branches</button>
+             <button onClick={() => handleProFeatureClick('Accounting Activities')} className="text-xs font-medium text-slate-300 hover:text-white transition-colors">Accounting</button>
+             <div className="w-px h-4 bg-slate-700"></div>
+             {!loading && (
+                 user ? (
+                     <div className="flex items-center gap-3">
+                         <span className="text-xs text-slate-400" title={user.email || ''}>{user.displayName || 'User'}</span>
+                         {!isPro && (
+                             <button onClick={() => { setPricingModalContent({ title: 'Upgrade to Pro', message: 'Unlock advanced features to supercharge your business.' }); setIsPricingModalOpen(true); }} className="text-xs font-bold bg-teal-500 hover:bg-teal-400 text-white px-3 py-1.5 rounded-lg transition-colors">
+                                 Upgrade
+                             </button>
+                         )}
+                         <button onClick={logout} className="text-xs text-slate-400 hover:text-white transition-colors">Logout</button>
+                     </div>
+                 ) : (
+                     <button onClick={login} className="text-xs font-bold text-slate-300 hover:text-white transition-colors">Login / Sign up</button>
+                 )
+             )}
           </div>
         </div>
       </header>
@@ -427,6 +470,24 @@ const App: React.FC = () => {
         isOpen={isEmailModalOpen}
         onClose={() => setIsEmailModalOpen(false)}
         emailContent={generatedEmail}
+      />
+
+      <PricingModal
+        isOpen={isPricingModalOpen}
+        onClose={() => setIsPricingModalOpen(false)}
+        onUpgrade={async () => {
+            const success = await upgradeToPro();
+            if (success) {
+                showToast('Successfully upgraded to Pro!', 'success');
+                setIsPricingModalOpen(false);
+            } else {
+                showToast('Failed to upgrade. Please try again.', 'error');
+            }
+        }}
+        onLogin={login}
+        user={user}
+        title={pricingModalContent.title}
+        message={pricingModalContent.message}
       />
     </div>
   );
