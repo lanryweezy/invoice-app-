@@ -57,4 +57,32 @@ describe('useInvoice - calculateTotals', () => {
     expect(totals.discountAmount).toBe(100);
     expect(totals.total).toBe(900);
   });
+
+  it('calculates totals correctly with WHT', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    const lineItems = [
+      { id: '1', description: 'Consulting', quantity: 1, price: 100000 },
+    ];
+
+    act(() => {
+      result.current.updateInvoice('lineItems', lineItems as any);
+      result.current.updateInvoice('discountRate', 0);
+      result.current.updateInvoice('taxRate', 7.5);
+      result.current.updateInvoice('whtRate', 5);
+      result.current.updateInvoice('shippingAmount', 0);
+    });
+
+    const totals = result.current.calculateTotals();
+
+    // Subtotal: 100000
+    // Tax (VAT 7.5%): 7500
+    // WHT (5%): 5000
+    // Total: 100000 + 7500 - 5000 = 102500
+
+    expect(totals.subtotal).toBe(100000);
+    expect(totals.tax).toBe(7500);
+    expect(totals.whtAmount).toBe(5000);
+    expect(totals.total).toBe(102500);
+  });
 });

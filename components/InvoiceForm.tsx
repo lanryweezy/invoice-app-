@@ -11,6 +11,9 @@ interface InvoiceFormProps {
   updateLineItem: (id: string, field: keyof Omit<LineItem, 'id'>, value: string | number) => void;
   savedClients: Client[];
   onSaveClient: (client: Client) => void;
+  onSaveRecurring?: (invoice: Invoice) => void;
+  isPro?: boolean;
+  onProFeatureClick?: () => void;
 }
 
 interface InputFieldProps {
@@ -167,7 +170,7 @@ const CollapsibleSection: React.FC<{ title: string; children: React.ReactNode; d
     );
 };
 
-export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, savedClients, onSaveClient }) => {
+export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, savedClients, onSaveClient, onSaveRecurring, isPro = false, onProFeatureClick }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const validateEmail = (email: string) => {
@@ -230,14 +233,45 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
             alert("Invalid file type. Only PNG and JPG are allowed.");
             return;
         }
-        if (file.size > 4 * 1024 * 1024) {
-            alert("File size too large. Please upload a logo under 4MB.");
+        if (file.size > 5 * 1024 * 1024) {
+            alert("File size too large. Please upload a logo under 5MB.");
             return;
         }
 
         const reader = new FileReader();
         reader.onloadend = () => {
-            updateInvoice('user', { ...invoice.user, logo: reader.result as string });
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 400;
+                const MAX_HEIGHT = 400;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const optimizedDataUrl = canvas.toDataURL('image/webp', 0.8);
+                    updateInvoice('user', { ...invoice.user, logo: optimizedDataUrl });
+                } else {
+                    updateInvoice('user', { ...invoice.user, logo: reader.result as string });
+                }
+            };
+            img.src = reader.result as string;
         };
         reader.readAsDataURL(file);
     }
@@ -397,6 +431,19 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
                                     <HashIcon className="w-5 h-5 text-teal-400 opacity-50" />
                                 </div>
                             </div>
+                            <div>
+                                <label className="text-[10px] text-slate-400 font-bold uppercase tracking-widest block mb-1 mt-4 flex items-center gap-1.5">
+                                    <svg className="w-3 h-3 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                    Payment Link (Optional)
+                                </label>
+                                <input
+                                    name="paymentLink"
+                                    value={invoice.user.paymentLink || ''}
+                                    onChange={handleUserChange}
+                                    placeholder="e.g. paystack.com/pay/xyz"
+                                    className="bg-transparent border-b border-white/20 w-full text-white font-mono font-semibold placeholder:text-white/20 focus:outline-none focus:border-teal-400 transition-colors py-1 text-sm"
+                                />
+                            </div>
                         </div>
                      </div>
                 </div>
@@ -549,6 +596,24 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
                             step="0.01"
                             prefix={currencySymbol}
                         />
+                    </div>
+
+                    {/* WHT Rate */}
+                    <div className="mt-4 pt-4 border-t border-slate-100">
+                         <div className="flex flex-col w-1/2">
+                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                                Withholding Tax (WHT)
+                            </label>
+                            <select
+                                className="block w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm font-bold focus:bg-white focus:outline-none focus:border-teal-500 transition-all"
+                                value={invoice.whtRate || 0}
+                                onChange={(e) => updateInvoice('whtRate', Number(e.target.value))}
+                            >
+                                <option value={0}>None</option>
+                                <option value={5}>5%</option>
+                                <option value={10}>10%</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -745,6 +810,53 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
                     placeholder="e.g. Thank you for your business!"
                 />
             </div>
+        </CollapsibleSection>
+
+        {/* Recurring Settings (Pro Feature) */}
+        <CollapsibleSection title="Recurring Schedule" defaultOpen={false} icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>}>
+            {!isPro ? (
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center flex flex-col items-center justify-center">
+                    <svg className="w-8 h-8 text-teal-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <h3 className="text-sm font-bold text-slate-900 mb-1">Automate Your Invoicing</h3>
+                    <p className="text-xs text-slate-500 mb-4">Set up recurring schedules to bill clients automatically every week, month, or year.</p>
+                    <button
+                        onClick={onProFeatureClick}
+                        className="bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors"
+                    >
+                        Upgrade to Pro to Unlock
+                    </button>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    <div className="flex flex-col">
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                            Repeat Frequency
+                        </label>
+                        <select
+                            className="block w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm font-bold focus:bg-white focus:outline-none focus:border-teal-500 transition-all"
+                            value={invoice.recurringFrequency || 'none'}
+                            onChange={(e) => updateInvoice('recurringFrequency', e.target.value as any)}
+                        >
+                            <option value="none">Does not repeat</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="quarterly">Quarterly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
+                    {invoice.recurringFrequency && invoice.recurringFrequency !== 'none' && onSaveRecurring && (
+                         <button
+                             onClick={() => onSaveRecurring(invoice)}
+                             className="w-full py-2 bg-slate-900 hover:bg-teal-700 text-white font-bold rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
+                         >
+                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                             Save as Recurring Template
+                         </button>
+                    )}
+                </div>
+            )}
         </CollapsibleSection>
     </div>
   );

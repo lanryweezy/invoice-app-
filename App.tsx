@@ -13,15 +13,32 @@ import { EditIcon, EyeIcon } from './components/Icons';
 import { Toast } from './components/Toast';
 import { trackEvent, collectSessionDetails } from './utils/analytics';
 import { Helmet } from 'react-helmet-async';
+import { useSubscription } from './hooks/useSubscription';
+import { PricingModal } from './components/PricingModal';
+import { SettingsModal } from './components/SettingsModal';
+import { BranchesManager } from './components/BranchesManager';
+import { AccountingDashboard } from './components/AccountingDashboard';
+import { RecurringManager } from './components/RecurringManager';
+import { useExpenses } from './hooks/useExpenses';
 
 // Lazy load heavy preview component
 const InvoicePreview = React.lazy(() => import('./components/InvoicePreview').then(module => ({ default: module.InvoicePreview })));
 
 const App: React.FC = () => {
-  const { invoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, calculateTotals, savedClients, saveClient } = useInvoice();
+  const { invoice, setInvoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, calculateTotals, savedClients, saveClient, recurringInvoices, saveRecurringInvoice, removeRecurringInvoice } = useInvoice();
+  const { expenses, addExpense, removeExpense } = useExpenses();
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [generatedEmail, setGeneratedEmail] = useState('');
   
+  // Subscription hooks
+  const { user, isPro, loading, login, logout, upgradeToPro } = useSubscription();
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [pricingModalContent, setPricingModalContent] = useState({ title: 'Upgrade to Pro', message: 'Unlock advanced features to supercharge your business.' });
+
+  // Main view state
+  const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring'>('editor');
+
   // 'edit' vs 'preview' for mobile tabs
   const [activeMobileTab, setActiveMobileTab] = useState<'edit' | 'preview'>('edit');
   
@@ -83,11 +100,33 @@ const App: React.FC = () => {
   }, [invoice, totals]);
 
   const handleSaveClient = (client: Client) => {
+      // Free tier restriction: max 2 clients
+      if (!isPro && savedClients.length >= 2 && !savedClients.some(c => c.name.toLowerCase() === client.name.trim().toLowerCase())) {
+          setPricingModalContent({
+              title: "Client Limit Reached",
+              message: "Free accounts can only save up to 2 clients. Upgrade to Pro for unlimited clients."
+          });
+          setIsPricingModalOpen(true);
+          return;
+      }
+
       if (saveClient(client)) {
           showToast('Client saved to list');
           trackEvent('save_client', { client_name: client.name });
       } else {
           showToast('Client name is required', 'error');
+      }
+  };
+
+  const handleProFeatureClick = (featureName: 'Branches' | 'Accounting' | 'Recurring') => {
+      if (!isPro) {
+          setPricingModalContent({
+              title: `${featureName} is a Pro Feature`,
+              message: `Upgrade to Pro to unlock ${featureName.toLowerCase()} and much more.`
+          });
+          setIsPricingModalOpen(true);
+      } else {
+          setActiveView(featureName.toLowerCase() as 'branches' | 'accounting' | 'recurring');
       }
   };
 
@@ -203,19 +242,35 @@ const App: React.FC = () => {
             </div>
             <div>
               <h1 className="text-lg font-bold text-white leading-none tracking-tight">Naija Invoice</h1>
-              <p className="text-[10px] uppercase tracking-widest text-teal-400 font-bold leading-none mt-1">Generator</p>
+              <p className="text-[10px] uppercase tracking-widest text-teal-400 font-bold leading-none mt-1">Generator {isPro && <span className="bg-gradient-to-r from-teal-400 to-teal-300 text-slate-900 px-1.5 py-0.5 rounded text-[9px] ml-1">PRO</span>}</p>
             </div>
           </div>
           <div className="hidden sm:flex items-center gap-4">
-             <div className="text-xs font-medium text-slate-400 border-r border-slate-700 pr-4">
-                Fast & Professional
-             </div>
-             <div className="text-xs font-bold text-slate-300">v1.1</div>
+             <button onClick={() => setActiveView('editor')} className={`text-xs font-medium transition-colors ${activeView === 'editor' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Invoice Editor</button>
+             <button onClick={() => handleProFeatureClick('Branches')} className={`text-xs font-medium transition-colors ${activeView === 'branches' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Branches</button>
+             <button onClick={() => handleProFeatureClick('Accounting')} className={`text-xs font-medium transition-colors ${activeView === 'accounting' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Accounting</button>
+             <button onClick={() => handleProFeatureClick('Recurring')} className={`text-xs font-medium transition-colors ${activeView === 'recurring' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Recurring</button>
+             <div className="w-px h-4 bg-slate-700"></div>
+             {!loading && (
+                 user ? (
+                     <div className="flex items-center gap-3">
+                         <button onClick={() => setIsSettingsModalOpen(true)} className="text-xs text-slate-400 hover:text-white transition-colors" title={user.email || ''}>{user.displayName || 'Settings'}</button>
+                         {!isPro && (
+                             <button onClick={() => { setPricingModalContent({ title: 'Upgrade to Pro', message: 'Unlock advanced features to supercharge your business.' }); setIsPricingModalOpen(true); }} className="text-xs font-bold bg-teal-500 hover:bg-teal-400 text-white px-3 py-1.5 rounded-lg transition-colors">
+                                 Upgrade
+                             </button>
+                         )}
+                     </div>
+                 ) : (
+                     <button onClick={login} className="text-xs font-bold text-slate-300 hover:text-white transition-colors">Login / Sign up</button>
+                 )
+             )}
           </div>
         </div>
       </header>
 
-      {/* COMMAND BAR (Sub-Nav) - Fixed height below header */}
+      {/* COMMAND BAR (Sub-Nav) - Fixed height below header - ONLY SHOW IN EDITOR VIEW */}
+      {activeView === 'editor' && (
       <div className="flex-none z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all">
         <div className="max-w-[1600px] mx-auto">
             
@@ -288,9 +343,32 @@ const App: React.FC = () => {
             </div>
         </div>
       </div>
+      )}
 
       {/* Main Layout - Flex-1 fills remaining space */}
-      <main className="flex-1 min-h-0 w-full max-w-[1600px] mx-auto">
+      <main className="flex-1 min-h-0 w-full max-w-[1600px] mx-auto overflow-y-auto">
+        {activeView === 'branches' ? (
+            <div className="p-4 sm:p-8 max-w-4xl mx-auto"><BranchesManager /></div>
+        ) : activeView === 'accounting' ? (
+            <div className="p-4 sm:p-8 max-w-6xl mx-auto"><AccountingDashboard expenses={expenses} onAddExpense={addExpense} onRemoveExpense={removeExpense} /></div>
+        ) : activeView === 'recurring' ? (
+            <div className="p-4 sm:p-8 max-w-4xl mx-auto">
+                <RecurringManager
+                    recurringInvoices={recurringInvoices}
+                    onGenerateNext={(inv) => {
+                        // Very simple mock generation: update issue date to today, clear invoice number to force a new one
+                        setInvoice({
+                            ...inv,
+                            issueDate: new Date().toISOString().split('T')[0],
+                            invoiceNumber: `INV-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`
+                        });
+                        setActiveView('editor');
+                        showToast('Recurring template loaded into editor', 'success');
+                    }}
+                    onRemove={removeRecurringInvoice}
+                />
+            </div>
+        ) : (
         <div className="flex flex-col md:flex-row h-full">
           
           {/* LEFT COLUMN: Editor Form - Independent Scroll */}
@@ -305,6 +383,12 @@ const App: React.FC = () => {
                   updateLineItem={updateLineItem}
                   savedClients={savedClients}
                   onSaveClient={handleSaveClient}
+                  onSaveRecurring={saveRecurringInvoice ? (inv) => {
+                      saveRecurringInvoice(inv);
+                      showToast('Saved as recurring template!', 'success');
+                  } : undefined}
+                  isPro={isPro}
+                  onProFeatureClick={() => handleProFeatureClick('Recurring')}
                 />
               </div>
             </div>
@@ -421,12 +505,42 @@ const App: React.FC = () => {
           </div>
 
         </div>
+        )}
       </main>
 
       <EmailModal
         isOpen={isEmailModalOpen}
         onClose={() => setIsEmailModalOpen(false)}
         emailContent={generatedEmail}
+      />
+
+      <PricingModal
+        isOpen={isPricingModalOpen}
+        onClose={() => setIsPricingModalOpen(false)}
+        onUpgrade={async () => {
+            const success = await upgradeToPro();
+            if (success) {
+                showToast('Successfully upgraded to Pro!', 'success');
+                setIsPricingModalOpen(false);
+            } else {
+                showToast('Failed to upgrade. Please try again.', 'error');
+            }
+        }}
+        onLogin={login}
+        user={user}
+        title={pricingModalContent.title}
+        message={pricingModalContent.message}
+      />
+
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        user={user}
+        isPro={isPro}
+        logout={() => {
+            logout();
+            setActiveView('editor');
+        }}
       />
     </div>
   );

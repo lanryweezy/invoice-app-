@@ -335,8 +335,8 @@ const getTemplateStyles = (template: TemplateId) => {
 };
 
 export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals, template }) => {
-  const { user, client, issueDate, dueDate, lineItems, notes, terms, taxRate, discountRate, shippingAmount, currency, status } = invoice;
-  const { subtotal, discountAmount, tax, shipping, total } = totals;
+  const { user, client, issueDate, dueDate, lineItems, notes, terms, taxRate, whtRate, discountRate, shippingAmount, currency, status } = invoice;
+  const { subtotal, discountAmount, tax, whtAmount, shipping, total } = totals;
   const styles = getTemplateStyles(template);
 
   const currencyFormatter = new Intl.NumberFormat('en-US', {
@@ -438,6 +438,12 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
                         <span className="text-slate-900 font-bold">{currencyFormatter.format(tax)}</span>
                     </div>
                 )}
+                {whtRate > 0 && whtAmount && (
+                    <div className="flex justify-between text-sm">
+                        <span className="text-slate-600 font-bold">WHT ({whtRate}%)</span>
+                        <span className="text-slate-900 font-bold">-{currencyFormatter.format(whtAmount)}</span>
+                    </div>
+                )}
                  {shipping > 0 && (
                     <div className="flex justify-between text-sm">
                         <span className="text-slate-600 font-bold">Shipping</span>
@@ -465,6 +471,14 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
                         <p className="font-mono text-slate-800">{user.accountNumber}</p>
                         <p>{user.name}</p>
                     </div>
+                    {user.paymentLink && (
+                        <div className="mt-4">
+                            <a href={user.paymentLink.startsWith('http') ? user.paymentLink : `https://${user.paymentLink}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900 text-white text-xs font-bold rounded-lg shadow-sm hover:bg-teal-700 transition-colors">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                Pay Now
+                            </a>
+                        </div>
+                    )}
                 </div>
                 {(notes || terms) && (
                     <div>
