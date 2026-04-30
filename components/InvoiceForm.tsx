@@ -230,14 +230,45 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
             alert("Invalid file type. Only PNG and JPG are allowed.");
             return;
         }
-        if (file.size > 4 * 1024 * 1024) {
-            alert("File size too large. Please upload a logo under 4MB.");
+        if (file.size > 5 * 1024 * 1024) {
+            alert("File size too large. Please upload a logo under 5MB.");
             return;
         }
 
         const reader = new FileReader();
         reader.onloadend = () => {
-            updateInvoice('user', { ...invoice.user, logo: reader.result as string });
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 400;
+                const MAX_HEIGHT = 400;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const optimizedDataUrl = canvas.toDataURL('image/webp', 0.8);
+                    updateInvoice('user', { ...invoice.user, logo: optimizedDataUrl });
+                } else {
+                    updateInvoice('user', { ...invoice.user, logo: reader.result as string });
+                }
+            };
+            img.src = reader.result as string;
         };
         reader.readAsDataURL(file);
     }
@@ -397,6 +428,19 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
                                     <HashIcon className="w-5 h-5 text-teal-400 opacity-50" />
                                 </div>
                             </div>
+                            <div>
+                                <label className="text-[10px] text-slate-400 font-bold uppercase tracking-widest block mb-1 mt-4 flex items-center gap-1.5">
+                                    <svg className="w-3 h-3 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                    Payment Link (Optional)
+                                </label>
+                                <input
+                                    name="paymentLink"
+                                    value={invoice.user.paymentLink || ''}
+                                    onChange={handleUserChange}
+                                    placeholder="e.g. paystack.com/pay/xyz"
+                                    className="bg-transparent border-b border-white/20 w-full text-white font-mono font-semibold placeholder:text-white/20 focus:outline-none focus:border-teal-400 transition-colors py-1 text-sm"
+                                />
+                            </div>
                         </div>
                      </div>
                 </div>
@@ -549,6 +593,24 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
                             step="0.01"
                             prefix={currencySymbol}
                         />
+                    </div>
+
+                    {/* WHT Rate */}
+                    <div className="mt-4 pt-4 border-t border-slate-100">
+                         <div className="flex flex-col w-1/2">
+                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                                Withholding Tax (WHT)
+                            </label>
+                            <select
+                                className="block w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm font-bold focus:bg-white focus:outline-none focus:border-teal-500 transition-all"
+                                value={invoice.whtRate || 0}
+                                onChange={(e) => updateInvoice('whtRate', Number(e.target.value))}
+                            >
+                                <option value={0}>None</option>
+                                <option value={5}>5%</option>
+                                <option value={10}>10%</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>

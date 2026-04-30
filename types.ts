@@ -20,6 +20,7 @@ export interface User {
   bankName: string;
   accountNumber: string;
   logo?: string; // Base64 string for the image
+  paymentLink?: string; // E.g. Paystack payment link
 }
 
 export type Currency = 'NGN' | 'USD' | 'EUR' | 'GBP';
@@ -36,6 +37,7 @@ export interface Invoice {
   notes: string;
   terms: string;
   taxRate: number;
+  whtRate: number; // Withholding Tax percentage (e.g. 5 or 10)
   discountRate: number | string; // Percentage
   discountType: 'percentage' | 'fixed';
   shippingAmount: number | string; // Added shipping amount
@@ -44,6 +46,7 @@ export interface Invoice {
   subtotal?: number;
   discountAmount?: number;
   tax?: number;
+  whtAmount?: number;
   shipping?: number;
   total?: number;
 }

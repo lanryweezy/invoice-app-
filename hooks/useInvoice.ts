@@ -49,6 +49,7 @@ const getInitialInvoiceState = (): Invoice => {
     notes: '',
     terms: '',
     taxRate: 7.5, // Standard VAT in Nigeria
+    whtRate: 0, // Withholding Tax
     discountRate: 0,
     discountType: 'percentage',
     shippingAmount: 0,
@@ -177,11 +178,14 @@ export const useInvoice = () => {
     // Calculate final tax amount based on discounted subtotal
     const taxAmount = taxableAmount * (invoice.taxRate / 100);
     
-    // Total = (Subtotal - Discount) + Tax + Shipping
-    const finalTotal = taxableAmount + taxAmount + safeShipping;
+    // Calculate WHT based on subtotal before VAT but after discount
+    const whtAmount = taxableAmount * (invoice.whtRate / 100);
+
+    // Total = (Subtotal - Discount) + Tax - WHT + Shipping
+    const finalTotal = taxableAmount + taxAmount - whtAmount + safeShipping;
     
-    return { subtotal, discountAmount, tax: taxAmount, shipping: safeShipping, total: finalTotal };
-  }, [invoice.lineItems, invoice.taxRate, invoice.discountRate, invoice.shippingAmount]);
+    return { subtotal, discountAmount, tax: taxAmount, whtAmount, shipping: safeShipping, total: finalTotal };
+  }, [invoice.lineItems, invoice.taxRate, invoice.whtRate, invoice.discountRate, invoice.shippingAmount]);
 
   const saveClient = useCallback((client: Client) => {
     if (!client.name.trim()) return false;
