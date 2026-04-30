@@ -12,6 +12,8 @@ interface InvoiceFormProps {
   savedClients: Client[];
   onSaveClient: (client: Client) => void;
   onSaveRecurring?: (invoice: Invoice) => void;
+  isPro?: boolean;
+  onProFeatureClick?: () => void;
 }
 
 interface InputFieldProps {
@@ -168,7 +170,7 @@ const CollapsibleSection: React.FC<{ title: string; children: React.ReactNode; d
     );
 };
 
-export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, savedClients, onSaveClient, onSaveRecurring }) => {
+export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, savedClients, onSaveClient, onSaveRecurring, isPro = false, onProFeatureClick }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const validateEmail = (email: string) => {
@@ -812,33 +814,49 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
 
         {/* Recurring Settings (Pro Feature) */}
         <CollapsibleSection title="Recurring Schedule" defaultOpen={false} icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>}>
-            <div className="space-y-4">
-                <div className="flex flex-col">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                        Repeat Frequency
-                    </label>
-                    <select
-                        className="block w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm font-bold focus:bg-white focus:outline-none focus:border-teal-500 transition-all"
-                        value={invoice.recurringFrequency || 'none'}
-                        onChange={(e) => updateInvoice('recurringFrequency', e.target.value as any)}
+            {!isPro ? (
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center flex flex-col items-center justify-center">
+                    <svg className="w-8 h-8 text-teal-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <h3 className="text-sm font-bold text-slate-900 mb-1">Automate Your Invoicing</h3>
+                    <p className="text-xs text-slate-500 mb-4">Set up recurring schedules to bill clients automatically every week, month, or year.</p>
+                    <button
+                        onClick={onProFeatureClick}
+                        className="bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors"
                     >
-                        <option value="none">Does not repeat</option>
-                        <option value="weekly">Weekly</option>
-                        <option value="monthly">Monthly</option>
-                        <option value="quarterly">Quarterly</option>
-                        <option value="yearly">Yearly</option>
-                    </select>
+                        Upgrade to Pro to Unlock
+                    </button>
                 </div>
-                {invoice.recurringFrequency && invoice.recurringFrequency !== 'none' && onSaveRecurring && (
-                     <button
-                         onClick={() => onSaveRecurring(invoice)}
-                         className="w-full py-2 bg-slate-900 hover:bg-teal-700 text-white font-bold rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
-                     >
-                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                         Save as Recurring Template
-                     </button>
-                )}
-            </div>
+            ) : (
+                <div className="space-y-4">
+                    <div className="flex flex-col">
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                            Repeat Frequency
+                        </label>
+                        <select
+                            className="block w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm font-bold focus:bg-white focus:outline-none focus:border-teal-500 transition-all"
+                            value={invoice.recurringFrequency || 'none'}
+                            onChange={(e) => updateInvoice('recurringFrequency', e.target.value as any)}
+                        >
+                            <option value="none">Does not repeat</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="quarterly">Quarterly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
+                    {invoice.recurringFrequency && invoice.recurringFrequency !== 'none' && onSaveRecurring && (
+                         <button
+                             onClick={() => onSaveRecurring(invoice)}
+                             className="w-full py-2 bg-slate-900 hover:bg-teal-700 text-white font-bold rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
+                         >
+                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                             Save as Recurring Template
+                         </button>
+                    )}
+                </div>
+            )}
         </CollapsibleSection>
     </div>
   );

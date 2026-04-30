@@ -387,6 +387,8 @@ const App: React.FC = () => {
                       saveRecurringInvoice(inv);
                       showToast('Saved as recurring template!', 'success');
                   } : undefined}
+                  isPro={isPro}
+                  onProFeatureClick={() => handleProFeatureClick('Recurring')}
                 />
               </div>
             </div>

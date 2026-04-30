@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import type { Invoice, LineItem, Currency, InvoiceStatus, User as AppUser, Client } from '../types';
 import { useSubscription } from './useSubscription';
@@ -187,7 +186,7 @@ export const useInvoice = () => {
     const taxAmount = taxableAmount * (invoice.taxRate / 100);
     
     // Calculate WHT based on subtotal before VAT but after discount
-    const whtAmount = taxableAmount * (invoice.whtRate / 100);
+    const whtAmount = taxableAmount * ((invoice.whtRate || 0) / 100);
 
     // Total = (Subtotal - Discount) + Tax - WHT + Shipping
     const finalTotal = taxableAmount + taxAmount - whtAmount + safeShipping;

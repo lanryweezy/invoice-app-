@@ -11,19 +11,20 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ expens
   const [desc, setDesc] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('Software');
+  const [revenueMock] = useState(205000);
 
   const handleExportCSV = () => {
-    // Basic CSV mock
-    const csvContent = [
-      ["Invoice Number", "Client Name", "Issue Date", "Due Date", "Status", "Subtotal", "Tax", "WHT", "Total"],
-      ["INV-2026-001", "Acme Corp", "2026-04-01", "2026-04-08", "Paid", "150000", "11250", "7500", "153750"],
-    ].map(e => e.join(",")).join("\n");
+    // Generate CSV from actual expenses
+    let csvContent = ["ID,Description,Date,Category,Amount"];
+    expenses.forEach(exp => {
+        csvContent.push(`${exp.id},"${exp.description}",${exp.date},${exp.category},${exp.amount}`);
+    });
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csvContent.join("\n")], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", "naija_invoices_export.csv");
+    link.setAttribute("download", "naija_expenses_export.csv");
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -57,22 +58,22 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ expens
               className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-lg transition-colors border border-slate-300"
           >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-              Export CSV
+              Export Expenses CSV
           </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-teal-50 p-6 rounded-xl border border-teal-100">
-          <h3 className="text-sm font-bold text-teal-800 uppercase tracking-wider mb-2">Total Revenue (Mock)</h3>
-          <div className="text-3xl font-bold text-teal-900">₦205,000</div>
+          <h3 className="text-sm font-bold text-teal-800 uppercase tracking-wider mb-2">Total Revenue (Mocked)</h3>
+          <div className="text-3xl font-bold text-teal-900">₦{revenueMock.toLocaleString()}</div>
         </div>
         <div className="bg-red-50 p-6 rounded-xl border border-red-100">
           <h3 className="text-sm font-bold text-red-800 uppercase tracking-wider mb-2">Total Expenses</h3>
           <div className="text-3xl font-bold text-red-900">₦{totalExpenses.toLocaleString()}</div>
         </div>
         <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
-          <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-2">Net Profit (Mock)</h3>
-          <div className="text-3xl font-bold text-slate-900">₦{(205000 - totalExpenses).toLocaleString()}</div>
+          <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-2">Net Profit</h3>
+          <div className="text-3xl font-bold text-slate-900">₦{(revenueMock - totalExpenses).toLocaleString()}</div>
         </div>
       </div>
 
