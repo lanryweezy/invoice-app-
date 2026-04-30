@@ -18,12 +18,15 @@ import { PricingModal } from './components/PricingModal';
 import { SettingsModal } from './components/SettingsModal';
 import { BranchesManager } from './components/BranchesManager';
 import { AccountingDashboard } from './components/AccountingDashboard';
+import { RecurringManager } from './components/RecurringManager';
+import { useExpenses } from './hooks/useExpenses';
 
 // Lazy load heavy preview component
 const InvoicePreview = React.lazy(() => import('./components/InvoicePreview').then(module => ({ default: module.InvoicePreview })));
 
 const App: React.FC = () => {
-  const { invoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, calculateTotals, savedClients, saveClient } = useInvoice();
+  const { invoice, setInvoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, calculateTotals, savedClients, saveClient, recurringInvoices, saveRecurringInvoice, removeRecurringInvoice } = useInvoice();
+  const { expenses, addExpense, removeExpense } = useExpenses();
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [generatedEmail, setGeneratedEmail] = useState('');
   
@@ -33,8 +36,8 @@ const App: React.FC = () => {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [pricingModalContent, setPricingModalContent] = useState({ title: 'Upgrade to Pro', message: 'Unlock advanced features to supercharge your business.' });
 
-  // Main view state (editor vs branches vs accounting)
-  const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting'>('editor');
+  // Main view state
+  const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring'>('editor');
 
   // 'edit' vs 'preview' for mobile tabs
   const [activeMobileTab, setActiveMobileTab] = useState<'edit' | 'preview'>('edit');
@@ -115,7 +118,7 @@ const App: React.FC = () => {
       }
   };
 
-  const handleProFeatureClick = (featureName: 'Branches' | 'Accounting') => {
+  const handleProFeatureClick = (featureName: 'Branches' | 'Accounting' | 'Recurring') => {
       if (!isPro) {
           setPricingModalContent({
               title: `${featureName} is a Pro Feature`,
@@ -123,7 +126,7 @@ const App: React.FC = () => {
           });
           setIsPricingModalOpen(true);
       } else {
-          setActiveView(featureName.toLowerCase() as 'branches' | 'accounting');
+          setActiveView(featureName.toLowerCase() as 'branches' | 'accounting' | 'recurring');
       }
   };
 
@@ -246,6 +249,7 @@ const App: React.FC = () => {
              <button onClick={() => setActiveView('editor')} className={`text-xs font-medium transition-colors ${activeView === 'editor' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Invoice Editor</button>
              <button onClick={() => handleProFeatureClick('Branches')} className={`text-xs font-medium transition-colors ${activeView === 'branches' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Branches</button>
              <button onClick={() => handleProFeatureClick('Accounting')} className={`text-xs font-medium transition-colors ${activeView === 'accounting' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Accounting</button>
+             <button onClick={() => handleProFeatureClick('Recurring')} className={`text-xs font-medium transition-colors ${activeView === 'recurring' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Recurring</button>
              <div className="w-px h-4 bg-slate-700"></div>
              {!loading && (
                  user ? (
@@ -346,7 +350,24 @@ const App: React.FC = () => {
         {activeView === 'branches' ? (
             <div className="p-4 sm:p-8 max-w-4xl mx-auto"><BranchesManager /></div>
         ) : activeView === 'accounting' ? (
-            <div className="p-4 sm:p-8 max-w-6xl mx-auto"><AccountingDashboard /></div>
+            <div className="p-4 sm:p-8 max-w-6xl mx-auto"><AccountingDashboard expenses={expenses} onAddExpense={addExpense} onRemoveExpense={removeExpense} /></div>
+        ) : activeView === 'recurring' ? (
+            <div className="p-4 sm:p-8 max-w-4xl mx-auto">
+                <RecurringManager
+                    recurringInvoices={recurringInvoices}
+                    onGenerateNext={(inv) => {
+                        // Very simple mock generation: update issue date to today, clear invoice number to force a new one
+                        setInvoice({
+                            ...inv,
+                            issueDate: new Date().toISOString().split('T')[0],
+                            invoiceNumber: `INV-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`
+                        });
+                        setActiveView('editor');
+                        showToast('Recurring template loaded into editor', 'success');
+                    }}
+                    onRemove={removeRecurringInvoice}
+                />
+            </div>
         ) : (
         <div className="flex flex-col md:flex-row h-full">
           
@@ -362,6 +383,10 @@ const App: React.FC = () => {
                   updateLineItem={updateLineItem}
                   savedClients={savedClients}
                   onSaveClient={handleSaveClient}
+                  onSaveRecurring={saveRecurringInvoice ? (inv) => {
+                      saveRecurringInvoice(inv);
+                      showToast('Saved as recurring template!', 'success');
+                  } : undefined}
                 />
               </div>
             </div>

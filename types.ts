@@ -27,6 +27,16 @@ export type Currency = 'NGN' | 'USD' | 'EUR' | 'GBP';
 
 export type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue';
 
+export type RecurringFrequency = 'none' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+
+export interface Expense {
+  id: string;
+  description: string;
+  amount: number;
+  date: string;
+  category: string;
+}
+
 export interface Invoice {
   user: User;
   client: Client;
@@ -49,6 +59,7 @@ export interface Invoice {
   whtAmount?: number;
   shipping?: number;
   total?: number;
+  recurringFrequency?: RecurringFrequency;
 }
 
 export type TemplateId = 'classic' | 'modern' | 'bold' | 'minimalist' | 'professional' | 'elegant' | 'tech';
