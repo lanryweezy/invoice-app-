@@ -51,22 +51,51 @@ export const useSubscription = () => {
     }
   };
 
-  const upgradeToPro = async () => {
+  const upgradeToPro = async (): Promise<boolean> => {
     if (!user) {
       await login();
-      // After login, they would have to click upgrade again in a real flow,
-      // but let's make it simple.
-      return;
-    }
-    try {
-      const userRef = doc(db, 'users', user.uid);
-      await setDoc(userRef, { plan: 'pro' }, { merge: true });
-      setIsPro(true);
-      return true;
-    } catch (error) {
-      console.error("Upgrade failed", error);
       return false;
     }
+
+    return new Promise((resolve) => {
+      // Check if Paystack is loaded
+      if (typeof window === 'undefined' || !(window as any).PaystackPop) {
+        console.error("Paystack not loaded");
+        // Fallback for development if Paystack isn't available
+        const userRef = doc(db, 'users', user.uid);
+        setDoc(userRef, { plan: 'pro' }, { merge: true })
+            .then(() => { setIsPro(true); resolve(true); })
+            .catch(() => resolve(false));
+        return;
+      }
+
+      const handler = (window as any).PaystackPop.setup({
+        key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_dummy_key_for_dev_change_me', // Replace with actual key
+        email: user.email || 'user@example.com',
+        amount: 5000 * 100, // Amount in kobo (₦5,000)
+        currency: 'NGN',
+        ref: 'NI_' + Math.floor((Math.random() * 1000000000) + 1),
+        callback: async function(response: any) {
+          // In a real app, you MUST verify this reference on your backend before granting access
+          console.log("Payment successful. Reference: " + response.reference);
+
+          try {
+            const userRef = doc(db, 'users', user.uid);
+            await setDoc(userRef, { plan: 'pro' }, { merge: true });
+            setIsPro(true);
+            resolve(true);
+          } catch (error) {
+            console.error("Failed to update user plan after payment", error);
+            resolve(false);
+          }
+        },
+        onClose: function() {
+          console.log('Payment window closed.');
+          resolve(false);
+        }
+      });
+      handler.openIframe();
+    });
   };
 
   return { user, isPro, loading, login, logout, upgradeToPro };

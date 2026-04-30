@@ -15,6 +15,9 @@ import { trackEvent, collectSessionDetails } from './utils/analytics';
 import { Helmet } from 'react-helmet-async';
 import { useSubscription } from './hooks/useSubscription';
 import { PricingModal } from './components/PricingModal';
+import { SettingsModal } from './components/SettingsModal';
+import { BranchesManager } from './components/BranchesManager';
+import { AccountingDashboard } from './components/AccountingDashboard';
 
 // Lazy load heavy preview component
 const InvoicePreview = React.lazy(() => import('./components/InvoicePreview').then(module => ({ default: module.InvoicePreview })));
@@ -27,7 +30,11 @@ const App: React.FC = () => {
   // Subscription hooks
   const { user, isPro, loading, login, logout, upgradeToPro } = useSubscription();
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [pricingModalContent, setPricingModalContent] = useState({ title: 'Upgrade to Pro', message: 'Unlock advanced features to supercharge your business.' });
+
+  // Main view state (editor vs branches vs accounting)
+  const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting'>('editor');
 
   // 'edit' vs 'preview' for mobile tabs
   const [activeMobileTab, setActiveMobileTab] = useState<'edit' | 'preview'>('edit');
@@ -108,7 +115,7 @@ const App: React.FC = () => {
       }
   };
 
-  const handleProFeatureClick = (featureName: string) => {
+  const handleProFeatureClick = (featureName: 'Branches' | 'Accounting') => {
       if (!isPro) {
           setPricingModalContent({
               title: `${featureName} is a Pro Feature`,
@@ -116,7 +123,7 @@ const App: React.FC = () => {
           });
           setIsPricingModalOpen(true);
       } else {
-          showToast(`${featureName} feature coming soon for Pro users!`, 'success');
+          setActiveView(featureName.toLowerCase() as 'branches' | 'accounting');
       }
   };
 
@@ -236,19 +243,19 @@ const App: React.FC = () => {
             </div>
           </div>
           <div className="hidden sm:flex items-center gap-4">
-             <button onClick={() => handleProFeatureClick('Multiple Branches')} className="text-xs font-medium text-slate-300 hover:text-white transition-colors">Branches</button>
-             <button onClick={() => handleProFeatureClick('Accounting Activities')} className="text-xs font-medium text-slate-300 hover:text-white transition-colors">Accounting</button>
+             <button onClick={() => setActiveView('editor')} className={`text-xs font-medium transition-colors ${activeView === 'editor' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Invoice Editor</button>
+             <button onClick={() => handleProFeatureClick('Branches')} className={`text-xs font-medium transition-colors ${activeView === 'branches' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Branches</button>
+             <button onClick={() => handleProFeatureClick('Accounting')} className={`text-xs font-medium transition-colors ${activeView === 'accounting' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Accounting</button>
              <div className="w-px h-4 bg-slate-700"></div>
              {!loading && (
                  user ? (
                      <div className="flex items-center gap-3">
-                         <span className="text-xs text-slate-400" title={user.email || ''}>{user.displayName || 'User'}</span>
+                         <button onClick={() => setIsSettingsModalOpen(true)} className="text-xs text-slate-400 hover:text-white transition-colors" title={user.email || ''}>{user.displayName || 'Settings'}</button>
                          {!isPro && (
                              <button onClick={() => { setPricingModalContent({ title: 'Upgrade to Pro', message: 'Unlock advanced features to supercharge your business.' }); setIsPricingModalOpen(true); }} className="text-xs font-bold bg-teal-500 hover:bg-teal-400 text-white px-3 py-1.5 rounded-lg transition-colors">
                                  Upgrade
                              </button>
                          )}
-                         <button onClick={logout} className="text-xs text-slate-400 hover:text-white transition-colors">Logout</button>
                      </div>
                  ) : (
                      <button onClick={login} className="text-xs font-bold text-slate-300 hover:text-white transition-colors">Login / Sign up</button>
@@ -258,7 +265,8 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      {/* COMMAND BAR (Sub-Nav) - Fixed height below header */}
+      {/* COMMAND BAR (Sub-Nav) - Fixed height below header - ONLY SHOW IN EDITOR VIEW */}
+      {activeView === 'editor' && (
       <div className="flex-none z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all">
         <div className="max-w-[1600px] mx-auto">
             
@@ -331,9 +339,15 @@ const App: React.FC = () => {
             </div>
         </div>
       </div>
+      )}
 
       {/* Main Layout - Flex-1 fills remaining space */}
-      <main className="flex-1 min-h-0 w-full max-w-[1600px] mx-auto">
+      <main className="flex-1 min-h-0 w-full max-w-[1600px] mx-auto overflow-y-auto">
+        {activeView === 'branches' ? (
+            <div className="p-4 sm:p-8 max-w-4xl mx-auto"><BranchesManager /></div>
+        ) : activeView === 'accounting' ? (
+            <div className="p-4 sm:p-8 max-w-6xl mx-auto"><AccountingDashboard /></div>
+        ) : (
         <div className="flex flex-col md:flex-row h-full">
           
           {/* LEFT COLUMN: Editor Form - Independent Scroll */}
@@ -464,6 +478,7 @@ const App: React.FC = () => {
           </div>
 
         </div>
+        )}
       </main>
 
       <EmailModal
@@ -488,6 +503,17 @@ const App: React.FC = () => {
         user={user}
         title={pricingModalContent.title}
         message={pricingModalContent.message}
+      />
+
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        user={user}
+        isPro={isPro}
+        logout={() => {
+            logout();
+            setActiveView('editor');
+        }}
       />
     </div>
   );

@@ -1,8 +1,10 @@
 
 import { useState, useCallback, useEffect } from 'react';
-import type { Invoice, LineItem, Currency, InvoiceStatus, User, Client } from '../types';
+import type { Invoice, LineItem, Currency, InvoiceStatus, User as AppUser, Client } from '../types';
+import { useSubscription } from './useSubscription';
+import { db, doc, setDoc, getDoc } from '../services/firebase';
 
-const DEFAULT_USER: User = {
+const DEFAULT_USER: AppUser = {
   name: '',
   email: '',
   phoneNumber: '',
@@ -25,7 +27,6 @@ const getInitialInvoiceState = (): Invoice => {
     const stored = localStorage.getItem('invoiceUser');
     if (stored) {
         savedUser = JSON.parse(stored);
-        // Ensure phoneNumber exists if loading from old local storage data
         if (!savedUser.phoneNumber) savedUser.phoneNumber = '';
     }
   } catch (e) {
@@ -60,6 +61,44 @@ const getInitialInvoiceState = (): Invoice => {
 export const useInvoice = () => {
   const [invoice, setInvoice] = useState<Invoice>(getInitialInvoiceState());
   const [savedClients, setSavedClients] = useState<Client[]>([]);
+  const { user: firebaseUser, isPro } = useSubscription();
+
+  // Cloud Sync: Load data from Firestore if Pro
+  useEffect(() => {
+    if (isPro && firebaseUser) {
+        const loadCloudData = async () => {
+            try {
+                const userRef = doc(db, 'users', firebaseUser.uid);
+                const userSnap = await getDoc(userRef);
+
+                if (userSnap.exists()) {
+                    const data = userSnap.data();
+                    if (data.invoiceUser) {
+                        setInvoice(prev => ({ ...prev, user: data.invoiceUser }));
+                    }
+                    if (data.savedClients) {
+                        setSavedClients(data.savedClients);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to load cloud data", error);
+            }
+        };
+        loadCloudData();
+    }
+  }, [isPro, firebaseUser]);
+
+  // Sync to Cloud helper
+  const syncToCloud = useCallback(async (data: Partial<{ invoiceUser: AppUser, savedClients: Client[] }>) => {
+      if (isPro && firebaseUser) {
+          try {
+              const userRef = doc(db, 'users', firebaseUser.uid);
+              await setDoc(userRef, data, { merge: true });
+          } catch (error) {
+              console.error("Failed to sync to cloud", error);
+          }
+      }
+  }, [isPro, firebaseUser]);
   
   // Persist Currency
   useEffect(() => {
@@ -75,9 +114,10 @@ export const useInvoice = () => {
   useEffect(() => {
     const timeoutId = setTimeout(() => {
         localStorage.setItem('invoiceUser', JSON.stringify(invoice.user));
-    }, 500); // Debounce save to avoid performance hits with large logo strings
+        syncToCloud({ invoiceUser: invoice.user });
+    }, 500); // Debounce save
     return () => clearTimeout(timeoutId);
-  }, [invoice.user]);
+  }, [invoice.user, syncToCloud]);
 
   // Load saved clients
   useEffect(() => {
@@ -163,10 +203,11 @@ export const useInvoice = () => {
         newClients.sort((a, b) => a.name.localeCompare(b.name));
         
         localStorage.setItem('invoiceSavedClients', JSON.stringify(newClients));
+        syncToCloud({ savedClients: newClients });
         return newClients;
     });
     return true;
-  }, []);
+  }, [syncToCloud]);
 
   return {
     invoice,
