@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { auth, db, googleProvider, signInWithPopup, signOut, onAuthStateChanged, doc, getDoc, setDoc, User } from '../services/firebase';
+import { auth, db, googleProvider, signInWithPopup, signOut, onAuthStateChanged, doc, getDoc, setDoc, User, createUserWithEmailAndPassword, signInWithEmailAndPassword } from '../services/firebase';
 import { onSnapshot } from 'firebase/firestore';
 
 export interface SubscriptionData {
@@ -45,13 +45,34 @@ export const useSubscription = () => {
     };
   }, []);
 
-  const login = async () => {
+  const loginWithGoogle = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (error) {
-      console.error("Login failed", error);
+      console.error("Google Login failed", error);
+      throw error;
     }
   };
+
+  const loginWithEmail = async (email: string, password: string) => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      console.error("Email Login failed", error);
+      throw error;
+    }
+  };
+
+  const signUpWithEmail = async (email: string, password: string) => {
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      console.error("Email Signup failed", error);
+      throw error;
+    }
+  };
+
+  const login = loginWithGoogle; // keep as default for backward compatibility where used
 
   const logout = async () => {
     try {
@@ -101,5 +122,5 @@ export const useSubscription = () => {
     });
   };
 
-  return { user, isPro, loading, login, logout, upgradeToPro };
+  return { user, isPro, loading, login, loginWithGoogle, loginWithEmail, signUpWithEmail, logout, upgradeToPro };
 };

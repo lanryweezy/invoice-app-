@@ -84,6 +84,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
                 <svg className="w-5 h-5 text-teal-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                 Cloud Sync
               </li>
+              <li className="flex items-center gap-2 text-sm text-slate-700 font-medium">
+                <svg className="w-5 h-5 text-teal-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                Add Paystack Payment Links
+              </li>
+              <li className="flex items-center gap-2 text-sm text-slate-700 font-medium">
+                <svg className="w-5 h-5 text-teal-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                Remove Branding Watermark
+              </li>
             </ul>
             <button
               onClick={user ? onUpgrade : onLogin}

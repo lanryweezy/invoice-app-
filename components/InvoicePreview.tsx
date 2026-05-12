@@ -12,6 +12,7 @@ interface InvoicePreviewProps {
     total: number;
   };
   template: TemplateId;
+  isPro?: boolean;
 }
 
 const StatusBadge: React.FC<{ status: InvoiceStatus; template: TemplateId }> = ({ status, template }) => {
@@ -334,7 +335,7 @@ const getTemplateStyles = (template: TemplateId) => {
     }
 };
 
-export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals, template }) => {
+export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals, template, isPro = false }) => {
   const { user, client, issueDate, dueDate, lineItems, notes, terms, taxRate, whtRate, discountRate, shippingAmount, currency, status } = invoice;
   const { subtotal, discountAmount, tax, whtAmount, shipping, total } = totals;
   const styles = getTemplateStyles(template);
@@ -499,6 +500,12 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
             </div>
           </div>
       </footer>
+
+      {!isPro && (
+        <div className="absolute bottom-2 left-0 right-0 text-center pointer-events-none opacity-50">
+           <p className="text-[10px] text-slate-400 font-medium">Generated with <span className="font-bold">InvoiceApp.ng</span></p>
+        </div>
+      )}
     </article>
   );
 };
