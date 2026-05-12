@@ -37,6 +37,16 @@ export interface Expense {
   category: string;
 }
 
+export interface Receipt {
+  id: string; // e.g., RCP-2026-xxx
+  invoiceNumber: string;
+  paymentMethod: string;
+  transactionReference: string;
+  paymentDate: string;
+  amountPaid: number;
+  invoice: Invoice; // snapshot of the invoice
+}
+
 export interface Invoice {
   user: User;
   client: Client;
