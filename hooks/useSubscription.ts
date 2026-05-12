@@ -84,7 +84,6 @@ export const useSubscription = () => {
         currency: 'NGN',
         ref: 'NI_' + Math.floor((Math.random() * 1000000000) + 1),
         callback: async function(response: any) {
-          console.log("Payment successful. Reference: " + response.reference);
           try {
             const userRef = doc(db, 'users', user.uid);
             await setDoc(userRef, { plan: 'pro' }, { merge: true });
@@ -95,7 +94,6 @@ export const useSubscription = () => {
           }
         },
         onClose: function() {
-          console.log('Payment window closed.');
           resolve(false);
         }
       });
