@@ -86,3 +86,36 @@ describe('useInvoice - calculateTotals', () => {
     expect(totals.total).toBe(102500);
   });
 });
+
+describe('useInvoice - addLineItem', () => {
+  it('adds a new line item with default values', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    // Initial state has 1 line item
+    expect(result.current.invoice.lineItems.length).toBe(1);
+
+    act(() => {
+      result.current.addLineItem();
+    });
+
+    expect(result.current.invoice.lineItems.length).toBe(2);
+    const newItem = result.current.invoice.lineItems[1];
+    expect(newItem.description).toBe('');
+    expect(newItem.quantity).toBe(1);
+    expect(newItem.price).toBe('');
+    expect(newItem.id).toBeDefined();
+    // Verify it's a UUID (basic check)
+    expect(newItem.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+  });
+
+  it('adds multiple line items', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    act(() => {
+      result.current.addLineItem();
+      result.current.addLineItem();
+    });
+
+    expect(result.current.invoice.lineItems.length).toBe(3);
+  });
+});
