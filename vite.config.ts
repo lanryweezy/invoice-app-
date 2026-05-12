@@ -16,8 +16,8 @@ export default defineConfig(({ mode }) => {
           registerType: 'autoUpdate',
           includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
           manifest: {
-            name: 'Naija Invoice Generator',
-            short_name: 'NaijaInvoice',
+            name: 'InvoiceApp',
+            short_name: 'InvoiceApp',
             description: 'Professional invoices for Nigerian freelancers and small businesses.',
             theme_color: '#0f172a',
             icons: [

@@ -1,6 +1,6 @@
-# 50 Ways to Improve Naija Invoice Generator
+# 50 Ways to Improve InvoiceApp
 
-This document outlines 50 potential improvements for the Naija Invoice Generator, categorized by UI/UX, Functionality, Nigerian-specific context, Technical, and Business needs.
+This document outlines 50 potential improvements for the InvoiceApp, categorized by UI/UX, Functionality, Nigerian-specific context, Technical, and Business needs.
 
 ## UI/UX Enhancements
 1.  **Dark Mode Support:** Implement a system-wide dark mode for comfortable late-night invoicing.

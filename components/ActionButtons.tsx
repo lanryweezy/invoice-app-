@@ -18,8 +18,8 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
     invoiceNumber = '',
     totalAmount = ''
 }) => {
-    const shareText = `Hi, here is the invoice #${invoiceNumber} for ${totalAmount}. Built with Naija Invoice Generator.`;
-    const shareUrl = 'https://naijainvoice.ng/';
+    const shareText = `Hi, here is the invoice #${invoiceNumber} for ${totalAmount}. Built with InvoiceApp.`;
+    const shareUrl = 'https://www.invoiceapp.ng/';
 
     const handleWhatsAppShare = () => {
         trackEvent('share_whatsapp', { invoice_number: invoiceNumber });
@@ -31,14 +31,14 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         trackEvent('share_x', { invoice_number: invoiceNumber });
         const text = encodeURIComponent(shareText);
         const url = encodeURIComponent(shareUrl);
-        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=NaijaInvoice,Nigeria,Freelance`, '_blank');
+        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=InvoiceApp,Nigeria,Freelance`, '_blank');
     };
 
     const handleNativeShare = async () => {
         if (navigator.share) {
             try {
                 await navigator.share({
-                    title: `Invoice #${invoiceNumber} | Naija Invoice`,
+                    title: `Invoice #${invoiceNumber} | InvoiceApp`,
                     text: shareText,
                     url: shareUrl,
                 });

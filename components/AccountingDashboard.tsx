@@ -24,7 +24,7 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ expens
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", "naija_expenses_export.csv");
+    link.setAttribute("download", "invoiceapp_expenses_export.csv");
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
