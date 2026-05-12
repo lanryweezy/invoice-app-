@@ -20,6 +20,7 @@ import { BranchesManager } from './components/BranchesManager';
 import { AccountingDashboard } from './components/AccountingDashboard';
 import { RecurringManager } from './components/RecurringManager';
 import { useExpenses } from './hooks/useExpenses';
+import { AuthModal } from './components/AuthModal';
 
 // Lazy load heavy preview component
 const InvoicePreview = React.lazy(() => import('./components/InvoicePreview').then(module => ({ default: module.InvoicePreview })));
@@ -31,8 +32,9 @@ const App: React.FC = () => {
   const [generatedEmail, setGeneratedEmail] = useState('');
   
   // Subscription hooks
-  const { user, isPro, loading, login, logout, upgradeToPro } = useSubscription();
+  const { user, isPro, loading, loginWithGoogle, loginWithEmail, signUpWithEmail, logout, upgradeToPro } = useSubscription();
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [pricingModalContent, setPricingModalContent] = useState({ title: 'Upgrade to Pro', message: 'Unlock advanced features to supercharge your business.' });
 
@@ -262,7 +264,7 @@ const App: React.FC = () => {
                          )}
                      </div>
                  ) : (
-                     <button onClick={login} className="text-xs font-bold text-slate-300 hover:text-white transition-colors">Login / Sign up</button>
+                     <button onClick={() => setIsAuthModalOpen(true)} className="text-xs font-bold text-slate-300 hover:text-white transition-colors">Login / Sign up</button>
                  )
              )}
           </div>
@@ -493,7 +495,7 @@ const App: React.FC = () => {
                                 </div>
                             </div>
                         }>
-                            <InvoicePreview invoice={invoice} totals={totals} template={template} />
+                            <InvoicePreview invoice={invoice} totals={totals} template={template} isPro={isPro} />
                         </Suspense>
                     </div>
                  </div>
@@ -526,10 +528,21 @@ const App: React.FC = () => {
                 showToast('Failed to upgrade. Please try again.', 'error');
             }
         }}
-        onLogin={login}
+        onLogin={() => {
+            setIsPricingModalOpen(false);
+            setIsAuthModalOpen(true);
+        }}
         user={user}
         title={pricingModalContent.title}
         message={pricingModalContent.message}
+      />
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onLoginWithGoogle={loginWithGoogle}
+        onLoginWithEmail={loginWithEmail}
+        onSignUpWithEmail={signUpWithEmail}
       />
 
       <SettingsModal
