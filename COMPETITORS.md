@@ -1,4 +1,4 @@
-# Competitor Analysis & Strategy for Naija Invoice Generator
+# Competitor Analysis & Strategy for InvoiceApp
 
 To become the #1 invoice app in Nigeria, we must understand the landscape and exploit the gaps left by global and local players.
 
@@ -18,7 +18,7 @@ To become the #1 invoice app in Nigeria, we must understand the landscape and ex
 
 ### A. Dominating Local Search
 *   **Hyper-Local Keywords**: Optimize for "VAT invoice generator Nigeria", "FIRS compliant invoice template", and "Naira receipt maker". (Already started with recent SEO updates).
-*   **Comparison Pages**: Create "Naija Invoice vs Wave" or "Best alternative to Zoho for Nigerians" pages. Users searching for competitors will find us.
+*   **Comparison Pages**: Create "InvoiceApp vs Wave" or "Best alternative to Zoho for Nigerians" pages. Users searching for competitors will find us.
 *   **Nigerian Business Knowledge Base**: Write guides on:
     *   "How to calculate Withholding Tax (WHT) in Nigeria."
     *   "Requirements for a CAC-compliant invoice."
@@ -26,8 +26,8 @@ To become the #1 invoice app in Nigeria, we must understand the landscape and ex
 
 ### B. Social Discovery (X and WhatsApp)
 *   **The "Sharability" Factor**: Every invoice shared via WhatsApp or X is a discovery event.
-    *   *Tip*: Add a small "Powered by NaijaInvoice.ng" watermark at the very bottom of the PDF (optional/removable for pro feel).
-*   **X (Twitter) Engagement**: Use the hashtag #NaijaInvoice. Encourage users to share their "freelance wins" with a screenshot of their professional invoice.
+    *   *Tip*: Add a small "Powered by InvoiceApp.ng" watermark at the very bottom of the PDF (optional/removable for pro feel).
+*   **X (Twitter) Engagement**: Use the hashtag #InvoiceApp. Encourage users to share their "freelance wins" with a screenshot of their professional invoice.
 
 ---
 
