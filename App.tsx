@@ -25,6 +25,7 @@ import { useReceipts } from './hooks/useReceipts';
 import { ReceiptsManager } from './components/ReceiptsManager';
 import { ReceiptPreview } from './components/ReceiptPreview';
 import { PaymentModal } from './components/PaymentModal';
+import { Blog } from './components/Blog';
 
 // Lazy load heavy preview component
 const InvoicePreview = React.lazy(() => import('./components/InvoicePreview').then(module => ({ default: module.InvoicePreview })));
@@ -47,7 +48,7 @@ const App: React.FC = () => {
   const [pricingModalContent, setPricingModalContent] = useState({ title: 'Upgrade to Pro', message: 'Unlock advanced features to supercharge your business.' });
 
   // Main view state
-  const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts'>('editor');
+  const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'blog'>('editor');
 
   // 'edit' vs 'preview' for mobile tabs
   const [activeMobileTab, setActiveMobileTab] = useState<'edit' | 'preview'>('edit');
@@ -261,6 +262,7 @@ const App: React.FC = () => {
              <button onClick={() => handleProFeatureClick('Accounting')} className={`text-xs font-medium transition-colors ${activeView === 'accounting' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Accounting</button>
              <button onClick={() => handleProFeatureClick('Recurring')} className={`text-xs font-medium transition-colors ${activeView === 'recurring' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Recurring</button>
              <button onClick={() => setActiveView('receipts')} className={`text-xs font-medium transition-colors ${activeView === 'receipts' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Receipts</button>
+             <button onClick={() => setActiveView('blog')} className={`text-xs font-medium transition-colors ${activeView === 'blog' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Blog</button>
              <div className="w-px h-4 bg-slate-700"></div>
              {!loading && (
                  user ? (
@@ -417,6 +419,8 @@ const App: React.FC = () => {
                     }}
                 />
             </div>
+        ) : activeView === 'blog' ? (
+            <Blog />
         ) : (
         <div className="flex flex-col md:flex-row h-full">
           
@@ -468,6 +472,8 @@ const App: React.FC = () => {
                        <button onClick={() => showToast('Privacy Policy coming soon', 'success')} className="hover:text-teal-600 transition-colors">Privacy</button>
                        <span className="text-slate-300">•</span>
                        <button onClick={() => showToast('Terms coming soon', 'success')} className="hover:text-teal-600 transition-colors">Terms</button>
+                       <span className="text-slate-300">•</span>
+                       <button onClick={() => setActiveView('blog')} className="hover:text-teal-600 transition-colors">Blog</button>
                        <span className="text-slate-300">•</span>
                        <button onClick={() => showToast('Contact: hello@invoiceapp.ng', 'success')} className="hover:text-teal-600 transition-colors">Contact</button>
                    </div>
