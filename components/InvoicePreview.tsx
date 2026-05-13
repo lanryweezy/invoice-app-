@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { Invoice, TemplateId, InvoiceStatus } from '../types';
 
 interface InvoicePreviewProps {
@@ -340,10 +340,11 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
   const { subtotal, discountAmount, tax, whtAmount, shipping, total } = totals;
   const styles = getTemplateStyles(template);
 
-  const currencyFormatter = new Intl.NumberFormat('en-US', {
+  // ⚡ Bolt: Memoize Intl.NumberFormat to avoid expensive recreation (~1ms) on every render
+  const currencyFormatter = useMemo(() => new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currency,
-  });
+  }), [currency]);
 
   const isMinimalist = template === 'minimalist';
   const isCenterAligned = template === 'minimalist' || template === 'elegant';
