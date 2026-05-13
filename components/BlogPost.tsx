@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { mockPosts } from './Blog';
+import { getBlogPost, mockPosts } from '../data/blogPosts';
 
 interface BlogPostProps {
   postId: number;
@@ -8,9 +8,13 @@ interface BlogPostProps {
 }
 
 export const BlogPost: React.FC<BlogPostProps> = ({ postId, onBack }) => {
-  const post = useMemo(() => mockPosts.find(p => p.id === postId), [postId]);
+  const meta = useMemo(() => mockPosts.find(p => p.id === postId), [postId]);
+  const post = useMemo(() => getBlogPost(postId), [postId]);
 
-  if (!post) {
+  // Merge meta from Blog list with the full htmlContent
+  const fullPost = meta && post ? { ...meta, htmlContent: post.htmlContent } : post;
+
+  if (!fullPost) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-slate-50">
         <div className="text-center">
@@ -25,9 +29,9 @@ export const BlogPost: React.FC<BlogPostProps> = ({ postId, onBack }) => {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
-    "headline": post.title,
-    "image": post.imageUrl,
-    "datePublished": new Date(post.date).toISOString(),
+    "headline": fullPost.title,
+    "image": fullPost.imageUrl,
+    "datePublished": new Date(fullPost.date).toISOString(),
     "author": {
       "@type": "Organization",
       "name": "InvoiceApp"
@@ -40,28 +44,28 @@ export const BlogPost: React.FC<BlogPostProps> = ({ postId, onBack }) => {
         "url": "https://www.invoiceapp.ng/favicon.svg"
       }
     },
-    "description": post.excerpt
+    "description": fullPost.excerpt
   };
 
   return (
     <div className="w-full bg-slate-50 min-h-full pb-16">
       <Helmet>
-        <title>{post.title} | InvoiceApp Blog</title>
-        <meta name="description" content={post.excerpt} />
-        <link rel="canonical" href={`https://www.invoiceapp.ng/blog/${post.id}`} />
+        <title>{fullPost.title} | InvoiceApp Blog</title>
+        <meta name="description" content={fullPost.excerpt} />
+        <link rel="canonical" href={`https://www.invoiceapp.ng/blog/${fullPost.id}`} />
 
         {/* Open Graph Tags for Social Sharing */}
-        <meta property="og:title" content={post.title} />
-        <meta property="og:description" content={post.excerpt} />
-        <meta property="og:image" content={post.imageUrl} />
-        <meta property="og:url" content={`https://www.invoiceapp.ng/blog/${post.id}`} />
+        <meta property="og:title" content={fullPost.title} />
+        <meta property="og:description" content={fullPost.excerpt} />
+        <meta property="og:image" content={fullPost.imageUrl} />
+        <meta property="og:url" content={`https://www.invoiceapp.ng/blog/${fullPost.id}`} />
         <meta property="og:type" content="article" />
 
         {/* Twitter Card Tags */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={post.title} />
-        <meta name="twitter:description" content={post.excerpt} />
-        <meta name="twitter:image" content={post.imageUrl} />
+        <meta name="twitter:title" content={fullPost.title} />
+        <meta name="twitter:description" content={fullPost.excerpt} />
+        <meta name="twitter:image" content={fullPost.imageUrl} />
 
         {/* JSON-LD for Google/Bing Rich Results */}
         <script type="application/ld+json">
@@ -73,20 +77,20 @@ export const BlogPost: React.FC<BlogPostProps> = ({ postId, onBack }) => {
       <div className="bg-slate-900 text-white pb-8 relative">
         <div className="h-64 sm:h-80 md:h-96 w-full relative">
              <div className="absolute inset-0 bg-slate-900/60 z-10"></div>
-             <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover" />
+             <img src={fullPost.imageUrl} alt={fullPost.title} className="w-full h-full object-cover" />
              <div className="absolute inset-0 z-20 flex flex-col justify-end p-4 sm:p-8 max-w-4xl mx-auto w-full">
                 <button onClick={onBack} className="self-start mb-6 sm:mb-8 text-slate-300 hover:text-white flex items-center gap-2 font-medium transition-colors bg-slate-900/50 px-3 py-1.5 rounded-lg backdrop-blur-sm">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                   Back to Blog
                 </button>
                 <div className="flex items-center gap-3 text-sm font-bold mb-4 text-teal-400">
-                    <span className="uppercase tracking-wider">{post.category}</span>
+                    <span className="uppercase tracking-wider">{fullPost.category}</span>
                 </div>
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-4">{post.title}</h1>
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-4">{fullPost.title}</h1>
                 <div className="flex items-center gap-4 text-sm text-slate-300 font-medium">
-                    <span>{post.date}</span>
+                    <span>{fullPost.date}</span>
                     <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
-                    <span>{post.readTime}</span>
+                    <span>{fullPost.readTime}</span>
                 </div>
              </div>
         </div>
@@ -94,39 +98,13 @@ export const BlogPost: React.FC<BlogPostProps> = ({ postId, onBack }) => {
 
       {/* Main Content Area */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
-          {/* Simulated Markdown Content */}
           <div className="prose prose-slate prose-lg max-w-none prose-headings:font-bold prose-a:text-teal-600">
              <p className="lead text-xl text-slate-600 mb-8 font-medium">
-                 {post.excerpt}
+                 {fullPost.excerpt}
              </p>
 
-             <p>
-                 Running a business or freelancing in Nigeria comes with its unique set of challenges. From dealing with inconsistent power supply to navigating complex tax structures like VAT and Withholding Tax (WHT), entrepreneurs have to wear many hats.
-             </p>
-
-             <h2>The Importance of Proper Documentation</h2>
-             <p>
-                 One of the most critical aspects of running a successful enterprise is maintaining proper financial records. This means moving away from informal WhatsApp messages requesting payment and adopting professional invoicing systems.
-             </p>
-
-             <ul>
-                 <li>Professionalism: A well-designed invoice builds trust with clients.</li>
-                 <li>Record Keeping: It's essential for tracking income and preparing for tax season.</li>
-                 <li>Faster Payments: Clear payment terms reduce the chances of delayed settlements.</li>
-             </ul>
-
-             <blockquote>
-                 "The difference between a hobby and a business is an invoice."
-             </blockquote>
-
-             <h2>Actionable Steps for Today</h2>
-             <p>
-                 If you take nothing else away from this article, ensure you start automating your administrative tasks. Use tools that are tailored for the Nigerian market to calculate your totals, apply the correct VAT rates, and send receipts automatically.
-             </p>
-
-             <p>
-                 <em>Thank you for reading! Make sure to subscribe to our newsletter for more weekly tips.</em>
-             </p>
+             {/* Render Dynamic HTML Content */}
+             <div dangerouslySetInnerHTML={{ __html: fullPost.htmlContent }} />
           </div>
 
           <hr className="my-12 border-slate-200" />
