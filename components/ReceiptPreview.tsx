@@ -43,7 +43,7 @@ export const ReceiptPreview: React.FC<ReceiptPreviewProps> = ({ receipt, templat
                         <button onClick={() => window.location.href = `mailto:${invoice.client.email}?subject=Receipt ${receipt.id} from ${invoice.user.name}&body=Please find attached the receipt ${receipt.id} for invoice ${invoice.invoiceNumber}.`} className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg transition-colors text-sm font-semibold">
                             <MailIcon className="w-4 h-4" /> Email
                         </button>
-                        <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors">
+                        <button onClick={onClose} aria-label="Close receipt preview" className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors">
                             <XIcon className="w-5 h-5" />
                         </button>
                     </div>
