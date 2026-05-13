@@ -26,6 +26,7 @@ import { ReceiptsManager } from './components/ReceiptsManager';
 import { ReceiptPreview } from './components/ReceiptPreview';
 import { PaymentModal } from './components/PaymentModal';
 import { Blog } from './components/Blog';
+import { BlogPost } from './components/BlogPost';
 
 // Lazy load heavy preview component
 const InvoicePreview = React.lazy(() => import('./components/InvoicePreview').then(module => ({ default: module.InvoicePreview })));
@@ -48,7 +49,52 @@ const App: React.FC = () => {
   const [pricingModalContent, setPricingModalContent] = useState({ title: 'Upgrade to Pro', message: 'Unlock advanced features to supercharge your business.' });
 
   // Main view state
-  const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'blog'>('editor');
+  const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'blog' | 'blogPost'>(() => {
+      const path = window.location.pathname;
+      if (path.startsWith('/blog/')) return 'blogPost';
+      if (path === '/blog') return 'blog';
+      return 'editor';
+  });
+
+  const [activeBlogPostId, setActiveBlogPostId] = useState<number | null>(() => {
+      const path = window.location.pathname;
+      if (path.startsWith('/blog/')) {
+          const idStr = path.split('/')[2];
+          return parseInt(idStr, 10) || null;
+      }
+      return null;
+  });
+
+  // Handle URL updates when state changes
+  useEffect(() => {
+      let path = '/';
+      if (activeView === 'blog') path = '/blog';
+      else if (activeView === 'blogPost' && activeBlogPostId !== null) path = `/blog/${activeBlogPostId}`;
+
+      // Update the URL without reloading the page
+      if (window.location.pathname !== path) {
+          window.history.pushState(null, '', path);
+      }
+  }, [activeView, activeBlogPostId]);
+
+  // Handle browser back/forward buttons
+  useEffect(() => {
+      const handlePopState = () => {
+          const path = window.location.pathname;
+          if (path.startsWith('/blog/')) {
+              const idStr = path.split('/')[2];
+              setActiveBlogPostId(parseInt(idStr, 10) || null);
+              setActiveView('blogPost');
+          } else if (path === '/blog') {
+              setActiveView('blog');
+          } else {
+              setActiveView('editor');
+          }
+      };
+
+      window.addEventListener('popstate', handlePopState);
+      return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // 'edit' vs 'preview' for mobile tabs
   const [activeMobileTab, setActiveMobileTab] = useState<'edit' | 'preview'>('edit');
@@ -420,7 +466,12 @@ const App: React.FC = () => {
                 />
             </div>
         ) : activeView === 'blog' ? (
-            <Blog />
+            <Blog onPostClick={(id) => {
+                setActiveBlogPostId(id);
+                setActiveView('blogPost');
+            }} />
+        ) : activeView === 'blogPost' && activeBlogPostId !== null ? (
+            <BlogPost postId={activeBlogPostId} onBack={() => setActiveView('blog')} />
         ) : (
         <div className="flex flex-col md:flex-row h-full">
           
