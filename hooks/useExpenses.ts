@@ -1,19 +1,21 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Expense } from '../types';
 import { useSubscription } from './useSubscription';
 import { db, doc, setDoc, getDoc } from '../services/firebase';
 
 export const useExpenses = () => {
-    const [expenses, setExpenses] = useState<Expense[]>([]);
-    const { user: firebaseUser, isPro } = useSubscription();
-
-    // Load from local storage initially
-    useEffect(() => {
+    const [expenses, setExpenses] = useState<Expense[]>(() => {
         try {
             const stored = localStorage.getItem('invoiceExpenses');
-            if (stored) setExpenses(JSON.parse(stored));
-        } catch (e) { console.error('Failed to load expenses', e); }
-    }, []);
+            return stored ? JSON.parse(stored) : [];
+        } catch (e) {
+            console.error('Failed to load initial expenses', e);
+            return [];
+        }
+    });
+
+    const { user: firebaseUser, isPro } = useSubscription();
+    const isCloudLoaded = useRef(false);
 
     // Load from cloud if Pro
     useEffect(() => {
@@ -30,9 +32,13 @@ export const useExpenses = () => {
                     }
                 } catch (error) {
                     console.error("Failed to load cloud expenses", error);
+                } finally {
+                    isCloudLoaded.current = true;
                 }
             };
             loadCloudData();
+        } else if (!isPro) {
+            isCloudLoaded.current = true;
         }
     }, [isPro, firebaseUser]);
 
@@ -47,23 +53,30 @@ export const useExpenses = () => {
         }
     }, [isPro, firebaseUser]);
 
+    // Immediate local persistence
+    useEffect(() => {
+        localStorage.setItem('invoiceExpenses', JSON.stringify(expenses));
+    }, [expenses]);
+
+    // Debounced sync to cloud
+    useEffect(() => {
+        // Only sync if we've finished the initial cloud load (or if not Pro)
+        if (!isCloudLoaded.current) return;
+
+        const timeoutId = setTimeout(() => {
+            syncToCloud(expenses);
+        }, 1000);
+
+        return () => clearTimeout(timeoutId);
+    }, [expenses, syncToCloud]);
+
     const addExpense = useCallback((expense: Omit<Expense, 'id'>) => {
-        setExpenses(prev => {
-            const updated = [...prev, { ...expense, id: crypto.randomUUID() }];
-            localStorage.setItem('invoiceExpenses', JSON.stringify(updated));
-            syncToCloud(updated);
-            return updated;
-        });
-    }, [syncToCloud]);
+        setExpenses(prev => [...prev, { ...expense, id: crypto.randomUUID() }]);
+    }, []);
 
     const removeExpense = useCallback((id: string) => {
-        setExpenses(prev => {
-            const updated = prev.filter(e => e.id !== id);
-            localStorage.setItem('invoiceExpenses', JSON.stringify(updated));
-            syncToCloud(updated);
-            return updated;
-        });
-    }, [syncToCloud]);
+        setExpenses(prev => prev.filter(e => e.id !== id));
+    }, []);
 
     return { expenses, addExpense, removeExpense };
 };
