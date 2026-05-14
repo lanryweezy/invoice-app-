@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import type { Invoice, LineItem, Currency, InvoiceStatus, Client } from '../types';
 import { TrashIcon, PlusIcon, UploadIcon, ChevronDownIcon, ChevronUpIcon, EmptyBoxIcon, SaveIcon, UserIcon, MailIcon, MapPinIcon, BriefcaseIcon, BankIcon, HashIcon, WalletIcon, CalendarIcon, InfoIcon, SparklesIcon, ListIcon, PhoneIcon } from './Icons';
 
@@ -294,10 +294,11 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
       }
   };
 
-  const currencyFormatter = new Intl.NumberFormat('en-US', {
+  // ⚡ Bolt: Memoize Intl.NumberFormat to avoid expensive recreation (~1ms) on every render
+  const currencyFormatter = useMemo(() => new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: invoice.currency,
-  });
+  }), [invoice.currency]);
   
   const getCurrencySymbol = (currency: Currency) => {
       return (0).toLocaleString('en-US', { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace(/\d/g, '').trim();
