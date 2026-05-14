@@ -3,6 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { registerSW } from 'virtual:pwa-register';
 import { HelmetProvider } from 'react-helmet-async';
+import { Analytics } from '@vercel/analytics/react';
 import App from './App';
 
 // Register service worker for PWA
@@ -18,6 +19,7 @@ root.render(
   <React.StrictMode>
     <HelmetProvider>
       <App />
+      <Analytics />
     </HelmetProvider>
   </React.StrictMode>
 );

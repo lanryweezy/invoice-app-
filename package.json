@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tailwindcss/typography": "^0.5.19",
+    "@vercel/analytics": "^2.0.1",
     "firebase": "^12.12.1",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.3",
