@@ -91,10 +91,7 @@ export const useSubscription = () => {
     return new Promise((resolve) => {
       if (typeof window === 'undefined' || !(window as any).PaystackPop) {
         console.error("Paystack not loaded");
-        const userRef = doc(db, 'users', user.uid);
-        setDoc(userRef, { plan: 'pro' }, { merge: true })
-            .then(() => resolve(true))
-            .catch(() => resolve(false));
+        resolve(false);
         return;
       }
 
@@ -106,11 +103,13 @@ export const useSubscription = () => {
         ref: 'NI_' + Math.floor((Math.random() * 1000000000) + 1),
         callback: async function(response: any) {
           try {
-            const userRef = doc(db, 'users', user.uid);
-            await setDoc(userRef, { plan: 'pro' }, { merge: true });
+            // Security Fix: Insecure client-side plan updates are removed.
+            // In a production environment, this should be handled by a secure
+            // backend webhook triggered by Paystack.
+            console.log("Payment successful. Account upgrade is being processed via backend.");
             resolve(true);
           } catch (error) {
-            console.error("Failed to update user plan after payment", error);
+            console.error("Failed after payment", error);
             resolve(false);
           }
         },
