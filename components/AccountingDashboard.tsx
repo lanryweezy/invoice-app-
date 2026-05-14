@@ -118,7 +118,12 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ expens
                               </div>
                               <div className="flex items-center gap-3">
                                   <p className="font-bold text-red-600">₦{exp.amount.toLocaleString()}</p>
-                                  <button onClick={() => onRemoveExpense(exp.id)} className="text-slate-400 hover:text-red-500">
+                                  <button
+                                      onClick={() => onRemoveExpense(exp.id)}
+                                      className="p-1 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-500 focus:outline-none transition-colors"
+                                      aria-label={`Remove ${exp.description} expense`}
+                                      title="Remove expense"
+                                  >
                                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                                   </button>
                               </div>
