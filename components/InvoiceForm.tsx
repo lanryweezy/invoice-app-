@@ -300,10 +300,10 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
       currency: invoice.currency,
   }), [invoice.currency]);
   
-  const getCurrencySymbol = (currency: Currency) => {
-      return (0).toLocaleString('en-US', { style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace(/\d/g, '').trim();
-  }
-  const currencySymbol = getCurrencySymbol(invoice.currency);
+  // ⚡ Bolt: Memoize currency symbol to avoid expensive toLocaleString calls on every render (~0.6ms)
+  const currencySymbol = useMemo(() => {
+      return (0).toLocaleString('en-US', { style: 'currency', currency: invoice.currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace(/\d/g, '').trim();
+  }, [invoice.currency]);
 
   return (
     <div className="space-y-6 pb-20">
