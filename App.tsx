@@ -21,6 +21,12 @@ import { AccountingDashboard } from './components/AccountingDashboard';
 import { RecurringManager } from './components/RecurringManager';
 import { useExpenses } from './hooks/useExpenses';
 import { AuthModal } from './components/AuthModal';
+import { useReceipts } from './hooks/useReceipts';
+import { ReceiptsManager } from './components/ReceiptsManager';
+import { ReceiptPreview } from './components/ReceiptPreview';
+import { PaymentModal } from './components/PaymentModal';
+import { Blog } from './components/Blog';
+import { BlogPost } from './components/BlogPost';
 
 // Lazy load heavy preview component
 const InvoicePreview = React.lazy(() => import('./components/InvoicePreview').then(module => ({ default: module.InvoicePreview })));
@@ -28,9 +34,13 @@ const InvoicePreview = React.lazy(() => import('./components/InvoicePreview').th
 const App: React.FC = () => {
   const { invoice, setInvoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, calculateTotals, savedClients, saveClient, recurringInvoices, saveRecurringInvoice, removeRecurringInvoice } = useInvoice();
   const { expenses, addExpense, removeExpense } = useExpenses();
+  const { receipts, addReceipt, removeReceipt } = useReceipts();
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [generatedEmail, setGeneratedEmail] = useState('');
   
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [viewingReceipt, setViewingReceipt] = useState<any>(null);
+
   // Subscription hooks
   const { user, isPro, loading, loginWithGoogle, loginWithEmail, signUpWithEmail, logout, upgradeToPro } = useSubscription();
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
@@ -39,7 +49,52 @@ const App: React.FC = () => {
   const [pricingModalContent, setPricingModalContent] = useState({ title: 'Upgrade to Pro', message: 'Unlock advanced features to supercharge your business.' });
 
   // Main view state
-  const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring'>('editor');
+  const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'blog' | 'blogPost'>(() => {
+      const path = window.location.pathname;
+      if (path.startsWith('/blog/')) return 'blogPost';
+      if (path === '/blog') return 'blog';
+      return 'editor';
+  });
+
+  const [activeBlogPostId, setActiveBlogPostId] = useState<number | null>(() => {
+      const path = window.location.pathname;
+      if (path.startsWith('/blog/')) {
+          const idStr = path.split('/')[2];
+          return parseInt(idStr, 10) || null;
+      }
+      return null;
+  });
+
+  // Handle URL updates when state changes
+  useEffect(() => {
+      let path = '/';
+      if (activeView === 'blog') path = '/blog';
+      else if (activeView === 'blogPost' && activeBlogPostId !== null) path = `/blog/${activeBlogPostId}`;
+
+      // Update the URL without reloading the page
+      if (window.location.pathname !== path) {
+          window.history.pushState(null, '', path);
+      }
+  }, [activeView, activeBlogPostId]);
+
+  // Handle browser back/forward buttons
+  useEffect(() => {
+      const handlePopState = () => {
+          const path = window.location.pathname;
+          if (path.startsWith('/blog/')) {
+              const idStr = path.split('/')[2];
+              setActiveBlogPostId(parseInt(idStr, 10) || null);
+              setActiveView('blogPost');
+          } else if (path === '/blog') {
+              setActiveView('blog');
+          } else {
+              setActiveView('editor');
+          }
+      };
+
+      window.addEventListener('popstate', handlePopState);
+      return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // 'edit' vs 'preview' for mobile tabs
   const [activeMobileTab, setActiveMobileTab] = useState<'edit' | 'preview'>('edit');
@@ -252,6 +307,8 @@ const App: React.FC = () => {
              <button onClick={() => handleProFeatureClick('Branches')} className={`text-xs font-medium transition-colors ${activeView === 'branches' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Branches</button>
              <button onClick={() => handleProFeatureClick('Accounting')} className={`text-xs font-medium transition-colors ${activeView === 'accounting' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Accounting</button>
              <button onClick={() => handleProFeatureClick('Recurring')} className={`text-xs font-medium transition-colors ${activeView === 'recurring' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Recurring</button>
+             <button onClick={() => setActiveView('receipts')} className={`text-xs font-medium transition-colors ${activeView === 'receipts' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Receipts</button>
+             <button onClick={() => setActiveView('blog')} className={`text-xs font-medium transition-colors ${activeView === 'blog' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Blog</button>
              <div className="w-px h-4 bg-slate-700"></div>
              {!loading && (
                  user ? (
@@ -348,6 +405,33 @@ const App: React.FC = () => {
       )}
 
       {/* Main Layout - Flex-1 fills remaining space */}
+      {isPaymentModalOpen && (
+          <PaymentModal
+              isOpen={isPaymentModalOpen}
+              onClose={() => setIsPaymentModalOpen(false)}
+              invoice={invoice}
+              totalAmount={totals.total}
+              onSubmit={(paymentDetails) => {
+                  addReceipt({
+                      invoiceNumber: invoice.invoiceNumber,
+                      ...paymentDetails,
+                      invoice: invoice
+                  });
+                  setIsPaymentModalOpen(false);
+                  showToast('Receipt generated successfully');
+                  setActiveView('receipts');
+              }}
+          />
+      )}
+
+      {viewingReceipt && (
+          <ReceiptPreview
+              receipt={viewingReceipt}
+              template={template}
+              onClose={() => setViewingReceipt(null)}
+          />
+      )}
+
       <main className="flex-1 min-h-0 w-full max-w-[1600px] mx-auto overflow-y-auto">
         {activeView === 'branches' ? (
             <div className="p-4 sm:p-8 max-w-4xl mx-auto"><BranchesManager /></div>
@@ -370,6 +454,24 @@ const App: React.FC = () => {
                     onRemove={removeRecurringInvoice}
                 />
             </div>
+        ) : activeView === 'receipts' ? (
+            <div className="p-4 sm:p-8 max-w-6xl mx-auto">
+                <ReceiptsManager
+                    receipts={receipts}
+                    onViewReceipt={setViewingReceipt}
+                    onRemoveReceipt={(id) => {
+                        removeReceipt(id);
+                        showToast('Receipt deleted');
+                    }}
+                />
+            </div>
+        ) : activeView === 'blog' ? (
+            <Blog onPostClick={(id) => {
+                setActiveBlogPostId(id);
+                setActiveView('blogPost');
+            }} />
+        ) : activeView === 'blogPost' && activeBlogPostId !== null ? (
+            <BlogPost postId={activeBlogPostId} onBack={() => setActiveView('blog')} />
         ) : (
         <div className="flex flex-col md:flex-row h-full">
           
@@ -379,7 +481,12 @@ const App: React.FC = () => {
               <div className="max-w-xl mx-auto pb-8">
                 <InvoiceForm
                   invoice={invoice}
-                  updateInvoice={updateInvoice}
+                  updateInvoice={(key, value) => {
+                      if (key === 'status' && value === 'Paid' && invoice.status !== 'Paid') {
+                          setIsPaymentModalOpen(true);
+                      }
+                      updateInvoice(key, value);
+                  }}
                   addLineItem={addLineItem}
                   removeLineItem={removeLineItem}
                   updateLineItem={updateLineItem}
@@ -416,6 +523,8 @@ const App: React.FC = () => {
                        <button onClick={() => showToast('Privacy Policy coming soon', 'success')} className="hover:text-teal-600 transition-colors">Privacy</button>
                        <span className="text-slate-300">•</span>
                        <button onClick={() => showToast('Terms coming soon', 'success')} className="hover:text-teal-600 transition-colors">Terms</button>
+                       <span className="text-slate-300">•</span>
+                       <button onClick={() => setActiveView('blog')} className="hover:text-teal-600 transition-colors">Blog</button>
                        <span className="text-slate-300">•</span>
                        <button onClick={() => showToast('Contact: hello@invoiceapp.ng', 'success')} className="hover:text-teal-600 transition-colors">Contact</button>
                    </div>
@@ -495,7 +604,7 @@ const App: React.FC = () => {
                                 </div>
                             </div>
                         }>
-                            <InvoicePreview invoice={invoice} totals={totals} template={template} />
+                            <InvoicePreview invoice={invoice} totals={totals} template={template} isPro={isPro} />
                         </Suspense>
                     </div>
                  </div>
