@@ -16,7 +16,7 @@ vi.mock('firebase/firestore', () => ({
     setDoc: vi.fn().mockResolvedValue(undefined),
     getDoc: vi.fn().mockResolvedValue({ exists: () => false }),
     getFirestore: vi.fn(),
-    db: {},
+    db: {}
 }));
 
 // Mock crypto.randomUUID
@@ -24,8 +24,10 @@ if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     vi.spyOn(crypto, 'randomUUID').mockReturnValue('test-uuid');
 } else if (!global.crypto) {
     (global as any).crypto = {
-        randomUUID: () => 'test-uuid'
+        randomUUID: vi.fn().mockReturnValue('test-uuid')
     };
+} else {
+    global.crypto.randomUUID = vi.fn().mockReturnValue('test-uuid');
 }
 
 describe('useExpenses', () => {
@@ -56,10 +58,23 @@ describe('useExpenses', () => {
         // Immediately after additions, no sync should have happened
         expect(firebaseFirestore.setDoc).toHaveBeenCalledTimes(0);
 
+        // Initial render triggers useEffect that sets isCloudLoaded to true asynchronously
+        await act(async () => {
+            await Promise.resolve(); // flush promises so loadCloudData finishes and isCloudLoaded.current becomes true
+        });
+
+        act(() => {
+            result.current.addExpense(expense);
+            result.current.addExpense(expense);
+            result.current.addExpense(expense);
+        });
+
+        // Immediately after additions, no sync should have happened
+        expect(firebaseFirestore.setDoc).toHaveBeenCalledTimes(0);
+
         // Advance time by 1000ms
         await act(async () => {
-            vi.advanceTimersByTime(1500);
-            await Promise.resolve();
+            vi.advanceTimersByTime(1000);
         });
 
         // Now it should have been called exactly once

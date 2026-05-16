@@ -151,6 +151,7 @@ const CollapsibleSection: React.FC<{ title: string; children: React.ReactNode; d
         <div className={`border rounded-xl overflow-hidden shadow-sm mb-5 transition-all duration-300 hover:shadow-md ${highlight ? 'border-teal-100 bg-white ring-1 ring-teal-50' : 'border-slate-200 bg-white'}`}>
             <button 
                 onClick={() => setIsOpen(!isOpen)}
+                aria-expanded={isOpen}
                 className={`w-full flex items-center justify-between p-4 transition-colors text-left group ${highlight ? 'bg-gradient-to-r from-teal-50 to-white' : 'bg-white hover:bg-slate-50'}`}
             >
                 <div className="flex items-center gap-3">
@@ -699,8 +700,9 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
                             {/* Delete Action */}
                             <button 
                                 onClick={() => removeLineItem(item.id)}
-                                className="absolute top-3 right-3 text-slate-300 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                className="absolute top-3 right-3 text-slate-300 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-red-500"
                                 title="Remove Item"
+                                aria-label={`Remove item ${index + 1}`}
                             >
                                 <TrashIcon className="w-4 h-4" />
                             </button>
