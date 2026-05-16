@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { Receipt, TemplateId } from '../types';
 import { DownloadIcon, EyeIcon } from './Icons';
 
@@ -9,6 +9,8 @@ interface ReceiptsManagerProps {
 }
 
 export const ReceiptsManager: React.FC<ReceiptsManagerProps> = ({ receipts, onViewReceipt, onRemoveReceipt }) => {
+    // ⚡ Bolt: Memoize Intl.NumberFormat to avoid expensive recreation when formatting currency
+    const numberFormatter = useMemo(() => new Intl.NumberFormat('en-US'), []);
     return (
         <div className="p-8 bg-white rounded-xl shadow-sm border border-slate-200">
             <h2 className="text-2xl font-bold text-slate-900 mb-4">Receipts</h2>
@@ -35,7 +37,7 @@ export const ReceiptsManager: React.FC<ReceiptsManagerProps> = ({ receipts, onVi
                                     Invoice: {receipt.invoiceNumber} • Client: {receipt.invoice?.client?.name || 'Unknown'}
                                 </p>
                                 <p className="text-sm text-slate-500 mt-1">
-                                    {receipt.paymentDate} • {receipt.paymentMethod} • {receipt.invoice?.currency} {receipt.amountPaid.toLocaleString()}
+                                    {receipt.paymentDate} • {receipt.paymentMethod} • {receipt.invoice?.currency} {numberFormatter.format(receipt.amountPaid)}
                                 </p>
                             </div>
                             <div className="flex items-center gap-3 mt-4 sm:mt-0">

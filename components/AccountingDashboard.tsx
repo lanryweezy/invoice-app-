@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { Expense } from '../types';
 
 interface AccountingDashboardProps {
@@ -46,6 +46,9 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ expens
 
   const totalExpenses = expenses.reduce((acc, exp) => acc + exp.amount, 0);
 
+  // ⚡ Bolt: Memoize Intl.NumberFormat to avoid expensive recreation when formatting currency
+  const numberFormatter = useMemo(() => new Intl.NumberFormat('en-US'), []);
+
   return (
     <div className="p-8 bg-white rounded-xl shadow-sm border border-slate-200">
       <div className="flex justify-between items-start mb-6">
@@ -65,15 +68,15 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ expens
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-teal-50 p-6 rounded-xl border border-teal-100">
           <h3 className="text-sm font-bold text-teal-800 uppercase tracking-wider mb-2">Total Revenue (Mocked)</h3>
-          <div className="text-3xl font-bold text-teal-900">₦{revenueMock.toLocaleString()}</div>
+          <div className="text-3xl font-bold text-teal-900">₦{numberFormatter.format(revenueMock)}</div>
         </div>
         <div className="bg-red-50 p-6 rounded-xl border border-red-100">
           <h3 className="text-sm font-bold text-red-800 uppercase tracking-wider mb-2">Total Expenses</h3>
-          <div className="text-3xl font-bold text-red-900">₦{totalExpenses.toLocaleString()}</div>
+          <div className="text-3xl font-bold text-red-900">₦{numberFormatter.format(totalExpenses)}</div>
         </div>
         <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
           <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-2">Net Profit</h3>
-          <div className="text-3xl font-bold text-slate-900">₦{(revenueMock - totalExpenses).toLocaleString()}</div>
+          <div className="text-3xl font-bold text-slate-900">₦{numberFormatter.format(revenueMock - totalExpenses)}</div>
         </div>
       </div>
 
@@ -117,7 +120,7 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ expens
                                   <p className="text-xs text-slate-500">{exp.date} • {exp.category}</p>
                               </div>
                               <div className="flex items-center gap-3">
-                                  <p className="font-bold text-red-600">₦{exp.amount.toLocaleString()}</p>
+                                  <p className="font-bold text-red-600">₦{numberFormatter.format(exp.amount)}</p>
                                   <button
                                       onClick={() => onRemoveExpense(exp.id)}
                                       className="p-1 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-500 focus:outline-none transition-colors"

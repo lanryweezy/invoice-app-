@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import type { Receipt, TemplateId } from '../types';
@@ -13,6 +13,9 @@ interface ReceiptPreviewProps {
 export const ReceiptPreview: React.FC<ReceiptPreviewProps> = ({ receipt, template, onClose }) => {
     const receiptRef = useRef<HTMLDivElement>(null);
     const invoice = receipt.invoice;
+
+    // ⚡ Bolt: Memoize Intl.NumberFormat to avoid expensive recreation when formatting currency
+    const numberFormatter = useMemo(() => new Intl.NumberFormat('en-US'), []);
 
     const handleDownload = async () => {
         if (!receiptRef.current) return;
@@ -102,7 +105,7 @@ export const ReceiptPreview: React.FC<ReceiptPreviewProps> = ({ receipt, templat
                                     )}
                                     <div className="pt-2 mt-2 border-t border-teal-200/50 flex justify-between items-center">
                                         <span className="font-bold text-teal-800">Amount Paid:</span>
-                                        <span className="text-xl font-bold text-teal-600">{invoice.currency} {receipt.amountPaid.toLocaleString()}</span>
+                                        <span className="text-xl font-bold text-teal-600">{invoice.currency} {numberFormatter.format(receipt.amountPaid)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -124,7 +127,7 @@ export const ReceiptPreview: React.FC<ReceiptPreviewProps> = ({ receipt, templat
                                         <tr key={item.id} className="border-b border-slate-50 text-slate-700">
                                             <td className="py-3">{item.description || 'Item'}</td>
                                             <td className="py-3 text-right">{item.quantity}</td>
-                                            <td className="py-3 text-right">{invoice.currency} {(item.quantity * Number(item.price || 0)).toLocaleString()}</td>
+                                            <td className="py-3 text-right">{invoice.currency} {numberFormatter.format(item.quantity * Number(item.price || 0))}</td>
                                         </tr>
                                     ))}
                                 </tbody>

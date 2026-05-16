@@ -15,11 +15,14 @@ vi.mock('firebase/firestore', () => ({
     doc: vi.fn(),
     setDoc: vi.fn().mockResolvedValue(undefined),
     getDoc: vi.fn().mockResolvedValue({ exists: () => false }),
-    db: {}
+    getFirestore: vi.fn(),
+    db: {},
 }));
 
 // Mock crypto.randomUUID
-if (!global.crypto) {
+if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    vi.spyOn(crypto, 'randomUUID').mockReturnValue('test-uuid');
+} else if (!global.crypto) {
     (global as any).crypto = {
         randomUUID: () => 'test-uuid'
     };
@@ -30,6 +33,7 @@ describe('useExpenses', () => {
         vi.clearAllMocks();
         vi.useFakeTimers();
         localStorage.clear();
+        vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
         (useSubscription as any).mockReturnValue({
             user: { uid: 'test-user' },
             isPro: true,
@@ -39,6 +43,7 @@ describe('useExpenses', () => {
 
     it('should debounce syncToCloud calls', async () => {
         const { result } = renderHook(() => useExpenses());
+        await act(async () => { await Promise.resolve(); }); // flush initial effect
 
         const expense = { title: 'Test', amount: 100, date: '2023-01-01', category: 'Food' };
 
@@ -52,8 +57,9 @@ describe('useExpenses', () => {
         expect(firebaseFirestore.setDoc).toHaveBeenCalledTimes(0);
 
         // Advance time by 1000ms
-        act(() => {
-            vi.advanceTimersByTime(1000);
+        await act(async () => {
+            vi.advanceTimersByTime(1500);
+            await Promise.resolve();
         });
 
         // Now it should have been called exactly once

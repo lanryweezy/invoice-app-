@@ -129,6 +129,9 @@ const App: React.FC = () => {
 
   const totals = useMemo(() => calculateTotals(), [invoice.lineItems, invoice.taxRate, invoice.discountRate, invoice.shippingAmount, calculateTotals]);
 
+  // ⚡ Bolt: Memoize Intl.NumberFormat to avoid expensive recreation when formatting totals
+  const numberFormatter = useMemo(() => new Intl.NumberFormat('en-US'), []);
+
   // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -357,7 +360,7 @@ const App: React.FC = () => {
                     onDownloadPdf={handleDownloadPdf}
                     isMobile={false}
                     invoiceNumber={invoice.invoiceNumber}
-                    totalAmount={`${invoice.currency} ${totals.total.toLocaleString()}`}
+                    totalAmount={`${invoice.currency} ${numberFormatter.format(totals.total)}`}
                 />
             </div>
 
@@ -388,7 +391,7 @@ const App: React.FC = () => {
                             onDownloadPdf={handleDownloadPdf}
                             isMobile={true}
                             invoiceNumber={invoice.invoiceNumber}
-                            totalAmount={`${invoice.currency} ${totals.total.toLocaleString()}`}
+                            totalAmount={`${invoice.currency} ${numberFormatter.format(totals.total)}`}
                         />
                     </div>
                 </div>

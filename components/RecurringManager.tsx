@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { Invoice } from '../types';
 
 interface RecurringManagerProps {
@@ -8,6 +8,8 @@ interface RecurringManagerProps {
 }
 
 export const RecurringManager: React.FC<RecurringManagerProps> = ({ recurringInvoices, onGenerateNext, onRemove }) => {
+  // ⚡ Bolt: Memoize Intl.NumberFormat to avoid expensive recreation when formatting currency
+  const numberFormatter = useMemo(() => new Intl.NumberFormat('en-US'), []);
   return (
     <div className="p-8 bg-white rounded-xl shadow-sm border border-slate-200">
       <h2 className="text-2xl font-bold text-slate-900 mb-4">Recurring Invoices</h2>
@@ -28,7 +30,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({ recurringInv
               <div>
                 <h3 className="font-bold text-slate-900">{inv.client.name || 'Unnamed Client'}</h3>
                 <p className="text-sm text-slate-500 capitalize">Repeats: {inv.recurringFrequency}</p>
-                <p className="text-xs text-slate-400 mt-1">Amount: {inv.currency} {inv.total?.toLocaleString() || '---'}</p>
+                <p className="text-xs text-slate-400 mt-1">Amount: {inv.currency} {inv.total ? numberFormatter.format(inv.total) : '---'}</p>
               </div>
               <div className="mt-4 sm:mt-0 flex items-center gap-3 w-full sm:w-auto">
                 <button
