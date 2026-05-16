@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { Invoice } from '../types';
 
 // ⚡ Bolt: Cache Intl.NumberFormat instance globally to avoid ~0.6ms overhead per instantiation inside render loop.
@@ -11,6 +11,8 @@ interface RecurringManagerProps {
 }
 
 export const RecurringManager: React.FC<RecurringManagerProps> = ({ recurringInvoices, onGenerateNext, onRemove }) => {
+  // ⚡ Bolt: Memoize Intl.NumberFormat to avoid expensive recreation when formatting currency
+  const numberFormatter = useMemo(() => new Intl.NumberFormat('en-US'), []);
   return (
     <div className="p-8 bg-white rounded-xl shadow-sm border border-slate-200">
       <h2 className="text-2xl font-bold text-slate-900 mb-4">Recurring Invoices</h2>

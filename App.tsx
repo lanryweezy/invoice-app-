@@ -133,6 +133,9 @@ const App: React.FC = () => {
 
   const totals = useMemo(() => calculateTotals(), [invoice.lineItems, invoice.taxRate, invoice.discountRate, invoice.shippingAmount, calculateTotals]);
 
+  // ⚡ Bolt: Memoize Intl.NumberFormat to avoid expensive recreation when formatting totals
+  const numberFormatter = useMemo(() => new Intl.NumberFormat('en-US'), []);
+
   // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

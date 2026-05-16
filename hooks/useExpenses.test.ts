@@ -20,7 +20,9 @@ vi.mock('firebase/firestore', () => ({
 }));
 
 // Mock crypto.randomUUID
-if (!global.crypto) {
+if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    vi.spyOn(crypto, 'randomUUID').mockReturnValue('test-uuid');
+} else if (!global.crypto) {
     (global as any).crypto = {
         randomUUID: vi.fn().mockReturnValue('test-uuid')
     };
@@ -33,6 +35,7 @@ describe('useExpenses', () => {
         vi.clearAllMocks();
         vi.useFakeTimers();
         localStorage.clear();
+        vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
         (useSubscription as any).mockReturnValue({
             user: { uid: 'test-user' },
             isPro: true,
@@ -42,6 +45,7 @@ describe('useExpenses', () => {
 
     it('should debounce syncToCloud calls', async () => {
         const { result } = renderHook(() => useExpenses());
+        await act(async () => { await Promise.resolve(); }); // flush initial effect
 
         const expense = { title: 'Test', amount: 100, date: '2023-01-01', category: 'Food' };
 

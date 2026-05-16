@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import type { Receipt, TemplateId } from '../types';
@@ -16,6 +16,9 @@ interface ReceiptPreviewProps {
 export const ReceiptPreview: React.FC<ReceiptPreviewProps> = ({ receipt, template, onClose }) => {
     const receiptRef = useRef<HTMLDivElement>(null);
     const invoice = receipt.invoice;
+
+    // ⚡ Bolt: Memoize Intl.NumberFormat to avoid expensive recreation when formatting currency
+    const numberFormatter = useMemo(() => new Intl.NumberFormat('en-US'), []);
 
     const handleDownload = async () => {
         if (!receiptRef.current) return;

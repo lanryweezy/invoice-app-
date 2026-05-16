@@ -12,6 +12,9 @@
 3. Use a guard (e.g., a 'isLoaded' ref) to prevent syncing until the initial hydration from all sources is complete.
 4. Move side effects out of 'setState' updaters to keep them pure and predictable.
 
+## 2025-05-15 - [.toLocaleString() is essentially Intl.NumberFormat]
+**Learning:** Calling `Number.prototype.toLocaleString()` implicitly creates and destroys an `Intl.NumberFormat` instance internally. Because instantiating `Intl.NumberFormat` is relatively slow (~1ms in some environments), doing `(amount).toLocaleString()` inside loops or large React list renders can become a hidden performance bottleneck, causing render times to easily spike to 10s or 100s of milliseconds.
+**Action:** Always prefer creating a single `Intl.NumberFormat` instance (memoized with `useMemo` in React components, or as a module-level constant) and reusing its `.format()` method instead of calling `.toLocaleString()` on individual numbers.
 ## 2025-05-16 - [String.prototype.toLocaleString inside Loops]
 **Learning:** Calling `(number).toLocaleString()` implicitly instantiates a new `Intl.NumberFormat` internally on each invocation, taking around ~0.6ms to ~1ms per call. When rendering lists containing prices (like `ReceiptsManager.tsx` or `AccountingDashboard.tsx` with hundreds of expenses), this can noticeably block the React main thread leading to poor scrolling and laggy renders.
 **Action:** Replace dynamic `.toLocaleString()` formatting within lists with a static, globally cached instance of `new Intl.NumberFormat('en-US')` and use its `.format(number)` method instead. This drops the formatting time for 10,000 items from ~280ms down to ~11ms.

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { Expense } from '../types';
 
 // ⚡ Bolt: Cache Intl.NumberFormat instance globally to avoid ~0.6ms overhead per instantiation inside render loop.
@@ -48,6 +48,9 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ expens
   };
 
   const totalExpenses = expenses.reduce((acc, exp) => acc + exp.amount, 0);
+
+  // ⚡ Bolt: Memoize Intl.NumberFormat to avoid expensive recreation when formatting currency
+  const numberFormatter = useMemo(() => new Intl.NumberFormat('en-US'), []);
 
   return (
     <div className="p-8 bg-white rounded-xl shadow-sm border border-slate-200">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { Receipt, TemplateId } from '../types';
 import { DownloadIcon, EyeIcon } from './Icons';
 
@@ -12,6 +12,8 @@ interface ReceiptsManagerProps {
 }
 
 export const ReceiptsManager: React.FC<ReceiptsManagerProps> = ({ receipts, onViewReceipt, onRemoveReceipt }) => {
+    // ⚡ Bolt: Memoize Intl.NumberFormat to avoid expensive recreation when formatting currency
+    const numberFormatter = useMemo(() => new Intl.NumberFormat('en-US'), []);
     return (
         <div className="p-8 bg-white rounded-xl shadow-sm border border-slate-200">
             <h2 className="text-2xl font-bold text-slate-900 mb-4">Receipts</h2>
