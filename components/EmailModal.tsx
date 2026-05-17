@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ClipboardCheckIcon, ClipboardIcon } from './Icons';
+import { ClipboardIcon } from './Icons';
 
 interface EmailModalProps {
   isOpen: boolean;
