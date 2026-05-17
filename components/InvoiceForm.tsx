@@ -126,7 +126,8 @@ const RichTextarea: React.FC<{
                 <button
                     type="button"
                     onClick={() => insertAtCursor('• ')}
-                    className="flex items-center gap-1 text-[10px] font-bold text-teal-600 bg-teal-50 hover:bg-teal-100 px-2 py-0.5 rounded border border-teal-100 transition-colors"
+                    aria-label="Add bullet point"
+                    className="flex items-center gap-1 text-[10px] font-bold text-teal-600 bg-teal-50 hover:bg-teal-100 px-2 py-0.5 rounded border border-teal-100 focus-visible:ring-2 focus-visible:ring-teal-500 focus:outline-none transition-colors"
                 >
                     <ListIcon className="w-3 h-3" />
                     Add Bullet
@@ -341,7 +342,8 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
                                     e.stopPropagation();
                                     updateInvoice('user', { ...invoice.user, logo: undefined });
                                 }}
-                                className="text-xs text-red-500 hover:text-red-700 font-bold flex items-center gap-1 py-1 px-3 rounded-full hover:bg-red-50 transition-colors"
+                                aria-label="Remove Logo"
+                                className="text-xs text-red-500 hover:text-red-700 font-bold flex items-center gap-1 py-1 px-3 rounded-full hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-500 focus:outline-none transition-colors"
                              >
                                 <TrashIcon className="w-3 h-3"/> Remove Logo
                              </button>
