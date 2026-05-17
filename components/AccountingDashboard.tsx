@@ -47,7 +47,7 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ expens
       setAmount('');
   };
 
-  const totalExpenses = expenses.reduce((acc, exp) => acc + exp.amount, 0);
+  const totalExpenses = useMemo(() => expenses.reduce((acc, exp) => acc + exp.amount, 0), [expenses]);
 
   // ⚡ Bolt: Memoize Intl.NumberFormat to avoid expensive recreation when formatting currency
   const numberFormatter = useMemo(() => new Intl.NumberFormat('en-US'), []);
