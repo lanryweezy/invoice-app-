@@ -278,10 +278,19 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
     }
   };
 
+  // ⚡ Bolt: Memoize savedClients to a map for O(1) lookups rather than O(N) Array.find
+  const savedClientsMap = useMemo(() => {
+      const map = new Map<string, Client>();
+      for (const client of savedClients) {
+          map.set(client.name, client);
+      }
+      return map;
+  }, [savedClients]);
+
   const handleSelectClient = (e: React.ChangeEvent<HTMLSelectElement>) => {
       const selectedName = e.target.value;
       if (!selectedName) return;
-      const client = savedClients.find(c => c.name === selectedName);
+      const client = savedClientsMap.get(selectedName);
       if (client) {
           updateInvoice('client', client);
       }
