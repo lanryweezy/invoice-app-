@@ -1,0 +1,19 @@
+--- components/InvoiceForm.tsx
++++ components/InvoiceForm.tsx
+@@ -85,14 +85,14 @@
+   );
+ });
+
+-const RichTextarea = React.memo<{
++const RichTextarea = React.memo((({ label, name, value, onChange, placeholder, rows = 3 }: {
+     label: string;
+     name: string;
+     value: string;
+     onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+     placeholder?: string;
+     rows?: number;
+-}> = ({ label, name, value, onChange, placeholder, rows = 3 }) => {
++}) => {
+     const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+     const insertAtCursor = (text: string) => {

@@ -49,9 +49,6 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ expens
 
   const totalExpenses = expenses.reduce((acc, exp) => acc + exp.amount, 0);
 
-  // ⚡ Bolt: Memoize Intl.NumberFormat to avoid expensive recreation when formatting currency
-  const numberFormatter = useMemo(() => new Intl.NumberFormat('en-US'), []);
-
   return (
     <div className="p-8 bg-white rounded-xl shadow-sm border border-slate-200">
       <div className="flex justify-between items-start mb-6">
