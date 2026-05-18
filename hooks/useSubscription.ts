@@ -82,7 +82,7 @@ export const useSubscription = () => {
     }
   };
 
-  const upgradeToPro = async (): Promise<boolean> => {
+  const upgradeToPro = async (planType: 'monthly' | 'yearly' = 'monthly'): Promise<boolean> => {
     if (!user) {
       await login();
       return false;
@@ -95,10 +95,12 @@ export const useSubscription = () => {
         return;
       }
 
+      const amount = planType === 'yearly' ? 48000 : 5000;
+
       const handler = (window as any).PaystackPop.setup({
         key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_dummy_key_for_dev_change_me',
         email: user.email || 'user@example.com',
-        amount: 5000 * 100, // Amount in kobo (₦5,000)
+        amount: amount * 100, // Amount in kobo
         currency: 'NGN',
         ref: 'NI_' + Math.floor((Math.random() * 1000000000) + 1),
         callback: async function(response: any) {

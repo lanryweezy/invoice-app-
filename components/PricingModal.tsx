@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface PricingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpgrade: () => void;
+  onUpgrade: (planType: 'monthly' | 'yearly') => void;
   onLogin: () => void;
   user: any;
   title?: string;
@@ -11,14 +11,34 @@ interface PricingModalProps {
 }
 
 export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onUpgrade, onLogin, user, title = "Upgrade to Pro", message = "Unlock advanced features to supercharge your business." }) => {
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden animate-in fade-in zoom-in duration-200 my-8">
         <div className="p-6 md:p-8 text-center border-b border-slate-100">
           <h2 className="text-2xl font-bold text-slate-900 mb-2">{title}</h2>
-          <p className="text-slate-500">{message}</p>
+          <p className="text-slate-500 mb-6">{message}</p>
+
+          <div className="flex justify-center items-center gap-3">
+            <span className={`text-sm font-medium ${billingCycle === 'monthly' ? 'text-slate-900' : 'text-slate-500'}`}>Monthly</span>
+            <button
+              onClick={() => setBillingCycle(prev => prev === 'monthly' ? 'yearly' : 'monthly')}
+              className="relative inline-flex h-6 w-11 items-center rounded-full bg-teal-500 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+              role="switch"
+              aria-checked={billingCycle === 'yearly'}
+            >
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${billingCycle === 'yearly' ? 'translate-x-6' : 'translate-x-1'}`} />
+            </button>
+            <span className={`text-sm font-medium flex items-center gap-1.5 ${billingCycle === 'yearly' ? 'text-slate-900' : 'text-slate-500'}`}>
+              Yearly
+              <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                20% off
+              </span>
+            </span>
+          </div>
         </div>
 
         <div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-slate-100">
@@ -60,8 +80,20 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
           <div className="flex-1 p-6 md:p-8">
             <div className="text-center mb-6">
               <h3 className="text-lg font-bold text-teal-600 mb-1">Pro</h3>
-              <div className="text-3xl font-bold text-slate-900 mb-1">₦5,000<span className="text-sm font-normal text-slate-500">/mo</span></div>
-              <p className="text-xs text-slate-500">For growing businesses</p>
+              <div className="flex justify-center items-baseline gap-1 mb-1">
+                <span className="text-3xl font-bold text-slate-900">
+                  {billingCycle === 'yearly' ? '₦48,000' : '₦5,000'}
+                </span>
+                <span className="text-sm font-normal text-slate-500">
+                  /{billingCycle === 'yearly' ? 'yr' : 'mo'}
+                </span>
+              </div>
+              {billingCycle === 'yearly' && (
+                <div className="text-sm text-green-600 font-medium mb-1">
+                  (₦4,000/mo)
+                </div>
+              )}
+              <p className="text-xs text-slate-500 mt-1">For growing businesses</p>
             </div>
             <ul className="space-y-3 mb-8">
               <li className="flex items-center gap-2 text-sm text-slate-700 font-medium">
@@ -94,7 +126,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
               </li>
             </ul>
             <button
-              onClick={user ? onUpgrade : onLogin}
+              onClick={user ? () => onUpgrade(billingCycle) : onLogin}
               className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-lg shadow-teal-600/30"
             >
               {user ? 'Upgrade Now' : 'Login to Upgrade'}
