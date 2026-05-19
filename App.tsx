@@ -131,7 +131,7 @@ const App: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const totals = useMemo(() => calculateTotals(), [invoice.lineItems, invoice.taxRate, invoice.discountRate, invoice.shippingAmount, calculateTotals]);
+  const totals = useMemo(() => calculateTotals(), [invoice.lineItems, invoice.taxRate, invoice.whtRate, invoice.discountRate, invoice.discountType, invoice.shippingAmount, calculateTotals]);
 
   // Keyboard Shortcuts
   useEffect(() => {
@@ -632,8 +632,8 @@ const App: React.FC = () => {
       <PricingModal
         isOpen={isPricingModalOpen}
         onClose={() => setIsPricingModalOpen(false)}
-        onUpgrade={async () => {
-            const success = await upgradeToPro();
+        onUpgrade={async (planType) => {
+            const success = await upgradeToPro(planType);
             if (success) {
                 showToast('Successfully upgraded to Pro!', 'success');
                 setIsPricingModalOpen(false);

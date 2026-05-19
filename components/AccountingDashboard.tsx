@@ -47,7 +47,7 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ expens
       setAmount('');
   };
 
-  const totalExpenses = expenses.reduce((acc, exp) => acc + exp.amount, 0);
+  const totalExpenses = useMemo(() => expenses.reduce((acc, exp) => acc + exp.amount, 0), [expenses]);
 
   return (
     <div className="p-8 bg-white rounded-xl shadow-sm border border-slate-200">

@@ -93,6 +93,7 @@ const RichTextarea = React.memo((({ label, name, value, onChange, placeholder, r
     placeholder?: string;
     rows?: number;
 }) => {
+}> = React.memo(({ label, name, value, onChange, placeholder, rows = 3 }) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const insertAtCursor = (text: string) => {
@@ -126,7 +127,8 @@ const RichTextarea = React.memo((({ label, name, value, onChange, placeholder, r
                 <button
                     type="button"
                     onClick={() => insertAtCursor('• ')}
-                    className="flex items-center gap-1 text-[10px] font-bold text-teal-600 bg-teal-50 hover:bg-teal-100 px-2 py-0.5 rounded border border-teal-100 transition-colors"
+                    aria-label="Add bullet point"
+                    className="flex items-center gap-1 text-[10px] font-bold text-teal-600 bg-teal-50 hover:bg-teal-100 px-2 py-0.5 rounded border border-teal-100 focus-visible:ring-2 focus-visible:ring-teal-500 focus:outline-none transition-colors"
                 >
                     <ListIcon className="w-3 h-3" />
                     Add Bullet
@@ -143,7 +145,7 @@ const RichTextarea = React.memo((({ label, name, value, onChange, placeholder, r
             />
         </div>
     );
-};
+});
 
 const CollapsibleSection = React.memo((({ title, children, defaultOpen = true, highlight = false, icon }: { title: string; children: React.ReactNode; defaultOpen?: boolean; highlight?: boolean; icon?: React.ReactNode }) => {
     const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -226,7 +228,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
     }
   }, [updateLineItem]);
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
         const validTypes = ['image/jpeg', 'image/png'];
@@ -276,24 +278,33 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
         };
         reader.readAsDataURL(file);
     }
-  };
+  }, [invoice.user, updateInvoice]);
 
-  const handleSelectClient = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  // ⚡ Bolt: Memoize savedClients to a map for O(1) lookups rather than O(N) Array.find
+  const savedClientsMap = useMemo(() => {
+      const map = new Map<string, Client>();
+      for (const client of savedClients) {
+          map.set(client.name, client);
+      }
+      return map;
+  }, [savedClients]);
+
+  const handleSelectClient = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
       const selectedName = e.target.value;
       if (!selectedName) return;
-      const client = savedClients.find(c => c.name === selectedName);
+      const client = savedClientsMap.get(selectedName);
       if (client) {
           updateInvoice('client', client);
       }
-  };
+  }, [savedClientsMap, updateInvoice]);
 
-  const handleVatToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVatToggle = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.checked) {
           updateInvoice('taxRate', invoice.taxRate > 0 ? invoice.taxRate : 7.5);
       } else {
           updateInvoice('taxRate', 0);
       }
-  };
+  }, [invoice.taxRate, updateInvoice]);
 
   // ⚡ Bolt: Memoize Intl.NumberFormat to avoid expensive recreation (~1ms) on every render
   const currencyFormatter = useMemo(() => new Intl.NumberFormat('en-US', {
@@ -341,7 +352,8 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
                                     e.stopPropagation();
                                     updateInvoice('user', { ...invoice.user, logo: undefined });
                                 }}
-                                className="text-xs text-red-500 hover:text-red-700 font-bold flex items-center gap-1 py-1 px-3 rounded-full hover:bg-red-50 transition-colors"
+                                aria-label="Remove Logo"
+                                className="text-xs text-red-500 hover:text-red-700 font-bold flex items-center gap-1 py-1 px-3 rounded-full hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-500 focus:outline-none transition-colors"
                              >
                                 <TrashIcon className="w-3 h-3"/> Remove Logo
                              </button>
