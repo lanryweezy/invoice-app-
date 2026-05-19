@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import type { Invoice, LineItem, Currency, InvoiceStatus, Client } from '../types';
 import { TrashIcon, PlusIcon, UploadIcon, ChevronDownIcon, ChevronUpIcon, EmptyBoxIcon, SaveIcon, UserIcon, MailIcon, MapPinIcon, BriefcaseIcon, BankIcon, HashIcon, WalletIcon, CalendarIcon, InfoIcon, SparklesIcon, ListIcon, PhoneIcon } from './Icons';
 
@@ -33,7 +33,7 @@ interface InputFieldProps {
   error?: string;
 }
 
-const InputField: React.FC<InputFieldProps> = ({ id, label, value, onChange, type = 'text', placeholder, className, name, icon, prefix, noLabel, autoComplete, step, error }) => {
+const InputField: React.FC<InputFieldProps> = React.memo(({ id, label, value, onChange, type = 'text', placeholder, className, name, icon, prefix, noLabel, autoComplete, step, error }) => {
   const isDate = type === 'date';
   
   const handlePickerTrigger = (e: React.SyntheticEvent) => {
@@ -83,7 +83,7 @@ const InputField: React.FC<InputFieldProps> = ({ id, label, value, onChange, typ
       {error && <p className="mt-1 text-[10px] text-red-500 font-bold uppercase tracking-wide">{error}</p>}
     </div>
   );
-};
+});
 
 const RichTextarea: React.FC<{
     label: string;
@@ -92,7 +92,7 @@ const RichTextarea: React.FC<{
     onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
     placeholder?: string;
     rows?: number;
-}> = ({ label, name, value, onChange, placeholder, rows = 3 }) => {
+}> = React.memo(({ label, name, value, onChange, placeholder, rows = 3 }) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const insertAtCursor = (text: string) => {
@@ -144,9 +144,9 @@ const RichTextarea: React.FC<{
             />
         </div>
     );
-};
+});
 
-const CollapsibleSection: React.FC<{ title: string; children: React.ReactNode; defaultOpen?: boolean; highlight?: boolean; icon?: React.ReactNode }> = ({ title, children, defaultOpen = true, highlight = false, icon }) => {
+const CollapsibleSection: React.FC<{ title: string; children: React.ReactNode; defaultOpen?: boolean; highlight?: boolean; icon?: React.ReactNode }> = React.memo(({ title, children, defaultOpen = true, highlight = false, icon }) => {
     const [isOpen, setIsOpen] = useState(defaultOpen);
     return (
         <div className={`border rounded-xl overflow-hidden shadow-sm mb-5 transition-all duration-300 hover:shadow-md ${highlight ? 'border-teal-100 bg-white ring-1 ring-teal-50' : 'border-slate-200 bg-white'}`}>
@@ -170,7 +170,7 @@ const CollapsibleSection: React.FC<{ title: string; children: React.ReactNode; d
             </div>
         </div>
     );
-};
+});
 
 export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, savedClients, onSaveClient, onSaveRecurring, isPro = false, onProFeatureClick }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -202,19 +202,22 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
   }, [invoice.lineItems.length]);
 
 
-  const handleUserChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUserChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     updateInvoice('user', { ...invoice.user, [name]: value });
-  };
-  const handleClientChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  }, [invoice.user, updateInvoice]);
+
+  const handleClientChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     updateInvoice('client', { ...invoice.client, [name]: value });
-  };
-  const handleInvoiceMetaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  }, [invoice.client, updateInvoice]);
+
+  const handleInvoiceMetaChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     updateInvoice(name as keyof Invoice, value);
-  };
-  const handleLineItemChange = (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
+  }, [updateInvoice]);
+
+  const handleLineItemChange = useCallback((id: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
     if (name === 'price') {
@@ -225,9 +228,9 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
     } else {
         updateLineItem(id, name as keyof Omit<LineItem, 'id'>, value);
     }
-  };
+  }, [updateLineItem]);
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
         const validTypes = ['image/jpeg', 'image/png'];
@@ -277,7 +280,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
         };
         reader.readAsDataURL(file);
     }
-  };
+  }, [invoice.user, updateInvoice]);
 
   // ⚡ Bolt: Memoize savedClients to a map for O(1) lookups rather than O(N) Array.find
   const savedClientsMap = useMemo(() => {
@@ -288,22 +291,22 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
       return map;
   }, [savedClients]);
 
-  const handleSelectClient = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleSelectClient = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
       const selectedName = e.target.value;
       if (!selectedName) return;
       const client = savedClientsMap.get(selectedName);
       if (client) {
           updateInvoice('client', client);
       }
-  };
+  }, [savedClientsMap, updateInvoice]);
 
-  const handleVatToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVatToggle = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.checked) {
           updateInvoice('taxRate', invoice.taxRate > 0 ? invoice.taxRate : 7.5);
       } else {
           updateInvoice('taxRate', 0);
       }
-  };
+  }, [invoice.taxRate, updateInvoice]);
 
   // ⚡ Bolt: Memoize Intl.NumberFormat to avoid expensive recreation (~1ms) on every render
   const currencyFormatter = useMemo(() => new Intl.NumberFormat('en-US', {

@@ -32,6 +32,10 @@ describe('analytics', () => {
             expect(() => {
                 trackEvent('test_event', { foo: 'bar' });
             }).not.toThrow();
+        });
+    });
+});
+
 describe('analytics.ts', () => {
     describe('trackEvent', () => {
         let originalGtag: any;
@@ -105,6 +109,7 @@ describe('analytics.ts', () => {
         it('should collect session details correctly for desktop', () => {
             vi.stubGlobal('innerWidth', 1024);
             vi.stubGlobal('innerHeight', 768);
+            vi.stubGlobal('devicePixelRatio', 2);
 
             const details = collectSessionDetails();
 
@@ -150,7 +155,11 @@ describe('analytics.ts', () => {
             vi.stubGlobal('innerHeight', 1024);
 
             const details = collectSessionDetails();
+            expect(details.device_type).toBe('tablet');
+        });
+    });
 
+    describe('collectSessionDetails - extended', () => {
         beforeEach(() => {
             vi.stubGlobal('innerWidth', 1024);
             vi.stubGlobal('innerHeight', 768);
@@ -243,6 +252,9 @@ describe('analytics.ts', () => {
                 configurable: true
             });
             const details = collectSessionDetails();
+            expect(details.referrer).toBe('direct');
+        });
+
         it('should handle undefined connection, search params, and referrer gracefully', () => {
             delete (navigator as any).connection;
             vi.stubGlobal('location', { search: '' });
