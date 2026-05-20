@@ -172,6 +172,85 @@ const CollapsibleSection: React.FC<{ title: string; children: React.ReactNode; d
     );
 });
 
+// ⚡ Bolt: Extract LineItem to a memoized component to avoid expensive O(N) re-renders of the entire list when only one item changes
+const LineItemRow = React.memo(({ item, index, currencySymbol, currencyFormatter, onChange, onRemove }: {
+    item: LineItem;
+    index: number;
+    currencySymbol: string;
+    currencyFormatter: Intl.NumberFormat;
+    onChange: (id: string, e: React.ChangeEvent<HTMLInputElement>) => void;
+    onRemove: (id: string) => void;
+}) => {
+    return (
+        <div className="group bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-300 transition-all relative">
+
+            <div className="space-y-4">
+                {/* Description */}
+                <div className="w-full">
+                    <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">
+                        Description
+                    </label>
+                    <input
+                        id={`desc-${item.id}`}
+                        value={item.description}
+                        onChange={(e) => onChange(item.id, e)}
+                        name="description"
+                        className="block w-full px-0 py-1 bg-transparent border-b border-slate-200 text-slate-800 text-base font-semibold focus:border-teal-500 focus:outline-none transition-all placeholder:text-slate-300"
+                        placeholder="Item name..."
+                    />
+                </div>
+
+                {/* Qty & Price & Total Row */}
+                <div className="flex items-end gap-3 sm:gap-4">
+                    <div className="w-20 sm:w-24">
+                        <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Qty</label>
+                        <input
+                            name="quantity"
+                            type="number"
+                            min="0"
+                            value={item.quantity}
+                            onChange={(e) => onChange(item.id, e)}
+                            className="block w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-bold focus:bg-white focus:outline-none focus:border-teal-500 transition-all text-center"
+                        />
+                    </div>
+                    <div className="flex-1">
+                        <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Price</label>
+                        <div className="relative">
+                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm pointer-events-none">
+                                {currencySymbol}
+                            </div>
+                            <input
+                                name="price"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={item.price}
+                                onChange={(e) => onChange(item.id, e)}
+                                className="block w-full pl-12 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-bold focus:bg-white focus:outline-none focus:border-teal-500 transition-all"
+                                placeholder=""
+                            />
+                        </div>
+                    </div>
+                    <div className="text-right pb-1.5 min-w-[80px]">
+                        <label className="block text-[9px] font-bold text-slate-300 mb-0.5 uppercase tracking-wide">Total</label>
+                        <span className="text-teal-700 font-mono font-bold text-lg">{currencyFormatter.format(item.quantity * Number(item.price))}</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Delete Action */}
+            <button
+                onClick={() => onRemove(item.id)}
+                className="absolute top-3 right-3 text-slate-300 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-red-500"
+                title="Remove Item"
+                aria-label={`Remove item ${index + 1}`}
+            >
+                <TrashIcon className="w-4 h-4" />
+            </button>
+        </div>
+    );
+});
+
 export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, savedClients, onSaveClient, onSaveRecurring, isPro = false, onProFeatureClick }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -655,72 +734,15 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
             ) : (
                 <div className="space-y-4">
                     {invoice.lineItems.map((item, index) => (
-                        <div key={item.id} className="group bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-300 transition-all relative">
-                        
-                            <div className="space-y-4">
-                                {/* Description */}
-                                <div className="w-full">
-                                    <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">
-                                        Description
-                                    </label>
-                                    <input
-                                        id={`desc-${item.id}`}
-                                        value={item.description}
-                                        onChange={(e) => handleLineItemChange(item.id, e)}
-                                        name="description"
-                                        className="block w-full px-0 py-1 bg-transparent border-b border-slate-200 text-slate-800 text-base font-semibold focus:border-teal-500 focus:outline-none transition-all placeholder:text-slate-300"
-                                        placeholder="Item name..."
-                                    />
-                                </div>
-
-                                {/* Qty & Price & Total Row */}
-                                <div className="flex items-end gap-3 sm:gap-4">
-                                    <div className="w-20 sm:w-24">
-                                        <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Qty</label>
-                                        <input
-                                            name="quantity"
-                                            type="number"
-                                            min="0"
-                                            value={item.quantity}
-                                            onChange={(e) => handleLineItemChange(item.id, e)}
-                                            className="block w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-bold focus:bg-white focus:outline-none focus:border-teal-500 transition-all text-center"
-                                        />
-                                    </div>
-                                    <div className="flex-1">
-                                        <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Price</label>
-                                        <div className="relative">
-                                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm pointer-events-none">
-                                                {currencySymbol}
-                                            </div>
-                                            <input
-                                                name="price"
-                                                type="number"
-                                                min="0"
-                                                step="0.01"
-                                                value={item.price}
-                                                onChange={(e) => handleLineItemChange(item.id, e)}
-                                                className="block w-full pl-12 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-bold focus:bg-white focus:outline-none focus:border-teal-500 transition-all"
-                                                placeholder=""
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="text-right pb-1.5 min-w-[80px]">
-                                        <label className="block text-[9px] font-bold text-slate-300 mb-0.5 uppercase tracking-wide">Total</label>
-                                        <span className="text-teal-700 font-mono font-bold text-lg">{currencyFormatter.format(item.quantity * Number(item.price))}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Delete Action */}
-                            <button 
-                                onClick={() => removeLineItem(item.id)}
-                                className="absolute top-3 right-3 text-slate-300 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-red-500"
-                                title="Remove Item"
-                                aria-label={`Remove item ${index + 1}`}
-                            >
-                                <TrashIcon className="w-4 h-4" />
-                            </button>
-                        </div>
+                        <LineItemRow
+                            key={item.id}
+                            item={item}
+                            index={index}
+                            currencySymbol={currencySymbol}
+                            currencyFormatter={currencyFormatter}
+                            onChange={handleLineItemChange}
+                            onRemove={removeLineItem}
+                        />
                     ))}
 
                     <button

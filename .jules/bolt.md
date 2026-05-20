@@ -21,3 +21,7 @@
 ## 2026-05-19 - [React.memo and useCallback for Complex Forms]
 **Learning:** Form components like `InvoiceForm` containing many inputs can suffer from expensive cross-form re-renders. Typing in one field (e.g. updating a line item quantity) causes the entire form tree, including unrelated sections like user details, to re-render. If child input components aren't memoized, and their event handlers are recreated on every render, React will deeply render all form inputs.
 **Action:** Wrap reusable form input components (`InputField`, `RichTextarea`, `CollapsibleSection`) with `React.memo()` and stabilize their callback props using `useCallback` with precise dependency arrays. This ensures an input only re-renders when its specific value or handler actually changes, greatly improving keystroke latency on complex forms.
+
+## 2026-05-20 - [List Item Re-rendering with React.memo]
+**Learning:** In React, mapping over an array to render complex child components inline (like a form row with multiple inputs) means the entire array block is re-rendered whenever any state in the parent changes. By extracting the item into its own component and wrapping it in `React.memo()`, and passing down stable callbacks, React can skip rendering items that haven't changed.
+**Action:** Extract list items that contain inputs or expensive elements into their own `React.memo` components. Ensure all passed functions (like `onChange`, `onRemove`) are stable (`useCallback` in the parent) and all primitive props are correct to avoid unnecessary `O(N)` re-renders of the list.
