@@ -23,13 +23,13 @@ vi.mock('firebase/firestore', () => ({
 const MOCK_UUID = '123e4567-e89b-12d3-a456-426614174000' as `${string}-${string}-${string}-${string}-${string}`;
 
 if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    vi.spyOn(crypto, 'randomUUID').mockReturnValue(MOCK_UUID);
+    vi.spyOn(crypto, 'randomUUID').mockReturnValue('11111111-1111-1111-1111-111111111111');
 } else if (!global.crypto) {
     (global as any).crypto = {
-        randomUUID: vi.fn().mockReturnValue(MOCK_UUID)
+        randomUUID: vi.fn().mockReturnValue('11111111-1111-1111-1111-111111111111')
     };
 } else {
-    global.crypto.randomUUID = vi.fn().mockReturnValue(MOCK_UUID);
+    global.crypto.randomUUID = vi.fn().mockReturnValue('11111111-1111-1111-1111-111111111111');
 }
 
 describe('useExpenses', () => {
@@ -93,7 +93,7 @@ describe('useExpenses', () => {
 
         expect(result.current.expenses.length).toBe(1);
         expect(result.current.expenses[0]).toMatchObject(expense);
-        expect(result.current.expenses[0].id).toBe(MOCK_UUID);
+        expect(result.current.expenses[0].id).toBe('11111111-1111-1111-1111-111111111111');
     });
 
     it('should remove an expense from the list', async () => {
@@ -107,7 +107,7 @@ describe('useExpenses', () => {
         expect(result.current.expenses.length).toBe(1);
 
         act(() => {
-            result.current.removeExpense(MOCK_UUID);
+            result.current.removeExpense('11111111-1111-1111-1111-111111111111');
         });
 
         expect(result.current.expenses.length).toBe(0);
