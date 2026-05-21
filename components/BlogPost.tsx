@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { getBlogPost, mockPostsMap } from '../data/blogPosts';
 
 interface BlogPostProps {
-  postId: number;
+  postSlug: string;
   onBack: () => void;
 }
 
@@ -53,13 +53,13 @@ export const BlogPost: React.FC<BlogPostProps> = ({ postId, onBack }) => {
       <Helmet>
         <title>{fullPost.title} | InvoiceApp Blog</title>
         <meta name="description" content={fullPost.excerpt} />
-        <link rel="canonical" href={`https://www.invoiceapp.ng/blog/${fullPost.id}`} />
+        <link rel="canonical" href={`https://www.invoiceapp.ng/${encodeURIComponent(fullPost.title)}`} />
 
         {/* Open Graph Tags for Social Sharing */}
         <meta property="og:title" content={fullPost.title} />
         <meta property="og:description" content={fullPost.excerpt} />
         <meta property="og:image" content={fullPost.imageUrl} />
-        <meta property="og:url" content={`https://www.invoiceapp.ng/blog/${fullPost.id}`} />
+        <meta property="og:url" content={`https://www.invoiceapp.ng/${encodeURIComponent(fullPost.title)}`} />
         <meta property="og:type" content="article" />
 
         {/* Twitter Card Tags */}

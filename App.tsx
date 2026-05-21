@@ -54,17 +54,41 @@ const App: React.FC = () => {
 
   // Main view state
   const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'blog' | 'blogPost'>(() => {
-      const path = window.location.pathname;
-      if (path.startsWith('/blog/')) return 'blogPost';
+      let path;
+      try {
+          path = decodeURIComponent(window.location.pathname);
+      } catch (e) {
+          path = window.location.pathname; // Fallback if malformed URI
+      }
+
       if (path === '/blog') return 'blog';
+
+      // Handle legacy /blog/:id routes by redirecting them or showing blogPost view
+      if (path.startsWith('/blog/')) {
+          return 'blogPost';
+      }
+
+      if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts') {
+          return 'blogPost';
+      }
       return 'editor';
   });
 
-  const [activeBlogPostId, setActiveBlogPostId] = useState<number | null>(() => {
-      const path = window.location.pathname;
+  const [activeBlogPostSlug, setActiveBlogPostSlug] = useState<string | null>(() => {
+      let path;
+      try {
+          path = decodeURIComponent(window.location.pathname);
+      } catch (e) {
+          path = window.location.pathname; // Fallback if malformed URI
+      }
+
+      // Support legacy paths
       if (path.startsWith('/blog/')) {
-          const idStr = path.split('/')[2];
-          return parseInt(idStr, 10) || null;
+          return path.substring(6);
+      }
+
+      if (path !== '/' && path !== '/blog' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts') {
+          return path.substring(1); // Remove leading slash
       }
       return null;
   });
@@ -73,24 +97,42 @@ const App: React.FC = () => {
   useEffect(() => {
       let path = '/';
       if (activeView === 'blog') path = '/blog';
-      else if (activeView === 'blogPost' && activeBlogPostId !== null) path = `/blog/${activeBlogPostId}`;
+      else if (activeView === 'blogPost' && activeBlogPostSlug !== null) path = `/${encodeURIComponent(activeBlogPostSlug)}`;
 
       // Update the URL without reloading the page
-      if (window.location.pathname !== path) {
+      let currentDecodedPath;
+      try {
+          currentDecodedPath = decodeURIComponent(window.location.pathname);
+      } catch (e) {
+          currentDecodedPath = window.location.pathname;
+      }
+
+      let targetDecodedPath;
+      try {
+          targetDecodedPath = decodeURIComponent(path);
+      } catch (e) {
+          targetDecodedPath = path;
+      }
+
+      if (currentDecodedPath !== targetDecodedPath) {
           window.history.pushState(null, '', path);
       }
-  }, [activeView, activeBlogPostId]);
+  }, [activeView, activeBlogPostSlug]);
 
   // Handle browser back/forward buttons
   useEffect(() => {
       const handlePopState = () => {
-          const path = window.location.pathname;
-          if (path.startsWith('/blog/')) {
-              const idStr = path.split('/')[2];
-              setActiveBlogPostId(parseInt(idStr, 10) || null);
-              setActiveView('blogPost');
-          } else if (path === '/blog') {
+          let path;
+          try {
+              path = decodeURIComponent(window.location.pathname);
+          } catch (e) {
+              path = window.location.pathname; // Fallback if malformed URI
+          }
+          if (path === '/blog') {
               setActiveView('blog');
+          } else if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts') {
+              setActiveBlogPostSlug(path.substring(1));
+              setActiveView('blogPost');
           } else {
               setActiveView('editor');
           }
@@ -282,10 +324,12 @@ const App: React.FC = () => {
         {/* Dynamic Open Graph */}
         <meta property="og:title" content={invoice.invoiceNumber ? `Invoice #${invoice.invoiceNumber} | InvoiceApp` : 'Free Invoice Generator for Nigeria'} />
         <meta property="og:description" content={invoice.user.name ? `Professional invoice created by ${invoice.user.name} via InvoiceApp.` : 'Create and share professional invoices for free.'} />
+        <meta property="og:image" content="https://www.invoiceapp.ng/og-image.jpg" />
 
         {/* Dynamic Twitter */}
         <meta name="twitter:title" content={invoice.invoiceNumber ? `Invoice #${invoice.invoiceNumber} | InvoiceApp` : 'Free Invoice Generator for Nigeria'} />
         <meta name="twitter:description" content={invoice.user.name ? `Check out this invoice created by ${invoice.user.name} using #InvoiceApp.` : 'The best way to generate invoices in Nigeria.'} />
+        <meta name="twitter:image" content="https://www.invoiceapp.ng/og-image.jpg" />
       </Helmet>
 
       <Toast 
@@ -473,12 +517,12 @@ const App: React.FC = () => {
                 />
             </div>
         ) : activeView === 'blog' ? (
-            <Blog onPostClick={(id) => {
-                setActiveBlogPostId(id);
+            <Blog onPostClick={(slug) => {
+                setActiveBlogPostSlug(slug);
                 setActiveView('blogPost');
             }} />
-        ) : activeView === 'blogPost' && activeBlogPostId !== null ? (
-            <BlogPost postId={activeBlogPostId} onBack={() => setActiveView('blog')} />
+        ) : activeView === 'blogPost' && activeBlogPostSlug !== null ? (
+            <BlogPost postSlug={activeBlogPostSlug} onBack={() => setActiveView('blog')} />
         ) : (
         <div className="flex flex-col md:flex-row h-full">
           

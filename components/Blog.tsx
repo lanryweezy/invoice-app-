@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { mockPosts } from '../data/blogPosts';
 
 interface BlogProps {
-  onPostClick: (postId: number) => void;
+  onPostClick: (slug: string) => void;
 }
 
 export const Blog: React.FC<BlogProps> = ({ onPostClick }) => {
@@ -46,7 +46,7 @@ export const Blog: React.FC<BlogProps> = ({ onPostClick }) => {
         {/* Blog Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {mockPosts.map((post) => (
-            <article key={post.id} onClick={() => onPostClick(post.id)} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col cursor-pointer group">
+            <article key={post.id} onClick={() => post.title && onPostClick(post.title)} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col cursor-pointer group">
               <div className="h-48 overflow-hidden bg-slate-100 relative">
                 <img
                     src={post.imageUrl}

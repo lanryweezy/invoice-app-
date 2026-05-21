@@ -1,6 +1,7 @@
 export const mockPosts = [
   {
     id: 11,
+    slug: 'the-hidden-cost-of-manual-bookkeeping-how-african-smes-lose-money-from-poor-financial-systems',
     title: 'The Hidden Cost of Manual Bookkeeping: How African SMEs Lose Money From Poor Financial Systems',
     excerpt: 'Most Nigerian business owners are running an operational deficit without even knowing it. If you are still sending account numbers via WhatsApp, you aren\'t just disorganized. You are actively leaking revenue.',
     category: 'Finance',
@@ -65,6 +66,7 @@ export const mockPosts = [
 ,
   {
     id: 1,
+    slug: 'how-to-write-an-invoice-in-nigeria-step-by-step-guide-for-small-businesses-and-freelancers',
     title: 'How to Write an Invoice in Nigeria (Step-by-Step Guide for Small Businesses and Freelancers)',
     excerpt: 'Most Nigerian freelancers and small business owners have sent this exact "invoice" at some point: "Oga, my account details below... GTBank..." and then the waiting begins.',
     category: 'Guides',
@@ -97,6 +99,7 @@ export const mockPosts = [
   },
   {
     id: 2,
+    slug: 'best-free-ai-tools-for-small-businesses-in-nigeria-2026-guide',
     title: 'Best Free AI Tools for Small Businesses in Nigeria (2026 Guide)',
     excerpt: 'Picture this. Amaka sells hand-sewn Ankara bags from her shop in Yaba. She runs her Instagram page, replies to customers on WhatsApp, tracks her orders in a notebook...',
     category: 'AI & Tech',
@@ -129,6 +132,7 @@ export const mockPosts = [
   },
   {
     id: 3,
+    slug: 'best-business-ideas-in-nigeria-2026-11-profitable-ideas-you-can-start-today',
     title: 'Best Business Ideas in Nigeria (2026): 11 Profitable Ideas You Can Start Today',
     excerpt: 'If you ask most people why they want to start a business in Nigeria, the answer is usually the same: income is unstable, expenses keep rising, and depending on one source of money no longer feels safe.',
     category: 'Entrepreneurship',
@@ -161,6 +165,7 @@ export const mockPosts = [
   },
   {
     id: 4,
+    slug: '7-ways-ai-agents-for-businesses-in-nigeria-are-reducing-operational-costs',
     title: '7 Ways AI Agents for Businesses in Nigeria Are Reducing Operational Costs',
     excerpt: 'Running a business in Nigeria right now is not for the faint-hearted. Between unstable power supply, rising fuel costs, unpredictable exchange rates...',
     category: 'Small Business',
@@ -191,6 +196,7 @@ export const mockPosts = [
   },
   {
     id: 5,
+    slug: 'how-to-start-a-small-business-in-nigeria-2026-guide',
     title: 'How to Start a Small Business in Nigeria (2026 Guide)',
     excerpt: 'Starting a business in Nigeria can feel overwhelming at first. There’s so much advice online, and most of it either sounds too complicated or completely out of touch with reality.',
     category: 'Guides',
@@ -219,6 +225,7 @@ export const mockPosts = [
   },
   {
     id: 6,
+    slug: 'how-does-the-new-2026-tax-reform-in-nigeria-affect-small-businesses',
     title: 'How Does the New 2026 Tax Reform in Nigeria Affect Small Businesses?',
     excerpt: 'Running a small business in Nigeria is already tough; rising costs, unstable power, customers delaying payments, and now… taxes.',
     category: 'Finance',
@@ -247,6 +254,7 @@ export const mockPosts = [
   },
   {
     id: 7,
+    slug: 'the-ultimate-guide-to-firs-compliant-e-invoicing-for-nigerian-businesses',
     title: 'The Ultimate Guide to FIRS Compliant e-Invoicing for Nigerian Businesses',
     excerpt: 'With Nigeria’s gradual move to digital tax systems, understanding e-invoicing is crucial. Learn what it takes to be FIRS compliant and why you need it now.',
     category: 'Finance',
@@ -276,6 +284,7 @@ export const mockPosts = [
   },
   {
     id: 8,
+    slug: 'top-5-digital-marketing-strategies-for-smes-in-lagos',
     title: 'Top 5 Digital Marketing Strategies for SMEs in Lagos',
     excerpt: 'From WhatsApp marketing to TikTok ads, learn how small businesses in Lagos are reaching more customers without breaking the bank.',
     category: 'Small Business',
@@ -304,6 +313,7 @@ export const mockPosts = [
   },
   {
     id: 9,
+    slug: 'how-to-deal-with-late-paying-clients-a-freelancers-playbook',
     title: 'How to Deal with Late Paying Clients: A Freelancer’s Playbook',
     excerpt: 'Tired of hearing "I will sort you next week"? Learn professional strategies to secure your payments on time without ruining client relationships.',
     category: 'Guides',
@@ -338,6 +348,7 @@ export const mockPosts = [
   },
   {
     id: 10,
+    slug: 'understanding-vat-in-nigeria-what-you-need-to-know',
     title: 'Understanding VAT in Nigeria: What You Need to Know',
     excerpt: 'Value Added Tax can be confusing. We break down the current VAT rates, exemptions, and how to properly include them in your invoices.',
     category: 'Finance',
@@ -367,6 +378,7 @@ export const mockPosts = [
   },
   {
     id: 11,
+    slug: 'how-to-build-a-financial-operating-system-for-your-business',
     title: 'How to Build a Financial Operating System for Your Business',
     excerpt: 'Stop running your African business on spreadsheets and WhatsApp. Learn how to architect a modern financial operating system that automates invoicing, tracks cash flow, and drives growth.',
     category: 'Finance',
@@ -420,6 +432,7 @@ export const mockPosts = [
 ,
   {
     id: 12,
+    slug: 'the-hidden-cost-of-manual-bookkeeping-for-african-smes',
     title: 'The Hidden Cost of Manual Bookkeeping for African SMEs',
     excerpt: 'Stop managing your business finances on spreadsheets and WhatsApp. Discover the hidden costs of manual bookkeeping and learn how African SMEs can automate their back-office to drive growth.',
     category: 'Finance',
@@ -477,6 +490,7 @@ export const mockPosts = [
 ,
   {
     id: 13,
+    slug: 'the-future-of-ai-powered-accounting-in-africa',
     title: 'The Future of AI-Powered Accounting in Africa',
     excerpt: 'African SMEs are moving beyond spreadsheets. Discover how AI-powered accounting and automated financial systems are solving cashflow problems and scaling local businesses.',
     category: 'Finance',
@@ -536,6 +550,7 @@ export const mockPosts = [
 ,
   {
     id: 14,
+    slug: 'the-hidden-cost-of-manual-bookkeeping',
     title: 'The Hidden Cost of Manual Bookkeeping',
     excerpt: 'Stop losing money to delayed payments. Learn how African founders are replacing manual bookkeeping and WhatsApp invoicing with automated financial systems.',
     category: 'Finance',
@@ -599,6 +614,7 @@ export const mockPosts = [
 ,
   {
     id: 15,
+    slug: 'the-psychology-of-pricing-and-professional-invoices',
     title: 'The Psychology of Pricing and Professional Invoices',
     excerpt: 'Learn how the design of your invoice impacts your pricing power. Discover why African freelancers and SMEs lose money to informal payments and how to command premium rates.',
     category: 'Finance',
