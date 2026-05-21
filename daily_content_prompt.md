@@ -60,3 +60,17 @@ Generate the response in this EXACT order:
 **Recent News/Trend to Tie In (Optional):** [e.g., Recent FIRS policy, inflation rate, start-up funding landscape]
 
 *Execute the prompt now.*
+***
+**AUTOMATION PROMPT FOR JULES**
+If you are asking Jules to execute this daily content generation, please use the following prompt in a new Jules session:
+
+```markdown
+Read the `daily_content_prompt.md` file located in the root of the project to understand the context, tone, and requirements for the daily blog post.
+
+Please perform the following steps autonomously:
+1. Choose a unique topic and write the new blog post following all instructions and formatting specified in `daily_content_prompt.md`.
+2. Do not output the blog post into the chat unless I ask. Instead, immediately inject the generated post directly into the `mockPosts` array within `data/blogPosts.ts`.
+3. Ensure you assign it a new, unique incremented `id`, an appropriate future date, and format the `htmlContent` exactly like the existing posts (using standard HTML tags like `<p>`, `<h2>`, `<ul>`, and `<li>`).
+4. Verify the syntax is correct by running `pnpm exec tsc --noEmit`.
+5. Once verified, provide me with the "Twitter/X Assets", "LinkedIn Assets", "WhatsApp Promos", and "Quote Cards" generated from the post so I can schedule the social media distribution.
+```
