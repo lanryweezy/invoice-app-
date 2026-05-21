@@ -131,7 +131,7 @@ const App: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const totals = useMemo(() => calculateTotals(), [invoice.lineItems, invoice.taxRate, invoice.discountRate, invoice.shippingAmount, calculateTotals]);
+  const totals = useMemo(() => calculateTotals(), [invoice.lineItems, invoice.taxRate, invoice.discountRate, invoice.shippingAmount, invoice.whtRate, invoice.discountType, calculateTotals]);
 
   // ⚡ Bolt: Memoize Intl.NumberFormat to avoid expensive recreation when formatting totals
   const numberFormatter = useMemo(() => new Intl.NumberFormat('en-US'), []);
