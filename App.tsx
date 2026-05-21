@@ -60,11 +60,11 @@ const App: React.FC = () => {
       return 'editor';
   });
 
-  const [activeBlogPostId, setActiveBlogPostId] = useState<number | null>(() => {
+  const [activeBlogPostSlug, setActiveBlogPostSlug] = useState<string | null>(() => {
       const path = window.location.pathname;
       if (path.startsWith('/blog/')) {
-          const idStr = path.split('/')[2];
-          return parseInt(idStr, 10) || null;
+          const slug = path.split('/')[2];
+          return slug || null;
       }
       return null;
   });
@@ -73,21 +73,21 @@ const App: React.FC = () => {
   useEffect(() => {
       let path = '/';
       if (activeView === 'blog') path = '/blog';
-      else if (activeView === 'blogPost' && activeBlogPostId !== null) path = `/blog/${activeBlogPostId}`;
+      else if (activeView === 'blogPost' && activeBlogPostSlug !== null) path = `/blog/${activeBlogPostSlug}`;
 
       // Update the URL without reloading the page
       if (window.location.pathname !== path) {
           window.history.pushState(null, '', path);
       }
-  }, [activeView, activeBlogPostId]);
+  }, [activeView, activeBlogPostSlug]);
 
   // Handle browser back/forward buttons
   useEffect(() => {
       const handlePopState = () => {
           const path = window.location.pathname;
           if (path.startsWith('/blog/')) {
-              const idStr = path.split('/')[2];
-              setActiveBlogPostId(parseInt(idStr, 10) || null);
+              const slug = path.split('/')[2];
+              setActiveBlogPostSlug(slug || null);
               setActiveView('blogPost');
           } else if (path === '/blog') {
               setActiveView('blog');
@@ -473,12 +473,12 @@ const App: React.FC = () => {
                 />
             </div>
         ) : activeView === 'blog' ? (
-            <Blog onPostClick={(id) => {
-                setActiveBlogPostId(id);
+            <Blog onPostClick={(slug) => {
+                setActiveBlogPostSlug(slug);
                 setActiveView('blogPost');
             }} />
-        ) : activeView === 'blogPost' && activeBlogPostId !== null ? (
-            <BlogPost postId={activeBlogPostId} onBack={() => setActiveView('blog')} />
+        ) : activeView === 'blogPost' && activeBlogPostSlug !== null ? (
+            <BlogPost postSlug={activeBlogPostSlug} onBack={() => setActiveView('blog')} />
         ) : (
         <div className="flex flex-col md:flex-row h-full">
           

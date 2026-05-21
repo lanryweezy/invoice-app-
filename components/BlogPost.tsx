@@ -3,13 +3,13 @@ import { Helmet } from 'react-helmet-async';
 import { getBlogPost, mockPosts } from '../data/blogPosts';
 
 interface BlogPostProps {
-  postId: number;
+  postSlug: string;
   onBack: () => void;
 }
 
-export const BlogPost: React.FC<BlogPostProps> = ({ postId, onBack }) => {
-  const meta = useMemo(() => mockPosts.find(p => p.id === postId), [postId]);
-  const post = useMemo(() => getBlogPost(postId), [postId]);
+export const BlogPost: React.FC<BlogPostProps> = ({ postSlug, onBack }) => {
+  const meta = useMemo(() => mockPosts.find(p => p.slug === postSlug), [postSlug]);
+  const post = useMemo(() => getBlogPost(postSlug), [postSlug]);
 
   // Merge meta from Blog list with the full htmlContent
   const fullPost = meta && post ? { ...meta, htmlContent: post.htmlContent } : post;
