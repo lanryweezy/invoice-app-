@@ -8,7 +8,7 @@ interface BlogPostProps {
 }
 
 export const BlogPost: React.FC<BlogPostProps> = ({ postSlug, onBack }) => {
-  const meta = useMemo(() => mockPosts.find(p => p.slug === postSlug), [postSlug]);
+  const meta = useMemo(() => mockPosts.find(p => p.title === postSlug), [postSlug]);
   const post = useMemo(() => getBlogPost(postSlug), [postSlug]);
 
   // Merge meta from Blog list with the full htmlContent
@@ -52,13 +52,13 @@ export const BlogPost: React.FC<BlogPostProps> = ({ postSlug, onBack }) => {
       <Helmet>
         <title>{fullPost.title} | InvoiceApp Blog</title>
         <meta name="description" content={fullPost.excerpt} />
-        <link rel="canonical" href={`https://www.invoiceapp.ng/blog/${fullPost.id}`} />
+        <link rel="canonical" href={`https://www.invoiceapp.ng/${encodeURIComponent(fullPost.title)}`} />
 
         {/* Open Graph Tags for Social Sharing */}
         <meta property="og:title" content={fullPost.title} />
         <meta property="og:description" content={fullPost.excerpt} />
         <meta property="og:image" content={fullPost.imageUrl} />
-        <meta property="og:url" content={`https://www.invoiceapp.ng/blog/${fullPost.id}`} />
+        <meta property="og:url" content={`https://www.invoiceapp.ng/${encodeURIComponent(fullPost.title)}`} />
         <meta property="og:type" content="article" />
 
         {/* Twitter Card Tags */}

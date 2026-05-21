@@ -673,6 +673,12 @@ export const mockPosts = [
   }
 ];
 
-export const getBlogPost = (slug: string) => {
-    return mockPosts.find(p => p.slug === slug) || null;
+export const getBlogPost = (identifier: string) => {
+    // If it's a legacy numeric ID
+    const numId = parseInt(identifier, 10);
+    if (!isNaN(numId) && numId.toString() === identifier) {
+        return mockPosts.find(p => p.id === numId) || null;
+    }
+    // Otherwise look up by exact title
+    return mockPosts.find(p => p.title === identifier) || null;
 };
