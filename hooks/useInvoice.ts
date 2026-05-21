@@ -192,7 +192,7 @@ export const useInvoice = () => {
     const finalTotal = taxableAmount + taxAmount - whtAmount + safeShipping;
 
     return { subtotal, discountAmount, tax: taxAmount, whtAmount, shipping: safeShipping, total: finalTotal };
-  }, [invoice.lineItems, invoice.taxRate, invoice.whtRate, invoice.discountRate, invoice.discountType, invoice.shippingAmount]);
+  }, [invoice.lineItems, invoice.taxRate, invoice.whtRate, invoice.discountRate, invoice.shippingAmount, invoice.discountType]);
 
   const saveClient = useCallback((client: Client) => {
     if (!client.name.trim()) return false;

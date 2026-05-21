@@ -1,15 +1,16 @@
 import React, { useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { getBlogPost, mockPosts } from '../data/blogPosts';
+import { getBlogPost, mockPostsMap } from '../data/blogPosts';
 
 interface BlogPostProps {
   postSlug: string;
   onBack: () => void;
 }
 
-export const BlogPost: React.FC<BlogPostProps> = ({ postSlug, onBack }) => {
-  const meta = useMemo(() => mockPosts.find(p => p.title === postSlug), [postSlug]);
-  const post = useMemo(() => getBlogPost(postSlug), [postSlug]);
+export const BlogPost: React.FC<BlogPostProps> = ({ postId, onBack }) => {
+  // ⚡ Bolt: Use O(1) Map lookup instead of O(N) Array.find for better rendering performance
+  const meta = useMemo(() => mockPostsMap.get(postId), [postId]);
+  const post = useMemo(() => getBlogPost(postId), [postId]);
 
   // Merge meta from Blog list with the full htmlContent
   const fullPost = meta && post ? { ...meta, htmlContent: post.htmlContent } : post;
