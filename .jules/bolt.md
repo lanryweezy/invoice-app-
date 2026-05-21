@@ -25,3 +25,7 @@
 ## 2026-05-20 - [List Item Re-rendering with React.memo]
 **Learning:** In React, mapping over an array to render complex child components inline (like a form row with multiple inputs) means the entire array block is re-rendered whenever any state in the parent changes. By extracting the item into its own component and wrapping it in `React.memo()`, and passing down stable callbacks, React can skip rendering items that haven't changed.
 **Action:** Extract list items that contain inputs or expensive elements into their own `React.memo` components. Ensure all passed functions (like `onChange`, `onRemove`) are stable (`useCallback` in the parent) and all primitive props are correct to avoid unnecessary `O(N)` re-renders of the list.
+
+## 2026-05-21 - [O(1) Map Lookups for Performance]
+**Learning:** React components (like `BlogPost.tsx`) frequently map over large static arrays (like `mockPosts`) to find a specific item by ID during render using `Array.find()` (`O(N)`). While this is usually fine for small lists, as the dataset grows, this `O(N)` search happens on every single render. Over time, this can lead to unnecessary main-thread blocking and reduced performance.
+**Action:** Replace `O(N)` array lookups with `O(1)` Map lookups. Export a memoized Map (e.g. `new Map(items.map(i => [i.id, i]))`) from the data source file, and use `map.get(id)` inside the component's `useMemo`.
