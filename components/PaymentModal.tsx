@@ -36,8 +36,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-5">
                     <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Amount Paid ({invoice.currency})</label>
+                        <label htmlFor="amountPaid" className="block text-sm font-semibold text-slate-700 mb-2">Amount Paid ({invoice.currency})</label>
                         <input
+                            id="amountPaid"
                             type="number"
                             step="0.01"
                             required
@@ -48,8 +49,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                     </div>
 
                     <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Payment Date</label>
+                        <label htmlFor="paymentDate" className="block text-sm font-semibold text-slate-700 mb-2">Payment Date</label>
                         <input
+                            id="paymentDate"
                             type="date"
                             required
                             value={paymentDate}
@@ -59,8 +61,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                     </div>
 
                     <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Payment Method</label>
+                        <label htmlFor="paymentMethod" className="block text-sm font-semibold text-slate-700 mb-2">Payment Method</label>
                         <select
+                            id="paymentMethod"
                             value={paymentMethod}
                             onChange={e => setPaymentMethod(e.target.value)}
                             className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
@@ -74,8 +77,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                     </div>
 
                     <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Transaction Reference (Optional)</label>
+                        <label htmlFor="transactionReference" className="block text-sm font-semibold text-slate-700 mb-2">Transaction Reference (Optional)</label>
                         <input
+                            id="transactionReference"
                             type="text"
                             placeholder="e.g. TXN-123456"
                             value={transactionReference}

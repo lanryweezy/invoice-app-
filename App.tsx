@@ -635,8 +635,8 @@ const App: React.FC = () => {
       <PricingModal
         isOpen={isPricingModalOpen}
         onClose={() => setIsPricingModalOpen(false)}
-        onUpgrade={async () => {
-            const success = await upgradeToPro();
+        onUpgrade={async (planType) => {
+            const success = await upgradeToPro(planType);
             if (success) {
                 showToast('Successfully upgraded to Pro!', 'success');
                 setIsPricingModalOpen(false);

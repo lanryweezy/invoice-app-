@@ -88,17 +88,17 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ expens
               <h3 className="font-bold text-slate-900 mb-4">Log New Expense</h3>
               <form onSubmit={handleAddExpense} className="space-y-4 bg-slate-50 p-5 rounded-xl border border-slate-200">
                   <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">Description</label>
-                      <input value={desc} onChange={e => setDesc(e.target.value)} className="w-full p-2 border border-slate-300 rounded focus:border-teal-500 outline-none" placeholder="e.g. Server hosting" required />
+                      <label htmlFor="expense-desc" className="block text-xs font-bold text-slate-500 mb-1 cursor-pointer">Description</label>
+                      <input id="expense-desc" value={desc} onChange={e => setDesc(e.target.value)} className="w-full p-2 border border-slate-300 rounded focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition-all" placeholder="e.g. Server hosting" required />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                       <div>
-                          <label className="block text-xs font-bold text-slate-500 mb-1">Amount</label>
-                          <input type="number" value={amount} onChange={e => setAmount(e.target.value)} className="w-full p-2 border border-slate-300 rounded focus:border-teal-500 outline-none" required min="0" />
+                          <label htmlFor="expense-amount" className="block text-xs font-bold text-slate-500 mb-1 cursor-pointer">Amount</label>
+                          <input id="expense-amount" type="number" value={amount} onChange={e => setAmount(e.target.value)} className="w-full p-2 border border-slate-300 rounded focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition-all" required min="0" />
                       </div>
                       <div>
-                          <label className="block text-xs font-bold text-slate-500 mb-1">Category</label>
-                          <select value={category} onChange={e => setCategory(e.target.value)} className="w-full p-2 border border-slate-300 rounded focus:border-teal-500 outline-none">
+                          <label htmlFor="expense-category" className="block text-xs font-bold text-slate-500 mb-1 cursor-pointer">Category</label>
+                          <select id="expense-category" value={category} onChange={e => setCategory(e.target.value)} className="w-full p-2 border border-slate-300 rounded focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition-all cursor-pointer">
                               <option>Software</option>
                               <option>Hardware</option>
                               <option>Marketing</option>
