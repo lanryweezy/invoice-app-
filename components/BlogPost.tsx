@@ -7,10 +7,10 @@ interface BlogPostProps {
   onBack: () => void;
 }
 
-export const BlogPost: React.FC<BlogPostProps> = ({ postId, onBack }) => {
+export const BlogPost: React.FC<BlogPostProps> = ({ postSlug, onBack }) => {
   // ⚡ Bolt: Use O(1) Map lookup instead of O(N) Array.find for better rendering performance
-  const meta = useMemo(() => mockPostsMap.get(postId), [postId]);
-  const post = useMemo(() => getBlogPost(postId), [postId]);
+  const meta = useMemo(() => mockPostsMap.get(postSlug), [postSlug]);
+  const post = useMemo(() => getBlogPost(postSlug), [postSlug]);
 
   // Merge meta from Blog list with the full htmlContent
   const fullPost = meta && post ? { ...meta, htmlContent: post.htmlContent } : post;
