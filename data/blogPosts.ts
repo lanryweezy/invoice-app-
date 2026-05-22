@@ -814,8 +814,8 @@ export const mockPosts = [
 ];
 
 // ⚡ Bolt: Export memoized map for O(1) lookups to avoid O(N) array searches during render
-export const mockPostsMap = new Map(mockPosts.map(p => [p.id, p]));
+export const mockPostsMap = new Map(mockPosts.map(p => [p.slug, p]));
 
-export const getBlogPost = (id: number) => {
-    return mockPostsMap.get(id) || null;
+export const getBlogPost = (slug: string) => {
+    return mockPostsMap.get(slug) || null;
 };

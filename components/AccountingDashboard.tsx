@@ -10,6 +10,29 @@ interface AccountingDashboardProps {
   onRemoveExpense: (id: string) => void;
 }
 
+// ⚡ Bolt: Memoize ExpenseRow to prevent re-rendering all rows when one is added or removed
+const ExpenseRow = React.memo(({ exp, numberFormatter, onRemove }: { exp: Expense, numberFormatter: Intl.NumberFormat, onRemove: (id: string) => void }) => {
+    return (
+        <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-200">
+            <div>
+                <p className="font-bold text-slate-900 text-sm">{exp.description}</p>
+                <p className="text-xs text-slate-500">{exp.date} • {exp.category}</p>
+            </div>
+            <div className="flex items-center gap-3">
+                <p className="font-bold text-red-600">₦{numberFormatter.format(exp.amount)}</p>
+                <button
+                    onClick={() => onRemove(exp.id)}
+                    className="p-1 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-500 focus:outline-none transition-colors"
+                    aria-label={`Remove ${exp.description} expense`}
+                    title="Remove expense"
+                >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+        </div>
+    );
+});
+
 export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ expenses, onAddExpense, onRemoveExpense }) => {
   const [desc, setDesc] = useState('');
   const [amount, setAmount] = useState('');
@@ -117,23 +140,7 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ expens
               ) : (
                   <div className="space-y-3 max-h-[300px] overflow-y-auto">
                       {expenses.map(exp => (
-                          <div key={exp.id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-200">
-                              <div>
-                                  <p className="font-bold text-slate-900 text-sm">{exp.description}</p>
-                                  <p className="text-xs text-slate-500">{exp.date} • {exp.category}</p>
-                              </div>
-                              <div className="flex items-center gap-3">
-                                  <p className="font-bold text-red-600">₦{numberFormatter.format(exp.amount)}</p>
-                                  <button
-                                      onClick={() => onRemoveExpense(exp.id)}
-                                      className="p-1 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-500 focus:outline-none transition-colors"
-                                      aria-label={`Remove ${exp.description} expense`}
-                                      title="Remove expense"
-                                  >
-                                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                                  </button>
-                              </div>
-                          </div>
+                          <ExpenseRow key={exp.id} exp={exp} numberFormatter={numberFormatter} onRemove={onRemoveExpense} />
                       ))}
                   </div>
               )}
