@@ -52,7 +52,7 @@ export const ReceiptsManager: React.FC<ReceiptsManagerProps> = ({ receipts, onVi
                                 </button>
                                 <button
                                     onClick={() => onRemoveReceipt(receipt.id)}
-                                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                                     title="Delete receipt"
                                     aria-label="Delete receipt"
                                 >

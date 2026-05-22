@@ -56,7 +56,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         <div className="flex gap-2">
             <button
                 onClick={onGenerateEmail}
-                className="p-1.5 text-slate-600 hover:text-teal-600 bg-slate-100 hover:bg-teal-50 rounded-lg transition-colors"
+                className="p-1.5 text-slate-600 hover:text-teal-600 bg-slate-100 hover:bg-teal-50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
                 title="Email Invoice"
                 aria-label="Email Invoice"
             >
@@ -64,7 +64,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
             </button>
             <button
                 onClick={handleWhatsAppShare}
-                className="p-1.5 text-slate-600 hover:text-green-600 bg-slate-100 hover:bg-green-50 rounded-lg transition-colors"
+                className="p-1.5 text-slate-600 hover:text-green-600 bg-slate-100 hover:bg-green-50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                 title="Share via WhatsApp"
                 aria-label="Share via WhatsApp"
             >
@@ -72,7 +72,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
             </button>
             <button
                 onClick={handleNativeShare}
-                className="p-1.5 text-slate-600 hover:text-blue-500 bg-slate-100 hover:bg-blue-50 rounded-lg transition-colors"
+                className="p-1.5 text-slate-600 hover:text-blue-500 bg-slate-100 hover:bg-blue-50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 title="Share"
                 aria-label="Share Invoice"
             >
@@ -80,7 +80,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
             </button>
             <button
                 onClick={onDownloadPdf}
-                className="p-1.5 text-white bg-teal-600 hover:bg-teal-700 rounded-lg shadow-md shadow-teal-200 transition-colors"
+                className="p-1.5 text-white bg-teal-600 hover:bg-teal-700 rounded-lg shadow-md shadow-teal-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-1"
                 title="Download PDF"
                 aria-label="Download PDF"
             >

@@ -44,7 +44,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({ recurringInv
                 </button>
                 <button
                   onClick={() => onRemove(idx)}
-                  className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                   title="Remove Template"
                   aria-label="Remove Template"
                 >

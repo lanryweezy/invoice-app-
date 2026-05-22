@@ -43,7 +43,7 @@ export const EmailModal: React.FC<EmailModalProps> = ({ isOpen, onClose, emailCo
                             <h3 className="text-xl font-bold text-slate-900">Generated Email</h3>
                             <p className="text-sm text-slate-500">Ready to send to your client</p>
                         </div>
-                        <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
+                        <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">
                             <span className="sr-only">Close</span>
                             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
