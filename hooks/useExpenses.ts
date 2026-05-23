@@ -23,6 +23,15 @@ export const useExpenses = () => {
         if (isPro && firebaseUser) {
             const loadCloudData = async () => {
                 try {
+                    // Check offline queue first to prevent clobbering newer local data
+                    const { getQueueCount } = await import('../utils/offlineSync');
+                    const queueCount = await getQueueCount();
+
+                    if (queueCount > 0) {
+                        console.log("[useExpenses] Offline queue active. Preserving local storage state.");
+                        return;
+                    }
+
                     const userRef = doc(db, 'users', firebaseUser.uid);
                     const userSnap = await getDoc(userRef);
                     if (userSnap.exists()) {

@@ -70,6 +70,16 @@ export const useInvoice = () => {
     if (isPro && firebaseUser) {
         const loadCloudData = async () => {
             try {
+                // To prevent clobbering un-synced offline local data with stale cloud data,
+                // we first check if there is an active offline queue.
+                const { getQueueCount } = await import('../utils/offlineSync');
+                const queueCount = await getQueueCount();
+
+                if (queueCount > 0) {
+                    console.log("[useInvoice] Offline queue is active. Skipping initial cloud fetch to preserve local state.");
+                    return;
+                }
+
                 const userRef = doc(db, 'users', firebaseUser.uid);
                 const userSnap = await getDoc(userRef);
 
@@ -83,6 +93,9 @@ export const useInvoice = () => {
                     }
                     if (data.recurringInvoices) {
                         setRecurringInvoices(data.recurringInvoices);
+                    }
+                    if (data.currentInvoice) {
+                        setInvoice(data.currentInvoice);
                     }
                 }
             } catch (error) {

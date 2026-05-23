@@ -54,6 +54,16 @@ const App: React.FC = () => {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [pricingModalContent, setPricingModalContent] = useState({ title: 'Upgrade to Pro', message: 'Unlock advanced features to supercharge your business.' });
 
+  // Toast State
+  const [toast, setToast] = useState<{ message: string; isVisible: boolean; type?: 'success' | 'error' }>({
+    message: '',
+    isVisible: false
+  });
+
+  const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
+      setToast({ message, isVisible: true, type });
+  }, []);
+
   // Offline Sync State
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [pendingSyncCount, setPendingSyncCount] = useState(0);
@@ -61,19 +71,19 @@ const App: React.FC = () => {
   useEffect(() => {
     const handleOnline = async () => {
       setIsOffline(false);
-      setToast({ message: 'Back online! Syncing data...', type: 'success', isVisible: true });
+      showToast('Back online! Syncing data...', 'success');
       const success = await flushQueue();
       if (success) {
         setPendingSyncCount(0);
-        setToast({ message: 'All changes synced to cloud.', type: 'success', isVisible: true });
+        showToast('All changes synced to cloud.', 'success');
       } else {
-        setToast({ message: 'Some changes could not be synced. Will retry later.', type: 'error', isVisible: true });
+        showToast('Some changes could not be synced. Will retry later.', 'error');
       }
     };
 
     const handleOffline = () => {
       setIsOffline(true);
-      setToast({ message: 'You are offline. Changes will be saved locally.', type: 'error', isVisible: true });
+      showToast('You are offline. Changes will be saved locally.', 'error');
     };
 
     window.addEventListener('online', handleOnline);
@@ -94,6 +104,24 @@ const App: React.FC = () => {
       if (interval) clearInterval(interval);
     };
   }, [isOffline]);
+
+  // Initial Sync on Startup
+  useEffect(() => {
+    const startupSync = async () => {
+      if (navigator.onLine) {
+         const count = await getQueueCount();
+         if (count > 0) {
+            showToast('Syncing pending changes from previous session...', 'success');
+            const success = await flushQueue();
+            if (success) {
+               setPendingSyncCount(0);
+               showToast('Startup sync complete.', 'success');
+            }
+         }
+      }
+    };
+    startupSync();
+  }, [showToast]);
 
   // Main view state
   const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'blog' | 'blogPost' | 'publicProfile'>(() => {
@@ -203,18 +231,9 @@ const App: React.FC = () => {
     return (localStorage.getItem('invoiceTemplate') as TemplateId) || 'classic';
   });
 
-  const [toast, setToast] = useState<{ message: string; isVisible: boolean; type?: 'success' | 'error' }>({
-    message: '',
-    isVisible: false
-  });
-
   useEffect(() => {
     localStorage.setItem('invoiceTemplate', template);
   }, [template]);
-
-  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
-      setToast({ message, isVisible: true, type });
-  };
 
   // Comprehensive Analytics - Session Start
   useEffect(() => {
