@@ -1,6 +1,68 @@
 export const mockPosts = [
   {
-    id: 1,
+    id: 18,
+    slug: 'why-most-invoices-never-get-paid-on-time-and-how-african-smes-can-fix-it',
+    title: 'Why Most Invoices Never Get Paid on Time (And How African SMEs Can Fix It)',
+    excerpt: 'Late payments aren\'t just bad luck; they are a structural failure in your business system. Here is why the "I will send it later" culture is killing your cashflow and the exact operational shifts to fix it.',
+    category: 'Finance',
+    readTime: '8 Min Read',
+    date: 'June 10, 2026',
+    imageUrl: 'https://images.unsplash.com/photo-1580519542036-ed47c0ceee86?w=800&q=80',
+    htmlContent: `
+      <p>Every founder has been there. You deliver excellent work, the client is thrilled, and you send the invoice. Then... silence. The due date passes. The "gentle follow-ups" begin. The WhatsApp messages get increasingly awkward. Before you know it, you're functionally operating as a zero-interest bank for your clients, financing their operations with your sweat equity.</p>
+
+      <p>If you're running a business in Africa—whether you're a freelance developer in Lagos, an agency in Nairobi, or a consultant in Accra—late payments are an epidemic. They are the silent killer of ambitious SMEs.</p>
+
+      <p>But here is the painful truth most operators refuse to accept: <strong>late payments are rarely the client's fault. They are a symptom of a weak internal financial system.</strong> If your invoices consistently get ignored, it's because you haven't engineered the payment process for speed.</p>
+
+      <h2>The Psychology of the Unpaid Invoice</h2>
+      <p>Let's unpack the cognitive load on your client when they receive a standard invoice. Often, it's a messy Word document or a poorly formatted PDF sent via a casual WhatsApp message: "Oga, please see attached."</p>
+
+      <p>This informal approach creates immediate friction:</p>
+      <ul>
+          <li><strong>No Urgency:</strong> Sending an invoice via chat signals informality. It says, "pay me when it's convenient."</li>
+          <li><strong>Friction to Pay:</strong> The client has to open their banking app, copy your account number, verify the name, type in the amount, and save the receipt. Every extra step increases the probability of them putting it off until "the weekend."</li>
+          <li><strong>Lack of Authority:</strong> An invoice without professional formatting, tax breakdown (VAT/WHT), and clear terms doesn't look like a legal demand for payment. It looks like a polite request.</li>
+      </ul>
+
+      <div class="my-8 rounded-xl overflow-hidden shadow-md">
+          <img src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=1200&q=80" alt="Frustrated business owner looking at laptop" class="w-full h-auto object-cover" />
+          <p class="text-sm text-center text-slate-500 mt-2 italic">Cashflow anxiety is the hidden cost of friction-heavy payment systems.</p>
+      </div>
+
+      <h2>The "WhatsApp Tax" on Cashflow</h2>
+      <p>In Nigeria, business runs on WhatsApp. But while it's fantastic for sales and support, it's a terrible medium for financial collections. The "WhatsApp Tax" is the cost of doing business informally.</p>
+
+      <p>When you handle payments informally, you surrender control of your cashflow. You're waiting on their mood, their availability, and their internal accounting processes. You need to shift the power dynamic. You need to transition from a "hustler asking for funds" to a "vendor enforcing terms."</p>
+
+      <h2>The Systems Fix: Engineering for Velocity</h2>
+      <p>Fixing late payments requires upgrading your operational infrastructure. You don't need a massive finance team; you need smart software.</p>
+
+      <p>Here is the playbook used by top-tier operators to ensure they get paid on time:</p>
+
+      <h3>1. Institutionalize the Invoice</h3>
+      <p>Stop sending loose files. An invoice must look like a formal document from a serious corporation. It needs your logo, a unique sequential invoice number, clear line items, and FIRS-compliant tax details. This signals to the client's procurement or finance team that you are a structured entity.</p>
+
+      <h3>2. Remove the Payment Friction</h3>
+      <p>This is the most critical step. If a client can't click a button on your invoice and pay instantly, you are losing money. By integrating payment gateways directly into your invoices, you eliminate the manual transfer process. They view the invoice, click 'Pay Now', enter their card or use bank transfer via a gateway like Paystack, and the transaction is closed in 60 seconds.</p>
+
+      <h3>3. Automate the Follow-Up</h3>
+      <p>You are a founder, not a debt collector. Chasing payments drains your energy. A modern financial system handles reminders automatically. "Invoice #1042 is due in 3 days." "Invoice #1042 is overdue." This removes the personal awkwardness from the transaction. It's just the system doing its job.</p>
+
+      <h2>How InvoiceApp.ng Solves the Cashflow Problem</h2>
+      <p>We built InvoiceApp precisely because we saw incredible African talent struggling with archaic back-office systems. We designed it to maximize the velocity of money.</p>
+
+      <p>With InvoiceApp, you aren't just generating a PDF. You are deploying a financial asset. You can link your Paystack account directly to your profile. When you send an invoice, the client gets a premium, professional document with a built-in payment link. If they pay, the system automatically generates and sends a receipt. Your bookkeeping is handled automatically.</p>
+
+      <p>You move from chaos to control.</p>
+
+      <h2>The Bottom Line</h2>
+      <p>Your product might be your passion, but cashflow is your oxygen. Stop treating invoicing as an afterthought. Build a system that demands respect, removes friction, and accelerates payment. Your bank account will thank you.</p>
+    `
+  },
+
+  {
+    id: 11,
     slug: 'the-hidden-cost-of-manual-bookkeeping-how-african-smes-lose-money-from-poor-financial-systems',
     title: 'The Hidden Cost of Manual Bookkeeping: How African SMEs Lose Money From Poor Financial Systems',
     excerpt: 'Most Nigerian business owners are running an operational deficit without even knowing it. If you are still sending account numbers via WhatsApp, you aren\'t just disorganized. You are actively leaking revenue.',
@@ -609,9 +671,10 @@ export const mockPosts = [
 
       <p>Stop waiting for money to arrive. Engineer your systems so it flows instantly.</p>
 `
-  },
+  }
+,
   {
-    id: 16,
+    id: 18,
     slug: 'what-to-consider-when-choosing-a-payment-gateway-for-your-nigerian-business',
     title: 'What to Consider When Choosing a Payment Gateway for Your Nigerian Business',
     excerpt: 'Choosing the right payment gateway is one of the most critical decisions for any Nigerian business owner. Discover the 5 key factors to consider and the top 8 gateways in Nigeria.',
@@ -625,6 +688,87 @@ export const mockPosts = [
       <p>In the rapidly evolving Nigerian fintech landscape, the options can be overwhelming. To help you navigate this, we've broken down the key factors you must consider and reviewed the top 8 payment gateways currently leading the market.</p>
 
       <h2>What to consider when choosing a payment gateway</h2>
+
+      <h3>1. Level of technology need</h3>
+      <p>Some businesses require heavy API integrations, while others just need no-code tools like Payment Links to accept payments instantly. The resources you have should determine your choice.</p>
+      <p>If your business requires extensive customisation, choose a solution with robust API capabilities. However, if you lack technical expertise, look for gateways that offer low-code or no-code solutions to get you started quickly.</p>
+
+      <h3>2. Ease of integration and API documentation</h3>
+      <p>Speed is everything. You don't want your developers wasting time on integration. Consider these three factors:</p>
+      <ul>
+          <li><strong>Readability:</strong> Is the documentation easy to understand? Are there clear examples?</li>
+          <li><strong>Accuracy:</strong> Does the code work exactly as promised?</li>
+          <li><strong>Searchability:</strong> Can your team find answers quickly?</li>
+      </ul>
+
+      <h3>3. Access to support</h3>
+      <p>Many people overlook support until they face a crisis after going live. Downtime happens, but you don't want a support team that goes silent when it does.</p>
+      <p>Prioritise solutions that provide active support during and after integration. You need a partner who communicates clearly when things go wrong.</p>
+
+      <h3>4. Pricing transparency</h3>
+      <p>You need to know exactly what you're paying for. Ask yourself: Will these fees hurt my profit margins? Can my customers afford them?</p>
+      <p>Watch out for the fee structure. Providers charge differently—some use flat rates, while others take a percentage of every sale. Some may even charge you for having an inactive account.</p>
+      <p>Avoid surprises. Meaningful costs like setup fees, currency conversion rates, or settlement charges often hide in the fine print. A trustworthy partner is open about pricing from day one.</p>
+
+      <h3>5. Payment channels</h3>
+      <p>Bank transfer is the most dominant payment channel in Nigeria. Ensure any payment gateway you select supports bank transfers and other flexible payment channels your customers prefer.</p>
+
+      <div class="my-8 rounded-xl overflow-hidden shadow-md">
+          <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&q=80" alt="Digital payments in Nigeria" class="w-full h-auto object-cover" />
+          <p class="text-sm text-center text-slate-500 mt-2 italic">Selecting the right payment partner is key to business growth.</p>
+      </div>
+
+      <h2>8 payment gateways best for online business in Nigeria</h2>
+
+      <h3>1. Kora: One payment gateway for all your needs</h3>
+      <p>Kora is built for businesses who need everything in one suite. Instead of managing multiple relationships and integrations, you access everything through a single API that just works.</p>
+      <p><strong>Who is Kora best for?</strong> Digital businesses that don’t want to switch between different dashboards for various solutions (KYC, virtual cards, payouts, etc).</p>
+      <p><strong>Pricing:</strong> Quote-based.</p>
+      <p><strong>Channels:</strong> Bank Transfer, Cards, Pay-with-bank, Mobile Money.</p>
+
+      <h3>2. Monnify</h3>
+      <p>Built by Moniepoint, Monnify understands Nigerian payment behaviour deeply. It focuses on transaction speed and reliability, especially for interbank transfers.</p>
+      <p><strong>Why they stand out:</strong> 99.8% success rates for interbank transfers and extensive offline agent network.</p>
+      <p><strong>Pricing:</strong> 1.5% fee capped at ₦2,000.</p>
+      <p><strong>Channels:</strong> Bank Transfer, Cards, USSD, Virtual Accounts.</p>
+
+      <h3>3. Paystack</h3>
+      <p>The developer favorite, acquired by Stripe. Known for outstanding developer experience and reliable webhook systems.</p>
+      <p><strong>Why they stand out:</strong> Extensive plugins for e-commerce and a milestone of ₦1 trillion processed in a single month.</p>
+      <p><strong>Pricing:</strong> 1.5% + ₦100 for local transactions.</p>
+      <p><strong>Channels:</strong> Cards, Bank Transfer, USSD, Mobile Money, QR Codes, Zap.</p>
+
+      <h3>4. Flutterwave</h3>
+      <p>The go-to choice for businesses with global customers, processing payments in over 30 currencies.</p>
+      <p><strong>Why they stand out:</strong> Strong cross-border commerce solutions and no-code Flutterwave Store.</p>
+      <p><strong>Pricing:</strong> 2% for local transactions (as of Dec 2025).</p>
+      <p><strong>Channels:</strong> Cards, Bank Transfer, USSD, Mobile Money, Payment Links, POS.</p>
+
+      <h3>5. Squad</h3>
+      <p>The fintech arm of GTCO (GTBank). Combines banking credibility with modern API technology.</p>
+      <p><strong>Why they stand out:</strong> Soft POS product that turns your phone into a POS device.</p>
+      <p><strong>Pricing:</strong> Capped at ₦1,500 for gateway fees.</p>
+      <p><strong>Channels:</strong> Soft POS, Cards, Bank Transfer, USSD, Virtual Accounts.</p>
+
+      <h3>6. Interswitch</h3>
+      <p>The pioneer of digital payment infrastructure in Nigeria. Trusted by over 31,000 businesses.</p>
+      <p><strong>Why they stand out:</strong> Robust split payment features for marketplaces and hosted fields for customisation.</p>
+      <p><strong>Pricing:</strong> Quote-based.</p>
+      <p><strong>Channels:</strong> Cards, USSD, Bank transfers.</p>
+
+      <h3>7. OPay</h3>
+      <p>Leverages its massive wallet ecosystem and offline POS presence for high success rates.</p>
+      <p><strong>Why they stand out:</strong> Deep market penetration with millions of active wallets and seamless in-app integration.</p>
+      <p><strong>Pricing:</strong> 1.5% capped at ₦2,000.</p>
+      <p><strong>Channels:</strong> Wallet, Cards, Bank Transfer, QR.</p>
+
+      <h3>8. Fincra</h3>
+      <p>Designed for businesses looking beyond Nigeria with multi-currency virtual accounts.</p>
+      <p><strong>Why they stand out:</strong> Issue named virtual accounts in USD, EUR, GBP, and NGN.</p>
+      <p><strong>Pricing:</strong> Quote-based.</p>
+      <p><strong>Channels:</strong> Cards, Bank Transfer, Virtual Accounts, Mobile Money.</p>
+    `
+  }
 
       <h3>1. Level of technology need</h3>
       <p>Some businesses require heavy API integrations, while others just need no-code tools like Payment Links to accept payments instantly. The resources you have should determine your choice.</p>

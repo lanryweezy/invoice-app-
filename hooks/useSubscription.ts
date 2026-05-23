@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { auth, db, googleProvider, signInWithPopup, signOut, onAuthStateChanged, doc, getDoc, setDoc, User, createUserWithEmailAndPassword, signInWithEmailAndPassword } from '../services/firebase';
 import { onSnapshot } from 'firebase/firestore';
+import { trackEvent } from '../utils/analytics';
 
 export interface SubscriptionData {
   plan: 'free' | 'pro';
@@ -88,6 +89,8 @@ export const useSubscription = () => {
       return false;
     }
 
+    trackEvent('upgrade_initiated', { plan_type: planType, user_email: user.email });
+
     return new Promise((resolve) => {
       if (typeof window === 'undefined' || !(window as any).PaystackPop) {
         console.error("Paystack not loaded");
@@ -105,17 +108,24 @@ export const useSubscription = () => {
         ref: 'NI_' + Math.floor((Math.random() * 1000000000) + 1),
         callback: async function(response: any) {
           try {
+            trackEvent('payment_success', {
+                plan_type: planType,
+                ref: response.reference,
+                email: user.email
+            });
             // Security Fix: Insecure client-side plan updates are removed.
             // In a production environment, this should be handled by a secure
             // backend webhook triggered by Paystack.
             console.log("Payment successful. Account upgrade is being processed via backend.");
             resolve(true);
           } catch (error) {
+            trackEvent('payment_error_callback', { error: String(error), plan_type: planType });
             console.error("Failed after payment", error);
             resolve(false);
           }
         },
         onClose: function() {
+          trackEvent('payment_cancelled', { plan_type: planType });
           resolve(false);
         }
       });

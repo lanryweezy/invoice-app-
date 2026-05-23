@@ -12,8 +12,18 @@ interface PricingModalProps {
 
 export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onUpgrade, onLogin, user, title = "Upgrade to Pro", message = "Unlock advanced features to supercharge your business." }) => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
+
+  const handleUpgrade = async () => {
+    setLoading(true);
+    try {
+      await onUpgrade(billingCycle);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm overflow-y-auto">
@@ -72,9 +82,18 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
                 Accounting Activities
               </li>
             </ul>
-            <div className="text-center text-sm font-medium text-slate-500 py-2">
-              Current Plan
-            </div>
+            {!user ? (
+              <button
+                onClick={onLogin}
+                className="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 px-4 rounded-xl transition-colors"
+              >
+                Create Free Account
+              </button>
+            ) : (
+              <div className="text-center text-sm font-medium text-slate-500 py-2">
+                Current Plan
+              </div>
+            )}
           </div>
 
           {/* Pro Tier */}
@@ -127,10 +146,12 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
               </li>
             </ul>
             <button
-              onClick={user ? () => onUpgrade(billingCycle) : onLogin}
-              className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-lg shadow-teal-600/30"
+              onClick={user ? handleUpgrade : onLogin}
+              disabled={loading}
+              className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-lg shadow-teal-600/30 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {user ? 'Upgrade Now' : 'Login to Upgrade'}
+              {loading && <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>}
+              {user ? (loading ? 'Processing...' : 'Upgrade Now') : 'Login to Upgrade'}
             </button>
           </div>
         </div>

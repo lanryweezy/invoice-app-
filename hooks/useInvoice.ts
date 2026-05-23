@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import type { Invoice, LineItem, Currency, InvoiceStatus, User as AppUser, Client } from '../types';
 import { useSubscription } from './useSubscription';
 import { db, doc, setDoc, getDoc } from '../services/firebase';
+import { queueMutation } from '../utils/offlineSync';
 
 const DEFAULT_USER: AppUser = {
   name: '',
@@ -69,6 +70,16 @@ export const useInvoice = () => {
     if (isPro && firebaseUser) {
         const loadCloudData = async () => {
             try {
+                // To prevent clobbering un-synced offline local data with stale cloud data,
+                // we first check if there is an active offline queue.
+                const { getQueueCount } = await import('../utils/offlineSync');
+                const queueCount = await getQueueCount();
+
+                if (queueCount > 0) {
+                    console.log("[useInvoice] Offline queue is active. Skipping initial cloud fetch to preserve local state.");
+                    return;
+                }
+
                 const userRef = doc(db, 'users', firebaseUser.uid);
                 const userSnap = await getDoc(userRef);
 
@@ -83,6 +94,9 @@ export const useInvoice = () => {
                     if (data.recurringInvoices) {
                         setRecurringInvoices(data.recurringInvoices);
                     }
+                    if (data.currentInvoice) {
+                        setInvoice(data.currentInvoice);
+                    }
                 }
             } catch (error) {
                 console.error("Failed to load cloud data", error);
@@ -92,14 +106,22 @@ export const useInvoice = () => {
     }
   }, [isPro, firebaseUser]);
 
-  // Sync to Cloud helper
-  const syncToCloud = useCallback(async (data: Partial<{ invoiceUser: AppUser, savedClients: Client[], recurringInvoices: Invoice[] }>) => {
+  // Sync to Cloud helper with Offline Support
+  const syncToCloud = useCallback(async (data: Partial<{ invoiceUser: AppUser, savedClients: Client[], recurringInvoices: Invoice[], currentInvoice: Invoice }>) => {
       if (isPro && firebaseUser) {
+          if (!navigator.onLine) {
+              // Queue the mutation in IndexedDB if offline
+              await queueMutation('users', firebaseUser.uid, data);
+              return;
+          }
+
           try {
               const userRef = doc(db, 'users', firebaseUser.uid);
               await setDoc(userRef, data, { merge: true });
           } catch (error) {
-              console.error("Failed to sync to cloud", error);
+              console.error("Failed to sync to cloud, queueing locally instead", error);
+              // Fallback to queue if the network request fails despite navigator.onLine being true
+              await queueMutation('users', firebaseUser.uid, data);
           }
       }
   }, [isPro, firebaseUser]);
@@ -122,6 +144,14 @@ export const useInvoice = () => {
     }, 500); // Debounce save
     return () => clearTimeout(timeoutId);
   }, [invoice.user, syncToCloud]);
+
+  // Persist full draft/current invoice to cloud to allow cross-device drafting and offline sync
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+        syncToCloud({ currentInvoice: invoice });
+    }, 1500); // 1.5s debounce to avoid thrashing on every keystroke
+    return () => clearTimeout(timeoutId);
+  }, [invoice, syncToCloud]);
 
   // Load saved clients and recurring invoices
   useEffect(() => {
