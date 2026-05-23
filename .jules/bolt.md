@@ -37,3 +37,7 @@
 ## 2026-05-23 - [Inline Functions Break React.memo]
 **Learning:** Wrapping a large component (like `InvoiceForm`) in `React.memo()` is useless if you pass it inline functions as props (e.g., `onProFeatureClick={() => handleProFeatureClick('Recurring')}`). Because the inline function is redefined on every render of the parent (`App.tsx`), the `React.memo` shallow comparison will always fail, causing the expensive component to re-render anyway.
 **Action:** When using `React.memo()`, strictly verify that *all* object and function props passed to the component are stable. Extract inline functions and wrap them in `useCallback` in the parent.
+
+## 2026-05-23 - [Redundant Hook Overhead]
+**Learning:** When a module-level constant (like a global `Intl.NumberFormat` instance) is already defined and cached, redefining it inside a component using `useMemo` shadows the global variable and creates an unnecessary hook allocation on every render cycle. While `useMemo` prevents recreation of the object, the hook itself still incurs a tiny performance cost and memory footprint during the render phase.
+**Action:** Avoid declaring `useMemo` wrappers for static variables that are already cached globally outside the component scope.
