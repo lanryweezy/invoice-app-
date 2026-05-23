@@ -251,7 +251,8 @@ const LineItemRow = React.memo(({ item, index, currencySymbol, currencyFormatter
     );
 });
 
-export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, savedClients, onSaveClient, onSaveRecurring, isPro = false, onProFeatureClick }) => {
+// ⚡ Bolt: Wrap InvoiceForm in React.memo to prevent unnecessary re-renders when parent state (like modals) changes
+export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, savedClients, onSaveClient, onSaveRecurring, isPro = false, onProFeatureClick }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const validateEmail = (email: string) => {
@@ -899,4 +900,4 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, updateInvoice
         </CollapsibleSection>
     </div>
   );
-};
+});
