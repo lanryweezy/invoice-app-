@@ -527,18 +527,42 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                                     <HashIcon className="w-5 h-5 text-teal-400 opacity-50" />
                                 </div>
                             </div>
-                            <div>
-                                <label className="text-[10px] text-slate-400 font-bold uppercase tracking-widest block mb-1 mt-4 flex items-center gap-1.5">
-                                    <svg className="w-3 h-3 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-                                    Payment Link (Optional)
-                                </label>
-                                <input
-                                    name="paymentLink"
-                                    value={invoice.user.paymentLink || ''}
-                                    onChange={handleUserChange}
-                                    placeholder="e.g. paystack.com/pay/xyz"
-                                    className="bg-transparent border-b border-white/20 w-full text-white font-mono font-semibold placeholder:text-white/20 focus:outline-none focus:border-teal-400 transition-colors py-1 text-sm"
-                                />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-[10px] text-slate-400 font-bold uppercase tracking-widest block mb-1 mt-4 flex items-center gap-1.5">
+                                        <WalletIcon className="w-3 h-3 text-teal-400" />
+                                        Payment Gateway
+                                    </label>
+                                    <select
+                                        name="paymentGateway"
+                                        value={invoice.user.paymentGateway || ''}
+                                        onChange={handleUserChange as any}
+                                        className="bg-transparent border-b border-white/20 w-full text-white font-semibold focus:outline-none focus:border-teal-400 transition-colors py-1 text-sm appearance-none cursor-pointer"
+                                    >
+                                        <option value="" className="text-slate-900">Custom / Direct</option>
+                                        <option value="Paystack" className="text-slate-900">Paystack</option>
+                                        <option value="Flutterwave" className="text-slate-900">Flutterwave</option>
+                                        <option value="Monnify" className="text-slate-900">Monnify</option>
+                                        <option value="Kora" className="text-slate-900">Kora</option>
+                                        <option value="Squad" className="text-slate-900">Squad</option>
+                                        <option value="Interswitch" className="text-slate-900">Interswitch</option>
+                                        <option value="OPay" className="text-slate-900">OPay</option>
+                                        <option value="Fincra" className="text-slate-900">Fincra</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="text-[10px] text-slate-400 font-bold uppercase tracking-widest block mb-1 mt-4 flex items-center gap-1.5">
+                                        <svg className="w-3 h-3 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                        Payment Link (Optional)
+                                    </label>
+                                    <input
+                                        name="paymentLink"
+                                        value={invoice.user.paymentLink || ''}
+                                        onChange={handleUserChange}
+                                        placeholder="e.g. paystack.com/pay/xyz"
+                                        className="bg-transparent border-b border-white/20 w-full text-white font-mono font-semibold placeholder:text-white/20 focus:outline-none focus:border-teal-400 transition-colors py-1 text-sm"
+                                    />
+                                </div>
                             </div>
                         </div>
                      </div>

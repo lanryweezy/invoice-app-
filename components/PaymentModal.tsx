@@ -71,6 +71,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                             <option value="Bank Transfer">Bank Transfer</option>
                             <option value="Cash">Cash</option>
                             <option value="Paystack">Paystack</option>
+                            <option value="Flutterwave">Flutterwave</option>
+                            <option value="Monnify">Monnify</option>
+                            <option value="Kora">Kora</option>
+                            <option value="Squad">Squad</option>
+                            <option value="Interswitch">Interswitch</option>
+                            <option value="OPay">OPay</option>
+                            <option value="Fincra">Fincra</option>
                             <option value="Card">Card</option>
                             <option value="Other">Other</option>
                         </select>
