@@ -205,7 +205,7 @@ const App: React.FC = () => {
     trackEvent('generate_email', { invoice_id: invoice.invoiceNumber });
   }, [invoice, totals]);
 
-  const handleSaveClient = (client: Client) => {
+  const handleSaveClient = useCallback((client: Client) => {
       // Free tier restriction: max 2 clients
       if (!isPro && savedClients.length >= 2 && !savedClients.some(c => c.name.toLowerCase() === client.name.trim().toLowerCase())) {
           setPricingModalContent({
@@ -222,9 +222,9 @@ const App: React.FC = () => {
       } else {
           showToast('Client name is required', 'error');
       }
-  };
+  }, [isPro, savedClients, saveClient]);
 
-  const handleProFeatureClick = (featureName: 'Branches' | 'Accounting' | 'Recurring') => {
+  const handleProFeatureClick = useCallback((featureName: 'Branches' | 'Accounting' | 'Recurring') => {
       if (!isPro) {
           setPricingModalContent({
               title: `${featureName} is a Pro Feature`,
@@ -234,7 +234,18 @@ const App: React.FC = () => {
       } else {
           setActiveView(featureName.toLowerCase() as 'branches' | 'accounting' | 'recurring');
       }
-  };
+  }, [isPro]);
+
+  const handleProFeatureRecurring = useCallback(() => {
+      handleProFeatureClick('Recurring');
+  }, [handleProFeatureClick]);
+
+  const handleSaveRecurringWrapper = useCallback((inv: Invoice) => {
+      if (saveRecurringInvoice) {
+          saveRecurringInvoice(inv);
+          showToast('Saved as recurring template!', 'success');
+      }
+  }, [saveRecurringInvoice]);
 
   const handleDownloadPdf = async () => {
     // Determine the source element
@@ -543,12 +554,9 @@ const App: React.FC = () => {
                   updateLineItem={updateLineItem}
                   savedClients={savedClients}
                   onSaveClient={handleSaveClient}
-                  onSaveRecurring={saveRecurringInvoice ? (inv) => {
-                      saveRecurringInvoice(inv);
-                      showToast('Saved as recurring template!', 'success');
-                  } : undefined}
+                  onSaveRecurring={saveRecurringInvoice ? handleSaveRecurringWrapper : undefined}
                   isPro={isPro}
-                  onProFeatureClick={() => handleProFeatureClick('Recurring')}
+                  onProFeatureClick={handleProFeatureRecurring}
                 />
               </div>
             </div>

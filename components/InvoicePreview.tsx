@@ -335,7 +335,8 @@ const getTemplateStyles = (template: TemplateId) => {
     }
 };
 
-export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals, template, isPro = false }) => {
+// ⚡ Bolt: Wrap InvoicePreview in React.memo to prevent unnecessary re-renders when parent state (like modals) changes
+export const InvoicePreview: React.FC<InvoicePreviewProps> = React.memo(({ invoice, totals, template, isPro = false }) => {
   const { user, client, issueDate, dueDate, lineItems, notes, terms, taxRate, whtRate, discountRate, shippingAmount, currency, status } = invoice;
   const { subtotal, discountAmount, tax, whtAmount, shipping, total } = totals;
   const styles = getTemplateStyles(template);
@@ -509,4 +510,4 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = ({ invoice, totals,
       )}
     </article>
   );
-};
+});
