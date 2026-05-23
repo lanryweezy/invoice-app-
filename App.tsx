@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect, Suspense } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, Suspense, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
@@ -40,6 +40,9 @@ const App: React.FC = () => {
   const { expenses, addExpense, removeExpense } = useExpenses();
   const { receipts, addReceipt, removeReceipt } = useReceipts();
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const previewContainerRef = useRef<HTMLDivElement>(null);
+  const [previewScale, setPreviewScale] = useState(1);
+
   const [generatedEmail, setGeneratedEmail] = useState('');
   
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -144,6 +147,27 @@ const App: React.FC = () => {
 
   // 'edit' vs 'preview' for mobile tabs
   const [activeMobileTab, setActiveMobileTab] = useState<'edit' | 'preview'>('edit');
+
+  useEffect(() => {
+    const updateScale = () => {
+      if (!previewContainerRef.current) return;
+      const containerWidth = previewContainerRef.current.offsetWidth;
+      // A4 width ≈ 794px at 96dpi
+      const a4Width = 794;
+
+      const availableWidth = containerWidth - 32;
+      const newScale = Math.min(availableWidth / a4Width, 1);
+      setPreviewScale(newScale);
+    };
+
+    const timeoutId = setTimeout(updateScale, 10);
+    window.addEventListener("resize", updateScale);
+
+    return () => {
+        clearTimeout(timeoutId);
+        window.removeEventListener("resize", updateScale);
+    };
+  }, [activeMobileTab]);
   
   const [template, setTemplate] = useState<TemplateId>(() => {
     return (localStorage.getItem('invoiceTemplate') as TemplateId) || 'classic';
@@ -602,18 +626,28 @@ const App: React.FC = () => {
           </div>
 
           {/* RIGHT COLUMN: Preview - Independent Scroll */}
-          {/* Added overflow-x-auto to allow horizontal scrolling on mobile when scaled invoice exceeds width */}
-          <div className={`w-full md:w-[55%] lg:w-[60%] bg-slate-100/50 h-full overflow-y-auto overflow-x-auto custom-scrollbar flex flex-col ${activeMobileTab === 'preview' ? 'block' : 'hidden md:flex'}`}>
+          {/* Responsive container for dynamic scaling */}
+          <div
+            ref={previewContainerRef}
+            className={`w-full md:w-[55%] lg:w-[60%] bg-slate-100/50 h-full overflow-y-auto overflow-x-auto custom-scrollbar flex flex-col ${activeMobileTab === 'preview' ? 'block' : 'hidden md:flex'}`}
+          >
             {/* Background Pattern */}
             <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0" style={{ backgroundImage: 'radial-gradient(#0f766e 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
             
             {/* Removed overflow-hidden to prevent clipping, added padding bottom for scroll space */}
             <div className="p-4 sm:p-6 lg:p-8 min-h-full flex flex-col items-center relative z-10 pt-8">
               
-              {/* A4 Paper Preview */}
-              {/* Increased mobile scale to 0.6 for better readability, relying on parent overflow-x-auto for width */}
-              <div className="relative w-[210mm] transition-all duration-500 ease-in-out pb-32 md:pb-0 transform scale-[0.6] sm:scale-[0.7] md:scale-[0.7] lg:scale-[0.85] xl:scale-100 origin-top">
-                 <div id="invoice-preview-container" className="bg-white text-slate-900 shadow-2xl shadow-slate-400/30 rounded-sm min-h-[297mm] w-[210mm] origin-top border border-slate-200/60">
+              {/* Responsive scaling wrapper */}
+              <div
+                className="origin-top-left transition-transform duration-200 ease-in-out pb-32 md:pb-0"
+                style={{
+                  transform: `scale(${previewScale})`,
+                  width: `${210 * previewScale}mm`,
+                  height: `${297 * previewScale}mm`,
+                }}
+              >
+                 {/* True A4 Paper Preview */}
+                 <div id="invoice-preview-container" className="bg-white text-slate-900 shadow-2xl shadow-slate-400/30 rounded-sm min-h-[297mm] w-[210mm] origin-top-left border border-slate-200/60">
                     <div className="p-8 md:p-12 h-full flex flex-col relative">
                         <Suspense fallback={
                             <div className="animate-pulse space-y-8 w-full h-full p-4">
