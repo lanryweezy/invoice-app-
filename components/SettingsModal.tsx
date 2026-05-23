@@ -19,6 +19,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
 
+  // Keep track of the original username to handle renames
+  const [originalUsername, setOriginalUsername] = useState('');
+
   useEffect(() => {
     if (isOpen && user && isPro) {
       const fetchProfile = async () => {
@@ -28,6 +31,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
           if (docSnap.exists()) {
             const data = docSnap.data();
             setUsername(data.username || '');
+            setOriginalUsername(data.username || '');
             setBio(data.bio || '');
             setBusinessName(data.businessName || '');
             setWebsite(data.website || '');
@@ -53,6 +57,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
          return;
       }
 
+      // 1. Pre-flight check: Ensure global uniqueness BEFORE writing to internal state
+      if (sanitizedUsername) {
+         const publicRef = doc(db, 'publicProfiles', sanitizedUsername);
+         const publicSnap = await getDoc(publicRef);
+
+         if (publicSnap.exists() && publicSnap.data().uid !== user.uid) {
+             setMessage('Failed: Username is already taken by another business.');
+             setSaving(false);
+             return;
+         }
+      }
+
       const payload = {
         username: sanitizedUsername,
         bio,
@@ -63,25 +79,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
         uid: user.uid
       };
 
-      // 1. Save to users document for internal state management
+      // 2. Save to internal users document
       const userDocRef = doc(db, 'users', user.uid);
       await updateDoc(userDocRef, payload);
 
-      // 2. Manage the public profile entry (ensures global uniqueness via document ID)
+      // 3. Write new public profile and cleanup old one if it changed
+      const { setDoc, deleteDoc } = await import('firebase/firestore');
+
       if (sanitizedUsername) {
          const publicRef = doc(db, 'publicProfiles', sanitizedUsername);
-         const publicSnap = await getDoc(publicRef);
-
-         if (publicSnap.exists() && publicSnap.data().uid !== user.uid) {
-             setMessage('Failed: Username is already taken by another business.');
-             setSaving(false);
-             return;
-         }
-
-         // Using setDoc here because updateDoc fails if the doc doesn't exist yet
-         const { setDoc } = await import('firebase/firestore');
          await setDoc(publicRef, payload);
       }
+
+      // Cleanup dangling old profile if username changed and old username existed
+      if (originalUsername && originalUsername !== sanitizedUsername) {
+          const oldPublicRef = doc(db, 'publicProfiles', originalUsername);
+          await deleteDoc(oldPublicRef);
+      }
+
+      setOriginalUsername(sanitizedUsername); // Sync up after successful save
 
       setMessage('Profile updated successfully!');
       setTimeout(() => setMessage(''), 3000);

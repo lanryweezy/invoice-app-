@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Expense } from '../types';
 import { useSubscription } from './useSubscription';
 import { db, doc, setDoc, getDoc } from '../services/firebase';
+import { queueMutation } from '../utils/offlineSync';
 
 export const useExpenses = () => {
     const [expenses, setExpenses] = useState<Expense[]>(() => {
@@ -44,11 +45,17 @@ export const useExpenses = () => {
 
     const syncToCloud = useCallback(async (newExpenses: Expense[]) => {
         if (isPro && firebaseUser) {
+            if (!navigator.onLine) {
+                await queueMutation('users', firebaseUser.uid, { expenses: newExpenses });
+                return;
+            }
+
             try {
                 const userRef = doc(db, 'users', firebaseUser.uid);
                 await setDoc(userRef, { expenses: newExpenses }, { merge: true });
             } catch (error) {
-                console.error("Failed to sync expenses", error);
+                console.error("Failed to sync expenses, queueing locally instead", error);
+                await queueMutation('users', firebaseUser.uid, { expenses: newExpenses });
             }
         }
     }, [isPro, firebaseUser]);
