@@ -153,22 +153,22 @@ const RichTextarea: React.FC<{
 const CollapsibleSection: React.FC<{ title: string; children: React.ReactNode; defaultOpen?: boolean; highlight?: boolean; icon?: React.ReactNode }> = React.memo(({ title, children, defaultOpen = true, highlight = false, icon }) => {
     const [isOpen, setIsOpen] = useState(defaultOpen);
     return (
-        <div className={`border rounded-xl overflow-hidden shadow-sm mb-6 transition-all duration-300 hover:shadow-md ${highlight ? 'border-teal-100 bg-white ring-2 ring-teal-50/50' : 'border-slate-200 bg-white'}`}>
+        <div className={`border rounded-xl overflow-hidden shadow-sm mb-5 transition-all duration-300 hover:shadow-md ${highlight ? 'border-teal-100 bg-white ring-1 ring-teal-50' : 'border-slate-200 bg-white'}`}>
             <button 
                 onClick={() => setIsOpen(!isOpen)}
                 aria-expanded={isOpen}
-                className={`w-full flex items-center justify-between p-4 sm:p-5 transition-colors text-left group ${highlight ? 'bg-gradient-to-r from-teal-50/50 to-white' : 'bg-white hover:bg-slate-50'}`}
+                className={`w-full flex items-center justify-between p-4 transition-colors text-left group ${highlight ? 'bg-gradient-to-r from-teal-50 to-white' : 'bg-white hover:bg-slate-50'}`}
             >
-                <div className="flex items-center gap-4">
-                    {icon && <div className={`p-2 rounded-xl transition-colors ${highlight ? 'bg-teal-100 text-teal-700 group-hover:bg-teal-200' : 'bg-slate-100 text-slate-500 group-hover:text-slate-700 group-hover:bg-slate-200'}`}>{icon}</div>}
-                    <h3 className={`text-sm sm:text-base font-bold ${highlight ? 'text-teal-900' : 'text-slate-700'}`}>{title}</h3>
+                <div className="flex items-center gap-3">
+                    {icon && <div className={`p-1.5 rounded-lg ${highlight ? 'bg-teal-100 text-teal-700' : 'bg-slate-100 text-slate-500 group-hover:text-slate-700'}`}>{icon}</div>}
+                    <h3 className={`text-sm font-bold ${highlight ? 'text-teal-900' : 'text-slate-700'}`}>{title}</h3>
                 </div>
-                <div className={`p-1.5 rounded-lg transition-all ${isOpen ? 'bg-slate-100 text-slate-600 rotate-180' : 'text-slate-400 group-hover:text-slate-600'}`}>
-                    <ChevronDownIcon className="w-4 h-4 sm:w-5 h-5" />
+                <div className={`p-1 rounded-md transition-all ${isOpen ? 'bg-slate-100 text-slate-600 rotate-180' : 'text-slate-400'}`}>
+                    <ChevronDownIcon className="w-4 h-4" />
                 </div>
             </button>
             <div className={`transition-all duration-300 ease-in-out ${isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-                <div className="p-5 sm:p-6 border-t border-slate-50 bg-white">
+                <div className="p-4 sm:p-5 border-t border-slate-50">
                     {children}
                 </div>
             </div>
