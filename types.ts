@@ -26,6 +26,10 @@ export interface User {
   paymentGateway?: PaymentGateway;
 }
 
+export interface BusinessProfile extends User {
+  id: string;
+}
+
 export type Currency = 'NGN' | 'USD' | 'EUR' | 'GBP';
 
 export type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue';

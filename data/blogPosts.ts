@@ -1,6 +1,6 @@
 export const mockPosts = [
   {
-    id: 18,
+    id: 1,
     slug: 'why-most-invoices-never-get-paid-on-time-and-how-african-smes-can-fix-it',
     title: 'Why Most Invoices Never Get Paid on Time (And How African SMEs Can Fix It)',
     excerpt: 'Late payments aren\'t just bad luck; they are a structural failure in your business system. Here is why the "I will send it later" culture is killing your cashflow and the exact operational shifts to fix it.',
@@ -60,9 +60,8 @@ export const mockPosts = [
       <p>Your product might be your passion, but cashflow is your oxygen. Stop treating invoicing as an afterthought. Build a system that demands respect, removes friction, and accelerates payment. Your bank account will thank you.</p>
     `
   },
-
   {
-    id: 11,
+    id: 2,
     slug: 'the-hidden-cost-of-manual-bookkeeping-how-african-smes-lose-money-from-poor-financial-systems',
     title: 'The Hidden Cost of Manual Bookkeeping: How African SMEs Lose Money From Poor Financial Systems',
     excerpt: 'Most Nigerian business owners are running an operational deficit without even knowing it. If you are still sending account numbers via WhatsApp, you aren\'t just disorganized. You are actively leaking revenue.',
@@ -124,17 +123,16 @@ export const mockPosts = [
 
       <p>Stop treating your business finances like a casual chat. Upgrade your systems, professionalize your invoicing, and watch your cashflow transform.</p>
     `
-  }
-,
+  },
   {
-    id: 1,
+    id: 3,
     slug: 'how-to-write-an-invoice-in-nigeria-step-by-step-guide-for-small-businesses-and-freelancers',
     title: 'How to Write an Invoice in Nigeria (Step-by-Step Guide for Small Businesses and Freelancers)',
     excerpt: 'Most Nigerian freelancers and small business owners have sent this exact "invoice" at some point: "Oga, my account details below... GTBank..." and then the waiting begins.',
     category: 'Guides',
     readTime: '11 Min Read',
     date: 'April 12, 2026',
-    imageUrl: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=1200&q=80',
     htmlContent: `
       <p>Running a business or freelancing in Nigeria comes with its unique set of challenges. From dealing with inconsistent power supply to navigating complex tax structures like VAT and Withholding Tax (WHT), entrepreneurs have to wear many hats. In a rapidly evolving economic landscape, staying ahead of administrative tasks is just as crucial as delivering the core service or product you offer. Many talented individuals find themselves overwhelmed not by the work they love, but by the paperwork they dread.</p>
 
@@ -160,7 +158,7 @@ export const mockPosts = [
     `
   },
   {
-    id: 2,
+    id: 4,
     slug: 'best-free-ai-tools-for-small-businesses-in-nigeria-2026-guide',
     title: 'Best Free AI Tools for Small Businesses in Nigeria (2026 Guide)',
     excerpt: 'Picture this. Amaka sells hand-sewn Ankara bags from her shop in Yaba. She runs her Instagram page, replies to customers on WhatsApp, tracks her orders in a notebook...',
@@ -193,7 +191,7 @@ export const mockPosts = [
     `
   },
   {
-    id: 3,
+    id: 5,
     slug: 'best-business-ideas-in-nigeria-2026-11-profitable-ideas-you-can-start-today',
     title: 'Best Business Ideas in Nigeria (2026): 11 Profitable Ideas You Can Start Today',
     excerpt: 'If you ask most people why they want to start a business in Nigeria, the answer is usually the same: income is unstable, expenses keep rising, and depending on one source of money no longer feels safe.',
@@ -226,14 +224,14 @@ export const mockPosts = [
     `
   },
   {
-    id: 4,
+    id: 6,
     slug: '7-ways-ai-agents-for-businesses-in-nigeria-are-reducing-operational-costs',
     title: '7 Ways AI Agents for Businesses in Nigeria Are Reducing Operational Costs',
     excerpt: 'Running a business in Nigeria right now is not for the faint-hearted. Between unstable power supply, rising fuel costs, unpredictable exchange rates...',
     category: 'Small Business',
     readTime: '6 Min Read',
     date: 'March 25, 2026',
-    imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80',
     htmlContent: `
       <p>Operating a business in Nigeria involves navigating a complex web of infrastructural deficits and economic volatility. Rising fuel costs, inflation, and currency fluctuations constantly squeeze profit margins. To survive and thrive, Nigerian businesses must become hyper-efficient. This is where AI agents are making a tangible difference, transforming from novelty tech to essential survival tools by drastically reducing operational costs.</p>
 
@@ -257,7 +255,7 @@ export const mockPosts = [
     `
   },
   {
-    id: 5,
+    id: 7,
     slug: 'how-to-start-a-small-business-in-nigeria-2026-guide',
     title: 'How to Start a Small Business in Nigeria (2026 Guide)',
     excerpt: 'Starting a business in Nigeria can feel overwhelming at first. There’s so much advice online, and most of it either sounds too complicated or completely out of touch with reality.',
@@ -286,7 +284,7 @@ export const mockPosts = [
     `
   },
   {
-    id: 6,
+    id: 8,
     slug: 'how-does-the-new-2026-tax-reform-in-nigeria-affect-small-businesses',
     title: 'How Does the New 2026 Tax Reform in Nigeria Affect Small Businesses?',
     excerpt: 'Running a small business in Nigeria is already tough; rising costs, unstable power, customers delaying payments, and now… taxes.',
@@ -315,7 +313,7 @@ export const mockPosts = [
     `
   },
   {
-    id: 7,
+    id: 9,
     slug: 'the-ultimate-guide-to-firs-compliant-e-invoicing-for-nigerian-businesses',
     title: 'The Ultimate Guide to FIRS Compliant e-Invoicing for Nigerian Businesses',
     excerpt: 'With Nigeria’s gradual move to digital tax systems, understanding e-invoicing is crucial. Learn what it takes to be FIRS compliant and why you need it now.',
@@ -345,7 +343,7 @@ export const mockPosts = [
     `
   },
   {
-    id: 8,
+    id: 10,
     slug: 'top-5-digital-marketing-strategies-for-smes-in-lagos',
     title: 'Top 5 Digital Marketing Strategies for SMEs in Lagos',
     excerpt: 'From WhatsApp marketing to TikTok ads, learn how small businesses in Lagos are reaching more customers without breaking the bank.',
@@ -374,7 +372,7 @@ export const mockPosts = [
     `
   },
   {
-    id: 9,
+    id: 11,
     slug: 'how-to-deal-with-late-paying-clients-a-freelancers-playbook',
     title: 'How to Deal with Late Paying Clients: A Freelancer’s Playbook',
     excerpt: 'Tired of hearing "I will sort you next week"? Learn professional strategies to secure your payments on time without ruining client relationships.',
@@ -409,7 +407,7 @@ export const mockPosts = [
     `
   },
   {
-    id: 10,
+    id: 12,
     slug: 'understanding-vat-in-nigeria-what-you-need-to-know',
     title: 'Understanding VAT in Nigeria: What You Need to Know',
     excerpt: 'Value Added Tax can be confusing. We break down the current VAT rates, exemptions, and how to properly include them in your invoices.',
@@ -426,7 +424,7 @@ export const mockPosts = [
       <p>Currently, the standard VAT rate in Nigeria is 7.5%. It is crucial to understand that you, as the business owner, are merely an agent collecting this tax on behalf of the government. The money does not belong to you, and it should ideally be kept in a separate account until it is time to remit it to the FIRS.</p>
 
       <div class="my-8 rounded-xl overflow-hidden shadow-md">
-          <img src="https://images.unsplash.com/photo-1554224155-1696413565d3?w=1200&q=80" alt="Calculating taxes" class="w-full h-auto object-cover" />
+          <img src="https://images.unsplash.com/photo-1554224155-1696413565d3?w=800&q=80" alt="Calculating taxes" class="w-full h-auto object-cover" />
           <p class="text-sm text-center text-slate-500 mt-2 italic">Accurate VAT calculation is essential for FIRS compliance.</p>
       </div>
 
@@ -439,7 +437,7 @@ export const mockPosts = [
     `
   },
   {
-    id: 11,
+    id: 13,
     slug: 'how-to-build-a-financial-operating-system-for-your-business',
     title: 'How to Build a Financial Operating System for Your Business',
     excerpt: 'Stop running your African business on spreadsheets and WhatsApp. Learn how to architect a modern financial operating system that automates invoicing, tracks cash flow, and drives growth.',
@@ -490,10 +488,9 @@ export const mockPosts = [
 
       <p>As the African fintech ecosystem matures, we are moving toward an era of autonomous finance. Soon, AI will predict your cash flow gaps before they happen and automatically reconcile complex tax liabilities. But you cannot participate in this autonomous future if your current data is trapped in physical notebooks. The prerequisite for AI-driven growth is digitized operations today.</p>
     `
-  }
-,
+  },
   {
-    id: 12,
+    id: 14,
     slug: 'the-hidden-cost-of-manual-bookkeeping-for-african-smes',
     title: 'The Hidden Cost of Manual Bookkeeping for African SMEs',
     excerpt: 'Stop managing your business finances on spreadsheets and WhatsApp. Discover the hidden costs of manual bookkeeping and learn how African SMEs can automate their back-office to drive growth.',
@@ -548,10 +545,9 @@ export const mockPosts = [
 
       <p>Stop acting as your own data-entry clerk. Professionalize your operations, build a frictionless financial engine, and take back the time you need to actually grow your business.</p>
     `
-  }
-,
+  },
   {
-    id: 13,
+    id: 15,
     slug: 'the-future-of-ai-powered-accounting-in-africa',
     title: 'The Future of AI-Powered Accounting in Africa',
     excerpt: 'African SMEs are moving beyond spreadsheets. Discover how AI-powered accounting and automated financial systems are solving cashflow problems and scaling local businesses.',
@@ -590,10 +586,12 @@ export const mockPosts = [
       <p>This was the core thesis behind [InvoiceApp.ng](https://invoiceapp.ng). We observed that African SMEs were drowning in administrative noise. They needed a tool that functioned not just as a document generator, but as a silent financial partner.</p>
 
       <p>Consider a modern, AI-augmented workflow:</p>
-      <li>You close a contract.</li>
-      <li>In under a minute, InvoiceApp generates a uniquely numbered, FIRS-compliant invoice with built-in Paystack links.</li>
-      <li>The invoice is sent. The client's procurement team sees a professional, institutional-grade document.</li>
-      <li>When payment drops, the system automatically reconciles the transaction, generates a receipt, and updates your revenue dashboard.</li>
+      <ul>
+          <li>You close a contract.</li>
+          <li>In under a minute, InvoiceApp generates a uniquely numbered, FIRS-compliant invoice with built-in Paystack links.</li>
+          <li>The invoice is sent. The client's procurement team sees a professional, institutional-grade document.</li>
+          <li>When payment drops, the system automatically reconciles the transaction, generates a receipt, and updates your revenue dashboard.</li>
+      </ul>
 
       <p>Zero human intervention. Zero context-switching. Your back-office runs quietly in the background while you focus on the frontline.</p>
 
@@ -608,74 +606,9 @@ export const mockPosts = [
       <p>Stop wrestling with spreadsheets. The future of your business depends on it.</p>
 
     `
-  }
-,
+  },
   {
-    id: 14,
-    slug: 'the-hidden-cost-of-manual-bookkeeping',
-    title: 'The Hidden Cost of Manual Bookkeeping',
-    excerpt: 'Stop losing money to delayed payments. Learn how African founders are replacing manual bookkeeping and WhatsApp invoicing with automated financial systems.',
-    category: 'Finance',
-    readTime: '8 Min Read',
-    date: 'March 22, 2026',
-    imageUrl: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80',
-    htmlContent: `
-
-      <p>Most Nigerian business owners are running an operational deficit without even knowing it. They have brilliant products, incredible resilience, and a growing customer base. Yet, at the end of the month, the math simply doesn't add up. The cash in the bank does not reflect the hustle in the streets.</p>
-
-      <p>If you are still sending account numbers via WhatsApp, tracking inventory in a dog-eared notebook, and waiting for clients to "sort you over the weekend," you aren't just disorganized. You are actively leaking revenue.</p>
-
-      <p>The harsh truth is this: manual financial systems are a hidden tax on your growth. In an economic environment as volatile as Africa's, where inflation eats into margins and corporate trust is notoriously low, relying on memory, informal chats, and paper is a fatal strategic error. Here is why the sharpest founders and operators treat their invoicing and bookkeeping not as an administrative afterthought, but as a core competitive advantage.</p>
-
-      <h2>The Cognitive Load of Financial Chaos</h2>
-
-      <p>At the earliest stages of a company, the founder *is* the operating system. You are the head of sales, the product manager, and the accountant.</p>
-
-      <p>When your financial system consists of scrolling through WhatsApp chats to remember who owes you money, you are burning cognitive cycles that should be spent on growth and strategy. This is what systems thinkers call the "context switching tax." Every time you have to pause deep work to manually calculate an invoice subtotal, figure out the 7.5% VAT, or remind a client about a late payment, you are losing momentum.</p>
-
-      <p>In a modern business, your financial plumbing should be invisible. It should just work. When bookkeeping is manual, it becomes a friction point that slows down the velocity of your business operations.</p>
-
-      <h2>The African Context: Trust and the Velocity of Money</h2>
-
-      <p>In Nigeria, the velocity of money—how fast capital moves from the client's hands to yours—determines survival. Delayed payments are an epidemic. The culture of "I will send it later" is deeply ingrained, particularly in B2B transactions.</p>
-
-      <p>But here is the operational insight: <strong>informal invoicing breeds informal payments.</strong></p>
-
-      <p>When you send a text message saying, "Oga, please the balance is ₦150k," you are implicitly signaling that the transaction is casual. There is no due date. There is no urgency. There is no paper trail for their own accounting department to process.</p>
-
-      <p>Conversely, when you send a beautifully designed, uniquely numbered, FIRS-compliant PDF invoice, the psychological dynamic shifts. It signals institutional permanence. It triggers the corporate procurement reflex. The client stops treating you like an individual "hustler" and starts treating you like a vendor.</p>
-
-      <h2>Building a Financial Operating System</h2>
-
-      <p>You don't need a massive enterprise resource planning (ERP) tool to run a smart business. You need a lightweight, highly effective financial operating system.</p>
-
-      <p>This is exactly why we built [InvoiceApp.ng](https://invoiceapp.ng). It wasn't just to make pretty PDFs; it was to solve the structural cashflow problem for African SMEs.</p>
-
-      <p>Instead of wrestling with Microsoft Word templates that break every time you adjust a margin, InvoiceApp allows you to generate professional, tax-compliant invoices in seconds. More importantly, it turns a static document into an active operational tool.</p>
-
-      <p>Imagine this workflow:</p>
-      <li>You close a deal.</li>
-      <li>In 60 seconds, you generate an invoice with built-in Paystack payment links.</li>
-      <li>The client receives an email that looks like it came from a Stripe-backed startup.</li>
-      <li>When they pay, the invoice is automatically marked as paid, a receipt is generated, and your dashboard updates.</li>
-
-      <p>No follow-ups required. No "please check your app" messages. Just seamless, automated financial plumbing.</p>
-
-      <h2>The Future is Automated (And Tax Compliant)</h2>
-
-      <p>The regulatory landscape in Nigeria is shifting rapidly. The Federal Inland Revenue Service (FIRS) is increasingly moving toward digitized, e-invoicing mandates. Large corporations are tightening their vendor requirements. They will simply refuse to do business with suppliers who cannot provide proper, traceable documentation.</p>
-
-      <p>If you are a freelancer, an agency, or an SME with ambitions of working with tier-one clients, manual bookkeeping is no longer just an inefficiency—it is a disqualifier.</p>
-
-      <p>The future of business in Africa belongs to the operators who automate their back-office so they can focus on their front-line. AI-driven expense categorization, automated payment reminders, and cloud-synced financial dashboards are not luxuries; they are the baseline for modern commerce.</p>
-
-      <p>Stop treating your business finances like a casual chat. Upgrade your systems, professionalize your invoicing, and watch your cashflow transform.</p>
-
-    `
-  }
-,
-  {
-    id: 15,
+    id: 16,
     slug: 'the-psychology-of-pricing-and-professional-invoices',
     title: 'The Psychology of Pricing and Professional Invoices',
     excerpt: 'Learn how the design of your invoice impacts your pricing power. Discover why African freelancers and SMEs lose money to informal payments and how to command premium rates.',
@@ -732,85 +665,10 @@ export const mockPosts = [
       <p>Stop treating your financial operations like an administrative chore. Treat them like a core component of your product offering. Professionalize your operations, automate the friction away, and watch your pricing power transform.</p>
 
     `
-  }
-,
-
-  {
-    id: 16,
-    title: 'The Hidden Cost of Manual Bookkeeping: How African SMEs Lose Money From Poor Financial Systems',
-    excerpt: 'Most Nigerian business owners are running an operational deficit without even knowing it. If you are still sending account numbers via WhatsApp, you aren\'t just disorganized. You are actively leaking revenue.',
-    category: 'Finance',
-    readTime: '8 Min Read',
-    date: 'May 20, 2026',
-    imageUrl: 'https://images.unsplash.com/photo-1554224154-22dec7ec8818?w=800&q=80',
-    htmlContent: `
-      <p>Most founders think their biggest problem is revenue. It isn’t. It’s cashflow friction.</p>
-
-      <p>If you look under the hood of the average African agency, consultancy, or growing SME, you won’t find a well-oiled financial machine. You will find a fragile web of Microsoft Word invoice templates, disorganized Excel sheets, and a graveyard of polite WhatsApp messages begging clients to process payments.</p>
-
-      <p>This is the primitive state of African business operations. And it is silently bleeding your margins dry.</p>
-
-      <p>When your business relies on human memory to trigger financial actions—remembering to send an invoice, remembering to follow up, remembering to reconcile a bank transfer—you introduce a fatal bottleneck. You are no longer running a business; you are managing a high-stress administrative hobby.</p>
-
-      <h2>The Anatomy of a Broken System</h2>
-
-      <p>Let’s dissect the standard manual workflow.</p>
-
-      <p>A project is completed. The freelancer or agency owner opens a Word document, updates the date, manually calculates 7.5% VAT, tries to remember if this specific corporate client requires a 5% or 10% Withholding Tax (WHT) deduction, exports it as a PDF, and emails it.</p>
-
-      <p>Two weeks pass. Silence.</p>
-
-      <p>The founder realizes they haven't been paid. They send a WhatsApp message: <em>"Good morning boss, just checking on that invoice."</em> The client replies: <em>"Ah, my accountant said the WHT calculation was wrong, please resend."</em></p>
-
-      <p>This cycle—what we call "Cashflow Ping-Pong"—adds an average of 14 to 21 days to your Days Sales Outstanding (DSO). In an economy where inflation and currency devaluation are daily realities, delayed money is lost money.</p>
-
-      <p>The hidden cost of manual bookkeeping isn't just the software subscription you aren't paying for. It is the cognitive load on the founder, the delayed capital allocation, and the unprofessionalism signaled to high-value enterprise clients.</p>
-
-      <div class="my-8 rounded-xl overflow-hidden shadow-md">
-          <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&q=80" alt="Financial reporting and analysis" class="w-full h-auto object-cover" />
-          <p class="text-sm text-center text-slate-500 mt-2 italic">A clear paper trail is the foundation of a scalable business.</p>
-      </div>
-
-      <h2>The Reality of the African B2B Payment Culture</h2>
-
-      <p>In Lagos, Nairobi, or Accra, <em>"I will sort it tomorrow"</em> is an operational reality. Trust is low, and financial systems are fragmented.</p>
-
-      <p>Corporate clients have strict procurement procedures. If your invoice isn't explicitly VAT-compliant, lacks a clear payment link, or doesn't have a structured breakdown, it gets pushed to the bottom of the accountant's pile.</p>
-
-      <p>You cannot fix client behavior, but you can engineer a system that forces compliance.</p>
-
-      <h2>Moving from Spreadsheets to a Financial Operating System</h2>
-
-      <p>Top-tier teams don't "do bookkeeping." They build systems. They treat their financial operations like a state machine. An invoice is not a document; it is an object that moves from <code>Draft</code> &rarr; <code>Sent</code> &rarr; <code>Viewed</code> &rarr; <code>Paid</code> &rarr; <code>Receipted</code>.</p>
-
-      <p>This is exactly why we built <a href="https://invoiceapp.ng" class="text-indigo-600 underline">InvoiceApp.ng</a>.</p>
-
-      <p>We didn't just want to build another PDF generator. We engineered a localized Financial OS designed for the nuances of the African market.</p>
-
-      <p>When you generate an invoice on InvoiceApp, the heavy lifting is programmatic:</p>
-      <ul>
-          <li><strong>Precision Taxation:</strong> WHT and VAT are calculated algorithmically, eliminating the back-and-forth with corporate finance departments.</li>
-          <li><strong>Automated State Management:</strong> The moment a client pays, the system updates the invoice state and automatically triggers a localized, professional receipt. No manual reconciliation required.</li>
-          <li><strong>Client Management:</strong> Your top clients' data, preferred currencies, and historical ledgers are stored natively. Generating a recurring invoice takes two clicks, not twenty minutes.</li>
-          <li><strong>Integrated Payment Rails:</strong> Embedding Paystack links directly into the document removes the friction between a client opening your invoice and actually transferring the funds.</li>
-      </ul>
-
-      <h2>The Future of Automated Operations</h2>
-
-      <p>The next wave of successful African businesses won't just be the ones with the best products; they will be the ones with the highest operational velocity.</p>
-
-      <p>AI-driven accounting, programmatic ledger syncing, and zero-touch reconciliation are becoming the global standard. If your business is still copy-pasting line items into Excel in 2024, you are competing with one hand tied behind your back.</p>
-
-      <p>Automation is not a luxury reserved for venture-backed startups. It is a survival mechanism.</p>
-
-      <p>Stop chasing payments. Start orchestrating them. Switch your financial primitive from manual documents to an automated state machine.</p>
-
-      <p>Your cashflow—and your sanity—will thank you.</p>
-    `
   },
-
   {
     id: 17,
+    slug: 'the-velocity-of-capital-why-fast-payments-are-the-ultimate-growth-metric-for-african-smes',
     title: 'The Velocity of Capital: Why Fast Payments Are the Ultimate Growth Metric for African SMEs',
     excerpt: 'Most founders obsess over top-line revenue, but the silent killer of African SMEs is payment latency. If you are still relying on manual transfers and WhatsApp follow-ups, your operational friction is bleeding your margins dry.',
     category: 'Finance',
@@ -871,8 +729,7 @@ export const mockPosts = [
 
       <p>Stop waiting for money to arrive. Engineer your systems so it flows instantly.</p>
 `
-  }
-,
+  },
   {
     id: 18,
     slug: 'what-to-consider-when-choosing-a-payment-gateway-for-your-nigerian-business',

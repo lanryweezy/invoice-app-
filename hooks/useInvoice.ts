@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import type { Invoice, LineItem, Currency, InvoiceStatus, User as AppUser, Client } from '../types';
+import type { Invoice, LineItem, Currency, InvoiceStatus, User as AppUser, Client, BusinessProfile } from '../types';
 import { useSubscription } from './useSubscription';
 import { db, doc, setDoc, getDoc } from '../services/firebase';
 import { queueMutation } from '../utils/offlineSync';
@@ -62,6 +62,7 @@ const getInitialInvoiceState = (): Invoice => {
 export const useInvoice = () => {
   const [invoice, setInvoice] = useState<Invoice>(getInitialInvoiceState());
   const [savedClients, setSavedClients] = useState<Client[]>([]);
+  const [businessProfiles, setBusinessProfiles] = useState<BusinessProfile[]>([]);
   const [recurringInvoices, setRecurringInvoices] = useState<Invoice[]>([]);
   const { user: firebaseUser, isPro } = useSubscription();
 
@@ -91,6 +92,9 @@ export const useInvoice = () => {
                     if (data.savedClients) {
                         setSavedClients(data.savedClients);
                     }
+                    if (data.businessProfiles) {
+                        setBusinessProfiles(data.businessProfiles);
+                    }
                     if (data.recurringInvoices) {
                         setRecurringInvoices(data.recurringInvoices);
                     }
@@ -107,7 +111,7 @@ export const useInvoice = () => {
   }, [isPro, firebaseUser]);
 
   // Sync to Cloud helper with Offline Support
-  const syncToCloud = useCallback(async (data: Partial<{ invoiceUser: AppUser, savedClients: Client[], recurringInvoices: Invoice[], currentInvoice: Invoice }>) => {
+  const syncToCloud = useCallback(async (data: Partial<{ invoiceUser: AppUser, savedClients: Client[], businessProfiles: BusinessProfile[], recurringInvoices: Invoice[], currentInvoice: Invoice }>) => {
       if (isPro && firebaseUser) {
           if (!navigator.onLine) {
               // Queue the mutation in IndexedDB if offline
@@ -153,12 +157,16 @@ export const useInvoice = () => {
     return () => clearTimeout(timeoutId);
   }, [invoice, syncToCloud]);
 
-  // Load saved clients and recurring invoices
+  // Load saved clients, business profiles and recurring invoices
   useEffect(() => {
     try {
         const storedClients = localStorage.getItem('invoiceSavedClients');
         if (storedClients) {
             setSavedClients(JSON.parse(storedClients));
+        }
+        const storedProfiles = localStorage.getItem('invoiceBusinessProfiles');
+        if (storedProfiles) {
+            setBusinessProfiles(JSON.parse(storedProfiles));
         }
         const storedRecurring = localStorage.getItem('invoiceRecurring');
         if (storedRecurring) {
@@ -270,6 +278,39 @@ export const useInvoice = () => {
       });
   }, [syncToCloud]);
 
+  const saveBusinessProfile = useCallback((profile: AppUser) => {
+      if (!profile.name.trim()) return false;
+
+      setBusinessProfiles(prev => {
+          const normalizedName = profile.name.trim().toLowerCase();
+          const existingIndex = prev.findIndex(p => p.name.toLowerCase() === normalizedName);
+
+          let newProfiles;
+          if (existingIndex >= 0) {
+              newProfiles = [...prev];
+              newProfiles[existingIndex] = { ...profile, id: prev[existingIndex].id };
+          } else {
+              newProfiles = [...prev, { ...profile, id: crypto.randomUUID() }];
+          }
+
+          newProfiles.sort((a, b) => a.name.localeCompare(b.name));
+
+          localStorage.setItem('invoiceBusinessProfiles', JSON.stringify(newProfiles));
+          syncToCloud({ businessProfiles: newProfiles });
+          return newProfiles;
+      });
+      return true;
+  }, [syncToCloud]);
+
+  const removeBusinessProfile = useCallback((id: string) => {
+      setBusinessProfiles(prev => {
+          const newProfiles = prev.filter(p => p.id !== id);
+          localStorage.setItem('invoiceBusinessProfiles', JSON.stringify(newProfiles));
+          syncToCloud({ businessProfiles: newProfiles });
+          return newProfiles;
+      });
+  }, [syncToCloud]);
+
   return {
     invoice,
     setInvoice,
@@ -280,6 +321,9 @@ export const useInvoice = () => {
     calculateTotals,
     savedClients,
     saveClient,
+    businessProfiles,
+    saveBusinessProfile,
+    removeBusinessProfile,
     recurringInvoices,
     saveRecurringInvoice,
     removeRecurringInvoice
