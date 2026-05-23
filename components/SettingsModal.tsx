@@ -46,15 +46,43 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
     setSaving(true);
     setMessage('');
     try {
-      const docRef = doc(db, 'users', user.uid);
-      await updateDoc(docRef, {
-        username: username.toLowerCase().replace(/[^a-z0-9_]/g, ''), // sanitize username
+      const sanitizedUsername = username.toLowerCase().replace(/[^a-z0-9_]/g, '');
+      if (!sanitizedUsername && isPublic) {
+         setMessage('Failed: Username cannot be empty if public.');
+         setSaving(false);
+         return;
+      }
+
+      const payload = {
+        username: sanitizedUsername,
         bio,
         businessName,
         website,
         isPublic,
-        email: user.email // keep email in sync for public contact
-      });
+        email: user.email,
+        uid: user.uid
+      };
+
+      // 1. Save to users document for internal state management
+      const userDocRef = doc(db, 'users', user.uid);
+      await updateDoc(userDocRef, payload);
+
+      // 2. Manage the public profile entry (ensures global uniqueness via document ID)
+      if (sanitizedUsername) {
+         const publicRef = doc(db, 'publicProfiles', sanitizedUsername);
+         const publicSnap = await getDoc(publicRef);
+
+         if (publicSnap.exists() && publicSnap.data().uid !== user.uid) {
+             setMessage('Failed: Username is already taken by another business.');
+             setSaving(false);
+             return;
+         }
+
+         // Using setDoc here because updateDoc fails if the doc doesn't exist yet
+         const { setDoc } = await import('firebase/firestore');
+         await setDoc(publicRef, payload);
+      }
+
       setMessage('Profile updated successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {

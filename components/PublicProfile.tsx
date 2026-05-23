@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../services/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 
 interface PublicProfileProps {
   username: string;
@@ -13,15 +13,15 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({ username }) => {
 
   useEffect(() => {
     const fetchProfile = async () => {
+      if (!username) return;
       try {
-        const usersRef = collection(db, 'users');
-        const q = query(usersRef, where('username', '==', username), where('isPublic', '==', true));
-        const querySnapshot = await getDocs(q);
+        const docRef = doc(db, 'publicProfiles', username);
+        const docSnap = await getDoc(docRef);
 
-        if (querySnapshot.empty) {
+        if (!docSnap.exists() || docSnap.data().isPublic === false) {
           setError('Profile not found or is not public.');
         } else {
-          setProfile(querySnapshot.docs[0].data());
+          setProfile(docSnap.data());
         }
       } catch (err) {
         console.error("Error fetching public profile:", err);
@@ -102,14 +102,21 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({ username }) => {
                     <span className="w-2 h-2 rounded-full bg-green-500"></span> Active on InvoiceApp
                   </span>
                </div>
-               {profile.website && (
-                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                    <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Website</span>
-                    <a href={profile.website} target="_blank" rel="noopener noreferrer" className="font-medium text-teal-600 hover:underline truncate block">
-                      {profile.website.replace(/^https?:\/\//, '')}
-                    </a>
-                 </div>
-               )}
+               {profile.website && (() => {
+                  // Basic XSS mitigation for href
+                  let safeUrl = profile.website;
+                  if (!safeUrl.startsWith('http://') && !safeUrl.startsWith('https://')) {
+                      safeUrl = 'https://' + safeUrl; // default to https, ignoring javascript: or other URIs
+                  }
+                  return (
+                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 overflow-hidden">
+                        <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Website</span>
+                        <a href={safeUrl} target="_blank" rel="noopener noreferrer" className="font-medium text-teal-600 hover:underline truncate block">
+                          {profile.website.replace(/^https?:\/\//, '')}
+                        </a>
+                    </div>
+                  );
+               })()}
             </div>
 
             <div className="border-t border-slate-100 pt-8 text-center">
