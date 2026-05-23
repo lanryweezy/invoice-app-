@@ -29,3 +29,7 @@
 ## 2026-05-21 - [O(1) Map Lookups for Performance]
 **Learning:** React components (like `BlogPost.tsx`) frequently map over large static arrays (like `mockPosts`) to find a specific item by ID during render using `Array.find()` (`O(N)`). While this is usually fine for small lists, as the dataset grows, this `O(N)` search happens on every single render. Over time, this can lead to unnecessary main-thread blocking and reduced performance.
 **Action:** Replace `O(N)` array lookups with `O(1)` Map lookups. Export a memoized Map (e.g. `new Map(items.map(i => [i.id, i]))`) from the data source file, and use `map.get(id)` inside the component's `useMemo`.
+
+## 2026-05-23 - [React.memo on large route/page components]
+**Learning:** Large, expensive components like `InvoiceForm` and `InvoicePreview` frequently take props that are carefully memoized (e.g. `useCallback` or primitive states), but if the parent component (`App.tsx`) re-renders due to unrelated state changes (like opening a modal, showing a toast, or toggling mobile tabs), these expensive components will unnecessarily re-render if not wrapped in `React.memo()`.
+**Action:** Always consider wrapping large top-level layout or heavy visual components in `React.memo` (especially if their props are already stable) to insulate them from frequent, unrelated state updates in their parent container.
