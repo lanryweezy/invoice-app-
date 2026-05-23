@@ -336,6 +336,17 @@ const App: React.FC = () => {
           showToast('PDF Downloaded!');
           trackEvent('download_pdf_success', { invoice_id: invoice.invoiceNumber });
 
+          // Nudge: Ask to sign up/login after successful download if not authenticated
+          if (!user) {
+              setTimeout(() => {
+                  setPricingModalContent({
+                      title: "Don't Lose Your Invoices!",
+                      message: "Sign up for a free account to save your clients and sync your invoices across all your devices."
+                  });
+                  setIsPricingModalOpen(true);
+              }, 1000);
+          }
+
       } catch (e) {
           console.error(e);
           showToast('Failed to generate PDF', 'error');
