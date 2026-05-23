@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { mockPosts } from '../data/blogPosts';
 
@@ -6,7 +6,31 @@ interface BlogProps {
   onPostClick: (slug: string) => void;
 }
 
+const POSTS_PER_PAGE = 6;
+
 export const Blog: React.FC<BlogProps> = ({ onPostClick }) => {
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [visibleCount, setVisibleCount] = useState(POSTS_PER_PAGE);
+
+  const categories = ['All', 'Guides', 'Small Business', 'Finance', 'AI & Tech'];
+
+  const filteredPosts = useMemo(() => {
+      if (activeCategory === 'All') return mockPosts;
+      return mockPosts.filter(post => post.category === activeCategory);
+  }, [activeCategory]);
+
+  const visiblePosts = filteredPosts.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredPosts.length;
+
+  const handleLoadMore = () => {
+      setVisibleCount(prev => prev + POSTS_PER_PAGE);
+  };
+
+  const handleCategoryChange = (category: string) => {
+      setActiveCategory(category);
+      setVisibleCount(POSTS_PER_PAGE);
+  };
+
   return (
     <div className="w-full bg-slate-50 min-h-full">
       <Helmet>
@@ -32,10 +56,11 @@ export const Blog: React.FC<BlogProps> = ({ onPostClick }) => {
 
             {/* Simple Category Filter */}
             <div className="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto">
-                {['All', 'Guides', 'Small Business', 'Finance', 'AI & Tech'].map((cat, i) => (
+                {categories.map((cat) => (
                     <button
                         key={cat}
-                        className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${i === 0 ? 'bg-teal-500 text-white' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'}`}
+                        onClick={() => handleCategoryChange(cat)}
+                        className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${activeCategory === cat ? 'bg-teal-500 text-white shadow-md' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'}`}
                     >
                         {cat}
                     </button>
@@ -45,7 +70,7 @@ export const Blog: React.FC<BlogProps> = ({ onPostClick }) => {
 
         {/* Blog Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {mockPosts.map((post) => (
+          {visiblePosts.map((post) => (
             <article key={post.id} onClick={() => post.slug && onPostClick(post.slug)} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col cursor-pointer group">
               <div className="h-48 overflow-hidden bg-slate-100 relative">
                 <img
@@ -78,6 +103,19 @@ export const Blog: React.FC<BlogProps> = ({ onPostClick }) => {
             </article>
           ))}
         </div>
+
+        {/* Load More Button */}
+        {hasMore && (
+            <div className="mt-12 text-center">
+                <button
+                    onClick={handleLoadMore}
+                    className="inline-flex items-center gap-2 px-8 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl shadow-sm hover:shadow-md hover:bg-slate-50 transition-all focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                >
+                    Load More Articles
+                    <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                </button>
+            </div>
+        )}
 
         {/* Newsletter Signup */}
         <div className="mt-16 bg-teal-50 rounded-2xl border border-teal-100 p-8 sm:p-12 text-center">

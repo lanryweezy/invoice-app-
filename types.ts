@@ -12,6 +12,8 @@ export interface Client {
   address: string;
 }
 
+export type PaymentGateway = 'Paystack' | 'Flutterwave' | 'Monnify' | 'Kora' | 'Squad' | 'Interswitch' | 'OPay' | 'Fincra';
+
 export interface User {
   name: string;
   email: string;
@@ -21,6 +23,7 @@ export interface User {
   accountNumber: string;
   logo?: string; // Base64 string for the image
   paymentLink?: string; // E.g. Paystack payment link
+  paymentGateway?: PaymentGateway;
 }
 
 export type Currency = 'NGN' | 'USD' | 'EUR' | 'GBP';
