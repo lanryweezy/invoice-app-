@@ -1,6 +1,63 @@
 export const mockPosts = [
   {
-    id: 1,
+    id: 19,
+    slug: 'how-smart-businesses-use-automation-to-grow-faster-in-africa',
+    title: 'How Smart Businesses Use Automation to Grow Faster',
+    excerpt: 'Manual processes are a hidden tax on your growth. Discover the systems thinking and automation frameworks that top-tier African operators use to scale without hiring huge teams.',
+    category: 'Operations',
+    readTime: '9 Min Read',
+    date: 'June 11, 2026',
+    imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80',
+    htmlContent: `
+      <p>There is a dangerous myth in African business: the belief that "hustle" scales. We celebrate the founder who sleeps three hours a night, manually reconciling bank statements, individually messaging clients on WhatsApp for payments, and keeping inventory in their head.</p>
+
+      <p>But hustle doesn't scale. Systems do.</p>
+
+      <p>If you're relying on manual effort to run your core operations, you are capping your growth. Every hour spent on a repetitive, low-leverage task is an hour stolen from strategy, product development, or aggressive sales. Manual work isn't just exhausting; it's a hidden tax on your operational bandwidth.</p>
+
+      <h2>The Real Cost of Manual Operations</h2>
+      <p>Let's look at the typical lifecycle of a transaction for a growing Nigerian agency or SME:</p>
+
+      <ul>
+          <li><strong>The Pitch:</strong> You win the client. Great.</li>
+          <li><strong>The Invoice:</strong> You spend 20 minutes finding the last invoice template, updating it, converting it to PDF, and emailing it.</li>
+          <li><strong>The Follow-up:</strong> The client forgets. You set a calendar reminder to text them in 4 days.</li>
+          <li><strong>The Reconciliation:</strong> They pay. You manually check your bank app, confirm the amount, and update an Excel spreadsheet.</li>
+          <li><strong>The Receipt:</strong> You create another document to acknowledge payment.</li>
+      </ul>
+
+      <p>This process takes perhaps 45 minutes of active context-switching per client. Multiply that by 50 clients. That's over 37 hours a month—an entire work week—lost to friction. You are paying a massive "friction tax" simply to collect money you've already earned.</p>
+
+      <div class="my-8 rounded-xl overflow-hidden shadow-md">
+          <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80" alt="Dashboard showing automated metrics" class="w-full h-auto object-cover" />
+          <p class="text-sm text-center text-slate-500 mt-2 italic">Automation transforms messy operations into predictable, scalable revenue engines.</p>
+      </div>
+
+      <h2>Systems Thinking: The Engine of Growth</h2>
+      <p>Smart operators don't just work harder; they engineer their businesses to run autonomously. Automation isn't about replacing humans; it's about elevating them. It’s about building a financial operating system.</p>
+
+      <p>Here is the playbook for automating your back-office:</p>
+
+      <h3>1. Standardize Before You Automate</h3>
+      <p>You cannot automate a chaotic process. First, define the exact steps. What is the standard payment term? What happens on day 3 of an overdue invoice? What is the exact email template? Once the rules are defined, the software can execute them.</p>
+
+      <h3>2. Automate the Invoicing Lifecycle</h3>
+      <p>Instead of manually generating documents, use an automated platform like InvoiceApp.ng. You select the client, input the deliverables, and the system handles the rest. But the real magic happens post-send.</p>
+
+      <p>Automated follow-ups are the highest ROI automation you can implement. The system checks the payment status and dispatches professional, firm reminders. It removes the emotional weight of "chasing money" and ensures you get paid faster without the awkward WhatsApp messages.</p>
+
+      <h3>3. Seamless Payment Integration</h3>
+      <p>When you automate, you remove steps for the user. A PDF requires the client to context-switch to their banking app. A smart invoice includes an embedded payment link (like Paystack or Flutterwave). They click, they pay, and the invoice is instantly marked as reconciled in your system.</p>
+
+      <h2>The Automation Arbitrage</h2>
+      <p>In a market where many competitors are bogged down by administrative debt, automation gives you an unfair advantage. You can handle 10x the client volume with the same headcount. Your team focuses on high-leverage work. Your cashflow becomes predictable.</p>
+
+      <p>Stop playing on hard mode. Build the system, automate the friction, and watch your business accelerate.</p>
+    `
+  },
+
+  {
+    id: 18,
     slug: 'why-most-invoices-never-get-paid-on-time-and-how-african-smes-can-fix-it',
     title: 'Why Most Invoices Never Get Paid on Time (And How African SMEs Can Fix It)',
     excerpt: 'Late payments aren\'t just bad luck; they are a structural failure in your business system. Here is why the "I will send it later" culture is killing your cashflow and the exact operational shifts to fix it.',
