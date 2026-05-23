@@ -27,6 +27,7 @@ import { ReceiptPreview } from './components/ReceiptPreview';
 import { PaymentModal } from './components/PaymentModal';
 import { Blog } from './components/Blog';
 import { BlogPost } from './components/BlogPost';
+import { PublicProfile } from './components/PublicProfile';
 
 // Lazy load heavy preview component
 const InvoicePreview = React.lazy(() => import('./components/InvoicePreview').then(module => ({ default: module.InvoicePreview })));
@@ -53,7 +54,7 @@ const App: React.FC = () => {
   const [pricingModalContent, setPricingModalContent] = useState({ title: 'Upgrade to Pro', message: 'Unlock advanced features to supercharge your business.' });
 
   // Main view state
-  const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'blog' | 'blogPost'>(() => {
+  const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'blog' | 'blogPost' | 'publicProfile'>(() => {
       let path;
       try {
           path = decodeURIComponent(window.location.pathname);
@@ -61,6 +62,7 @@ const App: React.FC = () => {
           path = window.location.pathname; // Fallback if malformed URI
       }
 
+      if (path.startsWith('/p/')) return 'publicProfile';
       if (path === '/blog') return 'blog';
 
       // Handle legacy /blog/:id routes by redirecting them or showing blogPost view
@@ -68,10 +70,16 @@ const App: React.FC = () => {
           return 'blogPost';
       }
 
-      if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts') {
+      if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts' && !path.startsWith('/p/')) {
           return 'blogPost';
       }
       return 'editor';
+  });
+
+  const [publicUsername, setPublicUsername] = useState<string | null>(() => {
+      let path = window.location.pathname;
+      if (path.startsWith('/p/')) return path.split('/')[2] || null;
+      return null;
   });
 
   const [activeBlogPostSlug, setActiveBlogPostSlug] = useState<string | null>(() => {
@@ -87,7 +95,7 @@ const App: React.FC = () => {
           return path.substring(6);
       }
 
-      if (path !== '/' && path !== '/blog' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts') {
+      if (path !== '/' && path !== '/blog' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts' && !path.startsWith('/p/')) {
           return path.substring(1); // Remove leading slash
       }
       return null;
@@ -98,6 +106,7 @@ const App: React.FC = () => {
       let path = '/';
       if (activeView === 'blog') path = '/blog';
       else if (activeView === 'blogPost' && activeBlogPostSlug !== null) path = `/${encodeURIComponent(activeBlogPostSlug)}`;
+      else if (activeView === 'publicProfile' && publicUsername !== null) path = `/p/${publicUsername}`;
 
       // Update the URL without reloading the page
       let currentDecodedPath;
@@ -117,7 +126,7 @@ const App: React.FC = () => {
       if (currentDecodedPath !== targetDecodedPath) {
           window.history.pushState(null, '', path);
       }
-  }, [activeView, activeBlogPostSlug]);
+  }, [activeView, activeBlogPostSlug, publicUsername]);
 
   // Handle browser back/forward buttons
   useEffect(() => {
@@ -130,6 +139,9 @@ const App: React.FC = () => {
           }
           if (path === '/blog') {
               setActiveView('blog');
+          } else if (path.startsWith('/p/')) {
+              setPublicUsername(path.split('/')[2] || null);
+              setActiveView('publicProfile');
           } else if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts') {
               setActiveBlogPostSlug(path.substring(1));
               setActiveView('blogPost');
@@ -523,6 +535,8 @@ const App: React.FC = () => {
             }} />
         ) : activeView === 'blogPost' && activeBlogPostSlug !== null ? (
             <BlogPost postSlug={activeBlogPostSlug} onBack={() => setActiveView('blog')} />
+        ) : activeView === 'publicProfile' && publicUsername !== null ? (
+            <PublicProfile username={publicUsername} />
         ) : (
         <div className="flex flex-col md:flex-row h-full">
           

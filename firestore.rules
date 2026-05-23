@@ -2,8 +2,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{userId} {
-      // Allow users to read their own document
-      allow read: if request.auth != null && request.auth.uid == userId;
+      // Allow users to read their own document, or if the document is flagged as public
+      allow read: if (request.auth != null && request.auth.uid == userId) || (resource.data.isPublic == true);
 
       // Allow creation only if plan is set to 'free'
       allow create: if request.auth != null && request.auth.uid == userId

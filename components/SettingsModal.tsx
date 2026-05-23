@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../services/firebase';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -9,6 +11,60 @@ interface SettingsModalProps {
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, user, isPro, logout }) => {
+  const [username, setUsername] = useState('');
+  const [bio, setBio] = useState('');
+  const [businessName, setBusinessName] = useState('');
+  const [website, setWebsite] = useState('');
+  const [isPublic, setIsPublic] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    if (isOpen && user && isPro) {
+      const fetchProfile = async () => {
+        try {
+          const docRef = doc(db, 'users', user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setUsername(data.username || '');
+            setBio(data.bio || '');
+            setBusinessName(data.businessName || '');
+            setWebsite(data.website || '');
+            setIsPublic(data.isPublic || false);
+          }
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+        }
+      };
+      fetchProfile();
+    }
+  }, [isOpen, user, isPro]);
+
+  const handleSaveProfile = async () => {
+    if (!user) return;
+    setSaving(true);
+    setMessage('');
+    try {
+      const docRef = doc(db, 'users', user.uid);
+      await updateDoc(docRef, {
+        username: username.toLowerCase().replace(/[^a-z0-9_]/g, ''), // sanitize username
+        bio,
+        businessName,
+        website,
+        isPublic,
+        email: user.email // keep email in sync for public contact
+      });
+      setMessage('Profile updated successfully!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      setMessage('Failed to update profile.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -43,6 +99,95 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
               {isPro ? 'Your data is being safely synced to the cloud.' : 'Upgrade to Pro to unlock cloud sync, unlimited clients, and more.'}
             </p>
           </div>
+
+          {isPro && (
+            <div className="border-t border-slate-100 pt-6">
+              <h3 className="text-sm font-bold text-slate-900 mb-4">Public "Verified Business" Profile</h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Public Username</label>
+                  <div className="flex rounded-lg shadow-sm">
+                    <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-slate-200 bg-slate-50 text-slate-500 text-sm">
+                      invoiceapp.ng/p/
+                    </span>
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="mycompany"
+                      className="flex-1 block w-full rounded-none rounded-r-lg border-slate-200 focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Business Name</label>
+                  <input
+                    type="text"
+                    value={businessName}
+                    onChange={(e) => setBusinessName(e.target.value)}
+                    className="block w-full rounded-lg border-slate-200 focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                    placeholder="E.g. Acme Corp"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Short Bio</label>
+                  <textarea
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    rows={2}
+                    className="block w-full rounded-lg border-slate-200 focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                    placeholder="We build amazing digital products..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Website URL</label>
+                  <input
+                    type="url"
+                    value={website}
+                    onChange={(e) => setWebsite(e.target.value)}
+                    className="block w-full rounded-lg border-slate-200 focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                    placeholder="https://example.com"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between pt-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={isPublic}
+                      onChange={(e) => setIsPublic(e.target.checked)}
+                      className="rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                    />
+                    <span className="text-sm text-slate-700">Make profile public</span>
+                  </label>
+                  <button
+                    onClick={handleSaveProfile}
+                    disabled={saving}
+                    className="px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors"
+                  >
+                    {saving ? 'Saving...' : 'Save Profile'}
+                  </button>
+                </div>
+                {message && (
+                  <p className={`text-xs mt-2 ${message.includes('Failed') ? 'text-red-500' : 'text-teal-600'}`}>
+                    {message}
+                  </p>
+                )}
+                {isPublic && username && (
+                   <p className="text-xs text-slate-500 mt-2">
+                     Your profile is live at:{' '}
+                     <a href={`/p/${username}`} target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:underline">
+                       invoiceapp.ng/p/{username}
+                     </a>
+                   </p>
+                )}
+              </div>
+            </div>
+          )}
 
           <button
             onClick={() => {
