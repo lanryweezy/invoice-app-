@@ -11,6 +11,8 @@ interface InvoiceFormProps {
   updateLineItem: (id: string, field: keyof Omit<LineItem, 'id'>, value: string | number) => void;
   savedClients: Client[];
   onSaveClient: (client: Client) => void;
+  businessProfiles?: any[];
+  onSaveBusinessProfile?: (profile: any) => void;
   onSaveRecurring?: (invoice: Invoice) => void;
   isPro?: boolean;
   onProFeatureClick?: () => void;
@@ -31,9 +33,10 @@ interface InputFieldProps {
   autoComplete?: string;
   step?: string;
   error?: string;
+  list?: string;
 }
 
-const InputField: React.FC<InputFieldProps> = React.memo(({ id, label, value, onChange, type = 'text', placeholder, className, name, icon, prefix, noLabel, autoComplete, step, error }) => {
+const InputField: React.FC<InputFieldProps> = React.memo(({ id, label, value, onChange, type = 'text', placeholder, className, name, icon, prefix, noLabel, autoComplete, step, error, list }) => {
   const isDate = type === 'date';
   
   const handlePickerTrigger = (e: React.SyntheticEvent) => {
@@ -69,6 +72,7 @@ const InputField: React.FC<InputFieldProps> = React.memo(({ id, label, value, on
           placeholder={placeholder}
           autoComplete={autoComplete}
           step={step}
+          list={list}
           onClick={handlePickerTrigger}
           onKeyDown={(e) => {
               if (isDate && (e.key === 'Enter' || e.key === ' ')) {
@@ -252,7 +256,7 @@ const LineItemRow = React.memo(({ item, index, currencySymbol, currencyFormatter
 });
 
 // ⚡ Bolt: Wrap InvoiceForm in React.memo to prevent unnecessary re-renders when parent state (like modals) changes
-export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, savedClients, onSaveClient, onSaveRecurring, isPro = false, onProFeatureClick }) => {
+export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, savedClients, onSaveClient, businessProfiles = [], onSaveBusinessProfile, onSaveRecurring, isPro = false, onProFeatureClick }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const validateEmail = (email: string) => {
@@ -380,6 +384,17 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
       }
   }, [savedClientsMap, updateInvoice]);
 
+  const handleSelectBusinessProfile = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = e.target.value;
+    if (!selectedId) return;
+    const profile = businessProfiles.find(p => p.id === selectedId);
+    if (profile) {
+        // Exclude 'id' when updating user state
+        const { id, ...userDetails } = profile;
+        updateInvoice('user', userDetails);
+    }
+  }, [businessProfiles, updateInvoice]);
+
   const handleVatToggle = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.checked) {
           updateInvoice('taxRate', invoice.taxRate > 0 ? invoice.taxRate : 7.5);
@@ -399,11 +414,52 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
       return (0).toLocaleString('en-US', { style: 'currency', currency: invoice.currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace(/\d/g, '').trim();
   }, [invoice.currency]);
 
+  const nigerianBanks = [
+    "Access Bank", "Access Bank (Diamond)", "ALAT by WEMA", "ASO Savings and Loans", "Bowen Microfinance Bank",
+    "Carbon", "CEMCS Microfinance Bank", "Citibank Nigeria", "Ecobank Nigeria", "Ekondo Microfinance Bank",
+    "Eyowo", "Fidelity Bank", "First Bank of Nigeria", "First City Monument Bank (FCMB)", "FSDH Merchant Bank Limited",
+    "Globus Bank", "Guaranty Trust Bank (GTBank)", "Hackman Microfinance Bank", "Hasal Microfinance Bank",
+    "Heritage Bank", "Ibile Microfinance Bank", "Infinity MFB", "Jaiz Bank", "Keystone Bank", "Kuda Bank",
+    "Lagos Building Investment Company PLC", "Links MFB", "Lotus Bank", "Mayfair MFB", "Mint MFB",
+    "Moniepoint MFB", "Nova Merchant Bank", "One Finance", "OPay Digital Services Limited (OPay)",
+    "Optimus Bank Limited", "Paga", "PalmPay", "Parallex Bank", "Parkway - ReadyCash", "Paycom", "Personal Trust Microfinance Bank",
+    "Petra Microfinance Bank", "Polaris Bank", "PremiumTrust Bank", "Providus Bank", "QuickFund MFB", "Rand Merchant Bank",
+    "Refuge Mortgage Bank", "Rubies MFB", "Safe Haven MFB", "Safe Haven Microfinance Bank", "SAGE MFB", "Signature Bank Limited",
+    "Sparkle Microfinance Bank", "Stanbic IBTC Bank", "Standard Chartered Bank", "Sterling Bank", "Suntrust Bank",
+    "TAJ Bank", "Tangerine Money", "TCF MFB", "Titan Bank", "Titan Paystack", "Union Bank of Nigeria",
+    "United Bank for Africa (UBA)", "Unity Bank", "VFD Microfinance Bank Limited", "Wema Bank", "Zenith Bank"
+  ];
+
   return (
     <div className="space-y-6 pb-20">
+        <datalist id="nigerian-banks">
+            {nigerianBanks.map(bank => <option key={bank} value={bank} />)}
+        </datalist>
         
         {/* Business Info */}
         <CollapsibleSection title="Your Business Info" icon={<BriefcaseIcon className="w-4 h-4"/>}>
+
+            {businessProfiles.length > 0 && (
+                <div className="mb-6 bg-slate-50 p-1 rounded-lg border border-slate-200">
+                    <div className="relative group">
+                        <select
+                            id="savedProfile"
+                            onChange={handleSelectBusinessProfile}
+                            className="block w-full pl-3 pr-10 py-2 bg-transparent text-slate-700 text-sm font-semibold focus:outline-none appearance-none cursor-pointer"
+                            defaultValue=""
+                        >
+                            <option value="" disabled>Load Saved Profile...</option>
+                            {businessProfiles.map(p => (
+                                <option key={p.id} value={p.id}>{p.name}</option>
+                            ))}
+                        </select>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-hover:text-teal-500 transition-colors">
+                            <ChevronDownIcon className="w-4 h-4" />
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Logo Upload - Brand Card Style */}
             <div className="mb-8">
                 <div 
@@ -493,6 +549,18 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                     />
                 </div>
 
+                {invoice.user.name && onSaveBusinessProfile && (
+                    <div className="flex justify-end pt-2 pb-4">
+                        <button
+                            onClick={() => onSaveBusinessProfile(invoice.user)}
+                            className="flex items-center gap-1.5 text-[11px] font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-md transition-colors border border-teal-100"
+                        >
+                            <SaveIcon className="w-3.5 h-3.5" />
+                            Save Business Profile
+                        </button>
+                    </div>
+                )}
+
                 {/* Bank Details - Credit Card Style UI */}
                 <div className="pt-4">
                      <label className="block text-[11px] font-bold text-slate-400 mb-2 uppercase tracking-wider flex items-center gap-1.5">
@@ -511,6 +579,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                                     value={invoice.user.bankName}
                                     onChange={handleUserChange}
                                     placeholder="e.g. GTBank"
+                                    list="nigerian-banks"
                                     className="bg-transparent border-b border-white/20 w-full text-white font-semibold placeholder:text-white/20 focus:outline-none focus:border-teal-400 transition-colors py-1 text-sm"
                                 />
                             </div>
@@ -562,6 +631,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                                         placeholder="e.g. paystack.com/pay/xyz"
                                         className="bg-transparent border-b border-white/20 w-full text-white font-mono font-semibold placeholder:text-white/20 focus:outline-none focus:border-teal-400 transition-colors py-1 text-sm"
                                     />
+                                    <p className="text-[9px] text-slate-400 mt-1 italic">Paste your Paystack/Flutterwave link so clients can pay faster.</p>
                                 </div>
                             </div>
                         </div>
@@ -742,12 +812,20 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
         {/* Line Items */}
         <CollapsibleSection title={`Invoice Items (${invoice.lineItems.length})`} highlight={true} icon={<ListIcon className="w-4 h-4"/>}>
             {invoice.lineItems.length === 0 ? (
-                <div className="text-center py-12 px-4 bg-white rounded-xl border-2 border-dashed border-slate-100 hover:border-teal-200 transition-colors group">
+                <div className="text-center py-10 px-4 bg-white rounded-xl border-2 border-dashed border-slate-100 hover:border-teal-200 transition-colors group">
                     <div className="bg-slate-50 group-hover:bg-teal-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors">
                         <EmptyBoxIcon className="w-8 h-8 text-slate-300 group-hover:text-teal-400 transition-colors" />
                     </div>
                     <h3 className="text-slate-900 font-bold mb-1">No items yet</h3>
                     <p className="text-slate-500 text-xs mb-6 max-w-xs mx-auto">Add services or products to calculate your invoice total.</p>
+
+                    {/* Visual Example Row */}
+                    <div className="max-w-md mx-auto mb-8 p-3 rounded-lg bg-slate-50/50 border border-slate-100 opacity-60 flex items-center gap-3">
+                        <div className="flex-1 h-2 bg-slate-200 rounded-full"></div>
+                        <div className="w-8 h-2 bg-slate-200 rounded-full"></div>
+                        <div className="w-16 h-2 bg-slate-300 rounded-full"></div>
+                    </div>
+
                     <button
                         onClick={addLineItem}
                         className="inline-flex items-center justify-center gap-2 bg-teal-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-teal-700 transition-all text-sm shadow-lg shadow-teal-200/50 hover:shadow-teal-300/50"
@@ -755,6 +833,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                         <PlusIcon className="w-4 h-4" />
                         Add First Item
                     </button>
+                    <p className="mt-4 text-[10px] text-slate-400 italic">Example: "Logo design — 1 — 150,000"</p>
                 </div>
             ) : (
                 <div className="space-y-4">

@@ -30,8 +30,8 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({ selectedTemp
               aria-pressed={selectedTemplate === template.id}
               aria-label={`Select ${template.name} template`}
               className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all whitespace-nowrap border shadow-sm ${
-                  selectedTemplate === template.id 
-                  ? 'bg-teal-600 text-white border-teal-600 shadow-md' 
+                  selectedTemplate === template.id
+                  ? 'bg-teal-600 text-white border-teal-600 shadow-md'
                   : 'bg-white text-slate-600 border-slate-200 hover:border-teal-400 hover:text-teal-700'
               }`}
             >

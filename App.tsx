@@ -28,6 +28,8 @@ import { PaymentModal } from './components/PaymentModal';
 import { Blog } from './components/Blog';
 import { BlogPost } from './components/BlogPost';
 import { PublicProfile } from './components/PublicProfile';
+import { PrivacyModal } from './components/PrivacyModal';
+import { TermsModal } from './components/TermsModal';
 import { flushQueue, getQueueCount } from './utils/offlineSync';
 
 // Lazy load heavy preview component
@@ -38,7 +40,7 @@ const InvoicePreview = React.lazy(() => import('./components/InvoicePreview').th
 const numberFormatter = new Intl.NumberFormat();
 
 const App: React.FC = () => {
-  const { invoice, setInvoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, calculateTotals, savedClients, saveClient, recurringInvoices, saveRecurringInvoice, removeRecurringInvoice } = useInvoice();
+  const { invoice, setInvoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, calculateTotals, savedClients, saveClient, businessProfiles, saveBusinessProfile, recurringInvoices, saveRecurringInvoice, removeRecurringInvoice } = useInvoice();
   const { expenses, addExpense, removeExpense } = useExpenses();
   const { receipts, addReceipt, removeReceipt } = useReceipts();
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
@@ -55,6 +57,8 @@ const App: React.FC = () => {
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
   const [pricingModalContent, setPricingModalContent] = useState({ title: 'Upgrade to Pro', message: 'Unlock advanced features to supercharge your business.' });
 
   // Toast State
@@ -669,6 +673,11 @@ const App: React.FC = () => {
                   updateLineItem={updateLineItem}
                   savedClients={savedClients}
                   onSaveClient={handleSaveClient}
+                  businessProfiles={businessProfiles}
+                  onSaveBusinessProfile={(profile) => {
+                      saveBusinessProfile(profile);
+                      showToast('Business profile saved!');
+                  }}
                   onSaveRecurring={saveRecurringInvoice ? handleSaveRecurringWrapper : undefined}
                   isPro={isPro}
                   onProFeatureClick={handleProFeatureRecurring}
@@ -694,9 +703,9 @@ const App: React.FC = () => {
 
                    {/* Links */}
                    <div className="flex justify-center gap-6 text-xs font-bold text-slate-600">
-                       <button onClick={() => showToast('Privacy Policy coming soon', 'success')} className="hover:text-teal-600 transition-colors">Privacy</button>
+                       <button onClick={() => setIsPrivacyModalOpen(true)} className="hover:text-teal-600 transition-colors">Privacy</button>
                        <span className="text-slate-300">•</span>
-                       <button onClick={() => showToast('Terms coming soon', 'success')} className="hover:text-teal-600 transition-colors">Terms</button>
+                       <button onClick={() => setIsTermsModalOpen(true)} className="hover:text-teal-600 transition-colors">Terms</button>
                        <span className="text-slate-300">•</span>
                        <button onClick={() => setActiveView('blog')} className="hover:text-teal-600 transition-colors">Blog</button>
                        <span className="text-slate-300">•</span>
@@ -847,6 +856,16 @@ const App: React.FC = () => {
             logout();
             setActiveView('editor');
         }}
+      />
+
+      <PrivacyModal
+        isOpen={isPrivacyModalOpen}
+        onClose={() => setIsPrivacyModalOpen(false)}
+      />
+
+      <TermsModal
+        isOpen={isTermsModalOpen}
+        onClose={() => setIsTermsModalOpen(false)}
       />
     </div>
   );
