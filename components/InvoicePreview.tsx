@@ -15,56 +15,57 @@ interface InvoicePreviewProps {
   isPro?: boolean;
 }
 
+// ⚡ Bolt: Move static objects outside of component to avoid recreation on every render
+const STATUS_STYLES: { [key in TemplateId]: { [key in InvoiceStatus]: string } } = {
+    classic: {
+        Draft: 'bg-slate-100 text-slate-700 border-slate-300',
+        Sent: 'bg-blue-50 text-blue-800 border-blue-200',
+        Paid: 'bg-teal-50 text-teal-800 border-teal-200',
+        Overdue: 'bg-red-50 text-red-800 border-red-200',
+    },
+    modern: {
+         Draft: 'bg-slate-200/20 text-slate-100 border-white/10',
+         Sent: 'bg-blue-500/20 text-blue-100 border-blue-400/30',
+         Paid: 'bg-teal-500/20 text-teal-100 border-teal-400/30',
+         Overdue: 'bg-red-500/20 text-red-100 border-red-400/30',
+    },
+    bold: {
+        Draft: 'bg-slate-200 text-slate-900 border-slate-900',
+        Sent: 'bg-blue-600 text-white border-blue-900',
+        Paid: 'bg-teal-600 text-white border-teal-900',
+        Overdue: 'bg-red-600 text-white border-red-900',
+    },
+    minimalist: {
+        Draft: 'bg-slate-100 text-slate-700 border-slate-300',
+        Sent: 'bg-blue-50 text-blue-700 border-blue-200',
+        Paid: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        Overdue: 'bg-rose-50 text-rose-700 border-rose-200',
+    },
+    professional: {
+        Draft: 'bg-white/10 text-white border-white/20',
+        Sent: 'bg-blue-500 text-white border-blue-600',
+        Paid: 'bg-teal-500 text-white border-teal-600',
+        Overdue: 'bg-red-500 text-white border-red-600',
+    },
+    elegant: {
+        Draft: 'bg-stone-100 text-stone-700 border-stone-300',
+        Sent: 'bg-blue-50 text-blue-800 border-blue-200',
+        Paid: 'bg-amber-50 text-amber-800 border-amber-200',
+        Overdue: 'bg-red-50 text-red-800 border-red-200',
+    },
+    tech: {
+        Draft: 'bg-slate-100 text-slate-700 border-slate-400 border-dashed',
+        Sent: 'bg-cyan-50 text-cyan-800 border-cyan-400 border-dashed',
+        Paid: 'bg-green-50 text-green-800 border-green-400 border-dashed',
+        Overdue: 'bg-red-50 text-red-800 border-red-400 border-dashed',
+    }
+};
+
 const StatusBadge: React.FC<{ status: InvoiceStatus; template: TemplateId }> = ({ status, template }) => {
     const baseClasses = "inline-block px-4 py-1 text-xs font-bold uppercase tracking-wider rounded-full border";
-
-    const statusStyles: { [key in TemplateId]: { [key in InvoiceStatus]: string } } = {
-        classic: {
-            Draft: 'bg-slate-100 text-slate-700 border-slate-300',
-            Sent: 'bg-blue-50 text-blue-800 border-blue-200',
-            Paid: 'bg-teal-50 text-teal-800 border-teal-200',
-            Overdue: 'bg-red-50 text-red-800 border-red-200',
-        },
-        modern: {
-             Draft: 'bg-slate-200/20 text-slate-100 border-white/10',
-             Sent: 'bg-blue-500/20 text-blue-100 border-blue-400/30',
-             Paid: 'bg-teal-500/20 text-teal-100 border-teal-400/30',
-             Overdue: 'bg-red-500/20 text-red-100 border-red-400/30',
-        },
-        bold: {
-            Draft: 'bg-slate-200 text-slate-900 border-slate-900',
-            Sent: 'bg-blue-600 text-white border-blue-900',
-            Paid: 'bg-teal-600 text-white border-teal-900',
-            Overdue: 'bg-red-600 text-white border-red-900',
-        },
-        minimalist: {
-            Draft: 'bg-slate-100 text-slate-700 border-slate-300',
-            Sent: 'bg-blue-50 text-blue-700 border-blue-200',
-            Paid: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-            Overdue: 'bg-rose-50 text-rose-700 border-rose-200',
-        },
-        professional: {
-            Draft: 'bg-white/10 text-white border-white/20',
-            Sent: 'bg-blue-500 text-white border-blue-600',
-            Paid: 'bg-teal-500 text-white border-teal-600',
-            Overdue: 'bg-red-500 text-white border-red-600',
-        },
-        elegant: {
-            Draft: 'bg-stone-100 text-stone-700 border-stone-300',
-            Sent: 'bg-blue-50 text-blue-800 border-blue-200',
-            Paid: 'bg-amber-50 text-amber-800 border-amber-200',
-            Overdue: 'bg-red-50 text-red-800 border-red-200',
-        },
-        tech: {
-            Draft: 'bg-slate-100 text-slate-700 border-slate-400 border-dashed',
-            Sent: 'bg-cyan-50 text-cyan-800 border-cyan-400 border-dashed',
-            Paid: 'bg-green-50 text-green-800 border-green-400 border-dashed',
-            Overdue: 'bg-red-50 text-red-800 border-red-400 border-dashed',
-        }
-    };
     
     return (
-        <span className={`${baseClasses} ${statusStyles[template][status]}`}>
+        <span className={`${baseClasses} ${STATUS_STYLES[template][status]}`}>
             {status}
         </span>
     );

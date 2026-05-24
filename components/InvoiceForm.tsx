@@ -256,6 +256,23 @@ const LineItemRow = React.memo(({ item, index, currencySymbol, currencyFormatter
 });
 
 // ⚡ Bolt: Wrap InvoiceForm in React.memo to prevent unnecessary re-renders when parent state (like modals) changes
+// ⚡ Bolt: Move static arrays outside of component to avoid recreation on every render
+const nigerianBanks = [
+    "Access Bank", "Access Bank (Diamond)", "ALAT by WEMA", "ASO Savings and Loans", "Bowen Microfinance Bank",
+    "Carbon", "CEMCS Microfinance Bank", "Citibank Nigeria", "Ecobank Nigeria", "Ekondo Microfinance Bank",
+    "Eyowo", "Fidelity Bank", "First Bank of Nigeria", "First City Monument Bank (FCMB)", "FSDH Merchant Bank Limited",
+    "Globus Bank", "Guaranty Trust Bank (GTBank)", "Hackman Microfinance Bank", "Hasal Microfinance Bank",
+    "Heritage Bank", "Ibile Microfinance Bank", "Infinity MFB", "Jaiz Bank", "Keystone Bank", "Kuda Bank",
+    "Lagos Building Investment Company PLC", "Links MFB", "Lotus Bank", "Mayfair MFB", "Mint MFB",
+    "Moniepoint MFB", "Nova Merchant Bank", "One Finance", "OPay Digital Services Limited (OPay)",
+    "Optimus Bank Limited", "Paga", "PalmPay", "Parallex Bank", "Parkway - ReadyCash", "Paycom", "Personal Trust Microfinance Bank",
+    "Petra Microfinance Bank", "Polaris Bank", "PremiumTrust Bank", "Providus Bank", "QuickFund MFB", "Rand Merchant Bank",
+    "Refuge Mortgage Bank", "Rubies MFB", "Safe Haven MFB", "Safe Haven Microfinance Bank", "SAGE MFB", "Signature Bank Limited",
+    "Sparkle Microfinance Bank", "Stanbic IBTC Bank", "Standard Chartered Bank", "Sterling Bank", "Suntrust Bank",
+    "TAJ Bank", "Tangerine Money", "TCF MFB", "Titan Bank", "Titan Paystack", "Union Bank of Nigeria",
+    "United Bank for Africa (UBA)", "Unity Bank", "VFD Microfinance Bank Limited", "Wema Bank", "Zenith Bank"
+];
+
 export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, savedClients, onSaveClient, businessProfiles = [], onSaveBusinessProfile, onSaveRecurring, isPro = false, onProFeatureClick }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -413,22 +430,6 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
   const currencySymbol = useMemo(() => {
       return (0).toLocaleString('en-US', { style: 'currency', currency: invoice.currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace(/\d/g, '').trim();
   }, [invoice.currency]);
-
-  const nigerianBanks = [
-    "Access Bank", "Access Bank (Diamond)", "ALAT by WEMA", "ASO Savings and Loans", "Bowen Microfinance Bank",
-    "Carbon", "CEMCS Microfinance Bank", "Citibank Nigeria", "Ecobank Nigeria", "Ekondo Microfinance Bank",
-    "Eyowo", "Fidelity Bank", "First Bank of Nigeria", "First City Monument Bank (FCMB)", "FSDH Merchant Bank Limited",
-    "Globus Bank", "Guaranty Trust Bank (GTBank)", "Hackman Microfinance Bank", "Hasal Microfinance Bank",
-    "Heritage Bank", "Ibile Microfinance Bank", "Infinity MFB", "Jaiz Bank", "Keystone Bank", "Kuda Bank",
-    "Lagos Building Investment Company PLC", "Links MFB", "Lotus Bank", "Mayfair MFB", "Mint MFB",
-    "Moniepoint MFB", "Nova Merchant Bank", "One Finance", "OPay Digital Services Limited (OPay)",
-    "Optimus Bank Limited", "Paga", "PalmPay", "Parallex Bank", "Parkway - ReadyCash", "Paycom", "Personal Trust Microfinance Bank",
-    "Petra Microfinance Bank", "Polaris Bank", "PremiumTrust Bank", "Providus Bank", "QuickFund MFB", "Rand Merchant Bank",
-    "Refuge Mortgage Bank", "Rubies MFB", "Safe Haven MFB", "Safe Haven Microfinance Bank", "SAGE MFB", "Signature Bank Limited",
-    "Sparkle Microfinance Bank", "Stanbic IBTC Bank", "Standard Chartered Bank", "Sterling Bank", "Suntrust Bank",
-    "TAJ Bank", "Tangerine Money", "TCF MFB", "Titan Bank", "Titan Paystack", "Union Bank of Nigeria",
-    "United Bank for Africa (UBA)", "Unity Bank", "VFD Microfinance Bank Limited", "Wema Bank", "Zenith Bank"
-  ];
 
   return (
     <div className="space-y-6 pb-20">
