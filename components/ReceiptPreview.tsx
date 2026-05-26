@@ -17,8 +17,8 @@ export const ReceiptPreview: React.FC<ReceiptPreviewProps> = ({ receipt, templat
     const receiptRef = useRef<HTMLDivElement>(null);
     const invoice = receipt.invoice;
 
-    // ⚡ Bolt: Memoize Intl.NumberFormat to avoid expensive recreation when formatting currency
-    const numberFormatter = useMemo(() => new Intl.NumberFormat('en-US'), []);
+
+
 
     const handleDownload = async () => {
         if (!receiptRef.current) return;
