@@ -41,3 +41,7 @@
 ## 2026-05-23 - [Redundant Hook Overhead]
 **Learning:** When a module-level constant (like a global `Intl.NumberFormat` instance) is already defined and cached, redefining it inside a component using `useMemo` shadows the global variable and creates an unnecessary hook allocation on every render cycle. While `useMemo` prevents recreation of the object, the hook itself still incurs a tiny performance cost and memory footprint during the render phase.
 **Action:** Avoid declaring `useMemo` wrappers for static variables that are already cached globally outside the component scope.
+
+## 2025-05-24 - [O(1) Map Lookups for Array Finds]
+**Learning:** React components mapping over arrays to generate `<select>` options frequently perform `Array.find()` to retrieve the selected object during onChange handlers. Because `Array.find()` is O(N), this introduces unnecessary performance overhead as the dataset grows, blocking the main thread during component interactions.
+**Action:** Replace `O(N)` array lookups with `O(1)` Map lookups for frequently accessed selection lists (like `businessProfiles`). Memoize the Map using `useMemo` with the array as a dependency, and use `map.get(id)` instead of `.find()` to improve lookup efficiency.

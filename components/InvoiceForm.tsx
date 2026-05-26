@@ -392,6 +392,15 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
       return map;
   }, [savedClients]);
 
+  // ⚡ Bolt: Memoize businessProfiles to a map for O(1) lookups rather than O(N) Array.find
+  const businessProfilesMap = useMemo(() => {
+      const map = new Map<string, any>();
+      for (const profile of businessProfiles) {
+          map.set(profile.id, profile);
+      }
+      return map;
+  }, [businessProfiles]);
+
   const handleSelectClient = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
       const selectedName = e.target.value;
       if (!selectedName) return;
@@ -404,13 +413,13 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
   const handleSelectBusinessProfile = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = e.target.value;
     if (!selectedId) return;
-    const profile = businessProfiles.find(p => p.id === selectedId);
+    const profile = businessProfilesMap.get(selectedId);
     if (profile) {
         // Exclude 'id' when updating user state
         const { id, ...userDetails } = profile;
         updateInvoice('user', userDetails);
     }
-  }, [businessProfiles, updateInvoice]);
+  }, [businessProfilesMap, updateInvoice]);
 
   const handleVatToggle = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.checked) {
