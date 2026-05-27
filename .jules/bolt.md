@@ -45,3 +45,7 @@
 ## 2025-05-24 - [O(1) Map Lookups for Array Finds]
 **Learning:** React components mapping over arrays to generate `<select>` options frequently perform `Array.find()` to retrieve the selected object during onChange handlers. Because `Array.find()` is O(N), this introduces unnecessary performance overhead as the dataset grows, blocking the main thread during component interactions.
 **Action:** Replace `O(N)` array lookups with `O(1)` Map lookups for frequently accessed selection lists (like `businessProfiles`). Memoize the Map using `useMemo` with the array as a dependency, and use `map.get(id)` instead of `.find()` to improve lookup efficiency.
+
+## 2026-05-27 - [Extracting inline functions to fix React.memo]
+**Learning:** Passing inline arrow functions directly in JSX to memoized components (e.g., `<InvoiceForm updateInvoice={(key, value) => updateInvoice(key, value)} />`) defeats `React.memo`. The inline function reference is recreated on every render of the parent component, causing the shallow comparison to fail and forcing the child component to re-render, negating any performance benefits of memoization.
+**Action:** Always extract inline callback functions into `useCallback` hooks in the parent component before passing them down to components wrapped in `React.memo`.

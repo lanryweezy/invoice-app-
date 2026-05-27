@@ -322,6 +322,20 @@ const App: React.FC = () => {
       }
   }, [isPro, savedClients, saveClient]);
 
+  // ⚡ Bolt: Memoize updateInvoice handler to prevent InvoiceForm from re-rendering on every App state change
+  const handleUpdateInvoice = useCallback((key: keyof Invoice, value: any) => {
+      if (key === 'status' && value === 'Paid' && invoice.status !== 'Paid') {
+          setIsPaymentModalOpen(true);
+      }
+      updateInvoice(key, value);
+  }, [invoice.status, updateInvoice]);
+
+  // ⚡ Bolt: Memoize saveBusinessProfile handler to prevent InvoiceForm from re-rendering on every App state change
+  const handleSaveBusinessProfile = useCallback((profile: any) => {
+      saveBusinessProfile(profile);
+      showToast('Business profile saved!');
+  }, [saveBusinessProfile, showToast]);
+
   const handleProFeatureClick = useCallback((featureName: 'Branches' | 'Accounting' | 'Recurring') => {
       if (!isPro) {
           setPricingModalContent({
@@ -662,22 +676,14 @@ const App: React.FC = () => {
               <div className="max-w-xl mx-auto pb-8">
                 <InvoiceForm
                   invoice={invoice}
-                  updateInvoice={(key, value) => {
-                      if (key === 'status' && value === 'Paid' && invoice.status !== 'Paid') {
-                          setIsPaymentModalOpen(true);
-                      }
-                      updateInvoice(key, value);
-                  }}
+                  updateInvoice={handleUpdateInvoice}
                   addLineItem={addLineItem}
                   removeLineItem={removeLineItem}
                   updateLineItem={updateLineItem}
                   savedClients={savedClients}
                   onSaveClient={handleSaveClient}
                   businessProfiles={businessProfiles}
-                  onSaveBusinessProfile={(profile) => {
-                      saveBusinessProfile(profile);
-                      showToast('Business profile saved!');
-                  }}
+                  onSaveBusinessProfile={handleSaveBusinessProfile}
                   onSaveRecurring={saveRecurringInvoice ? handleSaveRecurringWrapper : undefined}
                   isPro={isPro}
                   onProFeatureClick={handleProFeatureRecurring}
