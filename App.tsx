@@ -28,7 +28,9 @@ import { PaymentModal } from './components/PaymentModal';
 import { Blog } from './components/Blog';
 import { BlogPost } from './components/BlogPost';
 import { PublicProfile } from './components/PublicProfile';
+import { TemplatePage } from './components/TemplatePage';
 import { PrivacyModal } from './components/PrivacyModal';
+import { CommandPaletteProvider } from './components/CommandPaletteProvider';
 import { TermsModal } from './components/TermsModal';
 import { flushQueue, getQueueCount } from './utils/offlineSync';
 
@@ -131,7 +133,7 @@ const App: React.FC = () => {
   }, [showToast]);
 
   // Main view state
-  const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'blog' | 'blogPost' | 'publicProfile'>(() => {
+  const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'blog' | 'blogPost' | 'publicProfile' | 'templatePage'>(() => {
       let path;
       try {
           path = decodeURIComponent(window.location.pathname);
@@ -140,6 +142,7 @@ const App: React.FC = () => {
       }
 
       if (path.startsWith('/p/')) return 'publicProfile';
+      if (path.startsWith('/templates/')) return 'templatePage';
       if (path === '/blog') return 'blog';
 
       // Handle legacy /blog/:id routes by redirecting them or showing blogPost view
@@ -147,7 +150,7 @@ const App: React.FC = () => {
           return 'blogPost';
       }
 
-      if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts' && !path.startsWith('/p/')) {
+      if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts' && !path.startsWith('/p/') && !path.startsWith('/templates/')) {
           return 'blogPost';
       }
       return 'editor';
@@ -156,6 +159,19 @@ const App: React.FC = () => {
   const [publicUsername, setPublicUsername] = useState<string | null>(() => {
       let path = window.location.pathname;
       if (path.startsWith('/p/')) return path.split('/')[2] || null;
+      return null;
+  });
+
+  const [activeTemplateSlug, setActiveTemplateSlug] = useState<string | null>(() => {
+      let path;
+      try {
+          path = decodeURIComponent(window.location.pathname);
+      } catch (e) {
+          path = window.location.pathname;
+      }
+      if (path.startsWith('/templates/')) {
+          return path.split('/')[2] || null;
+      }
       return null;
   });
 
@@ -172,7 +188,7 @@ const App: React.FC = () => {
           return path.substring(6);
       }
 
-      if (path !== '/' && path !== '/blog' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts' && !path.startsWith('/p/')) {
+      if (path !== '/' && path !== '/blog' && !path.startsWith('/p/') && !path.startsWith('/templates/') && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts') {
           return path.substring(1); // Remove leading slash
       }
       return null;
@@ -184,6 +200,7 @@ const App: React.FC = () => {
       if (activeView === 'blog') path = '/blog';
       else if (activeView === 'blogPost' && activeBlogPostSlug !== null) path = `/${encodeURIComponent(activeBlogPostSlug)}`;
       else if (activeView === 'publicProfile' && publicUsername !== null) path = `/p/${publicUsername}`;
+      else if (activeView === 'templatePage' && activeTemplateSlug !== null) path = `/templates/${encodeURIComponent(activeTemplateSlug)}`;
 
       // Update the URL without reloading the page
       let currentDecodedPath;
@@ -219,6 +236,9 @@ const App: React.FC = () => {
           } else if (path.startsWith('/p/')) {
               setPublicUsername(path.split('/')[2] || null);
               setActiveView('publicProfile');
+          } else if (path.startsWith('/templates/')) {
+              setActiveTemplateSlug(path.split('/')[2] || null);
+              setActiveView('templatePage');
           } else if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts') {
               setActiveBlogPostSlug(path.substring(1));
               setActiveView('blogPost');
@@ -450,6 +470,21 @@ const App: React.FC = () => {
 
   return (
     <div className="h-screen flex flex-col bg-slate-50 text-slate-800 font-sans overflow-hidden selection:bg-teal-100 selection:text-teal-900">
+      <CommandPaletteProvider
+        onNavigate={(view) => {
+          if (view === 'blog') {
+            setActiveView('blog');
+          } else if (view === 'editor') {
+            setActiveView('editor');
+          } else {
+            handleProFeatureClick(view.charAt(0).toUpperCase() + view.slice(1));
+          }
+        }}
+        onAction={(action) => {
+          if (action === 'settings') setShowSettings(true);
+          if (action === 'upgrade') setShowPricing(true);
+        }}
+      />
       <Helmet>
         <title>{invoice.invoiceNumber ? `Invoice #${invoice.invoiceNumber} | InvoiceApp` : 'Free Invoice Generator for Nigeria | InvoiceApp'}</title>
         <meta name="description" content={invoice.user.name ? `Invoice generated by ${invoice.user.name} for ${invoice.client.name || 'a client'} using InvoiceApp.` : "Create professional invoices in seconds. The #1 free invoice generator tailored for Nigerian freelancers and businesses."} />
@@ -667,6 +702,8 @@ const App: React.FC = () => {
             <BlogPost postSlug={activeBlogPostSlug} onBack={() => setActiveView('blog')} />
         ) : activeView === 'publicProfile' && publicUsername !== null ? (
             <PublicProfile username={publicUsername} />
+        ) : activeView === 'templatePage' && activeTemplateSlug !== null ? (
+            <TemplatePage slug={activeTemplateSlug} onGoHome={() => setActiveView('editor')} />
         ) : (
         <div className="flex flex-col md:flex-row h-full">
           

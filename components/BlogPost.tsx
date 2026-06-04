@@ -29,17 +29,19 @@ export const BlogPost: React.FC<BlogPostProps> = ({ postSlug, onBack }) => {
   // Structured Data (JSON-LD)
   const structuredData = {
     "@context": "https://schema.org",
-    "@type": "BlogPosting",
+    "@type": "Article",
     "headline": fullPost.title,
-    "image": fullPost.imageUrl,
+    "image": [fullPost.imageUrl],
     "datePublished": new Date(fullPost.date).toISOString(),
-    "author": {
+    "dateModified": new Date(fullPost.date).toISOString(),
+    "author": [{
       "@type": "Organization",
-      "name": "InvoiceApp"
-    },
+      "name": "InvoiceApp.ng",
+      "url": "https://invoiceapp.ng"
+    }],
     "publisher": {
       "@type": "Organization",
-      "name": "InvoiceApp",
+      "name": "InvoiceApp.ng",
       "logo": {
         "@type": "ImageObject",
         "url": "https://www.invoiceapp.ng/favicon.svg"
@@ -48,18 +50,47 @@ export const BlogPost: React.FC<BlogPostProps> = ({ postSlug, onBack }) => {
     "description": fullPost.excerpt
   };
 
+  const softwareSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "InvoiceApp.ng",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "NGN"
+    },
+    "description": "Frictionless financial operating system for African SMEs."
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How does this tool help my cash flow?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "By automating invoicing and embedding Paystack or Flutterwave links, you reduce the time it takes clients to pay you, decreasing your Days Sales Outstanding (DSO)."
+        }
+      }
+    ]
+  };
+
   return (
     <div className="w-full bg-slate-50 min-h-full pb-16">
       <Helmet>
         <title>{fullPost.title} | InvoiceApp Blog</title>
         <meta name="description" content={fullPost.excerpt} />
-        <link rel="canonical" href={`https://www.invoiceapp.ng/${encodeURIComponent(fullPost.title)}`} />
+        <link rel="canonical" href={`https://www.invoiceapp.ng/blog/${fullPost.slug}`} />
 
         {/* Open Graph Tags for Social Sharing */}
         <meta property="og:title" content={fullPost.title} />
         <meta property="og:description" content={fullPost.excerpt} />
         <meta property="og:image" content={fullPost.imageUrl} />
-        <meta property="og:url" content={`https://www.invoiceapp.ng/${encodeURIComponent(fullPost.title)}`} />
+        <meta property="og:url" content={`https://www.invoiceapp.ng/blog/${fullPost.slug}`} />
         <meta property="og:type" content="article" />
 
         {/* Twitter Card Tags */}
@@ -71,6 +102,12 @@ export const BlogPost: React.FC<BlogPostProps> = ({ postSlug, onBack }) => {
         {/* JSON-LD for Google/Bing Rich Results */}
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(softwareSchema)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(faqSchema)}
         </script>
       </Helmet>
 
