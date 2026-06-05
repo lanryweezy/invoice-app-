@@ -1,11 +1,48 @@
 ---
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('blog');
+// Sort by ID conceptually, or date. Since date is string like 'June 3, 2026', we might need custom logic.
+// We'll reverse the array to simulate the "latest first" order the original array had.
+const sortedPosts = allPosts.reverse();
 ---
-<html>
+
+<html lang="en">
   <head>
-    <title>InvoiceApp Blog</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog | InvoiceApp.ng</title>
+    <!-- Use Tailwind via CDN for Astro just to match the visual style during migration -->
+    <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body>
-    <h1>InvoiceApp Blog</h1>
-    <p>This is where the super-fast static MDX blog will live!</p>
+  <body class="bg-slate-50 min-h-screen text-slate-800 font-sans">
+    <div class="max-w-4xl mx-auto pt-16 px-4 pb-20">
+      <h1 class="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">InvoiceApp Blog</h1>
+      <p class="text-xl text-slate-600 mb-12 font-medium">Resources to build, scale, and optimize your business.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {sortedPosts.map(post => (
+          <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow group flex flex-col h-full cursor-pointer">
+            <a href={`/blog/${post.data.slug}`} class="block h-48 overflow-hidden">
+              <img src={post.data.imageUrl} alt={post.data.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            </a>
+            <div class="p-6 flex flex-col flex-1">
+              <div class="flex items-center justify-between text-xs font-medium text-slate-500 mb-3">
+                <span class="bg-slate-100 px-3 py-1 rounded-full text-slate-700">{post.data.category}</span>
+                <span>{post.data.readTime}</span>
+              </div>
+              <a href={`/blog/${post.data.slug}`} class="block mt-2">
+                <h3 class="text-xl font-bold text-slate-900 mb-2 leading-tight group-hover:text-indigo-600 transition-colors">{post.data.title}</h3>
+                <p class="text-slate-600 text-sm line-clamp-3 mb-4">{post.data.excerpt}</p>
+              </a>
+              <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
+                <span class="text-sm font-medium text-slate-900">Read Article →</span>
+                <span class="text-xs text-slate-500">{post.data.date}</span>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
   </body>
 </html>

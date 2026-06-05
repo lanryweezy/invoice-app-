@@ -25,10 +25,7 @@ import { useReceipts } from './hooks/useReceipts';
 import { ReceiptsManager } from './components/ReceiptsManager';
 import { ReceiptPreview } from './components/ReceiptPreview';
 import { PaymentModal } from './components/PaymentModal';
-import { Blog } from './components/Blog';
-import { BlogPost } from './components/BlogPost';
 import { PublicProfile } from './components/PublicProfile';
-import { TemplatePage } from './components/TemplatePage';
 import { PrivacyModal } from './components/PrivacyModal';
 import { CommandPaletteProvider } from './components/CommandPaletteProvider';
 import { TermsModal } from './components/TermsModal';
@@ -473,7 +470,7 @@ const App: React.FC = () => {
       <CommandPaletteProvider
         onNavigate={(view) => {
           if (view === 'blog') {
-            setActiveView('blog');
+            window.location.href = '/blog';
           } else if (view === 'editor') {
             setActiveView('editor');
           } else {
@@ -481,8 +478,11 @@ const App: React.FC = () => {
           }
         }}
         onAction={(action) => {
-          if (action === 'settings') setShowSettings(true);
-          if (action === 'upgrade') setShowPricing(true);
+          if (action === 'settings') setIsSettingsModalOpen(true);
+          if (action === 'upgrade') {
+            setPricingModalContent({ title: 'Upgrade to Pro', message: 'Unlock advanced features to supercharge your business.' });
+            setIsPricingModalOpen(true);
+          }
         }}
       />
       <Helmet>
@@ -693,17 +693,8 @@ const App: React.FC = () => {
                     }}
                 />
             </div>
-        ) : activeView === 'blog' ? (
-            <Blog onPostClick={(slug) => {
-                setActiveBlogPostSlug(slug);
-                setActiveView('blogPost');
-            }} />
-        ) : activeView === 'blogPost' && activeBlogPostSlug !== null ? (
-            <BlogPost postSlug={activeBlogPostSlug} onBack={() => setActiveView('blog')} />
         ) : activeView === 'publicProfile' && publicUsername !== null ? (
             <PublicProfile username={publicUsername} />
-        ) : activeView === 'templatePage' && activeTemplateSlug !== null ? (
-            <TemplatePage slug={activeTemplateSlug} onGoHome={() => setActiveView('editor')} />
         ) : (
         <div className="flex flex-col md:flex-row h-full">
           
