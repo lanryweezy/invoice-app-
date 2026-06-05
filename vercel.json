@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/blog/:match*",
+      "destination": "/marketing/blog/:match*"
+    },
+    {
+      "source": "/templates/:match*",
+      "destination": "/marketing/templates/:match*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/web/$1"
+    }
+  ]
+}

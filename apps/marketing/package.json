@@ -1,0 +1,17 @@
+{
+  "name": "marketing",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "astro dev --port 4000",
+    "build": "astro build",
+    "preview": "astro preview",
+    "test": "echo \"No tests specified for marketing\""
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^6.0.2",
+    "@astrojs/react": "^5.0.7",
+    "astro": "^6.4.4",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
+  }
+}
