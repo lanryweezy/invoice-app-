@@ -33,6 +33,13 @@ const getInitialInvoiceState = (): Invoice => {
     console.error("Failed to load saved user", e);
   }
 
+  const generateRandomInvoiceNumber = () => {
+    // Generates a string like "INV-2026-X8B9Q"
+    const year = new Date().getFullYear();
+    const randomChars = Math.random().toString(36).substring(2, 7).toUpperCase();
+    return `INV-${year}-${randomChars}`;
+  };
+
   return {
     user: savedUser,
     client: {
@@ -40,7 +47,7 @@ const getInitialInvoiceState = (): Invoice => {
       email: '',
       address: '',
     },
-    invoiceNumber: `INV-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
+    invoiceNumber: generateRandomInvoiceNumber(),
     issueDate: formatDate(today),
     dueDate: formatDate(dueDate),
     lineItems: [

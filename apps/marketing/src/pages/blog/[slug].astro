@@ -1,0 +1,114 @@
+---
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const blogEntries = await getCollection('blog');
+  return blogEntries.map(entry => ({
+    params: { slug: entry.data.slug }, props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": entry.data.title,
+    "image": [entry.data.imageUrl],
+    "datePublished": new Date(entry.data.date).toISOString(),
+    "dateModified": new Date(entry.data.date).toISOString(),
+    "author": [{
+      "@type": "Organization",
+      "name": "InvoiceApp.ng",
+      "url": "https://invoiceapp.ng"
+    }],
+    "publisher": {
+      "@type": "Organization",
+      "name": "InvoiceApp.ng",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://www.invoiceapp.ng/favicon.svg"
+      }
+    },
+    "description": entry.data.excerpt
+};
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{entry.data.title} | InvoiceApp Blog</title>
+    <meta name="description" content={entry.data.excerpt} />
+    <link rel="canonical" href={`https://www.invoiceapp.ng/blog/${entry.data.slug}`} />
+
+    <meta property="og:title" content={entry.data.title} />
+    <meta property="og:description" content={entry.data.excerpt} />
+    <meta property="og:image" content={entry.data.imageUrl} />
+    <meta property="og:url" content={`https://www.invoiceapp.ng/blog/${entry.data.slug}`} />
+    <meta property="og:type" content="article" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={entry.data.title} />
+    <meta name="twitter:description" content={entry.data.excerpt} />
+    <meta name="twitter:image" content={entry.data.imageUrl} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .prose h2 { font-size: 1.875rem; font-weight: 800; margin-top: 2.5rem; margin-bottom: 1.25rem; color: #0f172a; }
+      .prose h3 { font-size: 1.5rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; color: #1e293b; }
+      .prose p { margin-top: 1.25rem; margin-bottom: 1.25rem; line-height: 1.8; color: #334155; }
+      .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-top: 1.25rem; margin-bottom: 1.25rem; }
+      .prose li { margin-top: 0.5rem; margin-bottom: 0.5rem; color: #334155; }
+      .prose strong { font-weight: 600; color: #0f172a; }
+    </style>
+  </head>
+  <body class="bg-slate-50 min-h-screen font-sans">
+    <div class="w-full pb-16">
+      <div class="w-full h-[40vh] min-h-[300px] relative bg-slate-900">
+        <img src={entry.data.imageUrl} alt={entry.data.title} class="w-full h-full object-cover opacity-60" />
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+        <div class="absolute bottom-0 left-0 w-full">
+            <div class="max-w-3xl mx-auto px-6 pb-12">
+                <a href="/blog" class="inline-flex items-center text-indigo-300 hover:text-indigo-200 text-sm font-medium mb-6 transition-colors">
+                    &larr; Back to Blog
+                </a>
+                <div class="flex items-center gap-4 text-slate-300 text-sm font-medium mb-4">
+                    <span class="bg-indigo-500/20 text-indigo-200 px-3 py-1 rounded-full border border-indigo-500/30">
+                        {entry.data.category}
+                    </span>
+                    <span>{entry.data.readTime}</span>
+                    <span>•</span>
+                    <span>{entry.data.date}</span>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-extrabold text-white leading-tight mb-4 tracking-tight">
+                    {entry.data.title}
+                </h1>
+            </div>
+        </div>
+      </div>
+
+      <div class="max-w-3xl mx-auto px-6 pt-12">
+        <div class="prose prose-lg max-w-none prose-slate">
+          <p class="lead text-xl text-slate-600 mb-8 font-medium">
+              {entry.data.excerpt}
+          </p>
+          <Content />
+        </div>
+
+        <hr class="my-12 border-slate-200" />
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-8 text-center shadow-sm">
+            <h3 class="text-2xl font-bold text-slate-800 mb-3">Ready to upgrade your business?</h3>
+            <p class="text-slate-600 mb-6">Create professional, automated invoices in seconds. It's 100% free.</p>
+            <a href="/" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg transition-colors shadow-lg">
+                Create an Invoice Now
+            </a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
