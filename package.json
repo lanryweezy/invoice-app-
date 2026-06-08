@@ -3,7 +3,19 @@
   "private": true,
   "scripts": {
     "dev": "pnpm --filter \"./apps/**\" --parallel run dev",
-    "build": "pnpm --filter \"./apps/**\" run build",
+    "build": "node scripts/build.js",
     "test": "pnpm --filter \"./apps/**\" run test"
+  },
+  "devDependencies": {
+    "fs-extra": "^11.3.5"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@firebase/util",
+      "core-js",
+      "esbuild",
+      "protobufjs",
+      "sharp"
+    ]
   }
 }

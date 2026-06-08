@@ -106,6 +106,9 @@ export const useSubscription = () => {
         amount: amount * 100, // Amount in kobo
         currency: 'NGN',
         ref: 'NI_' + Math.floor((Math.random() * 1000000000) + 1),
+        metadata: {
+            uid: user.uid
+        },
         callback: async function(response: any) {
           try {
             trackEvent('payment_success', {
