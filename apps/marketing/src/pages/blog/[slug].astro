@@ -56,8 +56,9 @@ const structuredData = {
 
     <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <style>
+      .prose { max-width: none; }
       .prose h2 { font-size: 1.875rem; font-weight: 800; margin-top: 2.5rem; margin-bottom: 1.25rem; color: #0f172a; }
       .prose h3 { font-size: 1.5rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; color: #1e293b; }
       .prose p { margin-top: 1.25rem; margin-bottom: 1.25rem; line-height: 1.8; color: #334155; }
