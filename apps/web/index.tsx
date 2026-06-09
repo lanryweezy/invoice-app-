@@ -1,9 +1,9 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { registerSW } from 'virtual:pwa-register';
 import { HelmetProvider } from 'react-helmet-async';
 import { Analytics } from '@vercel/analytics/react';
+import { AuthProvider } from './context/AuthContext';
 import App from './App';
 
 // Register service worker for PWA
@@ -18,8 +18,10 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <HelmetProvider>
-      <App />
-      <Analytics />
+      <AuthProvider>
+        <App />
+        <Analytics />
+      </AuthProvider>
     </HelmetProvider>
   </React.StrictMode>
 );

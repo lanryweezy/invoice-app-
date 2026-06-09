@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
 
 export async function getStaticPaths() {
   const blogEntries = await getCollection('blog');
@@ -35,79 +36,25 @@ const structuredData = {
 };
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{entry.data.title} | InvoiceApp Blog</title>
-    <meta name="description" content={entry.data.excerpt} />
-    <link rel="canonical" href={`https://www.invoiceapp.ng/blog/${entry.data.slug}`} />
+<BaseLayout 
+    title={entry.data.title} 
+    description={entry.data.excerpt} 
+    image={entry.data.imageUrl} 
+    article={true}
+>
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} slot="head" />
 
-    <meta property="og:title" content={entry.data.title} />
-    <meta property="og:description" content={entry.data.excerpt} />
-    <meta property="og:image" content={entry.data.imageUrl} />
-    <meta property="og:url" content={`https://www.invoiceapp.ng/blog/${entry.data.slug}`} />
-    <meta property="og:type" content="article" />
-
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={entry.data.title} />
-    <meta name="twitter:description" content={entry.data.excerpt} />
-    <meta name="twitter:image" content={entry.data.imageUrl} />
-
-    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
-
-    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-            },
-            colors: {
-              teal: {
-                50: '#f0fdfa',
-                100: '#ccfbf1',
-                200: '#99f6e4',
-                300: '#5eead4',
-                400: '#2dd4bf',
-                500: '#14b8a6',
-                600: '#0d9488',
-                700: '#0f766e',
-                800: '#115e59',
-                900: '#134e4a',
-              },
-              slate: {
-                850: '#1e293b',
-              }
-            }
-          },
-        },
-      }
-    </script>
-    <style>
-      .prose { max-width: none; }
-      .prose h2 { font-size: 1.875rem; font-weight: 800; margin-top: 2.5rem; margin-bottom: 1.25rem; color: #0f172a; }
-      .prose h3 { font-size: 1.5rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; color: #1e293b; }
-      .prose p { margin-top: 1.25rem; margin-bottom: 1.25rem; line-height: 1.8; color: #334155; }
-      .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-top: 1.25rem; margin-bottom: 1.25rem; }
-      .prose li { margin-top: 0.5rem; margin-bottom: 0.5rem; color: #334155; }
-      .prose strong { font-weight: 600; color: #0f172a; }
-      .prose blockquote { border-left-color: #0d9488; font-style: italic; color: #475569; padding-left: 1.5rem; margin: 2rem 0; }
-    </style>
-  </head>
-  <body class="bg-slate-50 min-h-screen font-sans">
     <div class="w-full pb-16">
       <div class="w-full h-[40vh] min-h-[300px] relative bg-slate-900">
         <img src={entry.data.imageUrl} alt={entry.data.title} class="w-full h-full object-cover opacity-60" />
         <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
         <div class="absolute bottom-0 left-0 w-full">
             <div class="max-w-3xl mx-auto px-6 pb-12">
-                <a href="/blog" class="inline-flex items-center text-indigo-300 hover:text-indigo-200 text-sm font-medium mb-6 transition-colors">
+                <a href="/blog" class="inline-flex items-center text-teal-300 hover:text-teal-200 text-sm font-medium mb-6 transition-colors">
                     &larr; Back to Blog
                 </a>
                 <div class="flex items-center gap-4 text-slate-300 text-sm font-medium mb-4">
-                    <span class="bg-indigo-500/20 text-indigo-200 px-3 py-1 rounded-full border border-indigo-500/30">
+                    <span class="bg-teal-500/20 text-teal-200 px-3 py-1 rounded-full border border-teal-500/30">
                         {entry.data.category}
                     </span>
                     <span>{entry.data.readTime}</span>
@@ -134,11 +81,10 @@ const structuredData = {
         <div class="bg-white rounded-2xl border border-slate-200 p-8 text-center shadow-sm">
             <h3 class="text-2xl font-bold text-slate-800 mb-3">Ready to upgrade your business?</h3>
             <p class="text-slate-600 mb-6">Create professional, automated invoices in seconds. It's 100% free.</p>
-            <a href="/" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg transition-colors shadow-lg">
+            <a href="/" class="inline-block bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-8 rounded-lg transition-colors shadow-lg shadow-teal-900/10">
                 Create an Invoice Now
             </a>
         </div>
       </div>
     </div>
-  </body>
-</html>
+</BaseLayout>

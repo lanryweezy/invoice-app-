@@ -8,14 +8,5 @@
   },
   "devDependencies": {
     "fs-extra": "^11.3.5"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@firebase/util",
-      "core-js",
-      "esbuild",
-      "protobufjs",
-      "sharp"
-    ]
   }
 }

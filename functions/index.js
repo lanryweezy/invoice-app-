@@ -4,11 +4,15 @@ const crypto = require('crypto');
 
 admin.initializeApp();
 
-// IMPORTANT: Replace with your actual Live Secret Key from Paystack Dashboard
+// IMPORTANT: Secret is now injected via runWith secrets config
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 
-exports.paystackWebhook = functions.https.onRequest(async (req, res) => {
+exports.paystackWebhook = functions.runWith({ secrets: ["PAYSTACK_SECRET_KEY"] }).https.onRequest(async (req, res) => {
     // 1. Verify the signature
+    if (!PAYSTACK_SECRET_KEY) {
+        console.error("PAYSTACK_SECRET_KEY not set");
+        return res.status(500).send('Configuration error');
+    }
     const hash = crypto.createHmac('sha512', PAYSTACK_SECRET_KEY).update(JSON.stringify(req.body)).digest('hex');
     if (hash !== req.headers['x-paystack-signature']) {
         return res.status(401).send('Invalid signature');
