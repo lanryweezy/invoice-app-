@@ -1,14 +1,10 @@
-## 2024-05-13 - [Accessibility Pass: Modal Controls]
-**Learning:** Found several icon-only controls for closing modals or deleting entries across multiple components (AuthModal, SettingsModal, PaymentModal, BranchesManager, etc.) lacking accessible text names. This prevents screen reader users from understanding the button purpose.
-**Action:** When adding icon-only SVG buttons in React for core interactions (Close, Delete, Remove), ensure `aria-label` is always included by default.
+## 2026-05-22 - Focus-visible pseudo-class triggering in testing
+**Learning:** The `focus-visible` utility classes for keyboard accessibility cannot be reliably triggered for screenshots purely by calling `element.focus()` in Playwright headless chromium, as it doesn't simulate true keyboard navigation.
+**Action:** Use `page.keyboard.press('Tab')` instead of or in addition to `.focus()` when attempting to verify focus ring visibility via automated screenshots.
+## 2024-05-24 - Do not use aria-label on buttons with visible text
+**Learning:** Adding `aria-label` attributes to buttons that already contain visible text (e.g., `<button aria-label="Download receipt as PDF">Download PDF</button>`) violates WCAG 2.5.3 (Label in Name) when the label differs from the visible text. This breaks voice navigation for users relying on what they see.
+**Action:** When adding context to elements with visible text, use visually hidden text spans (`sr-only` class) instead of overwriting the accessible name via `aria-label`, or ensure the `aria-label` exactly matches and starts with the visible text. Reserve `aria-label` additions primarily for icon-only buttons.
 
-## 2024-05-14 - [Accessibility Pass: Icon Button Interaction Polish]
-**Learning:** Adding screen reader accessibility (`aria-label`) to icon buttons is good, but UX isn't just about screen readers. The "Remove expense" button was inaccessible to keyboard users (no focus states) and lacked a mouse hover tooltip (`title`). The tap target was also too small, which was improved by adding `p-1`. When updating icon buttons, addressing interaction patterns across all input methods (mouse, keyboard, touch, screen reader) at once yields a more complete UX win.
-**Action:** Always check the holistic UX state of icon buttons (tooltip, focus state, tap target, accessible name) rather than just fixing `aria-label` alone.
-
-## 2024-05-18 - [Accessibility Pass: Form Label Associations]
-**Learning:** In React components with multiple inputs (like modals and forms), it's a common oversight to style `label` elements correctly but forget to explicitly associate them with their respective `input` elements using `htmlFor` and `id`. This not only impacts screen readers which fail to announce the label when the input is focused, but also degrades mouse/touch UX as clicking the label does not focus the input.
-**Action:** When creating or reviewing form inputs, always verify that `label` tags include an `htmlFor` attribute that matches a unique `id` on the corresponding input field, particularly in reusable modals or dynamic forms.
-## 2024-05-24 - Isolated Forms without Label Associations
-**Learning:** In simple, isolated admin views (like `AccountingDashboard` or `BranchesManager`), forms were built using standard `<input>` tags but lacked semantic connection to their preceding text strings because they weren't wrapped in a `<label>` or using `htmlFor`/`id` bindings. This made clicking the label text unreactive, shrinking the touch target area, and making them inaccessible to screen readers.
-**Action:** When working on generic configuration forms that don't use shared custom components (like `<InputField />`), ensure manual `id` and `htmlFor` pairings are added, along with basic focus rings for keyboard navigation.
+## 2024-05-24 - Dynamic Scaling for Document Previews
+**Learning:** Hardcoding responsive scaling utility classes (e.g. `scale-[0.6] sm:scale-[0.7]`) on a fixed-dimension document like an A4 invoice creates arbitrary breakpoints that fail on different viewports, cause blurry rendering, and break layout flow in mobile previews.
+**Action:** For document previews, strictly maintain the document's true physical dimensions (e.g. `210mm` width). Handle responsiveness by wrapping it in a viewport container that dynamically calculates the necessary scale (`containerWidth / trueWidth`) via a `useEffect` hook, and applies that computed `transform: scale()`, `width`, and `height` to the wrapper, establishing a clean separation between the document layout and the viewport adapter.
