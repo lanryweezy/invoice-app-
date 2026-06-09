@@ -698,6 +698,19 @@ const App: React.FC = () => {
             <PublicProfile username={publicUsername} />
         ) : activeView === 'templatePage' && activeTemplateSlug !== null ? (
             <TemplatePage slug={activeTemplateSlug} onGoHome={() => setActiveView('editor')} />
+        ) : activeView === 'blog' || activeView === 'blogPost' ? (
+            <div className="flex items-center justify-center h-full bg-slate-50">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto mb-4"></div>
+                    <p className="text-slate-600 font-medium">Loading blog...</p>
+                    <button 
+                        onClick={() => window.location.reload()} 
+                        className="mt-4 text-xs text-teal-600 hover:text-teal-700 font-bold underline"
+                    >
+                        Click here if it doesn't load
+                    </button>
+                </div>
+            </div>
         ) : (
         <div className="flex flex-col md:flex-row h-full">
           
