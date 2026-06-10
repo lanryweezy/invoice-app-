@@ -13,6 +13,14 @@
       "destination": "/marketing/templates/:match*"
     },
     {
+      "source": "/tools/:match*",
+      "destination": "/marketing/tools/:match*"
+    },
+    {
+      "source": "/nrs-compliance-dossier",
+      "destination": "/marketing/nrs-compliance-dossier/"
+    },
+    {
       "source": "/editor",
       "destination": "/web/editor"
     },
