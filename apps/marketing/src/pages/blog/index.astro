@@ -6,33 +6,72 @@ const allPosts = await getCollection('blog');
 const sortedPosts = allPosts.reverse();
 ---
 
-<BaseLayout title="Blog | Business Resources for Nigeria">
-  <div class="max-w-4xl mx-auto pt-16 px-4 pb-20">
-    <h1 class="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">InvoiceApp Blog</h1>
-    <p class="text-xl text-slate-600 mb-12 font-medium">Resources to build, scale, and optimize your business.</p>
+<BaseLayout title="Resources & Insights | InvoiceApp Nigeria">
+  <div class="bg-slate-900 pt-32 pb-48 -mt-16">
+    <div class="max-w-6xl mx-auto px-6">
+        <div class="max-w-3xl">
+            <span class="inline-block px-4 py-1.5 bg-teal-500 text-white text-xs font-black uppercase tracking-[0.2em] rounded-md mb-8">
+                Knowledge Hub
+            </span>
+            <h1 class="text-5xl md:text-8xl font-black text-white mb-8 tracking-tighter leading-none">
+                Master Your <span class="text-teal-400">Back-Office.</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-400 leading-relaxed font-medium">
+                Strategic insights for Nigerian SMEs and freelancers on cashflow, compliance, and institutional growth.
+            </p>
+        </div>
+    </div>
+  </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-      {sortedPosts.map(post => (
-        <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow group flex flex-col h-full cursor-pointer">
-          <a href={`/blog/${post.data.slug}`} class="block h-48 overflow-hidden">
-            <img src={post.data.imageUrl} alt={post.data.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+  <div class="max-w-6xl mx-auto px-6 -mt-32 pb-32">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+      {sortedPosts.map((post, index) => (
+        <article class={`group bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden hover:shadow-2xl hover:shadow-teal-900/10 transition-all duration-500 flex flex-col ${index === 0 ? 'md:col-span-2 lg:flex-row' : ''}`}>
+          <a href={`/blog/${post.data.slug}`} class={`block overflow-hidden relative ${index === 0 ? 'lg:w-1/2 h-[400px] lg:h-auto' : 'h-64'}`}>
+            <img 
+                src={post.data.imageUrl} 
+                alt={post.data.title} 
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
           </a>
-          <div class="p-6 flex flex-col flex-1">
-            <div class="flex items-center justify-between text-xs font-medium text-slate-500 mb-3">
-              <span class="bg-slate-100 px-3 py-1 rounded-full text-slate-700">{post.data.category}</span>
+          
+          <div class={`p-10 flex flex-col flex-1 ${index === 0 ? 'lg:w-1/2 justify-center' : ''}`}>
+            <div class="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">
+              <span class="text-teal-600 px-2 py-1 bg-teal-50 rounded">{post.data.category}</span>
               <span>{post.data.readTime}</span>
             </div>
-            <a href={`/blog/${post.data.slug}`} class="block mt-2">
-              <h3 class="text-xl font-bold text-slate-900 mb-2 leading-tight group-hover:text-teal-600 transition-colors">{post.data.title}</h3>
-              <p class="text-slate-600 text-sm line-clamp-3 mb-4">{post.data.excerpt}</p>
+            
+            <a href={`/blog/${post.data.slug}`} class="block group/link">
+              <h3 class={`${index === 0 ? 'text-3xl md:text-4xl' : 'text-2xl'} font-black text-slate-900 mb-4 leading-tight group-hover/link:text-teal-600 transition-colors tracking-tight`}>
+                {post.data.title}
+              </h3>
+              <p class="text-slate-500 text-lg leading-relaxed line-clamp-3 mb-8">
+                {post.data.excerpt}
+              </p>
             </a>
-            <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
-              <span class="text-sm font-medium text-slate-900 group-hover:text-teal-600 transition-colors">Read Article →</span>
-              <span class="text-xs text-slate-500">{post.data.date}</span>
+            
+            <div class="mt-auto pt-8 border-t border-slate-50 flex items-center justify-between">
+              <a href={`/blog/${post.data.slug}`} class="text-sm font-black text-slate-900 group-hover:text-teal-600 transition-colors uppercase tracking-widest flex items-center gap-2">
+                Read Analysis
+                <svg class="w-4 h-4 translate-x-0 group-hover:translate-x-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+              </a>
+              <span class="text-xs font-bold text-slate-300">{post.data.date}</span>
             </div>
           </div>
         </article>
       ))}
+    </div>
+
+    <div class="mt-32 bg-teal-600 rounded-[3rem] p-12 md:p-20 text-center text-white relative overflow-hidden shadow-2xl shadow-teal-900/20">
+        <div class="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+        <div class="relative z-10">
+            <h2 class="text-4xl md:text-6xl font-black mb-8 tracking-tighter italic font-serif">Build a business, not a hustle.</h2>
+            <p class="text-teal-50 mb-12 max-w-2xl mx-auto text-xl font-medium opacity-90">Our automated invoicing and NRS compliance tools give you the institutional authority you need to close bigger deals.</p>
+            <a href="/editor" class="inline-block bg-white text-teal-700 font-black py-6 px-16 rounded-2xl hover:bg-teal-50 transition-all shadow-xl text-xl uppercase tracking-widest">
+                Start Generating Now
+            </a>
+        </div>
     </div>
   </div>
 </BaseLayout>

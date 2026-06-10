@@ -45,7 +45,8 @@ const canonicalURL = new URL(Astro.url.pathname, "https://www.invoiceapp.ng");
         theme: {
           extend: {
             fontFamily: {
-              sans: ['Inter', 'sans-serif'],
+              sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+              serif: ['Playfair Display', 'serif'],
             },
             colors: {
               teal: {
@@ -64,25 +65,90 @@ const canonicalURL = new URL(Astro.url.pathname, "https://www.invoiceapp.ng");
                 850: '#1e293b',
                 950: '#020617',
               }
-            }
+            },
+            typography: (theme) => ({
+              DEFAULT: {
+                css: {
+                  color: theme('colors.slate.700'),
+                  a: {
+                    color: theme('colors.teal.600'),
+                    '&:hover': {
+                      color: theme('colors.teal.700'),
+                    },
+                  },
+                  h1: { color: theme('colors.slate.900'), fontWeight: '900' },
+                  h2: { color: theme('colors.slate.900'), fontWeight: '800' },
+                  h3: { color: theme('colors.slate.900'), fontWeight: '700' },
+                  h4: { color: theme('colors.slate.900'), fontWeight: '700' },
+                  code: { color: theme('colors.teal.600') },
+                  blockquote: {
+                    borderLeftColor: theme('colors.teal.500'),
+                    backgroundColor: theme('colors.teal.50'),
+                    padding: '1.5rem',
+                    fontStyle: 'italic',
+                    borderRadius: '0.75rem',
+                  },
+                  img: {
+                    borderRadius: '1.5rem',
+                    boxShadow: theme('boxShadow.2xl'),
+                  },
+                },
+              },
+            }),
           },
         },
       }
     </script>
     <style is:global>
-      .prose { max-width: none; }
-      .prose h2 { font-size: 1.875rem; font-weight: 800; margin-top: 2.5rem; margin-bottom: 1.25rem; color: #0f172a; }
-      .prose h3 { font-size: 1.5rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; color: #1e293b; }
-      .prose p { margin-top: 1.25rem; margin-bottom: 1.25rem; line-height: 1.8; color: #334155; }
-      .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-top: 1.25rem; margin-bottom: 1.25rem; }
-      .prose li { margin-top: 0.5rem; margin-bottom: 0.5rem; color: #334155; }
-      .prose strong { font-weight: 600; color: #0f172a; }
-      .prose blockquote { border-left-color: #0d9488; font-style: italic; color: #475569; padding-left: 1.5rem; margin: 2rem 0; }
+      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+
+      /* --- Professional Flow Fixes --- */
+      .prose { 
+        max-width: none; 
+        line-height: 1.85;
+      }
       
+      .prose p {
+        margin-top: 1.75rem;
+        margin-bottom: 1.75rem;
+        font-size: 1.15rem;
+      }
+
+      /* Fix for "Large Photos/Icons" */
+      .prose img, .prose svg { 
+        max-width: 100% !important;
+        height: auto !important;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      /* Ensure raw HTML divs inside MDX flow well */
+      .prose > div {
+        margin-top: 3rem;
+        margin-bottom: 3rem;
+      }
+
       /* Selection colors matching the app */
       ::selection {
         background-color: #ccfbf1; /* teal-100 */
         color: #134e4a; /* teal-900 */
+      }
+
+      /* Custom scrollbar for that formal feel */
+      ::-webkit-scrollbar {
+        width: 10px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f8fafc;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 5px;
+        border: 2px solid #f8fafc;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
       }
     </style>
   </head>
