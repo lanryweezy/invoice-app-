@@ -27,7 +27,7 @@ This document outlines 50 potential improvements for the InvoiceApp, categorized
 20. **Estimate-to-Invoice:** One-click conversion of a quote/estimate into a final invoice.
 
 ## Nigerian-Specific Context
-21. **WHT (Withholding Tax) Support:** Automatically calculate 5% or 10% WHT as per FIRS regulations.
+21. **WHT (Withholding Tax) Support:** Automatically calculate 5% or 10% WHT as per NRS regulations.
 22. **Payment Gateway Integration:** Direct "Pay Now" buttons for Paystack, Flutterwave, or Monnify.
 23. **Stamp Duty Calculation:** Include automated calculations for applicable stamp duties.
 24. **Bank Auto-complete:** A dropdown of all licensed Nigerian banks to prevent typos.

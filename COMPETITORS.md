@@ -17,7 +17,7 @@ To become the #1 invoice app in Nigeria, we must understand the landscape and ex
 ## 2. Tips to "Win" in Discovery (SEO & Growth)
 
 ### A. Dominating Local Search
-*   **Hyper-Local Keywords**: Optimize for "VAT invoice generator Nigeria", "FIRS compliant invoice template", and "Naira receipt maker". (Already started with recent SEO updates).
+*   **Hyper-Local Keywords**: Optimize for "VAT invoice generator Nigeria", "NRS compliant invoice template", and "Naira receipt maker". (Already started with recent SEO updates).
 *   **Comparison Pages**: Create "InvoiceApp vs Wave" or "Best alternative to Zoho for Nigerians" pages. Users searching for competitors will find us.
 *   **Nigerian Business Knowledge Base**: Write guides on:
     *   "How to calculate Withholding Tax (WHT) in Nigeria."

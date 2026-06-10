@@ -15,7 +15,7 @@
 ## SEO Package
 * **SEO Title:** The Hidden Cost of Manual Bookkeeping for African SMEs | InvoiceApp
 * **SEO Meta Description:** Discover why manual bookkeeping and informal invoicing are draining your cashflow. Learn how to build a scalable, automated financial system for your Nigerian SME.
-* **SEO Keywords:** manual bookkeeping, Nigerian SMEs, cashflow management, automated invoicing, InvoiceApp, freelance finance, African startups, financial operating system, e-invoicing Nigeria, FIRS compliant invoices.
+* **SEO Keywords:** manual bookkeeping, Nigerian SMEs, cashflow management, automated invoicing, InvoiceApp, freelance finance, African startups, financial operating system, e-invoicing Nigeria, NRS compliant invoices.
 * **Semantic Keyword Variations:** digital accounting software, online invoicing tool Lagos, small business cashflow problems, how to get paid faster by clients, business automation tools Africa.
 * **Suggested URL slug:** hidden-costs-manual-bookkeeping-african-smes
 
@@ -61,7 +61,7 @@ Imagine this workflow:
 No follow-ups required. No "please check your app" messages. Just seamless, automated financial plumbing.
 
 ### The Future is Automated (And Tax Compliant)
-The regulatory landscape in Nigeria is shifting rapidly. The Federal Inland Revenue Service (FIRS) is increasingly moving toward digitized, e-invoicing mandates. Large corporations are tightening their vendor requirements. They will simply refuse to do business with suppliers who cannot provide proper, traceable documentation.
+The regulatory landscape in Nigeria is shifting rapidly. The Nigeria Revenue Service (NRS) is increasingly moving toward digitized, e-invoicing mandates. Large corporations are tightening their vendor requirements. They will simply refuse to do business with suppliers who cannot provide proper, traceable documentation.
 
 If you are a freelancer, an agency, or an SME with ambitions of working with tier-one clients, manual bookkeeping is no longer just an inefficiency—it is a disqualifier.
 
@@ -138,11 +138,11 @@ Future-proof your business operations.
 4. **Chart:** A clean bar chart showing "Time spent on Admin vs. Core Work," highlighting the massive chunk of time manual bookkeeping steals from founders.
 
 ## CTA Ideas
-1. **In-text CTA (Mid-article):** "Stop wrestling with Word templates. Generate your first professional, FIRS-compliant invoice in 60 seconds with InvoiceApp.ng. It's free."
+1. **In-text CTA (Mid-article):** "Stop wrestling with Word templates. Generate your first professional, NRS-compliant invoice in 60 seconds with InvoiceApp.ng. It's free."
 2. **Bottom CTA:** "Ready to upgrade your financial operating system? Join thousands of smart African businesses getting paid faster. [Create Free Account]"
 3. **Sticky Sidebar (Desktop):** "See how your invoice looks to clients. [Preview a Template]"
 
 ## Lead Magnet Ideas
-1. **The FIRS Compliance Checklist for SMEs:** A downloadable 1-pager on exactly what needs to be on your invoice to avoid tax headaches.
+1. **The NRS Compliance Checklist for SMEs:** A downloadable 1-pager on exactly what needs to be on your invoice to avoid tax headaches.
 2. **The Professional Follow-up Scripts:** "5 Email and WhatsApp Templates to get late-paying clients to pay without ruining the relationship." (Given away in exchange for email signup).
 3. **The Agency Pricing Calculator:** A simple Google Sheet template sent via email to help freelancers calculate their ideal hourly rate inclusive of local taxes and software costs.
