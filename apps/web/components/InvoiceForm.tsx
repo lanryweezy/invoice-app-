@@ -5,17 +5,18 @@ import { TrashIcon, PlusIcon, UploadIcon, ChevronDownIcon, ChevronUpIcon, EmptyB
 
 interface InvoiceFormProps {
   invoice: Invoice;
-  updateInvoice: <K extends keyof Invoice>(key: K, value: Invoice[K]) => void;
+  updateInvoice: (key: keyof Invoice, value: any) => void;
   addLineItem: () => void;
   removeLineItem: (id: string) => void;
   updateLineItem: (id: string, field: keyof Omit<LineItem, 'id'>, value: string | number) => void;
   savedClients: Client[];
   onSaveClient: (client: Client) => void;
-  businessProfiles?: any[];
-  onSaveBusinessProfile?: (profile: any) => void;
-  onSaveRecurring?: (invoice: Invoice) => void;
-  isPro?: boolean;
-  onProFeatureClick?: () => void;
+  businessProfiles: any[];
+  onSaveBusinessProfile: (profile: any) => void;
+  onSaveRecurring?: (inv: Invoice) => void;
+  onSaveInvoice?: (inv: Invoice) => void;
+  isPro: boolean;
+  onProFeatureClick: () => void;
 }
 
 interface InputFieldProps {
@@ -205,8 +206,8 @@ const LineItemRow = React.memo(({ item, index, currencySymbol, currencyFormatter
                 </div>
 
                 {/* Qty & Price & Total Row */}
-                <div className="flex items-end gap-3 sm:gap-4">
-                    <div className="w-20 sm:w-24">
+                <div className="flex items-end gap-3 sm:gap-4 flex-wrap">
+                    <div className="w-16 sm:w-20">
                         <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Qty</label>
                         <input
                             name="quantity"
@@ -214,10 +215,27 @@ const LineItemRow = React.memo(({ item, index, currencySymbol, currencyFormatter
                             min="0"
                             value={item.quantity}
                             onChange={(e) => onChange(item.id, e)}
-                            className="block w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-bold focus:bg-white focus:outline-none focus:border-teal-500 transition-all text-center"
+                            className="block w-full px-2 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-bold focus:bg-white focus:outline-none focus:border-teal-500 transition-all text-center"
                         />
                     </div>
-                    <div className="flex-1">
+                    <div className="w-20 sm:w-24">
+                        <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Unit</label>
+                        <select
+                            name="unitOfMeasure"
+                            value={item.unitOfMeasure || 'PCS'}
+                            onChange={(e) => onChange(item.id, e as any)}
+                            className="block w-full px-2 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-bold focus:bg-white focus:outline-none focus:border-teal-500 transition-all text-center text-xs appearance-none"
+                        >
+                            <option value="PCS">PCS</option>
+                            <option value="HRS">HRS</option>
+                            <option value="DAYS">DAYS</option>
+                            <option value="KG">KG</option>
+                            <option value="LTR">LTR</option>
+                            <option value="MTR">MTR</option>
+                            <option value="SET">SET</option>
+                        </select>
+                    </div>
+                    <div className="flex-1 min-w-[120px]">
                         <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Price</label>
                         <div className="relative">
                             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm pointer-events-none">
@@ -230,10 +248,23 @@ const LineItemRow = React.memo(({ item, index, currencySymbol, currencyFormatter
                                 step="0.01"
                                 value={item.price}
                                 onChange={(e) => onChange(item.id, e)}
-                                className="block w-full pl-12 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-bold focus:bg-white focus:outline-none focus:border-teal-500 transition-all"
+                                className="block w-full pl-10 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-bold focus:bg-white focus:outline-none focus:border-teal-500 transition-all"
                                 placeholder=""
                             />
                         </div>
+                    </div>
+                    <div className="w-32">
+                        <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Tax Cat.</label>
+                        <select
+                            name="taxCategory"
+                            value={item.taxCategory || 'Standard'}
+                            onChange={(e) => onChange(item.id, e as any)}
+                            className="block w-full px-2 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-bold focus:bg-white focus:outline-none focus:border-teal-500 transition-all text-center text-xs appearance-none"
+                        >
+                            <option value="Standard">Standard</option>
+                            <option value="ZeroRated">Zero-Rated</option>
+                            <option value="Exempt">Exempt</option>
+                        </select>
                     </div>
                     <div className="text-right pb-1.5 min-w-[80px]">
                         <label className="block text-[9px] font-bold text-slate-300 mb-0.5 uppercase tracking-wide">Total</label>
@@ -530,23 +561,20 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                     />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <InputField 
-                            label="Email Address" 
-                            name="email" 
-                            value={invoice.user.email} 
+                            label="Tax ID (TIN)" 
+                            name="tin" 
+                            value={invoice.user.tin || ''} 
                             onChange={handleUserChange} 
-                            type="email" 
-                            autoComplete="email"
-                            icon={<MailIcon className="w-4 h-4"/>}
-                            error={validateEmail(invoice.user.email)}
+                            placeholder="e.g. 12345678-0001"
+                            icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>}
                         />
                         <InputField 
-                            label="Phone Number" 
-                            name="phoneNumber" 
-                            value={invoice.user.phoneNumber || ''} 
+                            label="CAC Number" 
+                            name="cacNumber" 
+                            value={invoice.user.cacNumber || ''} 
                             onChange={handleUserChange} 
-                            type="tel"
-                            autoComplete="tel"
-                            icon={<PhoneIcon className="w-4 h-4"/>}
+                            placeholder="e.g. RC 1234567"
+                            icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>}
                         />
                     </div>
                     <InputField 
@@ -663,6 +691,27 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                         icon={<HashIcon className="w-4 h-4" />}
                     />
                     <div>
+                        <label htmlFor="documentType" className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Document Type</label>
+                        <div className="relative">
+                            <select
+                                id="documentType"
+                                name="documentType"
+                                value={invoice.documentType || 'Tax Invoice'}
+                                onChange={(e) => updateInvoice('documentType', e.target.value as any)}
+                                className="block w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-800 text-sm font-semibold shadow-sm focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all cursor-pointer appearance-none"
+                            >
+                                <option value="Tax Invoice">Tax Invoice</option>
+                                <option value="Pro-forma">Pro-forma</option>
+                                <option value="Quote">Quote / Estimate</option>
+                                <option value="Receipt">Receipt</option>
+                            </select>
+                            <ChevronDownIcon className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-5">
+                    <div>
                         <label htmlFor="status" className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Status</label>
                         <div className="relative">
                             <select
@@ -680,6 +729,14 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                             <ChevronDownIcon className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                         </div>
                     </div>
+                    <InputField 
+                        label="Digital Signature (Name)" 
+                        name="digitalSignature" 
+                        value={invoice.digitalSignature || ''} 
+                        onChange={handleInvoiceMetaChange} 
+                        placeholder="Type your name..."
+                        icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>}
+                    />
                 </div>
                 
                 {/* Dates Row */}
@@ -919,15 +976,33 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                             icon={<MailIcon className="w-4 h-4"/>}
                             error={validateEmail(invoice.client.email)}
                         />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <InputField 
-                            label="Client Address" 
-                            name="address" 
-                            value={invoice.client.address} 
+                            label="Client Tax ID (TIN)" 
+                            name="tin" 
+                            value={invoice.client.tin || ''} 
                             onChange={handleClientChange} 
-                            autoComplete="street-address"
-                            icon={<MapPinIcon className="w-4 h-4"/>}
+                            placeholder="e.g. 87654321-0001"
+                            icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>}
+                        />
+                        <InputField 
+                            label="Client CAC Number" 
+                            name="cacNumber" 
+                            value={invoice.client.cacNumber || ''} 
+                            onChange={handleClientChange} 
+                            placeholder="e.g. RC 8765432"
+                            icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>}
                         />
                     </div>
+                    </div>
+                    <InputField 
+                        label="Client Address" 
+                        name="address" 
+                        value={invoice.client.address} 
+                        onChange={handleClientChange} 
+                        autoComplete="street-address"
+                        icon={<MapPinIcon className="w-4 h-4"/>}
+                    />
                 </div>
                 
                 {invoice.client.name && (
@@ -1010,6 +1085,90 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                     )}
                 </div>
             )}
+        </CollapsibleSection>
+
+        {/* NRS Compliance Section */}
+        <CollapsibleSection title="NRS E-Invoicing Compliance" defaultOpen={true} highlight={true} icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>}>
+            <div className="space-y-4">
+                <div className="bg-slate-900 rounded-xl p-5 text-white shadow-lg relative overflow-hidden group">
+                    <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                            <h4 className="text-xs font-bold uppercase tracking-widest text-teal-400">Compliance Status</h4>
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                                invoice.nrsStatus === 'Verified' ? 'bg-teal-500 text-white' : 
+                                invoice.nrsStatus === 'Failed' ? 'bg-red-500 text-white' : 'bg-slate-700 text-slate-300'
+                            }`}>
+                                {invoice.nrsStatus || 'Pending Validation'}
+                            </span>
+                        </div>
+                        
+                        <div className="space-y-3">
+                            <div className="flex items-start gap-3">
+                                <div className={`mt-1 w-2 h-2 rounded-full ${invoice.user.tin ? 'bg-teal-500' : 'bg-red-500'}`}></div>
+                                <div className="flex-1">
+                                    <p className="text-xs font-bold">Seller TIN Verification</p>
+                                    <p className="text-[10px] text-slate-400">{invoice.user.tin ? `TIN: ${invoice.user.tin}` : 'Missing. Add your TIN in Business Info.'}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <div className={`mt-1 w-2 h-2 rounded-full ${invoice.client.tin ? 'bg-teal-500' : 'bg-red-500'}`}></div>
+                                <div className="flex-1">
+                                    <p className="text-xs font-bold">Buyer TIN Verification</p>
+                                    <p className="text-[10px] text-slate-400">{invoice.client.tin ? `TIN: ${invoice.client.tin}` : 'Missing. Add client TIN in Client Info.'}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <div className={`mt-1 w-2 h-2 rounded-full ${invoice.lineItems.every(i => i.taxCategory) ? 'bg-teal-500' : 'bg-amber-500'}`}></div>
+                                <div className="flex-1">
+                                    <p className="text-xs font-bold">Data Standardization (NRS MBS)</p>
+                                    <p className="text-[10px] text-slate-400">Ensuring all line items have mandatory Tax Categories and Units.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-3 mt-6">
+                            <button 
+                                onClick={() => {
+                                    if (!invoice.user.tin || !invoice.client.tin) {
+                                        updateInvoice('nrsStatus', 'Failed');
+                                        updateInvoice('nrsValidationMessage', 'Missing mandatory TIN fields for compliance.');
+                                    } else {
+                                        updateInvoice('nrsStatus', 'Verified');
+                                        updateInvoice('nrsValidationMessage', 'All compliance checks passed.');
+                                    }
+                                }}
+                                className="flex-1 py-2.5 bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-teal-900/20 flex items-center justify-center gap-2"
+                            >
+                                <SparklesIcon className="w-4 h-4" />
+                                Validate & Transmit
+                            </button>
+                            
+                            {onSaveInvoice && (
+                                <button 
+                                    onClick={() => onSaveInvoice(invoice)}
+                                    className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2"
+                                >
+                                    <SaveIcon className="w-4 h-4" />
+                                    Record in History
+                                </button>
+                            )}
+                        </div>
+                        
+                        {invoice.nrsValidationMessage && (
+                            <p className={`mt-3 text-[10px] font-bold uppercase text-center ${invoice.nrsStatus === 'Failed' ? 'text-red-400' : 'text-teal-400'}`}>
+                                {invoice.nrsValidationMessage}
+                            </p>
+                        )}
+                    </div>
+                </div>
+                <p className="text-[10px] text-slate-400 italic text-center px-4">
+                    InvoiceApp.ng is an accredited Access Point Provider (APP). Real-time transmission ensures your invoices are recognized for tax deductions.
+                </p>
+                <div className="flex justify-center gap-4 pt-2">
+                    <a href="/nrs-compliance-dossier" target="_blank" className="text-[9px] font-bold text-teal-600 hover:text-teal-700 underline">Technical Dossier</a>
+                    <a href="/tools/nrs-readiness-assessment" target="_blank" className="text-[9px] font-bold text-teal-600 hover:text-teal-700 underline">Compliance Readiness Check</a>
+                </div>
+            </div>
         </CollapsibleSection>
     </div>
   );

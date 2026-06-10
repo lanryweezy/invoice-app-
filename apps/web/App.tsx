@@ -40,7 +40,24 @@ const InvoicePreview = React.lazy(() => import('./components/InvoicePreview').th
 const numberFormatter = new Intl.NumberFormat();
 
 const App: React.FC = () => {
-  const { invoice, setInvoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, calculateTotals, savedClients, saveClient, businessProfiles, saveBusinessProfile, recurringInvoices, saveRecurringInvoice, removeRecurringInvoice } = useInvoice();
+  const { 
+    invoice, 
+    setInvoice, 
+    updateInvoice, 
+    addLineItem, 
+    removeLineItem, 
+    updateLineItem, 
+    calculateTotals, 
+    savedInvoices,
+    saveInvoice,
+    savedClients, 
+    saveClient, 
+    businessProfiles, 
+    saveBusinessProfile, 
+    recurringInvoices, 
+    saveRecurringInvoice, 
+    removeRecurringInvoice 
+  } = useInvoice();
   const { expenses, addExpense, removeExpense } = useExpenses();
   const { receipts, addReceipt, removeReceipt } = useReceipts();
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
@@ -318,8 +335,9 @@ const App: React.FC = () => {
     const emailContent = generateEmailTemplate(fullInvoice);
     setGeneratedEmail(emailContent);
     setIsEmailModalOpen(true);
+    saveInvoice(fullInvoice); // Record in history
     trackEvent('generate_email', { invoice_id: invoice.invoiceNumber });
-  }, [invoice, totals]);
+  }, [invoice, totals, saveInvoice]);
 
   const handleSaveClient = useCallback((client: Client) => {
       // Free tier restriction: max 2 clients
@@ -442,6 +460,7 @@ const App: React.FC = () => {
           
           pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
           pdf.save(`Invoice-${invoice.invoiceNumber}.pdf`);
+          saveInvoice({ ...invoice, ...totals }); // Record in history with totals
           showToast('PDF Downloaded!');
           trackEvent('download_pdf_success', { invoice_id: invoice.invoiceNumber });
 
@@ -665,7 +684,7 @@ const App: React.FC = () => {
         {activeView === 'branches' ? (
             <div className="p-4 sm:p-8 max-w-4xl mx-auto"><BranchesManager /></div>
         ) : activeView === 'accounting' ? (
-            <div className="p-4 sm:p-8 max-w-6xl mx-auto"><AccountingDashboard expenses={expenses} onAddExpense={addExpense} onRemoveExpense={removeExpense} /></div>
+            <div className="p-4 sm:p-8 max-w-6xl mx-auto"><AccountingDashboard invoices={savedInvoices} expenses={expenses} onAddExpense={addExpense} onRemoveExpense={removeExpense} /></div>
         ) : activeView === 'recurring' ? (
             <div className="p-4 sm:p-8 max-w-4xl mx-auto">
                 <RecurringManager
@@ -729,6 +748,7 @@ const App: React.FC = () => {
                   businessProfiles={businessProfiles}
                   onSaveBusinessProfile={handleSaveBusinessProfile}
                   onSaveRecurring={saveRecurringInvoice ? handleSaveRecurringWrapper : undefined}
+                  onSaveInvoice={saveInvoice}
                   isPro={isPro}
                   onProFeatureClick={handleProFeatureRecurring}
                 />

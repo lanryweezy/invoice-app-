@@ -1,6 +1,5 @@
-
 import React, { useMemo } from 'react';
-import type { Invoice, TemplateId, InvoiceStatus } from '../types';
+import type { Invoice, TemplateId, InvoiceStatus, DocumentType } from '../types';
 
 interface InvoicePreviewProps {
   invoice: Invoice;
@@ -8,6 +7,7 @@ interface InvoicePreviewProps {
     subtotal: number;
     discountAmount: number;
     tax: number;
+    whtAmount?: number;
     shipping: number;
     total: number;
   };
@@ -73,7 +73,7 @@ const StatusBadge: React.FC<{ status: InvoiceStatus; template: TemplateId }> = (
 
 // --- HEADER COMPONENTS ---
 
-const ClassicHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, status: InvoiceStatus }> = ({ user, invoiceNumber, status }) => (
+const ClassicHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, status: InvoiceStatus, documentType?: DocumentType }> = ({ user, invoiceNumber, status, documentType }) => (
     <div className="flex justify-between items-start mb-12 pb-8 border-b-2 border-slate-200">
       <div className="flex items-start gap-6">
           {user.logo && (
@@ -81,6 +81,7 @@ const ClassicHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, st
           )}
           <div className="space-y-2">
             <h2 className="text-3xl font-bold text-slate-900 tracking-tight">{user.name}</h2>
+            {user.cacNumber && <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">CAC: {user.cacNumber}</p>}
             <div className="text-slate-600 text-sm leading-relaxed font-medium">
                 <p>{user.address}</p>
                 <div className="flex gap-3">
@@ -91,21 +92,21 @@ const ClassicHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, st
           </div>
       </div>
       <div className="text-right space-y-2">
-        <h1 className="text-4xl font-light text-slate-400 uppercase tracking-[0.2em]">Invoice</h1>
+        <h1 className="text-4xl font-light text-slate-400 uppercase tracking-[0.2em]">{documentType || 'Invoice'}</h1>
         <p className="text-slate-800 font-mono font-bold">#{invoiceNumber}</p>
         <div><StatusBadge status={status} template="classic" /></div>
       </div>
     </div>
 );
 
-const ModernHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, status: InvoiceStatus }> = ({ user, invoiceNumber, status }) => (
+const ModernHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, status: InvoiceStatus, documentType?: DocumentType }> = ({ user, invoiceNumber, status, documentType }) => (
     <div className="bg-slate-900 text-white p-10 -mx-8 -mt-8 mb-10 md:p-12 md:-mx-12 md:-mt-12 relative overflow-hidden shadow-lg">
         <div className="absolute top-0 right-0 w-80 h-80 bg-slate-800 rounded-full -mr-24 -mt-40 opacity-50 blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-teal-600 rounded-full -ml-32 -mb-32 opacity-30 blur-2xl"></div>
         
         <div className="relative z-10 flex justify-between items-start">
             <div className="flex flex-col justify-between h-full">
-                <h1 className="text-5xl font-bold tracking-tighter mb-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-200 to-white">INVOICE</h1>
+                <h1 className="text-5xl font-bold tracking-tighter mb-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-200 to-white uppercase">{(documentType || 'Invoice').toUpperCase()}</h1>
                 <div className="flex items-center gap-4 mt-2">
                     <p className="text-slate-300 font-mono text-lg">#{invoiceNumber}</p>
                     <StatusBadge status={status} template="modern" />
@@ -114,6 +115,7 @@ const ModernHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, sta
             <div className="flex items-center gap-5 text-right">
                 <div>
                     <h2 className="text-xl font-semibold mb-2 text-teal-50">{user.name}</h2>
+                    {user.cacNumber && <p className="text-[10px] font-bold text-teal-400 uppercase tracking-tighter mb-1">CAC: {user.cacNumber}</p>}
                     <div className="text-slate-300 text-sm space-y-0.5">
                         <p>{user.address}</p>
                         <p>{user.email}</p>
@@ -128,7 +130,7 @@ const ModernHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, sta
     </div>
 );
 
-const BoldHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, status: InvoiceStatus }> = ({ user, invoiceNumber, status }) => (
+const BoldHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, status: InvoiceStatus, documentType?: DocumentType }> = ({ user, invoiceNumber, status, documentType }) => (
     <div className="mb-12">
         <div className="flex justify-between items-start border-b-[6px] border-black pb-6">
             <div className="flex items-center gap-6">
@@ -137,6 +139,7 @@ const BoldHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, statu
                 )}
                 <div>
                     <h2 className="text-5xl font-black text-black uppercase tracking-tighter leading-none">{user.name}</h2>
+                    {user.cacNumber && <p className="text-xs font-black text-black uppercase mt-1">CAC: {user.cacNumber}</p>}
                     <div className="text-slate-600 font-bold mt-2 flex flex-col sm:flex-row sm:gap-4">
                         <p>{user.email}</p>
                         {user.phoneNumber && <p>{user.phoneNumber}</p>}
@@ -148,13 +151,13 @@ const BoldHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, statu
              </div>
         </div>
         <div className="mt-6 flex items-baseline gap-4">
-            <h1 className="text-7xl font-black text-slate-300 tracking-tighter">INVOICE</h1>
+            <h1 className="text-7xl font-black text-slate-300 tracking-tighter uppercase">{(documentType || 'Invoice').toUpperCase()}</h1>
             <span className="text-3xl text-black font-mono font-bold">#{invoiceNumber}</span>
         </div>
     </div>
 );
 
-const MinimalistHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, status: InvoiceStatus }> = ({ user, invoiceNumber, status }) => (
+const MinimalistHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, status: InvoiceStatus, documentType?: DocumentType }> = ({ user, invoiceNumber, status, documentType }) => (
     <div className="mb-16 text-center">
         {user.logo ? (
              <img src={user.logo} alt="Logo" className="h-20 w-auto object-contain mx-auto mb-6" />
@@ -163,31 +166,33 @@ const MinimalistHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string,
         )}
         
         <h2 className="text-2xl font-bold tracking-wide text-slate-900 mb-2">{user.name}</h2>
+        {user.cacNumber && <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">CAC: {user.cacNumber}</p>}
         <p className="text-slate-600 text-sm mb-8">
             {user.email} • {user.address}
             {user.phoneNumber && <> • {user.phoneNumber}</>}
         </p>
         
         <div className="inline-flex flex-col items-center gap-2 border-y border-slate-200 py-4 w-full max-w-md mx-auto">
-             <h1 className="text-sm font-bold uppercase tracking-[0.3em] text-slate-500">Invoice No.</h1>
+             <h1 className="text-sm font-bold uppercase tracking-[0.3em] text-slate-500">{documentType || 'Invoice'} No.</h1>
              <p className="text-3xl font-light text-slate-900">{invoiceNumber}</p>
              <div className="mt-1"><StatusBadge status={status} template="minimalist" /></div>
         </div>
     </div>
 );
 
-const ProfessionalHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, status: InvoiceStatus }> = ({ user, invoiceNumber, status }) => (
+const ProfessionalHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, status: InvoiceStatus, documentType?: DocumentType }> = ({ user, invoiceNumber, status, documentType }) => (
     <div className="mb-10">
         <div className="bg-teal-800 text-white p-8 -mx-8 -mt-8 mb-8 flex justify-between items-center">
              <div className="flex items-center gap-4">
                  {user.logo && <img src={user.logo} className="h-16 w-auto bg-white p-1 rounded" alt="Logo"/>}
                  <div>
                      <h2 className="text-2xl font-bold">{user.name}</h2>
-                     <p className="text-teal-100 text-sm font-medium opacity-90">Business Invoice</p>
+                     <p className="text-teal-100 text-sm font-medium opacity-90">Official Business {documentType || 'Invoice'}</p>
+                     {user.cacNumber && <p className="text-[9px] font-bold text-teal-200 uppercase tracking-widest mt-1">CAC: {user.cacNumber}</p>}
                  </div>
              </div>
              <div className="text-right">
-                 <h1 className="text-3xl font-bold opacity-100">INVOICE</h1>
+                 <h1 className="text-3xl font-bold opacity-100 uppercase">{(documentType || 'Invoice').toUpperCase()}</h1>
                  <p className="font-mono opacity-90">#{invoiceNumber}</p>
              </div>
         </div>
@@ -208,11 +213,12 @@ const ProfessionalHeader: React.FC<{ user: Invoice['user'], invoiceNumber: strin
     </div>
 );
 
-const ElegantHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, status: InvoiceStatus }> = ({ user, invoiceNumber, status }) => (
+const ElegantHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, status: InvoiceStatus, documentType?: DocumentType }> = ({ user, invoiceNumber, status, documentType }) => (
     <div className="mb-16 font-serif">
         <div className="text-center mb-8">
              {user.logo && <img src={user.logo} className="h-24 w-auto mx-auto mb-6" alt="Logo"/>}
              <h2 className="text-4xl text-slate-900 tracking-wide italic mb-2">{user.name}</h2>
+             {user.cacNumber && <p className="text-[10px] font-bold text-amber-700 uppercase tracking-[0.2em] mb-4">CAC: {user.cacNumber}</p>}
              <div className="h-1 w-16 bg-amber-400 mx-auto mb-4"></div>
              <p className="text-slate-600 text-sm italic">
                 {user.address} • {user.email}
@@ -221,7 +227,7 @@ const ElegantHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, st
         </div>
         <div className="flex justify-between items-end border-b border-slate-200 pb-2">
             <div className="text-left">
-                 <p className="text-xs font-bold text-amber-700 uppercase tracking-widest">Invoice For</p>
+                 <p className="text-xs font-bold text-amber-700 uppercase tracking-widest">{documentType || 'Invoice'} For</p>
             </div>
             <div className="text-right flex flex-col items-end">
                 <p className="text-2xl text-slate-900">{invoiceNumber}</p>
@@ -231,7 +237,7 @@ const ElegantHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, st
     </div>
 );
 
-const TechHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, status: InvoiceStatus }> = ({ user, invoiceNumber, status }) => (
+const TechHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, status: InvoiceStatus, documentType?: DocumentType }> = ({ user, invoiceNumber, status, documentType }) => (
     <div className="mb-10 font-mono">
         <div className="border-2 border-slate-800 p-6 flex justify-between items-start mb-6 relative">
              {/* Decorative corner squares */}
@@ -244,18 +250,17 @@ const TechHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, statu
                 {user.logo && <img src={user.logo} className="h-16 w-16 object-contain border border-slate-200 p-1" alt="Logo"/>}
                 <div>
                     <h2 className="text-xl font-bold uppercase mb-1">{user.name}</h2>
+                    {user.cacNumber && <p className="text-[10px] font-bold text-slate-500 mb-2">{`// CAC: ${user.cacNumber}`}</p>}
                     <p className="text-xs text-slate-600 font-bold">{`// ${user.email}`}</p>
                     <p className="text-xs text-slate-600 font-bold">{`// ${user.address}`}</p>
                     {user.phoneNumber && <p className="text-xs text-slate-600 font-bold">{`// ${user.phoneNumber}`}</p>}
                 </div>
              </div>
              <div className="text-right">
-                 <h1 className="text-2xl font-bold tracking-tighter mb-1">INV_OICE</h1>
-                 <p className="text-sm bg-slate-800 text-white px-2 py-0.5 inline-block font-bold">ID: {invoiceNumber}</p>
+                <h1 className="text-2xl font-black bg-slate-800 text-white px-2 py-1 mb-1 uppercase tracking-tighter">{(documentType || 'Invoice').toUpperCase()}</h1>
+                <p className="text-sm font-bold">#{invoiceNumber}</p>
+                <div className="mt-2 flex justify-end"><StatusBadge status={status} template="tech" /></div>
              </div>
-        </div>
-        <div className="flex justify-end">
-            <StatusBadge status={status} template="tech" />
         </div>
     </div>
 );
@@ -338,7 +343,7 @@ const getTemplateStyles = (template: TemplateId) => {
 
 // ⚡ Bolt: Wrap InvoicePreview in React.memo to prevent unnecessary re-renders when parent state (like modals) changes
 export const InvoicePreview: React.FC<InvoicePreviewProps> = React.memo(({ invoice, totals, template, isPro = false }) => {
-  const { user, client, issueDate, dueDate, lineItems, notes, terms, taxRate, whtRate, discountRate, shippingAmount, currency, status } = invoice;
+  const { user, client, issueDate, dueDate, lineItems, notes, terms, taxRate, whtRate, discountRate, shippingAmount, currency, status, documentType, digitalSignature } = invoice;
   const { subtotal, discountAmount, tax, whtAmount, shipping, total } = totals;
   const styles = getTemplateStyles(template);
 
@@ -354,6 +359,14 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = React.memo(({ invoi
   return (
     <article className={`text-slate-900 h-full flex flex-col relative overflow-hidden ${template === 'elegant' ? 'font-serif' : template === 'tech' ? 'font-mono' : 'font-sans'}`}>
       
+      {/* NRS Verified Badge */}
+      {invoice.nrsStatus === 'Verified' && (
+        <div className="absolute top-4 right-4 z-50 flex items-center gap-1.5 bg-teal-50 border border-teal-200 px-3 py-1.5 rounded-full shadow-sm">
+            <svg className="w-4 h-4 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+            <span className="text-[10px] font-black text-teal-700 uppercase tracking-tighter">NRS Verified</span>
+        </div>
+      )}
+
       {/* Paid Stamp/Watermark */}
       {status === 'Paid' && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50 opacity-[0.15] select-none">
@@ -365,20 +378,22 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = React.memo(({ invoi
 
       {/* Dynamic Header */}
       <header className="relative z-10" aria-label="Invoice Header">
-        {template === 'classic' && <ClassicHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
-        {template === 'modern' && <ModernHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
-        {template === 'bold' && <BoldHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
-        {template === 'minimalist' && <MinimalistHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
-        {template === 'professional' && <ProfessionalHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
-        {template === 'elegant' && <ElegantHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
-        {template === 'tech' && <TechHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} />}
+        {template === 'classic' && <ClassicHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} documentType={documentType} />}
+        {template === 'modern' && <ModernHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} documentType={documentType} />}
+        {template === 'bold' && <BoldHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} documentType={documentType} />}
+        {template === 'minimalist' && <MinimalistHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} documentType={documentType} />}
+        {template === 'professional' && <ProfessionalHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} documentType={documentType} />}
+        {template === 'elegant' && <ElegantHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} documentType={documentType} />}
+        {template === 'tech' && <TechHeader user={user} invoiceNumber={invoice.invoiceNumber} status={invoice.status} documentType={documentType} />}
       </header>
 
       {/* Bill To / Dates Grid */}
       <section className={`grid grid-cols-2 gap-12 mb-12 relative z-10 ${isCenterAligned ? 'text-center' : ''}`} aria-label="Client and Date Information">
         <div className={isCenterAligned ? 'order-2' : ''}>
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Bill To</p>
-          <h3 className="font-bold text-slate-900 text-xl mb-2">{client.name}</h3>
+          <h3 className="font-bold text-slate-900 text-xl mb-1">{client.name}</h3>
+          {client.tin && <p className="text-[10px] font-bold text-teal-600 uppercase tracking-tighter mb-2">TIN: {client.tin}</p>}
+          {client.cacNumber && <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-2">CAC: {client.cacNumber}</p>}
           <div className="text-slate-700 text-sm space-y-1 font-medium">
              <p className="whitespace-pre-line">{client.address}</p>
              <p className="text-teal-700 font-semibold">{client.email}</p>
@@ -484,22 +499,31 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = React.memo(({ invoi
                         </div>
                     )}
                 </div>
-                {(notes || terms) && (
-                    <div>
-                        {terms && (
-                            <div className="mb-4">
-                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Terms</p>
-                                <p className="text-slate-700 text-xs leading-relaxed font-medium whitespace-pre-wrap">{terms}</p>
-                            </div>
-                        )}
-                        {notes && (
-                            <div>
-                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Notes</p>
-                                <p className="text-slate-700 italic leading-relaxed whitespace-pre-wrap">{notes}</p>
-                            </div>
-                        )}
-                    </div>
-                )}
+                <div className="space-y-6">
+                    {(notes || terms) && (
+                        <div>
+                            {terms && (
+                                <div className="mb-4">
+                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Terms</p>
+                                    <p className="text-slate-700 text-xs leading-relaxed font-medium whitespace-pre-wrap">{terms}</p>
+                                </div>
+                            )}
+                            {notes && (
+                                <div>
+                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Notes</p>
+                                    <p className="text-slate-700 italic leading-relaxed whitespace-pre-wrap">{notes}</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    {digitalSignature && (
+                        <div className={`pt-6 border-t border-slate-100 ${isCenterAligned ? 'text-center' : 'text-right'}`}>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Authorized Signature</p>
+                            <p className="font-serif text-2xl text-slate-800 italic">{digitalSignature}</p>
+                            <div className={`h-px w-32 bg-slate-200 mt-2 ${isCenterAligned ? 'mx-auto' : 'ml-auto'}`}></div>
+                        </div>
+                    )}
+                </div>
             </div>
           </div>
       </footer>

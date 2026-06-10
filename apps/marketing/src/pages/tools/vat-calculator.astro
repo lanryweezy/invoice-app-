@@ -1,0 +1,119 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Free VAT & WHT Calculator Nigeria | NRS Compliance Tool" description="Calculate Value Added Tax (VAT) and Withholding Tax (WHT) for your Nigerian business. Fast, free, and updated for the 2026 tax regime.">
+  <div class="max-w-4xl mx-auto py-20 px-6">
+    <div class="text-center mb-16">
+        <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-4">VAT & WHT Calculator</h1>
+        <p class="text-lg text-slate-600">Quickly calculate tax deductions for your Nigerian invoices.</p>
+    </div>
+
+    <div class="bg-white rounded-[2.5rem] border border-slate-200 shadow-2xl shadow-slate-900/5 p-8 md:p-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Base Amount (₦)</label>
+                    <input 
+                        type="number" 
+                        id="base-amount" 
+                        placeholder="e.g. 100,000" 
+                        class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xl font-bold text-slate-900 focus:outline-none focus:border-teal-500 transition-all"
+                    />
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">VAT Rate (%)</label>
+                        <select id="vat-rate" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-900 focus:outline-none focus:border-teal-500 transition-all appearance-none">
+                            <option value="7.5">7.5% (Standard)</option>
+                            <option value="0">0% (Zero-Rated)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">WHT Rate (%)</label>
+                        <select id="wht-rate" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-900 focus:outline-none focus:border-teal-500 transition-all appearance-none">
+                            <option value="0">None</option>
+                            <option value="5">5% (Individuals)</option>
+                            <option value="10">10% (Companies)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 rounded-3xl p-8 text-white flex flex-col justify-center">
+                <div class="space-y-6">
+                    <div class="flex justify-between items-end border-b border-white/10 pb-4">
+                        <span class="text-slate-400 text-sm">VAT Amount</span>
+                        <span class="text-xl font-bold" id="res-vat">₦0.00</span>
+                    </div>
+                    <div class="flex justify-between items-end border-b border-white/10 pb-4">
+                        <span class="text-slate-400 text-sm">WHT Deduction</span>
+                        <span class="text-xl font-bold text-amber-400" id="res-wht">- ₦0.00</span>
+                    </div>
+                    <div class="flex justify-between items-end pt-4">
+                        <span class="text-teal-400 font-bold uppercase tracking-widest text-xs">Final Net Pay</span>
+                        <span class="text-3xl font-black text-white" id="res-total">₦0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-12 pt-12 border-t border-slate-100 flex flex-col items-center">
+            <p class="text-sm text-slate-500 mb-6 text-center max-w-lg">
+                Ready to generate a professional invoice with these calculations? Our generator handles all tax rules automatically.
+            </p>
+            <a href="/" class="bg-teal-600 hover:bg-teal-500 text-white font-bold py-4 px-10 rounded-2xl transition-all shadow-xl shadow-teal-900/20">
+                Generate Compliant Invoice
+            </a>
+        </div>
+    </div>
+
+    <div class="mt-24 prose prose-slate max-w-none">
+        <h2 class="text-3xl font-bold text-slate-900 mb-8">Understanding VAT & WHT in Nigeria</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <section>
+                <h4 class="font-bold text-slate-900">Value Added Tax (VAT)</h4>
+                <p>As of 2026, the standard VAT rate in Nigeria is 7.5%. VAT is an "output tax" that you collect on behalf of the government. Under the new NRS mandate, VAT must be clearly stated on every invoice to be recognized by corporate buyers.</p>
+            </section>
+            <section>
+                <h4 class="font-bold text-slate-900">Withholding Tax (WHT)</h4>
+                <p>WHT is an advance payment of income tax. When a corporate client pays you, they are often required to withhold 5% (for individuals) or 10% (for companies) and remit it to the FIRS. You can use your WHT credit notes to reduce your annual tax liability.</p>
+            </section>
+        </div>
+    </div>
+  </div>
+
+  <script>
+    const baseInput = document.getElementById('base-amount');
+    const vatSelect = document.getElementById('vat-rate');
+    const whtSelect = document.getElementById('wht-rate');
+    
+    const resVat = document.getElementById('res-vat');
+    const resWht = document.getElementById('res-wht');
+    const resTotal = document.getElementById('res-total');
+
+    const formatter = new Intl.NumberFormat('en-NG', {
+      style: 'currency',
+      currency: 'NGN',
+    });
+
+    function calculate() {
+      const amount = parseFloat(baseInput.value) || 0;
+      const vatRate = parseFloat(vatSelect.value) / 100;
+      const whtRate = parseFloat(whtSelect.value) / 100;
+
+      const vat = amount * vatRate;
+      const wht = amount * whtRate;
+      const total = amount + vat - wht;
+
+      resVat.textContent = formatter.format(vat);
+      resWht.textContent = `- ${formatter.format(wht)}`;
+      resTotal.textContent = formatter.format(total);
+    }
+
+    baseInput.addEventListener('input', calculate);
+    vatSelect.addEventListener('change', calculate);
+    whtSelect.addEventListener('change', calculate);
+  </script>
+</BaseLayout>

@@ -1,0 +1,243 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="NRS E-Invoicing Readiness Assessment | Free Compliance Tool" description="Is your business ready for the July 2026 NRS mandate? Take our free 2-minute assessment to get your compliance score and a custom action plan.">
+  <div class="max-w-4xl mx-auto py-20 px-6">
+    <div class="text-center mb-16">
+        <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-4">NRS Readiness Assessment</h1>
+        <p class="text-lg text-slate-600 text-center mx-auto max-w-2xl">The July 2026 e-invoicing deadline is approaching. Find out if your business is prepared or at risk of penalties.</p>
+    </div>
+
+    <div id="quiz-container" class="bg-white rounded-[2.5rem] border border-slate-200 shadow-2xl shadow-slate-900/5 overflow-hidden transition-all duration-500">
+        <div class="p-8 md:p-12">
+            <div id="question-step" class="space-y-8">
+                <div class="flex items-center justify-between mb-8">
+                    <span id="step-indicator" class="text-xs font-bold text-teal-600 uppercase tracking-widest bg-teal-50 px-3 py-1 rounded-full border border-teal-100">Step 1 of 5</span>
+                    <div class="w-32 h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div id="progress-bar" class="w-1/5 h-full bg-teal-500 transition-all duration-300"></div>
+                    </div>
+                </div>
+
+                <h2 id="question-text" class="text-2xl font-bold text-slate-900 leading-tight">Do you have a valid Tax Identification Number (TIN) for your business?</h2>
+                
+                <div class="grid grid-cols-1 gap-4">
+                    <button class="quiz-option group p-6 border-2 border-slate-100 rounded-2xl hover:border-teal-500 hover:bg-teal-50/50 text-left transition-all" data-points="20">
+                        <div class="flex items-center gap-4">
+                            <div class="w-6 h-6 rounded-full border-2 border-slate-200 group-hover:border-teal-500 flex items-center justify-center transition-all">
+                                <div class="w-3 h-3 rounded-full bg-teal-500 scale-0 group-hover:scale-100 transition-transform"></div>
+                            </div>
+                            <span class="font-bold text-slate-700">Yes, I have a validated TIN.</span>
+                        </div>
+                    </button>
+                    <button class="quiz-option group p-6 border-2 border-slate-100 rounded-2xl hover:border-teal-500 hover:bg-teal-50/50 text-left transition-all" data-points="0">
+                        <div class="flex items-center gap-4">
+                            <div class="w-6 h-6 rounded-full border-2 border-slate-200 group-hover:border-teal-500 flex items-center justify-center transition-all">
+                                <div class="w-3 h-3 rounded-full bg-teal-500 scale-0 group-hover:scale-100 transition-transform"></div>
+                            </div>
+                            <span class="font-bold text-slate-700">No, or I'm not sure.</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <div id="result-step" class="hidden text-center space-y-8 py-10">
+                <div class="relative inline-block">
+                    <svg class="w-48 h-48 -rotate-90">
+                        <circle cx="96" cy="96" r="88" stroke="currentColor" stroke-width="12" fill="transparent" class="text-slate-100"></circle>
+                        <circle id="score-circle" cx="96" cy="96" r="88" stroke="currentColor" stroke-width="12" fill="transparent" stroke-dasharray="553" stroke-dashoffset="553" class="text-teal-500 transition-all duration-1000"></circle>
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span id="score-value" class="text-5xl font-black text-slate-900">0%</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ready</span>
+                    </div>
+                </div>
+
+                <div>
+                    <h2 id="result-title" class="text-3xl font-black text-slate-900 mb-4">Moderate Risk</h2>
+                    <p id="result-desc" class="text-slate-600 max-w-md mx-auto">Your business is partially compliant but missing critical requirements for the July 2026 go-live date.</p>
+                </div>
+
+                <div class="bg-slate-50 rounded-2xl p-6 text-left border border-slate-200 max-w-lg mx-auto">
+                    <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Recommended Action Plan</h4>
+                    <ul id="action-items" class="space-y-3 text-sm font-medium text-slate-700">
+                        <li class="flex items-start gap-2">
+                            <svg class="w-5 h-5 text-teal-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                            Apply for a TIN immediately via the FIRS portal.
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+                    <a href="/" class="bg-teal-600 hover:bg-teal-500 text-white font-bold py-4 px-10 rounded-2xl transition-all shadow-xl shadow-teal-900/20">
+                        Use Compliant Invoicing Now
+                    </a>
+                    <button id="restart-quiz" class="text-slate-500 font-bold hover:text-teal-600 transition-colors">Retake Assessment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-20 text-center">
+        <p class="text-xs text-slate-400 uppercase tracking-[0.2em] font-bold mb-6">Accredited by Technical Standards</p>
+        <div class="flex justify-center gap-12 opacity-30 grayscale hover:grayscale-0 transition-all">
+            <div class="text-xl font-black">NRS/MBS</div>
+            <div class="text-xl font-black">NITDA</div>
+            <div class="text-xl font-black">FIRS</div>
+        </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+        {
+            text: "Do you have a valid Tax Identification Number (TIN) for your business?",
+            options: [
+                { text: "Yes, I have a validated TIN.", points: 20 },
+                { text: "No, or I'm not sure.", points: 0 }
+            ],
+            advice: "Apply for a TIN immediately via the FIRS portal—it's mandatory for all 2026 transactions."
+        },
+        {
+            text: "Are you currently using an electronic invoicing system to issue bills?",
+            options: [
+                { text: "Yes, I use a dedicated invoicing app.", points: 20 },
+                { text: "No, I use WhatsApp, Word, or paper.", points: 0 }
+            ],
+            advice: "Stop using manual tools like WhatsApp or Word; they don't support the required NRS encryption."
+        },
+        {
+            text: "Do your current invoices include mandatory NRS fields like Unit of Measure and Tax Category?",
+            options: [
+                { text: "Yes, every item is categorized correctly.", points: 20 },
+                { text: "No, I only show description and price.", points: 0 }
+            ],
+            advice: "Update your invoice layout to include 'Unit' and 'Tax Category' for every line item."
+        },
+        {
+            text: "Do you collect the Tax Identification Number (TIN) of your buyers?",
+            options: [
+                { text: "Yes, I collect buyer TINs.", points: 20 },
+                { text: "No, I only collect name and email.", points: 0 }
+            ],
+            advice: "Start collecting your clients' TINs. Corporate buyers cannot claim tax deductions without them."
+        },
+        {
+            text: "Are you aware of the July 1, 2026 mandatory go-live date for the NRS MBS portal?",
+            options: [
+                { text: "Yes, I'm already preparing.", points: 20 },
+                { text: "No, this is new to me.", points: 0 }
+            ],
+            advice: "Mark July 1, 2026 on your calendar. All businesses must be transmitted to MBS by this date."
+        }
+    ];
+
+    let currentStep = 0;
+    let totalScore = 0;
+    let adviceItems = [];
+
+    const questionStep = document.getElementById('question-step');
+    const resultStep = document.getElementById('result-step');
+    const questionText = document.getElementById('question-text');
+    const stepIndicator = document.getElementById('step-indicator');
+    const progressBar = document.getElementById('progress-bar');
+    const optionsContainer = questionStep.querySelector('.grid');
+    const actionItems = document.getElementById('action-items');
+    const scoreValue = document.getElementById('score-value');
+    const scoreCircle = document.getElementById('score-circle');
+    const resultTitle = document.getElementById('result-title');
+    const resultDesc = document.getElementById('result-desc');
+    const restartBtn = document.getElementById('restart-quiz');
+
+    function renderQuestion() {
+        const q = questions[currentStep];
+        questionText.textContent = q.text;
+        stepIndicator.textContent = `Step ${currentStep + 1} of ${questions.length}`;
+        progressBar.style.width = `${((currentStep + 1) / questions.length) * 100}%`;
+
+        optionsContainer.innerHTML = q.options.map((opt, i) => `
+            <button class="quiz-option group p-6 border-2 border-slate-100 rounded-2xl hover:border-teal-500 hover:bg-teal-50/50 text-left transition-all" data-points="${opt.points}" data-advice="${opt.points === 0 ? q.advice : ''}">
+                <div class="flex items-center gap-4">
+                    <div class="w-6 h-6 rounded-full border-2 border-slate-200 group-hover:border-teal-500 flex items-center justify-center transition-all">
+                        <div class="w-3 h-3 rounded-full bg-teal-500 scale-0 group-hover:scale-100 transition-transform"></div>
+                    </div>
+                    <span class="font-bold text-slate-700">${opt.text}</span>
+                </div>
+            </button>
+        `).join('');
+
+        const btns = optionsContainer.querySelectorAll('.quiz-option');
+        btns.forEach(btn => btn.addEventListener('click', handleSelect));
+    }
+
+    function handleSelect(e) {
+        const btn = e.currentTarget;
+        const points = parseInt(btn.getAttribute('data-points'));
+        const advice = btn.getAttribute('data-advice');
+
+        totalScore += points;
+        if (advice) adviceItems.push(advice);
+
+        if (currentStep < questions.length - 1) {
+            currentStep++;
+            renderQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        questionStep.classList.add('hidden');
+        resultStep.classList.remove('hidden');
+
+        // Circle animation
+        const dashArray = 553;
+        const dashOffset = dashArray - (dashArray * (totalScore / 100));
+        setTimeout(() => {
+            scoreCircle.style.strokeDashoffset = dashOffset;
+            scoreValue.textContent = `${totalScore}%`;
+        }, 100);
+
+        // Result content
+        if (totalScore === 100) {
+            resultTitle.textContent = "Fully Compliant";
+            resultDesc.textContent = "Your business is ready for the 2026 NRS mandate. Maintain this standard to ensure frictionless payments.";
+        } else if (totalScore >= 60) {
+            resultTitle.textContent = "Low Risk";
+            resultDesc.textContent = "You're on the right track but have a few gaps to close before the July 2026 deadline.";
+        } else {
+            resultTitle.textContent = "High Risk";
+            resultDesc.textContent = "Your business is currently non-compliant with the upcoming NRS regulations. Urgent action is needed.";
+        }
+
+        // Advice items
+        if (adviceItems.length === 0) {
+            actionItems.innerHTML = `
+                <li class="flex items-start gap-2">
+                    <svg class="w-5 h-5 text-teal-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    Keep up the great work! You are ahead of the curve.
+                </li>
+            `;
+        } else {
+            actionItems.innerHTML = adviceItems.map(item => `
+                <li class="flex items-start gap-2">
+                    <svg class="w-5 h-5 text-teal-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    ${item}
+                </li>
+            `).join('');
+        }
+    }
+
+    restartBtn.addEventListener('click', () => {
+        currentStep = 0;
+        totalScore = 0;
+        adviceItems = [];
+        resultStep.classList.add('hidden');
+        questionStep.classList.remove('hidden');
+        scoreCircle.style.strokeDashoffset = 553;
+        renderQuestion();
+    });
+
+    renderQuestion();
+  </script>
+</BaseLayout>

@@ -9,6 +9,7 @@ const DEFAULT_USER: AppUser = {
   email: '',
   phoneNumber: '',
   address: '',
+  tin: '',
   bankName: '',
   accountNumber: '',
   logo: undefined,
@@ -68,6 +69,7 @@ const getInitialInvoiceState = (): Invoice => {
 
 export const useInvoice = () => {
   const [invoice, setInvoice] = useState<Invoice>(getInitialInvoiceState());
+  const [savedInvoices, setSavedInvoices] = useState<Invoice[]>([]);
   const [savedClients, setSavedClients] = useState<Client[]>([]);
   const [businessProfiles, setBusinessProfiles] = useState<BusinessProfile[]>([]);
   const [recurringInvoices, setRecurringInvoices] = useState<Invoice[]>([]);
@@ -96,6 +98,9 @@ export const useInvoice = () => {
                     if (data.invoiceUser) {
                         setInvoice(prev => ({ ...prev, user: data.invoiceUser }));
                     }
+                    if (data.savedInvoices) {
+                        setSavedInvoices(data.savedInvoices);
+                    }
                     if (data.savedClients) {
                         setSavedClients(data.savedClients);
                     }
@@ -118,10 +123,16 @@ export const useInvoice = () => {
   }, [isPro, firebaseUser]);
 
   // Sync to Cloud helper with Offline Support
-  const syncToCloud = useCallback(async (data: Partial<{ invoiceUser: AppUser, savedClients: Client[], businessProfiles: BusinessProfile[], recurringInvoices: Invoice[], currentInvoice: Invoice }>) => {
+  const syncToCloud = useCallback(async (data: Partial<{ 
+      invoiceUser: AppUser, 
+      savedInvoices: Invoice[],
+      savedClients: Client[], 
+      businessProfiles: BusinessProfile[], 
+      recurringInvoices: Invoice[], 
+      currentInvoice: Invoice 
+  }>) => {
       if (isPro && firebaseUser) {
           if (!navigator.onLine) {
-              // Queue the mutation in IndexedDB if offline
               await queueMutation('users', firebaseUser.uid, data);
               return;
           }
@@ -131,7 +142,6 @@ export const useInvoice = () => {
               await setDoc(userRef, data, { merge: true });
           } catch (error) {
               console.error("Failed to sync to cloud, queueing locally instead", error);
-              // Fallback to queue if the network request fails despite navigator.onLine being true
               await queueMutation('users', firebaseUser.uid, data);
           }
       }
@@ -318,6 +328,24 @@ export const useInvoice = () => {
       });
   }, [syncToCloud]);
 
+  const saveInvoice = useCallback((inv: Invoice) => {
+    setSavedInvoices(prev => {
+        // Find if an invoice with this number already exists
+        const existingIndex = prev.findIndex(i => i.invoiceNumber === inv.invoiceNumber);
+        let newInvoices;
+        if (existingIndex >= 0) {
+            newInvoices = [...prev];
+            newInvoices[existingIndex] = inv;
+        } else {
+            newInvoices = [inv, ...prev]; // Newest first
+        }
+        
+        localStorage.setItem('invoiceHistory', JSON.stringify(newInvoices));
+        syncToCloud({ savedInvoices: newInvoices });
+        return newInvoices;
+    });
+  }, [syncToCloud]);
+
   return {
     invoice,
     setInvoice,
@@ -326,6 +354,8 @@ export const useInvoice = () => {
     removeLineItem,
     updateLineItem,
     calculateTotals,
+    savedInvoices,
+    saveInvoice,
     savedClients,
     saveClient,
     businessProfiles,

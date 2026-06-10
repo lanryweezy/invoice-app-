@@ -1,12 +1,20 @@
 {
   "rewrites": [
     {
+      "source": "/",
+      "destination": "/marketing/"
+    },
+    {
       "source": "/blog/:match*",
       "destination": "/marketing/blog/:match*"
     },
     {
       "source": "/templates/:match*",
       "destination": "/marketing/templates/:match*"
+    },
+    {
+      "source": "/editor",
+      "destination": "/web/editor"
     },
     {
       "source": "/(.*)",

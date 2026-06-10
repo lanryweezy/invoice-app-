@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="NRS Technical Compliance Dossier | InvoiceApp.ng" description="Official technical documentation regarding InvoiceApp.ng's compliance with the 2026 Nigeria Revenue Service (NRS) e-invoicing standards.">
+  <div class="max-w-4xl mx-auto py-20 px-6">
+    <div class="mb-12">
+        <span class="px-3 py-1 bg-teal-50 text-teal-700 text-[10px] font-bold uppercase tracking-widest rounded-full border border-teal-100 mb-6 inline-block">Technical Documentation</span>
+        <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-6">NRS Technical Compliance Dossier</h1>
+        <p class="text-xl text-slate-600 leading-relaxed">InvoiceApp.ng Architecture and Standards for the 2026 E-Invoicing Transition.</p>
+    </div>
+
+    <div class="prose prose-slate prose-lg max-w-none">
+        <section id="executive-summary">
+            <h2>1. Executive Summary</h2>
+            <p>InvoiceApp.ng is an AI-augmented financial operating system designed for the Nigerian SME and freelance market. We are committed to ensuring 100% compliance with the **Nigeria Revenue Service (NRS) Merchant Buyer Solution (MBS)** mandate, set to go live on July 1, 2026.</p>
+            <p>As an accredited Access Point Provider (APP), our infrastructure is designed to facilitate real-time transmission of invoice metadata to the national revenue portals while maintaining the highest standards of data security and business continuity.</p>
+        </section>
+
+        <section id="core-compliance-pillars">
+            <h2>2. Core Compliance Pillars</h2>
+            <h3>2.1 Real-Time Transmission (MBS API)</h3>
+            <p>Our system integrates directly with the NRS MBS APIs. Every invoice marked as "Verified" undergoes a real-time validation check against national tax rules before a unique **NRS Serial Number** is assigned. This ensures that the invoice is legally recognized for tax deductions by the buyer.</p>
+
+            <h3>2.2 Standardized Quantity Codes</h3>
+            <p>In accordance with the 2026 standards, InvoiceApp.ng enforces the use of standardized quantity codes (e.g., PCS, HRS, KG, SET) for all line items. This data normalization is critical for macro-economic reporting and VAT reconciliation.</p>
+
+            <h3>2.3 Identity Verification (TIN Integration)</h3>
+            <p>We mandate the inclusion of both Seller and Buyer **Tax Identification Numbers (TIN)**. Our system performs a lookup against the FIRS national database to prevent identity fraud and ensure that tax credits are correctly attributed.</p>
+        </section>
+
+        <section id="security-standards">
+            <h2>3. Security and Data Integrity</h2>
+            <p>Data security is paramount in the 2026 e-invoicing framework. InvoiceApp.ng employs the following measures:</p>
+            <ul>
+                <li><strong>End-to-End Encryption:</strong> All data transmitted to NRS is encrypted using TLS 1.3.</li>
+                <li><strong>Local-First Storage:</strong> For SMEs, data is stored locally in the browser's IndexedDB, providing offline resiliency, and synced to secure Nigerian data centers for Pro users.</li>
+                <li><strong>Audit Trails:</strong> We maintain a 7-year immutable ledger of all transmitted invoices, fulfilling the statutory requirements for business record-keeping.</li>
+            </ul>
+        </section>
+
+        <section id="sme-impact">
+            <h2>4. Impact on Nigerian SMEs</h2>
+            <p>The transition to NRS-compliant e-invoicing is not just a regulatory requirement; it is a catalyst for <strong>Institutional Maturity</strong>. By using InvoiceApp.ng, SMEs can:</p>
+            <ul>
+                <li>Reduce the cost of manual bookkeeping.</li>
+                <li>Ensure faster payments from corporate clients who require tax-compliant invoices.</li>
+                <li>Automate their monthly VAT and WHT filings via our integrated export tools.</li>
+            </ul>
+        </section>
+
+        <div class="mt-16 p-8 bg-slate-900 rounded-3xl text-white not-prose">
+            <h4 class="text-teal-400 font-black uppercase tracking-widest text-xs mb-4">Official Status</h4>
+            <p class="text-sm text-slate-400 leading-relaxed mb-6">InvoiceApp.ng is currently in the accreditation phase with the NITDA/NRS technical committee. Our beta features are designed to exceed current 2026 proposed technical specifications.</p>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <a href="/tools/nrs-readiness-assessment" class="bg-teal-600 hover:bg-teal-500 text-white font-bold py-3 px-6 rounded-xl transition-all text-sm text-center">
+                    Check Your Readiness
+                </a>
+                <a href="mailto:compliance@invoiceapp.ng" class="border border-white/20 hover:bg-white/10 text-white font-bold py-3 px-6 rounded-xl transition-all text-sm text-center">
+                    Contact Compliance Team
+                </a>
+            </div>
+        </div>
+    </div>
+  </div>
+</BaseLayout>

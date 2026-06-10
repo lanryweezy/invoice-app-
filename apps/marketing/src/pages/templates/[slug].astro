@@ -1,0 +1,157 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { seoTemplates } from '../../../web/data/seoTemplates';
+
+export function getStaticPaths() {
+  return seoTemplates.map((template) => ({
+    params: { slug: template.slug },
+    props: { template },
+  }));
+}
+
+const { template } = Astro.props;
+const formatter = new Intl.NumberFormat('en-NG', {
+  style: 'currency',
+  currency: 'NGN',
+});
+---
+
+<BaseLayout title={template.title} description={template.description}>
+  <div class="max-w-6xl mx-auto py-16 px-6">
+    <nav class="flex mb-8 text-sm font-medium text-slate-500">
+        <a href="/templates" class="hover:text-teal-600 transition-colors">Templates</a>
+        <span class="mx-2">/</span>
+        <span class="text-slate-900">{template.industry}</span>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+        {/* Left Content */}
+        <div>
+            <span class="inline-block px-4 py-1.5 bg-teal-50 text-teal-700 text-xs font-bold uppercase tracking-widest rounded-full mb-6 border border-teal-100">
+                {template.location} Edition
+            </span>
+            <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
+                {template.h1}
+            </h1>
+            <p class="text-lg text-slate-600 mb-10 leading-relaxed">
+                {template.description} This template is pre-configured with industry-standard line items and is fully compatible with the 2026 NRS Merchant Buyer Solution (MBS) requirements.
+            </p>
+
+            <div class="space-y-6 mb-12">
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center text-teal-600 shrink-0">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900">NRS Compliant</h3>
+                        <p class="text-sm text-slate-500">Includes mandatory TIN fields and NRS-compatible quantity codes.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center text-teal-600 shrink-0">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900">Tax Optimized</h3>
+                        <p class="text-sm text-slate-500">Automated VAT (7.5%) and WHT (5-10%) calculations tailored for {template.industry} services.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4">
+                <a 
+                    href={`/templates/${template.slug}`}
+                    class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 px-8 rounded-2xl text-center transition-all shadow-xl shadow-teal-900/20"
+                >
+                    Use This Template
+                </a>
+                <a 
+                    href="/templates"
+                    class="bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold py-4 px-8 rounded-2xl text-center transition-all"
+                >
+                    Browse All Templates
+                </a>
+            </div>
+        </div>
+
+        {/* Right Preview Card */}
+        <div class="bg-slate-50 rounded-[2.5rem] p-8 lg:p-12 border border-slate-200 shadow-inner">
+            <div class="bg-white rounded-2xl shadow-2xl p-8 border border-slate-100 min-h-[500px] flex flex-col">
+                <div class="flex justify-between items-start mb-10 pb-8 border-b border-slate-50">
+                    <div class="w-12 h-12 bg-slate-100 rounded-lg"></div>
+                    <div class="text-right">
+                        <h2 class="text-2xl font-black text-slate-900 uppercase tracking-tighter">INVOICE</h2>
+                        <p class="text-[10px] font-bold text-slate-400">#INV-2026-001</p>
+                    </div>
+                </div>
+
+                <div class="flex justify-between mb-10">
+                    <div class="space-y-1">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">From</p>
+                        <p class="text-sm font-bold text-slate-900">Your Business Name</p>
+                        <p class="text-[10px] font-bold text-teal-600">TIN: 12345678-0001</p>
+                    </div>
+                    <div class="space-y-1 text-right">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Bill To</p>
+                        <p class="text-sm font-bold text-slate-900">Client Name</p>
+                        <p class="text-[10px] font-bold text-teal-600">TIN: 87654321-0001</p>
+                    </div>
+                </div>
+
+                <div class="flex-1">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                <th class="py-3">Description</th>
+                                <th class="py-3 text-center">Qty</th>
+                                <th class="py-3 text-right">Price</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm font-medium text-slate-700">
+                            {template.defaultLineItems.map(item => (
+                                <tr class="border-b border-slate-50">
+                                    <td class="py-4">{item.description}</td>
+                                    <td class="py-4 text-center">{item.quantity}</td>
+                                    <td class="py-4 text-right">{formatter.format(item.price)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-slate-100 flex justify-end">
+                    <div class="w-48 space-y-2">
+                        <div class="flex justify-between text-xs text-slate-500">
+                            <span>Subtotal</span>
+                            <span class="font-bold">{formatter.format(template.defaultLineItems.reduce((acc, i) => acc + (i.price * i.quantity), 0))}</span>
+                        </div>
+                        <div class="flex justify-between text-xs text-teal-600 font-bold">
+                            <span>VAT (7.5%)</span>
+                            <span>{formatter.format(template.defaultLineItems.reduce((acc, i) => acc + (i.price * i.quantity), 0) * 0.075)}</span>
+                        </div>
+                        <div class="pt-2 flex justify-between text-lg font-black text-slate-900 border-t border-slate-100">
+                            <span>Total</span>
+                            <span>{formatter.format(template.defaultLineItems.reduce((acc, i) => acc + (i.price * i.quantity), 0) * 1.075)}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {/* Industry Context Section */}
+    <div class="mt-32 prose prose-slate max-w-none">
+        <h2 class="text-3xl font-bold text-slate-900 mb-8 text-center">Invoicing Best Practices for {template.industry} in {template.location}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div>
+                <h4 class="font-bold text-slate-900 underline decoration-teal-500 underline-offset-4">Why use this template?</h4>
+                <p>As a {template.industry.toLowerCase()} professional in {template.location}, your clients expect institutional professionalism. Using a standardized invoice that includes your **TIN (Tax Identification Number)** and clearly broken-down **VAT** not only ensures you get paid faster but also protects your business from the 2026 NRS audits.</p>
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-900 underline decoration-teal-500 underline-offset-4">Compliance Warning</h4>
+                <p>Failure to provide NRS-compliant e-invoices can lead to penalties and make your invoices ineligible for corporate tax deductions. This {template.industry} template is specifically designed to meet the **Access Point Provider (APP)** transmission standards required for the Nigerian market.</p>
+            </div>
+        </div>
+    </div>
+  </div>
+</BaseLayout>
