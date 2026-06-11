@@ -552,9 +552,9 @@ const App: React.FC = () => {
           </div>
           <div className="hidden sm:flex items-center gap-4">
              <button onClick={() => setActiveView('editor')} className={`text-xs font-medium transition-colors ${activeView === 'editor' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Invoice Editor</button>
-             <button onClick={() => handleProFeatureClick('Branches')} className={`text-xs font-medium transition-colors ${activeView === 'branches' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Branches</button>
-             <button onClick={() => handleProFeatureClick('Accounting')} className={`text-xs font-medium transition-colors ${activeView === 'accounting' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Accounting</button>
-             <button onClick={() => handleProFeatureClick('Recurring')} className={`text-xs font-medium transition-colors ${activeView === 'recurring' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Recurring</button>
+             <button onClick={() => user ? setActiveView('branches') : handleProFeatureClick('Branches')} className={`text-xs font-medium transition-colors ${activeView === 'branches' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Branches</button>
+             <button onClick={() => user ? setActiveView('accounting') : handleProFeatureClick('Accounting')} className={`text-xs font-medium transition-colors ${activeView === 'accounting' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Accounting</button>
+             <button onClick={() => user ? setActiveView('recurring') : handleProFeatureClick('Recurring')} className={`text-xs font-medium transition-colors ${activeView === 'recurring' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Recurring</button>
              <button onClick={() => setActiveView('receipts')} className={`text-xs font-medium transition-colors ${activeView === 'receipts' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Receipts</button>
              <button onClick={() => window.location.href = '/blog'} className={`text-xs font-medium transition-colors ${activeView === 'blog' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Blog</button>
              <div className="w-px h-4 bg-slate-700"></div>
@@ -682,9 +682,29 @@ const App: React.FC = () => {
 
       <main className="flex-1 min-h-0 w-full max-w-[1600px] mx-auto overflow-y-auto">
         {activeView === 'branches' ? (
-            <div className="p-4 sm:p-8 max-w-4xl mx-auto"><BranchesManager /></div>
+            <div className="p-4 sm:p-8 max-w-4xl mx-auto">
+                <BranchesManager 
+                    isPro={isPro} 
+                    onUpgrade={() => {
+                        setPricingModalContent({ title: 'Multi-Location Management', message: 'Upgrade to Pro to manage branches across Nigeria and track location-specific revenue.' });
+                        setIsPricingModalOpen(true);
+                    }} 
+                />
+            </div>
         ) : activeView === 'accounting' ? (
-            <div className="p-4 sm:p-8 max-w-6xl mx-auto"><AccountingDashboard invoices={savedInvoices} expenses={expenses} onAddExpense={addExpense} onRemoveExpense={removeExpense} /></div>
+            <div className="p-4 sm:p-8 max-w-6xl mx-auto">
+                <AccountingDashboard 
+                    invoices={savedInvoices} 
+                    expenses={expenses} 
+                    onAddExpense={addExpense} 
+                    onRemoveExpense={removeExpense} 
+                    isPro={isPro}
+                    onUpgrade={() => {
+                        setPricingModalContent({ title: 'Unlock Full Financial History', message: 'Upgrade to Pro to see your full transaction history, download detailed audit logs, and export for NRS bulk filing.' });
+                        setIsPricingModalOpen(true);
+                    }}
+                />
+            </div>
         ) : activeView === 'recurring' ? (
             <div className="p-4 sm:p-8 max-w-4xl mx-auto">
                 <RecurringManager
