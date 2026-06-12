@@ -1,9 +1,22 @@
-
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useInvoice } from './useInvoice';
+import { useSubscription } from './useSubscription';
+
+vi.mock('./useSubscription', () => ({
+  useSubscription: vi.fn(),
+}));
 
 describe('useInvoice - calculateTotals', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (useSubscription as any).mockReturnValue({
+      user: { uid: 'test-user' },
+      isPro: true,
+      loading: false
+    });
+  });
+
   it('calculates totals correctly with percentage discount', () => {
     const { result } = renderHook(() => useInvoice());
 
@@ -88,6 +101,15 @@ describe('useInvoice - calculateTotals', () => {
 });
 
 describe('useInvoice - addLineItem', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (useSubscription as any).mockReturnValue({
+      user: { uid: 'test-user' },
+      isPro: true,
+      loading: false
+    });
+  });
+
   it('adds a new line item with default values', () => {
     const { result } = renderHook(() => useInvoice());
 
