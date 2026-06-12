@@ -1,20 +1,28 @@
 {
   "rewrites": [
     {
-      "source": "/",
-      "destination": "/marketing/"
-    },
-    {
       "source": "/blog/:match*",
       "destination": "/marketing/blog/:match*"
+    },
+    {
+      "source": "/blog",
+      "destination": "/marketing/blog/"
     },
     {
       "source": "/templates/:match*",
       "destination": "/marketing/templates/:match*"
     },
     {
+      "source": "/templates",
+      "destination": "/marketing/templates/"
+    },
+    {
       "source": "/tools/:match*",
       "destination": "/marketing/tools/:match*"
+    },
+    {
+      "source": "/tools",
+      "destination": "/marketing/tools/"
     },
     {
       "source": "/nrs-compliance-dossier",

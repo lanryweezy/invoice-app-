@@ -4,7 +4,7 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
-    "public": "apps/web/dist",
+    "public": "dist",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -12,8 +12,36 @@
     ],
     "rewrites": [
       {
+        "source": "/blog/**",
+        "destination": "/marketing/blog/index.html"
+      },
+      {
+        "source": "/blog",
+        "destination": "/marketing/blog/index.html"
+      },
+      {
+        "source": "/templates/**",
+        "destination": "/marketing/templates/index.html"
+      },
+      {
+        "source": "/templates",
+        "destination": "/marketing/templates/index.html"
+      },
+      {
+        "source": "/tools/**",
+        "destination": "/marketing/tools/index.html"
+      },
+      {
+        "source": "/tools",
+        "destination": "/marketing/tools/index.html"
+      },
+      {
+        "source": "/nrs-compliance-dossier",
+        "destination": "/marketing/nrs-compliance-dossier/index.html"
+      },
+      {
         "source": "**",
-        "destination": "/index.html"
+        "destination": "/web/index.html"
       }
     ]
   },

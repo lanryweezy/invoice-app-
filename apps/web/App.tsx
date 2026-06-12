@@ -165,8 +165,8 @@ const App: React.FC = () => {
           return 'blogPost';
       }
 
-      if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts' && !path.startsWith('/p/') && !path.startsWith('/templates/')) {
-          return 'blogPost';
+      if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts' && !path.startsWith('/p/') && !path.startsWith('/templates/') && !path.startsWith('/tools/')) {
+          return 'editor';
       }
       return 'editor';
   });
