@@ -7,6 +7,7 @@
     "test": "pnpm --filter \"./apps/**\" run test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "fs-extra": "^11.3.5"
   }
 }
