@@ -4,13 +4,13 @@ import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "mock-key",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "mock-domain.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "mock-project",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "mock-bucket.appspot.com",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "000000",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:0000:web:0000",
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  apiKey: (import.meta as any).env?.VITE_FIREBASE_API_KEY || "mock-key",
+  authDomain: (import.meta as any).env?.VITE_FIREBASE_AUTH_DOMAIN || "mock-domain.firebaseapp.com",
+  projectId: (import.meta as any).env?.VITE_FIREBASE_PROJECT_ID || "mock-project",
+  storageBucket: (import.meta as any).env?.VITE_FIREBASE_STORAGE_BUCKET || "mock-bucket.appspot.com",
+  messagingSenderId: (import.meta as any).env?.VITE_FIREBASE_MESSAGING_SENDER_ID || "000000",
+  appId: (import.meta as any).env?.VITE_FIREBASE_APP_ID || "1:0000:web:0000",
+  measurementId: (import.meta as any).env?.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 const app = initializeApp(firebaseConfig);
