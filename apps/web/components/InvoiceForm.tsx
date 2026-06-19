@@ -304,7 +304,7 @@ const nigerianBanks = [
     "United Bank for Africa (UBA)", "Unity Bank", "VFD Microfinance Bank Limited", "Wema Bank", "Zenith Bank"
 ];
 
-export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, savedClients, onSaveClient, businessProfiles = [], onSaveBusinessProfile, onSaveRecurring, isPro = false, onProFeatureClick }) => {
+export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, savedClients, onSaveClient, businessProfiles = [], onSaveBusinessProfile, onSaveRecurring, onSaveInvoice, isPro = false, onProFeatureClick }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const validateEmail = (email: string) => {
