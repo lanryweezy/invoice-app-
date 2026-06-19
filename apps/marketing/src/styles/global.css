@@ -1,0 +1,57 @@
+/* Google Fonts — must be first */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+
+/* Tailwind base layers */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---- Prose flow fixes ---- */
+.prose {
+  max-width: none;
+  line-height: 1.85;
+}
+
+.prose p {
+  margin-top: 1.75rem;
+  margin-bottom: 1.75rem;
+  font-size: 1.15rem;
+}
+
+/* Keep images from blowing up the layout */
+.prose img,
+.prose svg {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Raw HTML divs inside MDX flow nicely */
+.prose > div {
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+}
+
+/* Branded text selection */
+::selection {
+  background-color: #ccfbf1; /* teal-100 */
+  color: #134e4a;            /* teal-900 */
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 5px;
+  border: 2px solid #f8fafc;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

@@ -1,4 +1,6 @@
 ---
+import '../styles/global.css';
+
 interface Props {
   title: string;
   description?: string;
@@ -7,9 +9,9 @@ interface Props {
   slug?: string;
 }
 
-const { 
-  title, 
-  description = "Create professional invoices in seconds. The #1 free invoice generator tailored for Nigerian freelancers and businesses.", 
+const {
+  title,
+  description = "Create professional invoices in seconds. The #1 free invoice generator tailored for Nigerian freelancers and businesses.",
   image = "https://www.invoiceapp.ng/og-image.jpg",
   article = false,
   slug
@@ -39,58 +41,11 @@ const canonicalURL = new URL(Astro.url.pathname, "https://www.invoiceapp.ng");
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-    <style is:global>
-      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+    <!-- Google Fonts preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-      /* --- Professional Flow Fixes --- */
-      .prose { 
-        max-width: none; 
-        line-height: 1.85;
-      }
-      
-      .prose p {
-        margin-top: 1.75rem;
-        margin-bottom: 1.75rem;
-        font-size: 1.15rem;
-      }
-
-      /* Fix for "Large Photos/Icons" */
-      .prose img, .prose svg { 
-        max-width: 100% !important;
-        height: auto !important;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-      }
-
-      /* Ensure raw HTML divs inside MDX flow well */
-      .prose > div {
-        margin-top: 3rem;
-        margin-bottom: 3rem;
-      }
-
-      /* Selection colors matching the app */
-      ::selection {
-        background-color: #ccfbf1; /* teal-100 */
-        color: #134e4a; /* teal-900 */
-      }
-
-      /* Custom scrollbar for that formal feel */
-      ::-webkit-scrollbar {
-        width: 10px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #f8fafc;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 5px;
-        border: 2px solid #f8fafc;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-      }
-    </style>
+    <slot name="head" />
   </head>
   <body class="bg-slate-50 min-h-screen font-sans flex flex-col text-slate-800">
     <header class="flex-none bg-slate-900 border-b border-slate-800 z-50 text-white">
@@ -105,7 +60,7 @@ const canonicalURL = new URL(Astro.url.pathname, "https://www.invoiceapp.ng");
             <div>
               <h1 class="text-lg font-bold text-white leading-none tracking-tight">InvoiceApp</h1>
               <div class="flex items-center gap-2 mt-1">
-                  <p class="text-[10px] uppercase tracking-widest text-teal-400 font-bold leading-none">Generator</p>
+                <p class="text-[10px] uppercase tracking-widest text-teal-400 font-bold leading-none">Generator</p>
               </div>
             </div>
           </a>
@@ -116,10 +71,10 @@ const canonicalURL = new URL(Astro.url.pathname, "https://www.invoiceapp.ng");
            <div class="relative group">
                <button class="text-xs font-medium text-slate-400 group-hover:text-white transition-colors flex items-center gap-1">
                    Free Tools
-                   <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                   <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                </button>
                <div class="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                   <a href="/tools/vat-calculator" class="block px-4 py-2 text-xs font-bold text-slate-700 hover:bg-teal-50 hover:text-teal-700">VAT & WHT Calculator</a>
+                   <a href="/tools/vat-calculator" class="block px-4 py-2 text-xs font-bold text-slate-700 hover:bg-teal-50 hover:text-teal-700">VAT &amp; WHT Calculator</a>
                    <a href="/tools/nrs-readiness-assessment" class="block px-4 py-2 text-xs font-bold text-slate-700 hover:bg-teal-50 hover:text-teal-700">NRS Readiness Check</a>
                </div>
            </div>
@@ -138,7 +93,7 @@ const canonicalURL = new URL(Astro.url.pathname, "https://www.invoiceapp.ng");
     <footer class="bg-white border-t border-slate-200 py-12">
         <div class="max-w-4xl mx-auto px-6 text-center">
             <p class="text-sm text-slate-500 mb-6">
-                Built for Nigerian freelancers & SMEs. Secure, fast, and 100% free.
+                Built for Nigerian freelancers &amp; SMEs. Secure, fast, and 100% free.
             </p>
             <div class="flex justify-center gap-8 text-sm font-bold text-slate-600 mb-8">
                 <a href="/privacy" class="hover:text-teal-600 transition-colors">Privacy</a>
@@ -147,7 +102,7 @@ const canonicalURL = new URL(Astro.url.pathname, "https://www.invoiceapp.ng");
                 <a href="mailto:hello@invoiceapp.ng" class="hover:text-teal-600 transition-colors">Contact</a>
             </div>
             <p class="text-xs text-slate-400">
-                © {new Date().getFullYear()} InvoiceApp. Made with ❤️ in Lagos 🇳🇬
+                &copy; {new Date().getFullYear()} InvoiceApp. Made with love in Lagos.
             </p>
         </div>
     </footer>
