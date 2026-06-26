@@ -32,6 +32,20 @@ import { CommandPaletteProvider } from './components/CommandPaletteProvider';
 import { TermsModal } from './components/TermsModal';
 import { flushQueue, getQueueCount } from './utils/offlineSync';
 
+// NRS Compliance Components
+import { ComplianceDashboard } from './components/ComplianceDashboard';
+import { NRSTaxPanel } from './components/NRSTaxPanel';
+import { QRCodeDisplay } from './components/QRCodeDisplay';
+import { TINValidator } from './components/TINValidator';
+import { PaymentDetails } from './components/PaymentDetails';
+
+// NRS Compliance Services
+import { calculateVAT, calculateWHT, calculateStampDuty } from './services/taxCalculator';
+import { generateNRSJSON, validateNRSCompliance } from './services/eInvoicing';
+import { generatePaymentQR } from './services/qrCodeGenerator';
+import { checkCompliance, getComplianceScore } from './services/complianceTracker';
+import { logAction, getAuditTrail } from './services/auditTrail';
+
 // Lazy load heavy preview component
 const InvoicePreview = React.lazy(() => import('./components/InvoicePreview').then(module => ({ default: module.InvoicePreview })));
 
@@ -77,6 +91,12 @@ const App: React.FC = () => {
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
   const [pricingModalContent, setPricingModalContent] = useState({ title: 'Upgrade to Pro', message: 'Unlock advanced features to supercharge your business.' });
+
+  // NRS Compliance State
+  const [isComplianceOpen, setIsComplianceOpen] = useState(false);
+  const [isQRCodeOpen, setIsQRCodeOpen] = useState(false);
+  const [isPaymentDetailsOpen, setIsPaymentDetailsOpen] = useState(false);
+  const [complianceScore, setComplianceScore] = useState(0);
 
   // Toast State
   const [toast, setToast] = useState<{ message: string; isVisible: boolean; type?: 'success' | 'error' }>({
@@ -146,6 +166,34 @@ const App: React.FC = () => {
     };
     startupSync();
   }, [showToast]);
+
+  // NRS Compliance Functions
+  const handleCheckCompliance = useCallback(() => {
+    if (invoice) {
+      const score = getComplianceScore(invoice);
+      setComplianceScore(score);
+      setIsComplianceOpen(true);
+      logAction(invoice.id || 'new', 'compliance_check', user?.email || 'anonymous', `Score: ${score}`);
+    }
+  }, [invoice, user]);
+
+  const handleGenerateQR = useCallback(() => {
+    setIsQRCodeOpen(true);
+  }, []);
+
+  const handleShowPaymentDetails = useCallback(() => {
+    setIsPaymentDetailsOpen(true);
+  }, []);
+
+  // Calculate NRS Tax
+  const nrsTax = useMemo(() => {
+    if (!invoice) return null;
+    const subtotal = invoice.subtotal || 0;
+    const vat = calculateVAT(subtotal);
+    const wht = calculateWHT(subtotal, 'professional');
+    const stamp = calculateStampDuty('invoice', subtotal);
+    return { vat, wht, stamp, total: vat + wht + stamp };
+  }, [invoice]);
 
   // Main view state
   const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'blog' | 'blogPost' | 'publicProfile' | 'templatePage'>(() => {
@@ -600,13 +648,40 @@ const App: React.FC = () => {
                 </div>
 
                 {/* Right: Actions */}
-                <ActionButtons 
-                    onGenerateEmail={handleGenerateEmail} 
-                    onDownloadPdf={handleDownloadPdf}
-                    isMobile={false}
-                    invoiceNumber={invoice.invoiceNumber}
-                    totalAmount={`${invoice.currency} ${numberFormatter.format(totals.total)}`}
-                />
+                <div className="flex items-center gap-2">
+                    <ActionButtons 
+                        onGenerateEmail={handleGenerateEmail} 
+                        onDownloadPdf={handleDownloadPdf}
+                        isMobile={false}
+                        invoiceNumber={invoice.invoiceNumber}
+                        totalAmount={`${invoice.currency} ${numberFormatter.format(totals.total)}`}
+                    />
+                    
+                    {/* NRS Compliance Buttons */}
+                    <div className="flex items-center gap-1 border-l pl-2 ml-2">
+                        <button
+                            onClick={handleCheckCompliance}
+                            className="px-3 py-2 text-xs font-medium bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors"
+                            title="Check NRS Compliance"
+                        >
+                            ✓ NRS
+                        </button>
+                        <button
+                            onClick={handleGenerateQR}
+                            className="px-3 py-2 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+                            title="Generate QR Code"
+                        >
+                            QR
+                        </button>
+                        <button
+                            onClick={handleShowPaymentDetails}
+                            className="px-3 py-2 text-xs font-medium bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors"
+                            title="Payment Details"
+                        >
+                            Pay
+                        </button>
+                    </div>
+                </div>
             </div>
 
             {/* Mobile Command Bar Content */}
@@ -957,6 +1032,44 @@ const App: React.FC = () => {
         isOpen={isTermsModalOpen}
         onClose={() => setIsTermsModalOpen(false)}
       />
+
+      {/* NRS Compliance Modals */}
+      {isComplianceOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <ComplianceDashboard
+              invoice={invoice}
+              onClose={() => setIsComplianceOpen(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {isQRCodeOpen && invoice && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full">
+            <h3 className="text-lg font-bold mb-4">Invoice QR Code</h3>
+            <QRCodeDisplay invoice={invoice} />
+            <button
+              onClick={() => setIsQRCodeOpen(false)}
+              className="mt-4 w-full py-2 bg-teal-600 text-white rounded-lg"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isPaymentDetailsOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-lg w-full">
+            <PaymentDetails
+              invoice={invoice}
+              onClose={() => setIsPaymentDetailsOpen(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

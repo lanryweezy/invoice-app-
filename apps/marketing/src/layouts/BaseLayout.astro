@@ -18,6 +18,7 @@ const {
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, "https://www.invoiceapp.ng");
+const path = Astro.url.pathname;
 ---
 
 <html lang="en">
@@ -41,15 +42,16 @@ const canonicalURL = new URL(Astro.url.pathname, "https://www.invoiceapp.ng");
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-    <!-- Google Fonts preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
     <slot name="head" />
   </head>
   <body class="bg-slate-50 min-h-screen font-sans flex flex-col text-slate-800">
+
     <header class="flex-none bg-slate-900 border-b border-slate-800 z-50 text-white">
       <div class="max-w-[1600px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+
         <div class="flex items-center gap-3">
           <a href="/" class="flex items-center gap-3">
             <div class="bg-teal-500 text-white p-2 rounded-xl shadow-lg shadow-teal-900/50 ring-1 ring-white/10">
@@ -58,53 +60,88 @@ const canonicalURL = new URL(Astro.url.pathname, "https://www.invoiceapp.ng");
               </svg>
             </div>
             <div>
-              <h1 class="text-lg font-bold text-white leading-none tracking-tight">InvoiceApp</h1>
-              <div class="flex items-center gap-2 mt-1">
-                <p class="text-[10px] uppercase tracking-widest text-teal-400 font-bold leading-none">Generator</p>
-              </div>
+              <p class="text-lg font-bold text-white leading-none tracking-tight">InvoiceApp</p>
+              <p class="text-[10px] uppercase tracking-widest text-teal-400 font-bold leading-none mt-0.5">Generator</p>
             </div>
           </a>
         </div>
-        <nav class="hidden sm:flex items-center gap-6">
-           <a href="/editor" class="text-xs font-medium text-slate-400 hover:text-white transition-colors">Invoice Editor</a>
-           <a href="/templates" class={`text-xs font-medium transition-colors ${Astro.url.pathname.startsWith('/templates') ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Templates</a>
-           <div class="relative group">
-               <button class="text-xs font-medium text-slate-400 group-hover:text-white transition-colors flex items-center gap-1">
-                   Free Tools
-                   <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-               </button>
-               <div class="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                   <a href="/tools/vat-calculator" class="block px-4 py-2 text-xs font-bold text-slate-700 hover:bg-teal-50 hover:text-teal-700">VAT &amp; WHT Calculator</a>
-                   <a href="/tools/nrs-readiness-assessment" class="block px-4 py-2 text-xs font-bold text-slate-700 hover:bg-teal-50 hover:text-teal-700">NRS Readiness Check</a>
-               </div>
-           </div>
-           <a href="/blog" class={`text-xs font-medium transition-colors ${Astro.url.pathname === '/blog' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Blog</a>
-           <a href="/#pricing" class="text-xs font-bold bg-teal-500 hover:bg-teal-400 text-white px-4 py-2 rounded-lg transition-colors">
-               Get Started Free
-           </a>
+
+        <nav class="hidden sm:flex items-center gap-5">
+          <a
+            href="/editor"
+            class={`text-xs font-medium transition-colors ${path.startsWith('/editor') ? 'text-white' : 'text-slate-400 hover:text-white'}`}
+          >Invoice Editor</a>
+          <a
+            href="/editor#branches"
+            class="text-xs font-medium text-slate-400 hover:text-white transition-colors"
+          >Branches</a>
+          <a
+            href="/editor#accounting"
+            class="text-xs font-medium text-slate-400 hover:text-white transition-colors"
+          >Accounting</a>
+          <a
+            href="/editor#recurring"
+            class="text-xs font-medium text-slate-400 hover:text-white transition-colors"
+          >Recurring</a>
+          <a
+            href="/editor#receipts"
+            class="text-xs font-medium text-slate-400 hover:text-white transition-colors"
+          >Receipts</a>
+          <a
+            href="/blog"
+            class={`text-xs font-semibold transition-colors ${path.startsWith('/blog') ? 'text-white' : 'text-slate-400 hover:text-white'}`}
+          >Blog</a>
+          <a
+            href="/editor"
+            class="text-xs font-semibold border border-slate-600 hover:border-teal-400 text-slate-300 hover:text-white px-4 py-2 rounded-lg transition-colors"
+          >Login / Sign up</a>
+        </nav>
+
+        <button id="mobile-menu-btn" class="sm:hidden p-2 text-slate-400 hover:text-white transition-colors" aria-label="Open menu">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+
+      <div id="mobile-menu" class="hidden sm:hidden bg-slate-900 border-t border-slate-800 px-4 pb-4">
+        <nav class="flex flex-col gap-1 pt-2">
+          <a href="/editor" class="text-sm font-medium text-slate-400 hover:text-white py-2 transition-colors">Invoice Editor</a>
+          <a href="/editor#branches" class="text-sm font-medium text-slate-400 hover:text-white py-2 transition-colors">Branches</a>
+          <a href="/editor#accounting" class="text-sm font-medium text-slate-400 hover:text-white py-2 transition-colors">Accounting</a>
+          <a href="/editor#recurring" class="text-sm font-medium text-slate-400 hover:text-white py-2 transition-colors">Recurring</a>
+          <a href="/editor#receipts" class="text-sm font-medium text-slate-400 hover:text-white py-2 transition-colors">Receipts</a>
+          <a href="/blog" class="text-sm font-medium text-slate-400 hover:text-white py-2 transition-colors">Blog</a>
+          <a href="/editor" class="mt-2 text-sm font-semibold border border-slate-600 text-slate-300 px-4 py-2 rounded-lg text-center transition-colors">Login / Sign up</a>
         </nav>
       </div>
     </header>
+
+    <script>
+      const btn = document.getElementById('mobile-menu-btn');
+      const menu = document.getElementById('mobile-menu');
+      btn?.addEventListener('click', () => menu?.classList.toggle('hidden'));
+    </script>
 
     <main class="flex-1">
       <slot />
     </main>
 
     <footer class="bg-white border-t border-slate-200 py-12">
-        <div class="max-w-4xl mx-auto px-6 text-center">
-            <p class="text-sm text-slate-500 mb-6">
-                Built for Nigerian freelancers &amp; SMEs. Secure, fast, and 100% free.
-            </p>
-            <div class="flex justify-center gap-8 text-sm font-bold text-slate-600 mb-8">
-                <a href="/privacy" class="hover:text-teal-600 transition-colors">Privacy</a>
-                <a href="/terms" class="hover:text-teal-600 transition-colors">Terms</a>
-                <a href="/blog" class="hover:text-teal-600 transition-colors">Blog</a>
-                <a href="mailto:hello@invoiceapp.ng" class="hover:text-teal-600 transition-colors">Contact</a>
-            </div>
-            <p class="text-xs text-slate-400">
-                &copy; {new Date().getFullYear()} InvoiceApp. Made with love in Lagos.
-            </p>
+      <div class="max-w-4xl mx-auto px-6 text-center">
+        <p class="text-sm text-slate-500 mb-6">
+          Built for Nigerian freelancers &amp; SMEs. Secure, fast, and 100% free.
+        </p>
+        <div class="flex justify-center gap-8 text-sm font-bold text-slate-600 mb-8">
+          <a href="/privacy" class="hover:text-teal-600 transition-colors">Privacy</a>
+          <a href="/terms" class="hover:text-teal-600 transition-colors">Terms</a>
+          <a href="/blog" class="hover:text-teal-600 transition-colors">Blog</a>
+          <a href="mailto:hello@invoiceapp.ng" class="hover:text-teal-600 transition-colors">Contact</a>
         </div>
+        <p class="text-xs text-slate-400">
+          &copy; {new Date().getFullYear()} InvoiceApp. Made with love in Lagos.
+        </p>
+      </div>
     </footer>
   </body>
 </html>
