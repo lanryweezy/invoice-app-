@@ -210,4 +210,5 @@ const PaymentDetails: React.FC<PaymentDetailsProps> = React.memo(({ invoice, upd
   );
 });
 
+export { PaymentDetails };
 export default PaymentDetails;

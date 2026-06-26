@@ -197,4 +197,5 @@ const QRCodeDisplay: React.FC<QRCodeDisplayProps> = React.memo(({ invoice, size 
   );
 });
 
+export { QRCodeDisplay };
 export default QRCodeDisplay;
