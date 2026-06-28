@@ -21,15 +21,17 @@ async function build() {
 
     console.log('--- Organizing Build Output ---');
     
-    // Move Web Dist to dist/web
-    await fs.ensureDir(path.join(distDir, 'web'));
-    await fs.copy(webDist, path.join(distDir, 'web'));
-    console.log('✓ Web app moved to dist/web');
+    // Copy Web Dist to root/web (Vercel serves from project root)
+    const rootWeb = path.join(rootDir, 'web');
+    await fs.remove(rootWeb);
+    await fs.copy(webDist, rootWeb);
+    console.log('✓ Web app copied to /web');
 
-    // Move Marketing Dist to dist/marketing
-    await fs.ensureDir(path.join(distDir, 'marketing'));
-    await fs.copy(marketingDist, path.join(distDir, 'marketing'));
-    console.log('✓ Marketing app moved to dist/marketing');
+    // Copy Marketing Dist to root/marketing (Vercel serves from project root)
+    const rootMarketing = path.join(rootDir, 'marketing');
+    await fs.remove(rootMarketing);
+    await fs.copy(marketingDist, rootMarketing);
+    console.log('✓ Marketing app copied to /marketing');
 
     console.log('--- Build Complete ---');
   } catch (error) {
