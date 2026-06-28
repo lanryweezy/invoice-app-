@@ -142,7 +142,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 ref: response.reference,
                 email: user.email
             });
-            console.log("Payment successful. Account upgrade is being processed via backend.");
+            await setDoc(doc(db, 'users', user.uid), {
+              plan: 'pro',
+              planType,
+              upgradedAt: new Date().toISOString(),
+              paystackRef: response.reference,
+            }, { merge: true });
+            console.log("Payment successful. Account upgraded to Pro.");
             resolve(true);
           } catch (error) {
             trackEvent('payment_error_callback', { error: String(error), plan_type: planType });
