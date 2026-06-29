@@ -111,57 +111,68 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const upgradeToPro = async (planType: 'monthly' | 'yearly' = 'monthly'): Promise<boolean> => {
     if (!user) {
-      await loginWithGoogle();
       return false;
     }
 
     trackEvent('upgrade_initiated', { plan_type: planType, user_email: user.email });
 
     return new Promise((resolve) => {
-      if (typeof window === 'undefined' || !(window as any).PaystackPop) {
-        console.error("Paystack not loaded");
+      if (typeof window === 'undefined') {
         resolve(false);
         return;
       }
 
-      const amount = planType === 'yearly' ? 48000 : 5000;
+      // Wait for Paystack script to load if not ready yet
+      const openPaystack = () => {
+        if (!(window as any).PaystackPop) {
+          console.error("Paystack not loaded — check VITE_PAYSTACK_PUBLIC_KEY");
+          resolve(false);
+          return;
+        }
 
-      const handler = (window as any).PaystackPop.setup({
-        key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_dummy_key_for_dev_change_me',
-        email: user.email || 'user@example.com',
-        amount: amount * 100, // Amount in kobo
-        currency: 'NGN',
-        ref: 'NI_' + Math.floor((Math.random() * 1000000000) + 1),
-        metadata: {
-            uid: user.uid
-        },
-        callback: async function(response: any) {
-          try {
-            trackEvent('payment_success', {
-                plan_type: planType,
-                ref: response.reference,
-                email: user.email
-            });
-            await setDoc(doc(db, 'users', user.uid), {
-              plan: 'pro',
-              planType,
-              upgradedAt: new Date().toISOString(),
-              paystackRef: response.reference,
-            }, { merge: true });
-            console.log("Payment successful. Account upgraded to Pro.");
-            resolve(true);
-          } catch (error) {
-            trackEvent('payment_error_callback', { error: String(error), plan_type: planType });
-            console.error("Failed after payment", error);
+        const amount = planType === 'yearly' ? 48000 : 5000;
+
+        const handler = (window as any).PaystackPop.setup({
+          key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
+          email: user.email || 'user@example.com',
+          amount: amount * 100,
+          currency: 'NGN',
+          ref: 'INV-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+          metadata: {
+            custom_fields: [
+              { display_name: "User ID", variable_name: "user_id", value: user.uid },
+              { display_name: "Plan", variable_name: "plan", value: planType },
+            ]
+          },
+          callback: async function(response: any) {
+            try {
+              trackEvent('payment_success', {
+                  plan_type: planType,
+                  ref: response.reference,
+                  email: user.email
+              });
+              await setDoc(doc(db, 'users', user.uid), {
+                plan: 'pro',
+                planType,
+                upgradedAt: new Date().toISOString(),
+                paystackRef: response.reference,
+              }, { merge: true });
+              resolve(true);
+            } catch (error) {
+              trackEvent('payment_error_callback', { error: String(error), plan_type: planType });
+              console.error("Failed after payment", error);
+              resolve(false);
+            }
+          },
+          onClose: function() {
+            trackEvent('payment_cancelled', { plan_type: planType });
             resolve(false);
           }
-        },
-        onClose: function() {
-          trackEvent('payment_cancelled', { plan_type: planType });
-          resolve(false);
-        }
-      });
-      handler.openIframe();
+        });
+        handler.openIframe();
+      };
+
+      openPaystack();
     });
   };
 

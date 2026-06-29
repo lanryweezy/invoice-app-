@@ -471,95 +471,80 @@ const App: React.FC = () => {
   const handleDownloadPdf = async () => {
     if (isGeneratingPdf) return;
     setIsGeneratingPdf(true);
-    try {
+
     // Determine the source element
     let sourceElement = document.getElementById('invoice-preview-container');
 
-    // If on mobile and in edit mode, the preview might not be rendered or updated.
-    // We switch to preview tab briefly if needed, but the Clone strategy below 
-    // is robust enough to handle the element as long as it exists in the DOM.
     if (!sourceElement && activeMobileTab === 'edit' && window.innerWidth < 768) {
          showToast('Switching to preview to generate PDF...', 'success');
          setActiveMobileTab('preview');
-         // Small delay to allow render
          await new Promise(resolve => setTimeout(resolve, 500));
          sourceElement = document.getElementById('invoice-preview-container');
     }
 
-    if (sourceElement) {
+    if (!sourceElement) {
+        showToast('Preview not available. Please switch to Preview tab.', 'error');
+        setIsGeneratingPdf(false);
+        return;
+    }
+
+    try {
       showToast('Generating PDF...', 'success');
       trackEvent('download_pdf_start', { invoice_id: invoice.invoiceNumber });
-      
-      try {
-          // --- CLONE STRATEGY ---
-          // 1. Create a container that forces A4 dimensions, off-screen
-          const container = document.createElement('div');
-          container.style.position = 'absolute';
-          container.style.top = '-10000px';
-          container.style.left = '0';
-          container.style.width = '210mm'; // Force A4 width
-          container.style.minHeight = '297mm'; // Force A4 height
-          container.style.zIndex = '-1';
-          container.style.backgroundColor = '#ffffff';
-          document.body.appendChild(container);
 
-          // 2. Clone the invoice element
-          const clone = sourceElement.cloneNode(true) as HTMLElement;
-          
-          // 3. Clean up the clone's styles to ensure it flows correctly in the A4 container
-          // Remove any mobile-specific transforms or constraints
-          clone.style.transform = 'none';
-          clone.style.margin = '0';
-          clone.style.boxShadow = 'none';
-          clone.style.width = '100%';
-          clone.style.height = 'auto';
-          
-          container.appendChild(clone);
+      const container = document.createElement('div');
+      container.style.position = 'absolute';
+      container.style.top = '-10000px';
+      container.style.left = '0';
+      container.style.width = '210mm';
+      container.style.minHeight = '297mm';
+      container.style.zIndex = '-1';
+      container.style.backgroundColor = '#ffffff';
+      document.body.appendChild(container);
 
-          // 4. Generate Canvas from the CLONE (which is full size)
-          const canvas = await html2canvas(container, {
-            scale: 2, // High quality scale
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            logging: false,
-            windowWidth: 1200, // FORCE DESKTOP WIDTH: Critical for fixing mobile layout issues
-          });
+      const clone = sourceElement.cloneNode(true) as HTMLElement;
+      clone.style.transform = 'none';
+      clone.style.margin = '0';
+      clone.style.boxShadow = 'none';
+      clone.style.width = '100%';
+      clone.style.height = 'auto';
+      container.appendChild(clone);
 
-          // 5. Clean up DOM
-          document.body.removeChild(container);
-          
-          // 6. Generate PDF
-          const imgData = canvas.toDataURL('image/jpeg', 0.8);
-          const pdf = new jsPDF('p', 'mm', 'a4');
-          const pdfWidth = pdf.internal.pageSize.getWidth();
-          const pdfHeight = pdf.internal.pageSize.getHeight();
-          
-          pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-          pdf.save(`Invoice-${invoice.invoiceNumber}.pdf`);
-          saveInvoice({ ...invoice, ...totals }); // Record in history with totals
-          showToast('PDF Downloaded!');
-          trackEvent('download_pdf_success', { invoice_id: invoice.invoiceNumber });
+      const canvas = await html2canvas(container, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        windowWidth: 1200,
+      });
 
-          // Nudge: Ask to sign up/login after successful download if not authenticated
-          if (!user) {
-              setTimeout(() => {
-                  setPricingModalContent({
-                      title: "Don't Lose Your Invoices!",
-                      message: "Sign up for a free account to save your clients and sync your invoices across all your devices."
-                  });
-                  setIsPricingModalOpen(true);
-              }, 1000);
-          }
+      document.body.removeChild(container);
 
-      } catch (e) {
-          console.error(e);
-          showToast('Failed to generate PDF', 'error');
-          trackEvent('download_pdf_error', { error: String(e) });
-      } finally {
-          setIsGeneratingPdf(false);
+      const imgData = canvas.toDataURL('image/jpeg', 0.8);
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+      pdf.save(`Invoice-${invoice.invoiceNumber}.pdf`);
+      saveInvoice({ ...invoice, ...totals });
+      showToast('PDF Downloaded!');
+      trackEvent('download_pdf_success', { invoice_id: invoice.invoiceNumber });
+
+      if (!user) {
+          setTimeout(() => {
+              setPricingModalContent({
+                  title: "Don't Lose Your Invoices!",
+                  message: "Sign up for a free account to save your clients and sync your invoices across all your devices."
+              });
+              setIsPricingModalOpen(true);
+          }, 1000);
       }
-    } else {
-        showToast('Preview not available. Please switch to Preview tab.', 'error');
+    } catch (e) {
+      console.error(e);
+      showToast('Failed to generate PDF', 'error');
+      trackEvent('download_pdf_error', { error: String(e) });
+    } finally {
+      setIsGeneratingPdf(false);
     }
   };
 
@@ -1028,15 +1013,9 @@ const App: React.FC = () => {
         onClose={() => setIsPricingModalOpen(false)}
         onUpgrade={async (planType) => {
             const success = await upgradeToPro(planType);
-            if (success) {
-                showToast('Successfully upgraded to Pro!', 'success');
-                setIsPricingModalOpen(false);
-            } else {
-                showToast('Failed to upgrade. Please try again.', 'error');
-            }
+            return success;
         }}
         onLogin={() => {
-            setIsPricingModalOpen(false);
             setIsAuthModalOpen(true);
         }}
         user={user}
