@@ -74,7 +74,11 @@ export const BranchesManager: React.FC<BranchesManagerProps> = ({ isPro = false,
                  <div className="flex items-center gap-2">
                     {branch.id === 1 && <span className="bg-teal-50 text-teal-700 text-[9px] font-black uppercase px-2 py-0.5 rounded-full border border-teal-100">HQ</span>}
                     <button
-                        onClick={() => setBranches(branches.filter(b => b.id !== branch.id))}
+                        onClick={() => {
+                          if (confirm(`Delete "${branch.name}" branch? This cannot be undone.`)) {
+                            setBranches(branches.filter(b => b.id !== branch.id));
+                          }
+                        }}
                         aria-label={`Delete ${branch.name} branch`}
                         title={`Delete ${branch.name} branch`}
                         className="p-2 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-500 focus:outline-none transition-colors opacity-0 group-hover:opacity-100"

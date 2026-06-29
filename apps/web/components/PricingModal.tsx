@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface PricingModalProps {
   isOpen: boolean;
@@ -14,6 +14,13 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleUpgrade = async () => {
@@ -26,10 +33,10 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="pricing-modal-title">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden animate-in fade-in zoom-in duration-200 my-8">
         <div className="p-6 md:p-8 text-center border-b border-slate-100">
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">{title}</h2>
+          <h2 id="pricing-modal-title" className="text-2xl font-bold text-slate-900 mb-2">{title}</h2>
           <p className="text-slate-500 mb-6">{message}</p>
 
           <div className="flex justify-center items-center gap-3">

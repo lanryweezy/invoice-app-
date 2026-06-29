@@ -82,6 +82,7 @@ const App: React.FC = () => {
 
   const [generatedEmail, setGeneratedEmail] = useState('');
   const [emailTemplate, setEmailTemplate] = useState<EmailTemplateType>('formal');
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [viewingReceipt, setViewingReceipt] = useState<any>(null);
@@ -456,13 +457,21 @@ const App: React.FC = () => {
   }, [handleProFeatureClick]);
 
   const handleSaveRecurringWrapper = useCallback((inv: Invoice) => {
+      if (!isPro) {
+          setPricingModalContent({ title: 'Recurring Invoices', message: 'Upgrade to Pro to save and auto-generate recurring invoices.' });
+          setIsPricingModalOpen(true);
+          return;
+      }
       if (saveRecurringInvoice) {
           saveRecurringInvoice(inv);
           showToast('Saved as recurring template!', 'success');
       }
-  }, [saveRecurringInvoice]);
+  }, [saveRecurringInvoice, isPro]);
 
   const handleDownloadPdf = async () => {
+    if (isGeneratingPdf) return;
+    setIsGeneratingPdf(true);
+    try {
     // Determine the source element
     let sourceElement = document.getElementById('invoice-preview-container');
 
@@ -546,6 +555,8 @@ const App: React.FC = () => {
           console.error(e);
           showToast('Failed to generate PDF', 'error');
           trackEvent('download_pdf_error', { error: String(e) });
+      } finally {
+          setIsGeneratingPdf(false);
       }
     } else {
         showToast('Preview not available. Please switch to Preview tab.', 'error');
@@ -677,6 +688,7 @@ const App: React.FC = () => {
                         documentType={invoice.documentType}
                         onConvertToInvoice={handleConvertToInvoice}
                         invoice={invoice}
+                        isGeneratingPdf={isGeneratingPdf}
                     />
                     
                     {/* NRS Compliance Buttons */}
@@ -737,6 +749,7 @@ const App: React.FC = () => {
                             documentType={invoice.documentType}
                             onConvertToInvoice={handleConvertToInvoice}
                             invoice={invoice}
+                            isGeneratingPdf={isGeneratingPdf}
                         />
                     </div>
                 </div>
@@ -867,7 +880,7 @@ const App: React.FC = () => {
                   onSaveClient={handleSaveClient}
                   businessProfiles={businessProfiles}
                   onSaveBusinessProfile={handleSaveBusinessProfile}
-                  onSaveRecurring={saveRecurringInvoice ? handleSaveRecurringWrapper : undefined}
+                  onSaveRecurring={handleSaveRecurringWrapper}
                   onSaveInvoice={saveInvoice}
                   isPro={isPro}
                   onProFeatureClick={handleProFeatureRecurring}
@@ -887,9 +900,9 @@ const App: React.FC = () => {
                        <div className="h-px bg-slate-200 w-12"></div>
                    </div>
                    
-                   <p className="text-xs text-slate-500 text-center leading-relaxed">
-                       Built for Nigerian freelancers & SMEs. Your data stays in your browser and is never stored on our servers.
-                   </p>
+                    <p className="text-xs text-slate-500 text-center leading-relaxed">
+                        Built for Nigerian freelancers & SMEs. Free plan stores data locally. Pro plan adds optional cloud sync.
+                    </p>
 
                    {/* Links */}
                    <div className="flex justify-center gap-6 text-xs font-bold text-slate-600">

@@ -14,6 +14,7 @@ interface ActionButtonsProps {
   documentType?: string;
   onConvertToInvoice?: () => void;
   invoice?: Invoice;
+  isGeneratingPdf?: boolean;
 }
 
 export const ActionButtons: React.FC<ActionButtonsProps> = ({
@@ -25,6 +26,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
     documentType,
     onConvertToInvoice,
     invoice,
+    isGeneratingPdf = false,
 }) => {
     const [linkCopied, setLinkCopied] = useState(false);
     const shareText = `Hi, here is the invoice #${invoiceNumber} for ${totalAmount}. Built with InvoiceApp.`;
@@ -126,11 +128,16 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
             </button>
             <button
                 onClick={onDownloadPdf}
-                className="p-1.5 text-white bg-teal-600 hover:bg-teal-700 rounded-lg shadow-md shadow-teal-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-1"
-                title="Download PDF"
+                disabled={isGeneratingPdf}
+                className="p-1.5 text-white bg-teal-600 hover:bg-teal-700 disabled:bg-slate-400 disabled:cursor-not-allowed rounded-lg shadow-md shadow-teal-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-1"
+                title={isGeneratingPdf ? 'Generating PDF...' : 'Download PDF'}
                 aria-label="Download PDF"
             >
-                <DownloadIcon className="w-4 h-4" />
+                {isGeneratingPdf ? (
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                ) : (
+                  <DownloadIcon className="w-4 h-4" />
+                )}
             </button>
         </div>
       )
@@ -187,11 +194,16 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       </button>
       <button
         onClick={onDownloadPdf}
-        className="flex-1 lg:flex-none inline-flex items-center justify-center px-3 py-1.5 border border-transparent text-xs font-bold rounded-lg shadow-md shadow-teal-200 text-white bg-teal-600 hover:bg-teal-700 hover:shadow-lg transition-all"
+        disabled={isGeneratingPdf}
+        className="flex-1 lg:flex-none inline-flex items-center justify-center px-3 py-1.5 border border-transparent text-xs font-bold rounded-lg shadow-md shadow-teal-200 text-white bg-teal-600 hover:bg-teal-700 disabled:bg-slate-400 disabled:cursor-not-allowed hover:shadow-lg transition-all"
         aria-label="Download PDF"
       >
-        <DownloadIcon className="w-3.5 h-3.5 mr-1.5" />
-        PDF
+        {isGeneratingPdf ? (
+          <svg className="w-3.5 h-3.5 mr-1.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+        ) : (
+          <DownloadIcon className="w-3.5 h-3.5 mr-1.5" />
+        )}
+        {isGeneratingPdf ? 'Generating...' : 'PDF'}
       </button>
     </div>
   );

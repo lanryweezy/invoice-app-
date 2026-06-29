@@ -256,7 +256,11 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <p className="font-bold text-red-600 text-sm">₦{numberFormatter.format(exp.amount)}</p>
-                      <button onClick={() => onRemoveExpense(exp.id)} className="p-1 text-slate-400 hover:text-red-500 rounded-lg transition-colors">
+                      <button onClick={() => {
+                        if (confirm(`Delete "${exp.description}" expense?`)) {
+                          onRemoveExpense(exp.id);
+                        }
+                      }} className="p-1 text-slate-400 hover:text-red-500 rounded-lg transition-colors">
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                       </button>
                     </div>
