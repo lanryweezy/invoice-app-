@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/_astro/:match*",
+      "destination": "/marketing/_astro/:match*"
+    },
+    {
+      "source": "/favicon.svg",
+      "destination": "/marketing/favicon.svg"
+    },
+    {
       "source": "/blog/:match*",
       "destination": "/marketing/blog/:match*"
     },
@@ -17,7 +25,7 @@
       "destination": "/marketing/nrs-compliance-dossier/"
     },
     {
-      "source": "/((?!web/|_astro/).*)",
+      "source": "/((?!web/).*)",
       "destination": "/web/index.html"
     }
   ]
