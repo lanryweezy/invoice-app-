@@ -6,7 +6,7 @@ import { InvoiceForm } from './components/InvoiceForm';
 import { ActionButtons } from './components/ActionButtons';
 import { EmailModal } from './components/EmailModal';
 import { useInvoice } from './hooks/useInvoice';
-import { generateEmailTemplate } from './utils/emailGenerator';
+import { generateEmailTemplate, type EmailTemplateType } from './utils/emailGenerator';
 import { generateSequentialInvoiceNumber } from './utils/invoiceSequence';
 import type { Invoice, TemplateId, Client } from './types';
 import { TemplateSelector } from './components/TemplateSelector';
@@ -81,6 +81,7 @@ const App: React.FC = () => {
   const [previewScale, setPreviewScale] = useState(1);
 
   const [generatedEmail, setGeneratedEmail] = useState('');
+  const [emailTemplate, setEmailTemplate] = useState<EmailTemplateType>('formal');
   
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [viewingReceipt, setViewingReceipt] = useState<any>(null);
@@ -394,14 +395,16 @@ const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [invoice, totals, activeMobileTab]);
 
-  const handleGenerateEmail = useCallback(() => {
+  const handleGenerateEmail = useCallback((templateType?: EmailTemplateType) => {
+    const type = templateType || emailTemplate;
     const fullInvoice: Invoice = { ...invoice, subtotal: totals.subtotal, tax: totals.tax, total: totals.total, discountAmount: totals.discountAmount, shipping: totals.shipping };
-    const emailContent = generateEmailTemplate(fullInvoice);
+    const emailContent = generateEmailTemplate(fullInvoice, type);
     setGeneratedEmail(emailContent);
+    setEmailTemplate(type);
     setIsEmailModalOpen(true);
-    saveInvoice(fullInvoice); // Record in history
-    trackEvent('generate_email', { invoice_id: invoice.invoiceNumber });
-  }, [invoice, totals, saveInvoice]);
+    saveInvoice(fullInvoice);
+    trackEvent('generate_email', { invoice_id: invoice.invoiceNumber, template: type });
+  }, [invoice, totals, saveInvoice, emailTemplate]);
 
   const handleSaveClient = useCallback((client: Client) => {
       // Free tier restriction: max 2 clients
@@ -1003,6 +1006,8 @@ const App: React.FC = () => {
         isOpen={isEmailModalOpen}
         onClose={() => setIsEmailModalOpen(false)}
         emailContent={generatedEmail}
+        onTemplateChange={(type) => handleGenerateEmail(type)}
+        activeTemplate={emailTemplate}
       />
 
       <PricingModal

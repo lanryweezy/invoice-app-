@@ -1,47 +1,147 @@
 import type { Invoice } from '../types';
 
-export const generateEmailTemplate = (invoice: Invoice): string => {
-  const { user, client, invoiceNumber, total, dueDate, currency, notes, lineItems } = invoice;
-  
-  const currencyFormatter = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currency,
-  });
+export type EmailTemplateType = 'formal' | 'casual' | 'followup' | 'overdue';
 
-  const formattedTotal = currencyFormatter.format(total || 0);
+export interface EmailTemplate {
+  id: EmailTemplateType;
+  name: string;
+  description: string;
+  icon: string;
+}
 
-  // Create a simple list of items for the email body
-  const itemsList = lineItems
-    .map(item => `- ${item.description} (${item.quantity} x ${currencyFormatter.format(Number(item.price))})`)
+export const EMAIL_TEMPLATES: EmailTemplate[] = [
+  { id: 'formal', name: 'Formal', description: 'Professional business tone', icon: '👔' },
+  { id: 'casual', name: 'Casual', description: 'Friendly and relaxed', icon: '😊' },
+  { id: 'followup', name: 'Follow-up', description: 'Gentle payment reminder', icon: '🔔' },
+  { id: 'overdue', name: 'Overdue', description: 'Urgent past-due notice', icon: '⚠️' },
+];
+
+const currencyFmt = (amount: number, currency: string) =>
+  new Intl.NumberFormat('en-NG', { style: 'currency', currency }).format(amount);
+
+function itemsList(inv: Invoice): string {
+  return inv.lineItems
+    .map(item => `  - ${item.description} (${item.quantity} x ${currencyFmt(Number(item.price) || 0, inv.currency)})`)
     .join('\n');
+}
 
-  return `Subject: Invoice ${invoiceNumber} from ${user.name}
+function bankDetails(inv: Invoice): string {
+  return [
+    `Bank: ${inv.user.bankName}`,
+    `Account: ${inv.user.accountNumber}`,
+    `Name: ${inv.user.name}`,
+  ].join('\n');
+}
 
-Dear ${client.name},
+const templates: Record<EmailTemplateType, (inv: Invoice) => { subject: string; body: string }> = {
+  formal: (inv) => ({
+    subject: `Invoice ${inv.invoiceNumber} from ${inv.user.name}`,
+    body: `Dear ${inv.client.name},
 
-I hope this email finds you well.
+I hope this message finds you well.
 
-Please find attached invoice ${invoiceNumber} for the following services:
+Please find below the details for invoice ${inv.invoiceNumber}:
 
-${itemsList}
+Services Provided:
+${itemsList(inv)}
 
-Total Amount Due: ${formattedTotal}
-Due Date: ${dueDate}
+Amount Due: ${currencyFmt(inv.total || 0, inv.currency)}
+Due Date: ${inv.dueDate}
 
-PAYMENT DETAILS:
-Bank Name: ${user.bankName}
-Account Number: ${user.accountNumber}
-Account Name: ${user.name}
+Payment Instructions:
+${bankDetails(inv)}
 
-${notes ? `Note: ${notes}` : ''}
+${inv.notes ? `Additional Notes: ${inv.notes}\n\n` : ''}Kindly ensure payment is made by the due date to avoid any late fees.
 
-If you have any questions regarding this invoice, please don't hesitate to reach out.
+Should you have any questions regarding this invoice, please do not hesitate to contact me.
 
-Thank you for your business!
+Thank you for your valued business.
 
 Best regards,
+${inv.user.name}
+${inv.user.email}
+${inv.user.address}`,
+  }),
 
-${user.name}
-${user.email}
-${user.address}`;
+  casual: (inv) => ({
+    subject: `Hey ${inv.client.name} — here's your invoice`,
+    body: `Hi ${inv.client.name}! 👋
+
+Hope you're doing well! Here's the invoice for the work we've done together:
+
+${itemsList(inv)}
+
+Total: ${currencyFmt(inv.total || 0, inv.currency)}
+Due: ${inv.dueDate}
+
+Payment details:
+${bankDetails(inv)}
+
+${inv.notes ? `Note: ${inv.notes}\n\n` : ''}Let me know if you have any questions. Thanks for working with me!
+
+Cheers,
+${inv.user.name}`,
+  }),
+
+  followup: (inv) => ({
+    subject: `Gentle reminder: Invoice ${inv.invoiceNumber} — ${currencyFmt(inv.total || 0, inv.currency)}`,
+    body: `Hi ${inv.client.name},
+
+I hope you're doing well. I wanted to follow up on invoice ${inv.invoiceNumber} which was issued on ${inv.issueDate}.
+
+Invoice Summary:
+${itemsList(inv)}
+
+Amount Due: ${currencyFmt(inv.total || 0, inv.currency)}
+Due Date: ${inv.dueDate}
+
+Payment Details:
+${bankDetails(inv)}
+
+If you've already made payment, please disregard this message. If not, I'd appreciate it if you could process the payment at your earliest convenience.
+
+Thank you!
+
+Best,
+${inv.user.name}`,
+  }),
+
+  overdue: (inv) => ({
+    subject: `OVERDUE: Invoice ${inv.invoiceNumber} — Immediate Payment Required`,
+    body: `Dear ${inv.client.name},
+
+This is to formally notify you that invoice ${inv.invoiceNumber}, originally due on ${inv.dueDate}, is now overdue.
+
+Invoice Details:
+${itemsList(inv)}
+
+Outstanding Amount: ${currencyFmt(inv.total || 0, inv.currency)}
+Original Due Date: ${inv.dueDate}
+Days Overdue: ${Math.max(0, Math.floor((Date.now() - new Date(inv.dueDate).getTime()) / 86400000))}
+
+Payment Instructions:
+${bankDetails(inv)}
+
+Please arrange for immediate payment of this outstanding balance. Failure to settle this invoice may result in additional late fees and suspension of services.
+
+If you have already sent payment, please disregard this notice and accept our apologies for the reminder.
+
+Regards,
+${inv.user.name}
+${inv.user.email}
+${inv.user.address}`,
+  }),
 };
+
+export function generateEmailTemplate(inv: Invoice, templateType: EmailTemplateType = 'formal'): string {
+  const { subject, body } = templates[templateType](inv);
+  return `Subject: ${subject}\n\n${body}`;
+}
+
+export function getEmailSubject(inv: Invoice, templateType: EmailTemplateType = 'formal'): string {
+  return templates[templateType](inv).subject;
+}
+
+export function getEmailBody(inv: Invoice, templateType: EmailTemplateType = 'formal'): string {
+  return templates[templateType](inv).body;
+}
