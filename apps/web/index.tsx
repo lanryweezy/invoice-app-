@@ -5,6 +5,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { Analytics } from '@vercel/analytics/react';
 import { AuthProvider } from './context/AuthContext';
 import App from './App';
+import './src/index.css';
 
 // Register service worker for PWA
 registerSW({ immediate: true });

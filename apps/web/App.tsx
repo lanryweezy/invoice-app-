@@ -7,6 +7,7 @@ import { ActionButtons } from './components/ActionButtons';
 import { EmailModal } from './components/EmailModal';
 import { useInvoice } from './hooks/useInvoice';
 import { generateEmailTemplate } from './utils/emailGenerator';
+import { generateSequentialInvoiceNumber } from './utils/invoiceSequence';
 import type { Invoice, TemplateId, Client } from './types';
 import { TemplateSelector } from './components/TemplateSelector';
 import { EditIcon, EyeIcon } from './components/Icons';
@@ -70,7 +71,8 @@ const App: React.FC = () => {
     saveBusinessProfile, 
     recurringInvoices, 
     saveRecurringInvoice, 
-    removeRecurringInvoice 
+    removeRecurringInvoice,
+    toggleRecurringActive
   } = useInvoice();
   const { expenses, addExpense, removeExpense } = useExpenses();
   const { receipts, addReceipt, removeReceipt } = useReceipts();
@@ -184,6 +186,20 @@ const App: React.FC = () => {
   const handleShowPaymentDetails = useCallback(() => {
     setIsPaymentDetailsOpen(true);
   }, []);
+
+  const handleConvertToInvoice = useCallback(() => {
+    if (!invoice || invoice.documentType !== 'Pro-forma') return;
+    const newInvoiceNumber = generateSequentialInvoiceNumber();
+    setInvoice(prev => ({
+      ...prev,
+      documentType: 'Tax Invoice' as const,
+      status: 'Draft' as const,
+      invoiceNumber: newInvoiceNumber,
+      convertedFromProforma: true,
+      proformaId: prev.invoiceNumber,
+    }));
+    showToast(`Converted to Invoice #${newInvoiceNumber}`, 'success');
+  }, [invoice, setInvoice, showToast]);
 
   // Calculate NRS Tax
   const nrsTax = useMemo(() => {
@@ -655,6 +671,8 @@ const App: React.FC = () => {
                         isMobile={false}
                         invoiceNumber={invoice.invoiceNumber}
                         totalAmount={`${invoice.currency} ${numberFormatter.format(totals.total)}`}
+                        documentType={invoice.documentType}
+                        onConvertToInvoice={handleConvertToInvoice}
                     />
                     
                     {/* NRS Compliance Buttons */}
@@ -712,6 +730,8 @@ const App: React.FC = () => {
                             isMobile={true}
                             invoiceNumber={invoice.invoiceNumber}
                             totalAmount={`${invoice.currency} ${numberFormatter.format(totals.total)}`}
+                            documentType={invoice.documentType}
+                            onConvertToInvoice={handleConvertToInvoice}
                         />
                     </div>
                 </div>
@@ -785,16 +805,16 @@ const App: React.FC = () => {
                 <RecurringManager
                     recurringInvoices={recurringInvoices}
                     onGenerateNext={(inv) => {
-                        // Very simple mock generation: update issue date to today, clear invoice number to force a new one
                         setInvoice({
                             ...inv,
                             issueDate: new Date().toISOString().split('T')[0],
-                            invoiceNumber: `INV-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`
+                            invoiceNumber: generateSequentialInvoiceNumber()
                         });
                         setActiveView('editor');
                         showToast('Recurring template loaded into editor', 'success');
                     }}
                     onRemove={removeRecurringInvoice}
+                    onToggleActive={toggleRecurringActive}
                 />
             </div>
         ) : activeView === 'receipts' ? (

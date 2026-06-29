@@ -295,6 +295,16 @@ export const useInvoice = () => {
       });
   }, [syncToCloud]);
 
+  const toggleRecurringActive = useCallback((index: number, isActive: boolean) => {
+      setRecurringInvoices(prev => {
+          const updated = [...prev];
+          updated[index] = { ...updated[index], recurringIsActive: isActive };
+          localStorage.setItem('invoiceRecurring', JSON.stringify(updated));
+          syncToCloud({ recurringInvoices: updated });
+          return updated;
+      });
+  }, [syncToCloud]);
+
   const saveBusinessProfile = useCallback((profile: AppUser) => {
       if (!profile.name.trim()) return false;
 
@@ -363,6 +373,7 @@ export const useInvoice = () => {
     removeBusinessProfile,
     recurringInvoices,
     saveRecurringInvoice,
-    removeRecurringInvoice
+    removeRecurringInvoice,
+    toggleRecurringActive
   };
 };

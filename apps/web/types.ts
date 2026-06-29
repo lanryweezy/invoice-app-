@@ -52,6 +52,9 @@ export interface Expense {
   amount: number;
   date: string;
   category: string;
+  vendor?: string;
+  isRecurring?: boolean;
+  recurringFrequency?: RecurringFrequency;
 }
 
 export interface Receipt {
@@ -65,6 +68,7 @@ export interface Receipt {
 }
 
 export interface Invoice {
+  id?: string;
   user: User;
   client: Client;
   invoiceNumber: string;
@@ -74,16 +78,16 @@ export interface Invoice {
   notes: string;
   terms: string;
   taxRate: number;
-  whtRate: number; // Withholding Tax percentage (e.g. 5 or 10)
-  discountRate: number | string; // Percentage
+  whtRate: number;
+  discountRate: number | string;
   discountType: 'percentage' | 'fixed';
-  shippingAmount: number | string; // Added shipping amount
+  shippingAmount: number | string;
   currency: Currency;
   status: InvoiceStatus;
   documentType?: DocumentType;
   nrsStatus?: NRSComplianceStatus;
   nrsValidationMessage?: string;
-  digitalSignature?: string; // Base64 or name string
+  digitalSignature?: string;
   subtotal?: number;
   discountAmount?: number;
   tax?: number;
@@ -91,6 +95,29 @@ export interface Invoice {
   shipping?: number;
   total?: number;
   recurringFrequency?: RecurringFrequency;
+  recurringIsActive?: boolean;
+  nextDueDate?: string;
+  lastGenerated?: string;
+  portalToken?: string;
+  portalViewed?: boolean;
+  portalViewedAt?: string;
+  paymentConfirmedByClient?: boolean;
+  paymentConfirmedAt?: string;
+  convertedFromProforma?: boolean;
+  proformaId?: string;
 }
 
 export type TemplateId = 'classic' | 'modern' | 'bold' | 'minimalist' | 'professional' | 'elegant' | 'tech';
+
+export interface ClientPortalLink {
+  token: string;
+  invoiceId: string;
+  invoiceNumber: string;
+  clientName: string;
+  clientEmail: string;
+  totalAmount: number;
+  currency: Currency;
+  status: InvoiceStatus;
+  createdAt: string;
+  expiresAt?: string;
+}

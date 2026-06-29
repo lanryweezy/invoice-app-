@@ -9,6 +9,8 @@ interface ActionButtonsProps {
   isMobile?: boolean;
   invoiceNumber?: string;
   totalAmount?: string;
+  documentType?: string;
+  onConvertToInvoice?: () => void;
 }
 
 export const ActionButtons: React.FC<ActionButtonsProps> = ({
@@ -16,10 +18,13 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
     onDownloadPdf,
     isMobile = false,
     invoiceNumber = '',
-    totalAmount = ''
+    totalAmount = '',
+    documentType,
+    onConvertToInvoice,
 }) => {
     const shareText = `Hi, here is the invoice #${invoiceNumber} for ${totalAmount}. Built with InvoiceApp.`;
     const shareUrl = 'https://www.invoiceapp.ng/';
+    const isProforma = documentType === 'Pro-forma';
 
     const handleWhatsAppShare = () => {
         trackEvent('share_whatsapp', { invoice_number: invoiceNumber });
@@ -54,6 +59,16 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   if (isMobile) {
       return (
         <div className="flex gap-2">
+            {isProforma && onConvertToInvoice && (
+              <button
+                onClick={onConvertToInvoice}
+                className="p-1.5 text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors"
+                title="Convert to Invoice"
+                aria-label="Convert to Invoice"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+              </button>
+            )}
             <button
                 onClick={onGenerateEmail}
                 className="p-1.5 text-slate-600 hover:text-teal-600 bg-slate-100 hover:bg-teal-50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
@@ -92,6 +107,16 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
 
   return (
     <div className="flex gap-2 w-full lg:w-auto">
+      {isProforma && onConvertToInvoice && (
+        <button
+          onClick={onConvertToInvoice}
+          className="flex-1 lg:flex-none inline-flex items-center justify-center px-3 py-1.5 border border-amber-300 text-xs font-bold rounded-lg text-amber-700 bg-amber-50 hover:bg-amber-100 hover:border-amber-400 transition-all shadow-sm"
+          aria-label="Convert to Invoice"
+        >
+          <svg className="w-3.5 h-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          Convert to Invoice
+        </button>
+      )}
       <button
         onClick={onGenerateEmail}
         className="flex-1 lg:flex-none inline-flex items-center justify-center px-3 py-1.5 border border-slate-200 text-xs font-bold rounded-lg text-slate-600 bg-white hover:bg-slate-50 hover:text-teal-600 hover:border-teal-200 transition-all shadow-sm"
