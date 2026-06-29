@@ -1,10 +1,6 @@
 {
   "rewrites": [
     {
-      "source": "/",
-      "destination": "/marketing/"
-    },
-    {
       "source": "/blog/:match*",
       "destination": "/marketing/blog/:match*"
     },
@@ -21,15 +17,7 @@
       "destination": "/marketing/nrs-compliance-dossier/"
     },
     {
-      "source": "/editor",
-      "destination": "/web/index.html"
-    },
-    {
-      "source": "/editor/:match*",
-      "destination": "/web/index.html"
-    },
-    {
-      "source": "/((?!web/).*)",
+      "source": "/((?!web/|_astro/).*)",
       "destination": "/web/index.html"
     }
   ]
