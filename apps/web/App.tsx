@@ -673,6 +673,7 @@ const App: React.FC = () => {
                         totalAmount={`${invoice.currency} ${numberFormatter.format(totals.total)}`}
                         documentType={invoice.documentType}
                         onConvertToInvoice={handleConvertToInvoice}
+                        invoice={invoice}
                     />
                     
                     {/* NRS Compliance Buttons */}
@@ -732,6 +733,7 @@ const App: React.FC = () => {
                             totalAmount={`${invoice.currency} ${numberFormatter.format(totals.total)}`}
                             documentType={invoice.documentType}
                             onConvertToInvoice={handleConvertToInvoice}
+                            invoice={invoice}
                         />
                     </div>
                 </div>
