@@ -5,12 +5,19 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 export async function getStaticPaths() {
   const blogEntries = await getCollection('blog');
   return blogEntries.map(entry => ({
-    params: { slug: entry.data.slug }, props: { entry },
+    params: { slug: entry.data.slug }, props: { entry, allEntries: blogEntries },
   }));
 }
 
-const { entry } = Astro.props;
+const { entry, allEntries } = Astro.props;
 const { Content } = await render(entry);
+
+const relatedPosts = allEntries
+  .filter(e => e.data.slug !== entry.data.slug && e.data.category === entry.data.category)
+  .slice(0, 3);
+
+const shareUrl = `https://www.invoiceapp.ng/blog/${entry.data.slug}`;
+const shareText = encodeURIComponent(`${entry.data.title} — Read on InvoiceApp.ng`);
 
 const structuredData = {
     "@context": "https://schema.org",
@@ -19,19 +26,8 @@ const structuredData = {
     "image": [entry.data.imageUrl],
     "datePublished": new Date(entry.data.date).toISOString(),
     "dateModified": new Date(entry.data.date).toISOString(),
-    "author": [{
-      "@type": "Organization",
-      "name": "InvoiceApp.ng",
-      "url": "https://invoiceapp.ng"
-    }],
-    "publisher": {
-      "@type": "Organization",
-      "name": "InvoiceApp.ng",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://www.invoiceapp.ng/favicon.svg"
-      }
-    },
+    "author": [{ "@type": "Organization", "name": "InvoiceApp.ng", "url": "https://invoiceapp.ng" }],
+    "publisher": { "@type": "Organization", "name": "InvoiceApp.ng", "logo": { "@type": "ImageObject", "url": "https://www.invoiceapp.ng/favicon.svg" } },
     "description": entry.data.excerpt
 };
 ---
@@ -43,6 +39,9 @@ const structuredData = {
     article={true}
 >
     <script type="application/ld+json" set:html={JSON.stringify(structuredData)} slot="head" />
+
+    {/* Reading Progress Bar */}
+    <div id="progress-bar" class="fixed top-0 left-0 h-1 bg-teal-500 z-[60] transition-all duration-150" style="width: 0%"></div>
 
     <div class="w-full pb-32">
       <div class="w-full h-[60vh] min-h-[450px] relative bg-slate-900 overflow-hidden">
@@ -59,9 +58,7 @@ const structuredData = {
                 </a>
                 
                 <div class="flex items-center gap-4 text-white/70 text-xs font-black uppercase tracking-widest mb-6">
-                    <span class="bg-teal-500 text-white px-3 py-1 rounded-md">
-                        {entry.data.category}
-                    </span>
+                    <span class="bg-teal-500 text-white px-3 py-1 rounded-md">{entry.data.category}</span>
                     <span>{entry.data.readTime}</span>
                     <span class="w-1 h-1 bg-white/30 rounded-full"></span>
                     <span>{entry.data.date}</span>
@@ -72,9 +69,7 @@ const structuredData = {
                 </h1>
 
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-teal-500 flex items-center justify-center font-bold text-white shadow-xl shadow-teal-500/20">
-                        IA
-                    </div>
+                    <div class="w-12 h-12 rounded-full bg-teal-500 flex items-center justify-center font-bold text-white shadow-xl shadow-teal-500/20">IA</div>
                     <div class="text-sm">
                         <p class="text-white font-bold">Editorial Team</p>
                         <p class="text-white/50">InvoiceApp Nigeria</p>
@@ -95,39 +90,71 @@ const structuredData = {
                 </div>
             </div>
 
-            <div class="mt-20 pt-12 border-t border-slate-100">
-                <div class="flex flex-col md:flex-row items-center justify-between gap-8">
-                    <div class="flex items-center gap-4">
-                        <p class="text-sm font-bold text-slate-400 uppercase tracking-widest">Share this insight:</p>
-                        <div class="flex gap-2">
-                            {[1,2,3].map(i => <div class="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 hover:bg-teal-50 hover:border-teal-200 transition-colors cursor-pointer"></div>)}
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2 text-xs font-bold text-slate-400">
-                        <span>TAGS:</span>
-                        <span class="bg-slate-100 px-2 py-1 rounded">#NIGERIA</span>
-                        <span class="bg-slate-100 px-2 py-1 rounded">#FINANCE</span>
-                        <span class="bg-slate-100 px-2 py-1 rounded">#SME</span>
-                    </div>
+            {/* Share Section */}
+            <div class="mt-16 pt-10 border-t border-slate-100">
+                <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Share this article</p>
+                <div class="flex gap-3">
+                    <a href={`https://wa.me/?text=${shareText}%20${encodeURIComponent(shareUrl)}`} target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-4 py-2.5 bg-green-50 text-green-700 rounded-xl text-xs font-bold hover:bg-green-100 transition-colors">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        WhatsApp
+                    </a>
+                    <a href={`https://twitter.com/intent/tweet?text=${shareText}&url=${encodeURIComponent(shareUrl)}&hashtags=InvoiceApp,Nigeria,Invoicing`} target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        Twitter
+                    </a>
+                    <button onclick={`navigator.clipboard.writeText('${shareUrl}');this.textContent='Copied!'`} class="flex items-center gap-2 px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+                        Copy Link
+                    </button>
                 </div>
             </div>
         </div>
 
+        {/* Related Posts */}
+        {relatedPosts.length > 0 && (
+          <div class="mt-16">
+            <h3 class="text-2xl font-black text-slate-900 mb-8">You might also like</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {relatedPosts.map(related => (
+                <a href={`/blog/${related.data.slug}`} class="group bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl hover:shadow-teal-900/10 transition-all">
+                  <div class="h-40 overflow-hidden">
+                    <img src={related.data.imageUrl} alt={related.data.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  </div>
+                  <div class="p-5">
+                    <span class="text-[10px] font-bold text-teal-600 uppercase">{related.data.category}</span>
+                    <h4 class="text-sm font-bold text-slate-900 mt-1 mb-2 line-clamp-2 group-hover:text-teal-600 transition-colors">{related.data.title}</h4>
+                    <p class="text-xs text-slate-400">{related.data.readTime} · {related.data.date}</p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* CTA */}
         <div class="mt-16 bg-slate-900 rounded-[3rem] p-12 md:p-16 text-center text-white relative overflow-hidden group">
             <div class="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full -mr-48 -mt-48 blur-3xl group-hover:bg-teal-500/20 transition-all duration-1000"></div>
             <div class="relative z-10">
                 <h3 class="text-3xl md:text-4xl font-black mb-6 tracking-tight italic font-serif">Stop fighting manual paperwork.</h3>
                 <p class="text-slate-400 mb-10 max-w-xl mx-auto text-lg">Join 10,000+ Nigerian businesses using our automated financial OS to get paid faster and stay NRS compliant.</p>
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
-                    <a href="/editor" class="inline-block bg-teal-600 hover:bg-teal-500 text-white font-black py-5 px-12 rounded-2xl transition-all shadow-2xl shadow-teal-900/50 text-lg">
-                        Get Started Free
-                    </a>
-                    <a href="/tools/nrs-readiness-assessment" class="inline-block bg-white/10 hover:bg-white/20 text-white font-bold py-5 px-12 rounded-2xl transition-all backdrop-blur-sm border border-white/10">
-                        Check NRS Status
-                    </a>
+                    <a href="/editor" class="inline-block bg-teal-600 hover:bg-teal-500 text-white font-black py-5 px-12 rounded-2xl transition-all shadow-2xl shadow-teal-900/50 text-lg">Get Started Free</a>
+                    <a href="/tools/nrs-readiness-assessment" class="inline-block bg-white/10 hover:bg-white/20 text-white font-bold py-5 px-12 rounded-2xl transition-all backdrop-blur-sm border border-white/10">Check NRS Status</a>
                 </div>
             </div>
         </div>
       </div>
     </div>
+
+    <script>
+      // Reading progress bar
+      window.addEventListener('scroll', () => {
+        const bar = document.getElementById('progress-bar');
+        if (!bar) return;
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        bar.style.width = `${Math.min(progress, 100)}%`;
+      });
+    </script>
 </BaseLayout>

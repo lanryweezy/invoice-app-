@@ -4,6 +4,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 const allPosts = await getCollection('blog');
 const sortedPosts = allPosts.reverse();
+
+const categories = [...new Set(sortedPosts.map(p => p.data.category))].sort();
 ---
 
 <BaseLayout title="Resources & Insights | InvoiceApp Nigeria">
@@ -24,10 +26,40 @@ const sortedPosts = allPosts.reverse();
   </div>
 
   <div class="max-w-6xl mx-auto px-6 -mt-32 pb-32">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+    {/* Search + Filter Bar */}
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 p-4 mb-10 flex flex-col sm:flex-row gap-4 items-center sticky top-20 z-30">
+      <div class="relative flex-1 w-full">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+        <input
+          type="text"
+          id="blog-search"
+          placeholder="Search articles..."
+          class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+        />
+      </div>
+      <div class="flex gap-2 overflow-x-auto pb-1 w-full sm:w-auto" id="category-filters">
+        <button data-category="all" class="filter-btn px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all bg-teal-500 text-white">
+          All ({sortedPosts.length})
+        </button>
+        {categories.map(cat => (
+          <button data-category={cat} class="filter-btn px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+            {cat} ({sortedPosts.filter(p => p.data.category === cat).length})
+          </button>
+        ))}
+      </div>
+    </div>
+
+    {/* Blog Grid */}
+    <div id="blog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
       {sortedPosts.map((post, index) => (
-        <article class={`group bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden hover:shadow-2xl hover:shadow-teal-900/10 transition-all duration-500 flex flex-col ${index === 0 ? 'md:col-span-2 lg:flex-row' : ''}`}>
-          <a href={`/blog/${post.data.slug}`} class={`block overflow-hidden relative ${index === 0 ? 'lg:w-1/2 h-[400px] lg:h-auto' : 'h-64'}`}>
+        <article
+          class="blog-card group bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden hover:shadow-2xl hover:shadow-teal-900/10 transition-all duration-500 flex flex-col"
+          data-category={post.data.category}
+          data-title={post.data.title.toLowerCase()}
+          data-excerpt={post.data.excerpt.toLowerCase()}
+          style={index >= 6 ? 'display:none' : ''}
+        >
+          <a href={`/blog/${post.data.slug}`} class="block overflow-hidden relative h-64">
             <img 
                 src={post.data.imageUrl} 
                 alt={post.data.title} 
@@ -36,31 +68,47 @@ const sortedPosts = allPosts.reverse();
             <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
           </a>
           
-          <div class={`p-10 flex flex-col flex-1 ${index === 0 ? 'lg:w-1/2 justify-center' : ''}`}>
-            <div class="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">
+          <div class="p-8 flex flex-col flex-1">
+            <div class="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">
               <span class="text-teal-600 px-2 py-1 bg-teal-50 rounded">{post.data.category}</span>
               <span>{post.data.readTime}</span>
+              <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+              <span>{post.data.date}</span>
             </div>
             
             <a href={`/blog/${post.data.slug}`} class="block group/link">
-              <h3 class={`${index === 0 ? 'text-3xl md:text-4xl' : 'text-2xl'} font-black text-slate-900 mb-4 leading-tight group-hover/link:text-teal-600 transition-colors tracking-tight`}>
+              <h3 class="text-xl font-black text-slate-900 mb-3 leading-tight group-hover/link:text-teal-600 transition-colors tracking-tight line-clamp-2">
                 {post.data.title}
               </h3>
-              <p class="text-slate-500 text-lg leading-relaxed line-clamp-3 mb-8">
+              <p class="text-slate-500 text-sm leading-relaxed line-clamp-2 mb-6">
                 {post.data.excerpt}
               </p>
             </a>
             
-            <div class="mt-auto pt-8 border-t border-slate-50 flex items-center justify-between">
-              <a href={`/blog/${post.data.slug}`} class="text-sm font-black text-slate-900 group-hover:text-teal-600 transition-colors uppercase tracking-widest flex items-center gap-2">
+            <div class="mt-auto pt-4 border-t border-slate-50">
+              <a href={`/blog/${post.data.slug}`} class="text-xs font-black text-slate-900 group-hover:text-teal-600 transition-colors uppercase tracking-widest flex items-center gap-2">
                 Read Analysis
-                <svg class="w-4 h-4 translate-x-0 group-hover:translate-x-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                <svg class="w-3.5 h-3.5 translate-x-0 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" strokeLinejoin="round" strokeWidth={3} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
               </a>
-              <span class="text-xs font-bold text-slate-300">{post.data.date}</span>
             </div>
           </div>
         </article>
       ))}
+    </div>
+
+    {/* Load More */}
+    <div id="load-more-container" class="text-center mt-12">
+      <button id="load-more" class="px-8 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors text-sm">
+        Load More Articles
+      </button>
+      <p id="post-count" class="text-xs text-slate-400 mt-3">Showing 6 of {sortedPosts.length} articles</p>
+    </div>
+
+    {/* Empty State */}
+    <div id="empty-state" class="hidden text-center py-20">
+      <svg class="w-16 h-16 text-slate-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+      <p class="text-lg font-bold text-slate-500">No articles found</p>
+      <p class="text-sm text-slate-400">Try a different search term or category</p>
     </div>
 
     <div class="mt-32 bg-teal-600 rounded-[3rem] p-12 md:p-20 text-center text-white relative overflow-hidden shadow-2xl shadow-teal-900/20">
@@ -74,4 +122,74 @@ const sortedPosts = allPosts.reverse();
         </div>
     </div>
   </div>
+
+  <script>
+    // Search + Filter
+    const searchInput = document.getElementById('blog-search') as HTMLInputElement;
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.blog-card');
+    const loadMoreBtn = document.getElementById('load-more') as HTMLButtonElement;
+    const postCount = document.getElementById('post-count') as HTMLParagraphElement;
+    const emptyState = document.getElementById('empty-state') as HTMLDivElement;
+    let visibleCount = 6;
+    let activeCategory = 'all';
+
+    function filterCards() {
+      const query = searchInput.value.toLowerCase();
+      let matchCount = 0;
+
+      cards.forEach((card, i) => {
+        const el = card as HTMLElement;
+        const title = el.dataset.title || '';
+        const excerpt = el.dataset.excerpt || '';
+        const category = el.dataset.category || '';
+        const matchesSearch = !query || title.includes(query) || excerpt.includes(query);
+        const matchesCategory = activeCategory === 'all' || category === activeCategory;
+        const shouldShow = matchesSearch && matchesCategory;
+
+        el.style.display = shouldShow ? '' : 'none';
+        matchCount++;
+      });
+
+      // Re-apply pagination
+      let shown = 0;
+      cards.forEach((card) => {
+        const el = card as HTMLElement;
+        if (el.style.display === 'none') return;
+        shown++;
+        el.style.display = shown <= visibleCount ? '' : 'none';
+      });
+
+      const totalVisible = document.querySelectorAll('.blog-card:not([style*="display: none"])').length;
+      const totalMatched = [...cards].filter(c => {
+        const el = c as HTMLElement;
+        const title = el.dataset.title || '';
+        const excerpt = el.dataset.excerpt || '';
+        const category = el.dataset.category || '';
+        return (!query || title.includes(query) || excerpt.includes(query)) && (activeCategory === 'all' || category === activeCategory);
+      }).length;
+
+      postCount.textContent = `Showing ${Math.min(visibleCount, totalMatched)} of ${totalMatched} articles`;
+      loadMoreBtn.style.display = visibleCount >= totalMatched ? 'none' : '';
+      emptyState.classList.toggle('hidden', totalMatched > 0);
+    }
+
+    searchInput?.addEventListener('input', () => { visibleCount = 6; filterCards(); });
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => { b.classList.remove('bg-teal-500', 'text-white'); b.classList.add('bg-slate-100', 'text-slate-600'); });
+        btn.classList.add('bg-teal-500', 'text-white');
+        btn.classList.remove('bg-slate-100', 'text-slate-600');
+        activeCategory = (btn as HTMLElement).dataset.category || 'all';
+        visibleCount = 6;
+        filterCards();
+      });
+    });
+
+    loadMoreBtn?.addEventListener('click', () => {
+      visibleCount += 6;
+      filterCards();
+    });
+  </script>
 </BaseLayout>
