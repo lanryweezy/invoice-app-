@@ -1054,8 +1054,8 @@ const App: React.FC = () => {
 
       {/* NRS Compliance Modals */}
       {isComplianceOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setIsComplianceOpen(false)} onKeyDown={(e) => e.key === 'Escape' && setIsComplianceOpen(false)}>
+          <div className="bg-white rounded-xl max-w-3xl w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <ComplianceDashboard
               invoice={invoice}
               onClose={() => setIsComplianceOpen(false)}
@@ -1065,26 +1065,19 @@ const App: React.FC = () => {
       )}
 
       {isQRCodeOpen && invoice && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full">
-            <h3 className="text-lg font-bold mb-4">Invoice QR Code</h3>
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setIsQRCodeOpen(false)} onKeyDown={(e) => e.key === 'Escape' && setIsQRCodeOpen(false)}>
+          <div className="bg-white rounded-xl p-5 max-w-sm w-full" onClick={e => e.stopPropagation()}>
             <QRCodeDisplay invoice={invoice} />
-            <button
-              onClick={() => setIsQRCodeOpen(false)}
-              className="mt-4 w-full py-2 bg-teal-600 text-white rounded-lg"
-            >
-              Close
-            </button>
           </div>
         </div>
       )}
 
       {isPaymentDetailsOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-lg w-full">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setIsPaymentDetailsOpen(false)} onKeyDown={(e) => e.key === 'Escape' && setIsPaymentDetailsOpen(false)}>
+          <div className="w-full max-w-sm" onClick={e => e.stopPropagation()}>
             <PaymentDetails
               invoice={invoice}
-              onClose={() => setIsPaymentDetailsOpen(false)}
+              updateInvoice={handleUpdateInvoice}
             />
           </div>
         </div>
