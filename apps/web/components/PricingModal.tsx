@@ -136,7 +136,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
               <Feature text="Accounting Activities" />
             </ul>
             {!user ? (
-              <button onClick={onLogin} className="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2.5 px-4 rounded-xl transition-colors text-sm">
+              <button onClick={onLogin} className="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2.5 px-4 rounded-xl transition-colors text-sm cursor-pointer">
                 Create Free Account
               </button>
             ) : (
@@ -175,7 +175,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
             <button
               onClick={handleUpgrade}
               disabled={loading}
-              className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 px-4 rounded-xl transition-all shadow-lg shadow-teal-600/30 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+              className="w-full bg-teal-600 hover:bg-teal-700 active:scale-[0.98] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg shadow-teal-600/30 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm cursor-pointer"
             >
               {loading && (
                 <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
@@ -200,7 +200,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
           )}
           <div className="flex justify-between items-center">
             <p className="text-xs text-slate-400">Secure payment powered by Paystack</p>
-            <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+            <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all cursor-pointer">
               Maybe Later
             </button>
           </div>
