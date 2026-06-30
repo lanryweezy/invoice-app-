@@ -144,20 +144,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 { display_name: "Plan", variable_name: "plan", value: planType },
               ]
             },
-            callback: async function(response: any) {
-              try {
-                try { trackEvent('payment_success', { plan_type: planType, ref: response.reference, email: user.email }); } catch {}
-                await setDoc(doc(db, 'users', user.uid), {
-                  plan: 'pro',
-                  planType,
-                  upgradedAt: new Date().toISOString(),
-                  paystackRef: response.reference,
-                }, { merge: true });
+            callback: function(response: any) {
+              try { trackEvent('payment_success', { plan_type: planType, ref: response.reference, email: user.email }); } catch {}
+              setDoc(doc(db, 'users', user.uid), {
+                plan: 'pro',
+                planType,
+                upgradedAt: new Date().toISOString(),
+                paystackRef: response.reference,
+              }, { merge: true }).then(() => {
                 resolve(true);
-              } catch (error) {
-                console.error("Failed after payment", error);
+              }).catch((error) => {
+                console.error("Failed to save upgrade", error);
                 resolve(false);
-              }
+              });
             },
             onClose: function() {
               resolve(false);
