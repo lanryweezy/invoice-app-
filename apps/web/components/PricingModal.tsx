@@ -47,12 +47,15 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
       const result = await onUpgrade(billingCycle);
       if (result) {
         setSuccess(true);
-        trackEvent('upgrade_completed', { plan_type: billingCycle });
-      } else {
-        setError('');
       }
     } catch (e) {
-      setError('Something went wrong. Please try again.');
+      console.error('Upgrade error:', e);
+      const msg = e instanceof Error ? e.message : String(e);
+      if (msg.includes('Paystack') || msg.includes('paystack')) {
+        setError('Payment system failed to load. Please refresh and try again.');
+      } else {
+        setError('Something went wrong. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -64,17 +67,17 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
   if (success) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" role="dialog" aria-modal="true">
-        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden text-center">
-          <div className="p-10">
-            <div className="w-20 h-20 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-10 h-10 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden text-center">
+          <div className="p-8">
+            <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-2xl font-black text-slate-900 mb-3">Welcome to Pro!</h2>
-            <p className="text-slate-500 mb-2">Your account has been upgraded successfully.</p>
-            <p className="text-sm text-slate-400 mb-8">
-              You now have access to unlimited clients, branches, accounting, cloud sync, and more.
+            <h2 className="text-xl font-black text-slate-900 mb-2">Welcome to Pro!</h2>
+            <p className="text-sm text-slate-500 mb-1">Your account has been upgraded successfully.</p>
+            <p className="text-xs text-slate-400 mb-6">
+              Unlimited clients, branches, accounting, cloud sync, and more.
             </p>
             <button
               onClick={onClose}
@@ -90,11 +93,11 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="pricing-modal-title">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden my-8">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden my-4">
         {/* Header */}
-        <div className="p-6 md:p-8 text-center border-b border-slate-100">
-          <h2 id="pricing-modal-title" className="text-2xl font-bold text-slate-900 mb-2">{title}</h2>
-          <p className="text-slate-500 mb-6">{message}</p>
+        <div className="px-6 py-4 text-center border-b border-slate-100">
+          <h2 id="pricing-modal-title" className="text-lg font-bold text-slate-900 mb-1">{title}</h2>
+          <p className="text-sm text-slate-500 mb-4">{message}</p>
 
           <div className="flex justify-center items-center gap-3">
             <span className={`text-sm font-medium transition-colors ${billingCycle === 'monthly' ? 'text-slate-900' : 'text-slate-400'}`}>Monthly</span>
@@ -119,13 +122,13 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
         {/* Plans */}
         <div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-slate-100">
           {/* Free */}
-          <div className="flex-1 p-6 md:p-8 bg-slate-50">
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-bold text-slate-900 mb-1">Free</h3>
-              <div className="text-3xl font-bold text-slate-900 mb-1">₦0<span className="text-sm font-normal text-slate-500">/mo</span></div>
-              <p className="text-xs text-slate-500">Perfect for getting started</p>
+          <div className="flex-1 p-5">
+            <div className="text-center mb-4">
+              <h3 className="text-base font-bold text-slate-900 mb-1">Free</h3>
+              <div className="text-2xl font-bold text-slate-900 mb-0.5">₦0<span className="text-xs font-normal text-slate-500">/mo</span></div>
+              <p className="text-[11px] text-slate-500">Perfect for getting started</p>
             </div>
-            <ul className="space-y-3 mb-8">
+            <ul className="space-y-2 mb-5">
               <Feature text="Unlimited Invoices" included />
               <Feature text="Basic Templates" included />
               <Feature text="Save up to 2 Clients" included />
@@ -133,34 +136,34 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
               <Feature text="Accounting Activities" />
             </ul>
             {!user ? (
-              <button onClick={onLogin} className="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 px-4 rounded-xl transition-colors">
+              <button onClick={onLogin} className="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2.5 px-4 rounded-xl transition-colors text-sm">
                 Create Free Account
               </button>
             ) : (
-              <div className="text-center text-sm font-medium text-slate-400 py-3">Current Plan</div>
+              <div className="text-center text-xs font-medium text-slate-400 py-2">Current Plan</div>
             )}
           </div>
 
           {/* Pro */}
-          <div className="flex-1 p-6 md:p-8">
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-bold text-teal-600 mb-1">Pro</h3>
-              <div className="flex justify-center items-baseline gap-1 mb-1">
-                <span className="text-3xl font-bold text-slate-900">
+          <div className="flex-1 p-5">
+            <div className="text-center mb-4">
+              <h3 className="text-base font-bold text-teal-600 mb-1">Pro</h3>
+              <div className="flex justify-center items-baseline gap-1 mb-0.5">
+                <span className="text-2xl font-bold text-slate-900">
                   ₦{price.toLocaleString()}
                 </span>
-                <span className="text-sm font-normal text-slate-500">
+                <span className="text-xs font-normal text-slate-500">
                   /{billingCycle === 'yearly' ? 'yr' : 'mo'}
                 </span>
               </div>
               {billingCycle === 'yearly' && (
-                <div className="text-sm text-green-600 font-medium mb-1">
+                <div className="text-xs text-green-600 font-medium mb-0.5">
                   (₦{monthlyEquiv.toLocaleString()}/mo)
                 </div>
               )}
-              <p className="text-xs text-slate-500 mt-1">For growing businesses</p>
+              <p className="text-[11px] text-slate-500 mt-1">For growing businesses</p>
             </div>
-            <ul className="space-y-3 mb-8">
+            <ul className="space-y-2 mb-5">
               <Feature text="Everything in Free" included bold />
               <Feature text="Unlimited Saved Clients" included bold />
               <Feature text="Manage Multiple Branches" included bold />
@@ -172,7 +175,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
             <button
               onClick={handleUpgrade}
               disabled={loading}
-              className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg shadow-teal-600/30 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 px-4 rounded-xl transition-all shadow-lg shadow-teal-600/30 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
             >
               {loading && (
                 <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
