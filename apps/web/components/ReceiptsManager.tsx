@@ -1,9 +1,7 @@
+import { numberFormatter } from "../utils/formatters";
 import React, { useState, useMemo } from 'react';
 import type { Receipt, TemplateId } from '../types';
 import { DownloadIcon, EyeIcon } from './Icons';
-
-// ⚡ Bolt: Cache Intl.NumberFormat instance globally to avoid ~0.6ms overhead per instantiation inside render loop.
-const numberFormatter = new Intl.NumberFormat();
 
 interface ReceiptsManagerProps {
     receipts: Receipt[];
@@ -12,7 +10,6 @@ interface ReceiptsManagerProps {
 }
 
 export const ReceiptsManager: React.FC<ReceiptsManagerProps> = ({ receipts, onViewReceipt, onRemoveReceipt }) => {
-
 
     return (
         <div className="p-8 bg-white rounded-xl shadow-sm border border-slate-200">

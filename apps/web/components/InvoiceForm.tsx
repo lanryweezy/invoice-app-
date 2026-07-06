@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { getCurrencyFormatter } from '../utils/formatters';
 import type { Invoice, LineItem, Currency, InvoiceStatus, Client } from '../types';
 import { TrashIcon, PlusIcon, UploadIcon, ChevronDownIcon, ChevronUpIcon, EmptyBoxIcon, SaveIcon, UserIcon, MailIcon, MapPinIcon, BriefcaseIcon, BankIcon, HashIcon, WalletIcon, CalendarIcon, InfoIcon, SparklesIcon, ListIcon, PhoneIcon } from './Icons';
 
@@ -39,7 +40,7 @@ interface InputFieldProps {
 
 const InputField: React.FC<InputFieldProps> = React.memo(({ id, label, value, onChange, type = 'text', placeholder, className, name, icon, prefix, noLabel, autoComplete, step, error, list }) => {
   const isDate = type === 'date';
-  
+
   const handlePickerTrigger = (e: React.SyntheticEvent) => {
     if (isDate && 'showPicker' in HTMLInputElement.prototype) {
         try {
@@ -107,16 +108,16 @@ const RichTextarea: React.FC<{
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;
         const textValue = textarea.value;
-        
+
         const newValue = textValue.substring(0, start) + text + textValue.substring(end);
-        
+
         // Create synthetic event
         const event = {
             target: { value: newValue, name }
         } as React.ChangeEvent<HTMLTextAreaElement>;
-        
+
         onChange(event);
-        
+
         // Reset focus and cursor position
         setTimeout(() => {
             textarea.focus();
@@ -155,7 +156,7 @@ const CollapsibleSection: React.FC<{ title: string; children: React.ReactNode; d
     const [isOpen, setIsOpen] = useState(defaultOpen);
     return (
         <div className={`border rounded-xl overflow-hidden shadow-sm mb-5 transition-all duration-300 hover:shadow-md ${highlight ? 'border-teal-100 bg-white ring-1 ring-teal-50' : 'border-slate-200 bg-white'}`}>
-            <button 
+            <button
                 onClick={() => setIsOpen(!isOpen)}
                 aria-expanded={isOpen}
                 className={`w-full flex items-center justify-between p-4 transition-colors text-left group ${highlight ? 'bg-gradient-to-r from-teal-50 to-white' : 'bg-white hover:bg-slate-50'}`}
@@ -306,7 +307,7 @@ const nigerianBanks = [
 
 export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, updateInvoice, addLineItem, removeLineItem, updateLineItem, savedClients, onSaveClient, businessProfiles = [], onSaveBusinessProfile, onSaveRecurring, onSaveInvoice, isPro = false, onProFeatureClick }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const validateEmail = (email: string) => {
     if (!email) return undefined;
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -351,7 +352,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
 
   const handleLineItemChange = useCallback((id: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    
+
     if (name === 'price') {
         // If value is empty, pass empty string, otherwise parse as number
         updateLineItem(id, 'price', value === '' ? '' : value);
@@ -460,12 +461,8 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
       }
   }, [invoice.taxRate, updateInvoice]);
 
-  // ⚡ Bolt: Memoize Intl.NumberFormat to avoid expensive recreation (~1ms) on every render
-  const currencyFormatter = useMemo(() => new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: invoice.currency,
-  }), [invoice.currency]);
-  
+  const currencyFormatter = getCurrencyFormatter(invoice.currency);
+
   // ⚡ Bolt: Memoize currency symbol to avoid expensive toLocaleString calls on every render (~0.6ms)
   const currencySymbol = useMemo(() => {
       return (0).toLocaleString('en-US', { style: 'currency', currency: invoice.currency, minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace(/\d/g, '').trim();
@@ -476,7 +473,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
         <datalist id="nigerian-banks">
             {nigerianBanks.map(bank => <option key={bank} value={bank} />)}
         </datalist>
-        
+
         {/* Business Info */}
         <CollapsibleSection title="Your Business Info" icon={<BriefcaseIcon className="w-4 h-4"/>}>
 
@@ -503,21 +500,21 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
 
             {/* Logo Upload - Brand Card Style */}
             <div className="mb-8">
-                <div 
+                <div
                     onClick={() => fileInputRef.current?.click()}
                     className={`relative overflow-hidden rounded-xl border-2 border-dashed transition-all cursor-pointer group flex flex-col items-center justify-center p-6
-                    ${invoice.user.logo 
-                        ? 'border-teal-200 bg-teal-50/10' 
+                    ${invoice.user.logo
+                        ? 'border-teal-200 bg-teal-50/10'
                         : 'border-slate-200 bg-slate-50/50 hover:border-teal-400 hover:bg-teal-50/20'}`}
                 >
-                    <input 
+                    <input
                         ref={fileInputRef}
-                        type="file" 
-                        accept="image/png, image/jpeg" 
-                        className="hidden" 
+                        type="file"
+                        accept="image/png, image/jpeg"
+                        className="hidden"
                         onChange={handleLogoUpload}
                     />
-                    
+
                     {invoice.user.logo ? (
                         <div className="flex flex-col items-center w-full">
                             <div className="w-24 h-24 relative mb-3">
@@ -526,7 +523,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                                     <span className="text-white text-xs font-bold flex items-center gap-1"><UploadIcon className="w-3 h-3"/> Change</span>
                                 </div>
                             </div>
-                            <button 
+                            <button
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     updateInvoice('user', { ...invoice.user, logo: undefined });
@@ -551,37 +548,37 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
 
             <div className="space-y-5">
                 <div className="grid grid-cols-1 gap-5">
-                    <InputField 
-                        label="Business Name" 
-                        name="name" 
-                        value={invoice.user.name} 
-                        onChange={handleUserChange} 
+                    <InputField
+                        label="Business Name"
+                        name="name"
+                        value={invoice.user.name}
+                        onChange={handleUserChange}
                         autoComplete="organization"
                         icon={<BriefcaseIcon className="w-4 h-4"/>}
                     />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <InputField 
-                            label="Tax ID (TIN)" 
-                            name="tin" 
-                            value={invoice.user.tin || ''} 
-                            onChange={handleUserChange} 
+                        <InputField
+                            label="Tax ID (TIN)"
+                            name="tin"
+                            value={invoice.user.tin || ''}
+                            onChange={handleUserChange}
                             placeholder="e.g. 12345678-0001"
                             icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>}
                         />
-                        <InputField 
-                            label="CAC Number" 
-                            name="cacNumber" 
-                            value={invoice.user.cacNumber || ''} 
-                            onChange={handleUserChange} 
+                        <InputField
+                            label="CAC Number"
+                            name="cacNumber"
+                            value={invoice.user.cacNumber || ''}
+                            onChange={handleUserChange}
                             placeholder="e.g. RC 1234567"
                             icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>}
                         />
                     </div>
-                    <InputField 
-                        label="Business Address" 
-                        name="address" 
-                        value={invoice.user.address} 
-                        onChange={handleUserChange} 
+                    <InputField
+                        label="Business Address"
+                        name="address"
+                        value={invoice.user.address}
+                        onChange={handleUserChange}
                         autoComplete="street-address"
                         icon={<MapPinIcon className="w-4 h-4"/>}
                     />
@@ -608,11 +605,11 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                         {/* Decorative Patterns */}
                         <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
                         <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-500/10 rounded-full blur-xl -ml-5 -mb-5"></div>
-                        
+
                         <div className="relative z-10 space-y-4">
                             <div>
                                 <label className="text-[10px] text-slate-400 font-bold uppercase tracking-widest block mb-1">Bank Name</label>
-                                <input 
+                                <input
                                     name="bankName"
                                     value={invoice.user.bankName}
                                     onChange={handleUserChange}
@@ -624,7 +621,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                             <div>
                                 <label className="text-[10px] text-slate-400 font-bold uppercase tracking-widest block mb-1">Account Number</label>
                                 <div className="flex items-center gap-2">
-                                    <input 
+                                    <input
                                         name="accountNumber"
                                         value={invoice.user.accountNumber}
                                         onChange={handleUserChange}
@@ -698,11 +695,11 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
             <div className="space-y-6">
                 {/* Meta Row */}
                 <div className="grid grid-cols-2 gap-5">
-                    <InputField 
-                        label="Invoice No." 
-                        name="invoiceNumber" 
-                        value={invoice.invoiceNumber} 
-                        onChange={handleInvoiceMetaChange} 
+                    <InputField
+                        label="Invoice No."
+                        name="invoiceNumber"
+                        value={invoice.invoiceNumber}
+                        onChange={handleInvoiceMetaChange}
                         icon={<HashIcon className="w-4 h-4" />}
                     />
                     <div>
@@ -744,31 +741,31 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                             <ChevronDownIcon className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                         </div>
                     </div>
-                    <InputField 
-                        label="Digital Signature (Name)" 
-                        name="digitalSignature" 
-                        value={invoice.digitalSignature || ''} 
-                        onChange={handleInvoiceMetaChange} 
+                    <InputField
+                        label="Digital Signature (Name)"
+                        name="digitalSignature"
+                        value={invoice.digitalSignature || ''}
+                        onChange={handleInvoiceMetaChange}
                         placeholder="Type your name..."
                         icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>}
                     />
                 </div>
-                
+
                 {/* Dates Row */}
                 <div className="grid grid-cols-2 gap-5 p-4 bg-slate-50/50 rounded-xl border border-slate-100">
-                    <InputField 
-                        label="Issue Date" 
-                        name="issueDate" 
-                        value={invoice.issueDate} 
-                        onChange={handleInvoiceMetaChange} 
+                    <InputField
+                        label="Issue Date"
+                        name="issueDate"
+                        value={invoice.issueDate}
+                        onChange={handleInvoiceMetaChange}
                         type="date"
                         className="bg-white"
                     />
-                    <InputField 
-                        label="Due Date" 
-                        name="dueDate" 
-                        value={invoice.dueDate} 
-                        onChange={handleInvoiceMetaChange} 
+                    <InputField
+                        label="Due Date"
+                        name="dueDate"
+                        value={invoice.dueDate}
+                        onChange={handleInvoiceMetaChange}
                         type="date"
                         className="bg-white"
                     />
@@ -797,7 +794,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                             <ChevronDownIcon className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                         </div>
                     </div>
-                    
+
                     {/* Tax & Discount & Shipping */}
                     <div className="col-span-1 space-y-4">
                         <div className="grid grid-cols-2 gap-4">
@@ -807,9 +804,9 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                                         VAT %
                                     </label>
                                     <label className="flex items-center gap-1.5 cursor-pointer hover:opacity-80">
-                                        <input 
-                                            type="checkbox" 
-                                            checked={invoice.taxRate > 0} 
+                                        <input
+                                            type="checkbox"
+                                            checked={invoice.taxRate > 0}
                                             onChange={handleVatToggle}
                                             className="w-3.5 h-3.5 text-teal-600 rounded border-slate-300 focus:ring-teal-500 cursor-pointer accent-teal-600"
                                         />
@@ -817,12 +814,12 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                                     </label>
                                 </div>
                                 {invoice.taxRate > 0 ? (
-                                    <InputField 
+                                    <InputField
                                         noLabel
-                                        name="taxRate" 
-                                        value={invoice.taxRate} 
-                                        onChange={(e) => updateInvoice('taxRate', parseFloat(e.target.value) || 0)} 
-                                        type="number" 
+                                        name="taxRate"
+                                        value={invoice.taxRate}
+                                        onChange={(e) => updateInvoice('taxRate', parseFloat(e.target.value) || 0)}
+                                        type="number"
                                     />
                                 ) : (
                                     <div className="block w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-400 text-sm font-normal italic text-center">
@@ -830,7 +827,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                                     </div>
                                 )}
                             </div>
-                            
+
                             <div className="flex flex-col">
                                 <div className="flex items-center justify-between mb-1.5">
                                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
@@ -858,12 +855,12 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                             </div>
                         </div>
 
-                         <InputField 
+                         <InputField
                             label="Shipping"
-                            name="shippingAmount" 
-                            value={invoice.shippingAmount} 
-                            onChange={(e) => updateInvoice('shippingAmount', e.target.value)} 
-                            type="number" 
+                            name="shippingAmount"
+                            value={invoice.shippingAmount}
+                            onChange={(e) => updateInvoice('shippingAmount', e.target.value)}
+                            type="number"
                             placeholder="0.00"
                             step="0.01"
                             prefix={currencySymbol}
@@ -948,7 +945,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                 {savedClients.length > 0 && (
                     <div className="bg-slate-50 p-1 rounded-lg border border-slate-200">
                         <div className="relative group">
-                            <select 
+                            <select
                                 id="savedClient"
                                 onChange={handleSelectClient}
                                 className="block w-full pl-3 pr-10 py-2 bg-transparent text-slate-700 text-sm font-semibold focus:outline-none appearance-none cursor-pointer"
@@ -965,64 +962,64 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                         </div>
                     </div>
                 )}
-                
+
                 <div className="grid grid-cols-1 gap-5">
                     <div className="flex items-end gap-3">
                         <div className="flex-1">
-                            <InputField 
-                                label="Client Name" 
-                                name="name" 
-                                value={invoice.client.name} 
-                                onChange={handleClientChange} 
+                            <InputField
+                                label="Client Name"
+                                name="name"
+                                value={invoice.client.name}
+                                onChange={handleClientChange}
                                 autoComplete="off"
                                 icon={<UserIcon className="w-4 h-4"/>}
                             />
                         </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <InputField 
-                            label="Client Email" 
-                            name="email" 
-                            value={invoice.client.email} 
-                            onChange={handleClientChange} 
-                            type="email" 
+                        <InputField
+                            label="Client Email"
+                            name="email"
+                            value={invoice.client.email}
+                            onChange={handleClientChange}
+                            type="email"
                             autoComplete="email"
                             icon={<MailIcon className="w-4 h-4"/>}
                             error={validateEmail(invoice.client.email)}
                         />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <InputField 
-                            label="Client Tax ID (TIN)" 
-                            name="tin" 
-                            value={invoice.client.tin || ''} 
-                            onChange={handleClientChange} 
+                        <InputField
+                            label="Client Tax ID (TIN)"
+                            name="tin"
+                            value={invoice.client.tin || ''}
+                            onChange={handleClientChange}
                             placeholder="e.g. 87654321-0001"
                             icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>}
                         />
-                        <InputField 
-                            label="Client CAC Number" 
-                            name="cacNumber" 
-                            value={invoice.client.cacNumber || ''} 
-                            onChange={handleClientChange} 
+                        <InputField
+                            label="Client CAC Number"
+                            name="cacNumber"
+                            value={invoice.client.cacNumber || ''}
+                            onChange={handleClientChange}
                             placeholder="e.g. RC 8765432"
                             icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>}
                         />
                     </div>
                     </div>
-                    <InputField 
-                        label="Client Address" 
-                        name="address" 
-                        value={invoice.client.address} 
-                        onChange={handleClientChange} 
+                    <InputField
+                        label="Client Address"
+                        name="address"
+                        value={invoice.client.address}
+                        onChange={handleClientChange}
                         autoComplete="street-address"
                         icon={<MapPinIcon className="w-4 h-4"/>}
                     />
                 </div>
-                
+
                 {invoice.client.name && (
                     <div className="flex justify-end pt-2">
-                        <button 
+                        <button
                             onClick={() => onSaveClient(invoice.client)}
                             className="flex items-center gap-1.5 text-[11px] font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-md transition-colors border border-teal-100"
                         >
@@ -1111,13 +1108,13 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                         <div className="flex items-center justify-between mb-4">
                             <h4 className="text-xs font-bold uppercase tracking-widest text-teal-400">Compliance Status</h4>
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                                invoice.nrsStatus === 'Verified' ? 'bg-teal-500 text-white' : 
+                                invoice.nrsStatus === 'Verified' ? 'bg-teal-500 text-white' :
                                 invoice.nrsStatus === 'Failed' ? 'bg-red-500 text-white' : 'bg-slate-700 text-slate-300'
                             }`}>
                                 {invoice.nrsStatus || 'Pending Validation'}
                             </span>
                         </div>
-                        
+
                         <div className="space-y-3">
                             <div className="flex items-start gap-3">
                                 <div className={`mt-1 w-2 h-2 rounded-full ${invoice.user.tin ? 'bg-teal-500' : 'bg-red-500'}`}></div>
@@ -1143,7 +1140,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                         </div>
 
                         <div className="flex flex-col sm:flex-row gap-3 mt-6">
-                            <button 
+                            <button
                                 onClick={() => {
                                     if (!invoice.user.tin || !invoice.client.tin) {
                                         updateInvoice('nrsStatus', 'Failed');
@@ -1158,9 +1155,9 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                                 <SparklesIcon className="w-4 h-4" />
                                 Validate & Transmit
                             </button>
-                            
+
                             {onSaveInvoice && (
-                                <button 
+                                <button
                                     onClick={() => onSaveInvoice(invoice)}
                                     className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2"
                                 >
@@ -1169,7 +1166,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                                 </button>
                             )}
                         </div>
-                        
+
                         {invoice.nrsValidationMessage && (
                             <p className={`mt-3 text-[10px] font-bold uppercase text-center ${invoice.nrsStatus === 'Failed' ? 'text-red-400' : 'text-teal-400'}`}>
                                 {invoice.nrsValidationMessage}

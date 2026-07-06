@@ -1,11 +1,9 @@
+import { numberFormatter } from "../utils/formatters";
 import React, { useRef, useMemo } from 'react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import type { Receipt, TemplateId } from '../types';
 import { DownloadIcon, MailIcon, XIcon } from './Icons';
-
-// ⚡ Bolt: Cache Intl.NumberFormat instance globally to avoid ~0.6ms overhead per instantiation inside render loop.
-const numberFormatter = new Intl.NumberFormat();
 
 interface ReceiptPreviewProps {
     receipt: Receipt;
@@ -16,9 +14,6 @@ interface ReceiptPreviewProps {
 export const ReceiptPreview: React.FC<ReceiptPreviewProps> = ({ receipt, template, onClose }) => {
     const receiptRef = useRef<HTMLDivElement>(null);
     const invoice = receipt.invoice;
-
-
-
 
     const handleDownload = async () => {
         if (!receiptRef.current) return;

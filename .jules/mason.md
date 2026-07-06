@@ -1,0 +1,3 @@
+## 2026-07-06 - [Consolidate formatters and path handling]
+**Learning:** Found a widespread duplication of the "Bolt" optimization pattern (caching `Intl.NumberFormat`) across almost every UI component. While effective, it led to significant boilerplate and scattered comments. Centralizing this into a utility Map-based cache improves maintainability without losing performance. Also noted that `decodeURIComponent(window.location.pathname)` was wrapped in identical try-catch blocks 5 times in `App.tsx`, which made the routing logic harder to read.
+**Action:** Centralize performance-critical formatters in `utils/formatters.ts` and use helper functions like `getDecodedPath()` for repeated complex expressions.

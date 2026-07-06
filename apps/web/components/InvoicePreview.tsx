@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { getCurrencyFormatter } from '../utils/formatters';
 import type { Invoice, TemplateId, InvoiceStatus, DocumentType } from '../types';
 
 interface InvoicePreviewProps {
@@ -63,7 +64,7 @@ const STATUS_STYLES: { [key in TemplateId]: { [key in InvoiceStatus]: string } }
 
 const StatusBadge: React.FC<{ status: InvoiceStatus; template: TemplateId }> = ({ status, template }) => {
     const baseClasses = "inline-block px-4 py-1 text-xs font-bold uppercase tracking-wider rounded-full border";
-    
+
     return (
         <span className={`${baseClasses} ${STATUS_STYLES[template][status]}`}>
             {status}
@@ -103,7 +104,7 @@ const ModernHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string, sta
     <div className="bg-slate-900 text-white p-10 -mx-8 -mt-8 mb-10 md:p-12 md:-mx-12 md:-mt-12 relative overflow-hidden shadow-lg">
         <div className="absolute top-0 right-0 w-80 h-80 bg-slate-800 rounded-full -mr-24 -mt-40 opacity-50 blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-teal-600 rounded-full -ml-32 -mb-32 opacity-30 blur-2xl"></div>
-        
+
         <div className="relative z-10 flex justify-between items-start">
             <div className="flex flex-col justify-between h-full">
                 <h1 className="text-5xl font-bold tracking-tighter mb-2 text-transparent bg-clip-text bg-gradient-to-r from-teal-200 to-white uppercase">{(documentType || 'Invoice').toUpperCase()}</h1>
@@ -164,14 +165,14 @@ const MinimalistHeader: React.FC<{ user: Invoice['user'], invoiceNumber: string,
         ) : (
              <div className="h-12 w-12 bg-slate-900 rounded-full mx-auto mb-6"></div>
         )}
-        
+
         <h2 className="text-2xl font-bold tracking-wide text-slate-900 mb-2">{user.name}</h2>
         {user.cacNumber && <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">CAC: {user.cacNumber}</p>}
         <p className="text-slate-600 text-sm mb-8">
             {user.email} • {user.address}
             {user.phoneNumber && <> • {user.phoneNumber}</>}
         </p>
-        
+
         <div className="inline-flex flex-col items-center gap-2 border-y border-slate-200 py-4 w-full max-w-md mx-auto">
              <h1 className="text-sm font-bold uppercase tracking-[0.3em] text-slate-500">{documentType || 'Invoice'} No.</h1>
              <p className="text-3xl font-light text-slate-900">{invoiceNumber}</p>
@@ -347,18 +348,14 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = React.memo(({ invoi
   const { subtotal, discountAmount, tax, whtAmount, shipping, total } = totals;
   const styles = getTemplateStyles(template);
 
-  // ⚡ Bolt: Memoize Intl.NumberFormat to avoid expensive recreation (~1ms) on every render
-  const currencyFormatter = useMemo(() => new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currency,
-  }), [currency]);
+  const currencyFormatter = getCurrencyFormatter(currency);
 
   const isMinimalist = template === 'minimalist';
   const isCenterAligned = template === 'minimalist' || template === 'elegant';
 
   return (
     <article className={`text-slate-900 h-full flex flex-col relative overflow-hidden ${template === 'elegant' ? 'font-serif' : template === 'tech' ? 'font-mono' : 'font-sans'}`}>
-      
+
       {/* NRS Verified Badge */}
       {invoice.nrsStatus === 'Verified' && (
         <div className="absolute top-4 right-4 z-50 flex items-center gap-1.5 bg-teal-50 border border-teal-200 px-3 py-1.5 rounded-full shadow-sm">

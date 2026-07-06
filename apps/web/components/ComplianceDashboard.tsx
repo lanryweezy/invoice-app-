@@ -1,3 +1,4 @@
+import { numberFormatter } from "../utils/formatters";
 import React, { useState, useMemo, useCallback } from 'react';
 import type { Invoice } from '../types';
 import {
@@ -35,8 +36,6 @@ const CATEGORY_ICONS: Record<ComplianceCategory, string> = {
   Dates: 'D',
   General: 'G',
 };
-
-const numberFormatter = new Intl.NumberFormat();
 
 export const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({
   invoices,

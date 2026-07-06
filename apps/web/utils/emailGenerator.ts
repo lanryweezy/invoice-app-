@@ -1,4 +1,5 @@
 import type { Invoice } from '../types';
+import { getCurrencyFormatter } from './formatters';
 
 export type EmailTemplateType = 'formal' | 'casual' | 'followup' | 'overdue';
 
@@ -17,7 +18,7 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
 ];
 
 const currencyFmt = (amount: number, currency: string) =>
-  new Intl.NumberFormat('en-NG', { style: 'currency', currency }).format(amount);
+  getCurrencyFormatter(currency, 'en-NG').format(amount);
 
 function itemsList(inv: Invoice): string {
   return inv.lineItems
