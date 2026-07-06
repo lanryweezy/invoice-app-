@@ -1,5 +1,6 @@
 import localforage from 'localforage';
 import { db, doc, setDoc } from '../services/firebase';
+import { trackEvent } from './analytics';
 
 // Configure the IndexedDB store
 localforage.config({
@@ -43,8 +44,14 @@ export const queueMutation = async (collectionName: string, docId: string, data:
 
     await localforage.setItem('syncQueue', queue);
     console.log(`[Offline Sync] Queued mutation for ${collectionName}/${docId}`);
+    trackEvent('sync_mutation_queued', { collection: collectionName, docId });
   } catch (error) {
     console.error("[Offline Sync] Failed to queue mutation", error);
+    trackEvent('sync_mutation_queue_failed', {
+      collection: collectionName,
+      docId,
+      error: error instanceof Error ? error.message : String(error)
+    });
   }
 };
 
@@ -65,6 +72,7 @@ export const flushQueue = async (): Promise<boolean> => {
     }
 
     console.log(`[Offline Sync] Flushing ${queue.length} items to cloud...`);
+    trackEvent('sync_flush_started', { queue_length: queue.length });
 
     // Sort by timestamp to ensure older mutations are processed first (if we had distinct mutations per doc)
     queue.sort((a, b) => a.timestamp - b.timestamp);
@@ -78,18 +86,32 @@ export const flushQueue = async (): Promise<boolean> => {
         // Using merge: true as this is primarily used for partial updates (e.g. { invoiceUser: ... })
         await setDoc(docRef, mutation.data, { merge: true });
         console.log(`[Offline Sync] Synced ${mutation.collection}/${mutation.docId}`);
+        trackEvent('sync_item_success', { collection: mutation.collection, docId: mutation.docId });
       } catch (err) {
         console.error(`[Offline Sync] Failed to sync ${mutation.id}`, err);
+        trackEvent('sync_item_failed', {
+          collection: mutation.collection,
+          docId: mutation.docId,
+          error: err instanceof Error ? err.message : String(err)
+        });
         failedMutations.push(mutation); // Keep failed ones in the queue for next time
       }
     }
 
     await localforage.setItem('syncQueue', failedMutations);
 
+    trackEvent('sync_flush_completed', {
+      success_count: queue.length - failedMutations.length,
+      failed_count: failedMutations.length
+    });
+
     return failedMutations.length === 0;
 
   } catch (error) {
     console.error("[Offline Sync] Critical failure during flushQueue", error);
+    trackEvent('sync_flush_critical_failure', {
+      error: error instanceof Error ? error.message : String(error)
+    });
     return false;
   }
 };
