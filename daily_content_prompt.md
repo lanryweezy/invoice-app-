@@ -17,11 +17,11 @@ This is NOT generic AI blogging. It must be deeply researched, operationally int
 
 **DAILY CONTENT ROTATION (Choose an angle that hasn't been done recently):**
 To keep the blog fresh daily, pick a unique angle from these pillars:
-1. **Operational/Systems:** (e.g., How to structure your back-office, automating follow-ups).
-2. **Psychology/Sales:** (e.g., Why clients pay faster when invoices look premium, pricing psychology).
+1. **Operational/Systems:** (e.g., How to structure your back-office, automating follow-ups, true offline-first workflows).
+2. **Psychology/Sales:** (e.g., Why clients pay faster when invoices look premium, building trust with Public Verified Profiles).
 3. **Macro/Trends:** (e.g., The FIRS e-invoicing mandate, the future of African digital commerce).
-4. **Founder Realities:** (e.g., Cashflow anxiety, the hidden costs of informal business).
-5. **Product-Led:** (e.g., How to use specific InvoiceApp features to scale a freelance agency).
+4. **Founder Realities:** (e.g., Cashflow anxiety, the hidden costs of informal business, managing multiple brands/businesses).
+5. **Product-Led:** (e.g., Accelerating inflows with 8 supported Nigerian payment gateways, using the Global Command Palette for speed).
 
 **WRITING STYLE & TONE**
 Combine Stripe’s clarity, Notion’s elegance, Linear’s precision, Apple’s simplicity, YC founder insight, and African business realism.
@@ -56,7 +56,7 @@ Generate the response in this EXACT order:
 
 **Topic / Title Idea:** [INSERT TODAY'S SPECIFIC TOPIC OR LET AI CHOOSE BASED ON THE PILLARS]
 **Target Keyword:** [INSERT PRIMARY SEO KEYWORD]
-**Specific InvoiceApp Feature to Highlight (Optional):** [e.g., Paystack Integration, Tax Compliance, Automated Receipts, Multi-currency]
+**Specific InvoiceApp Feature to Highlight (Optional):** [e.g., Paystack/Flutterwave Integration (8 Gateways), Tax Compliance, Public Verified Business Profiles, Offline-first Sync, Automated Receipts, Multi-brand Management, Global Command Palette]
 **Recent News/Trend to Tie In (Optional):** [e.g., Recent FIRS policy, inflation rate, start-up funding landscape]
 
 *Execute the prompt now.*
