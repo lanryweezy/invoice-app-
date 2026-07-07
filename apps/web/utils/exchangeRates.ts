@@ -21,8 +21,13 @@ export async function getExchangeRates(): Promise<ExchangeRates> {
   const cached = getCachedRates();
   if (cached) return cached;
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   try {
-    const res = await fetch('https://api.exchangerate-api.com/v4/latest/NGN');
+    const res = await fetch('https://api.exchangerate-api.com/v4/latest/NGN', {
+      signal: controller.signal,
+    });
     if (!res.ok) throw new Error('Failed to fetch rates');
     const data = await res.json();
 
@@ -38,6 +43,8 @@ export async function getExchangeRates(): Promise<ExchangeRates> {
     return rates;
   } catch {
     return FALLBACK_RATES;
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
