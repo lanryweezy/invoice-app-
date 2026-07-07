@@ -2,9 +2,24 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useInvoice } from './useInvoice';
 import { useSubscription } from './useSubscription';
+import * as firebaseFirestore from '../services/firebase';
+import * as offlineSync from '../utils/offlineSync';
 
 vi.mock('./useSubscription', () => ({
   useSubscription: vi.fn(),
+}));
+
+vi.mock('../services/firebase', () => ({
+  db: {},
+  doc: vi.fn(),
+  setDoc: vi.fn().mockResolvedValue(undefined),
+  getDoc: vi.fn().mockResolvedValue({ exists: () => false }),
+  getFirestore: vi.fn(),
+}));
+
+vi.mock('../utils/offlineSync', () => ({
+  queueMutation: vi.fn().mockResolvedValue(undefined),
+  getQueueCount: vi.fn().mockResolvedValue(0),
 }));
 
 describe('useInvoice - calculateTotals', () => {
@@ -35,12 +50,6 @@ describe('useInvoice - calculateTotals', () => {
     });
 
     const totals = result.current.calculateTotals();
-
-    // Subtotal: (2*100) + (1*50) = 250
-    // Discount: 250 * 0.1 = 25
-    // Taxable: 250 - 25 = 225
-    // Tax: 225 * 0.075 = 16.875
-    // Total: 225 + 16.875 + 20 = 261.875
 
     expect(totals.subtotal).toBe(250);
     expect(totals.discountAmount).toBe(25);
@@ -88,11 +97,6 @@ describe('useInvoice - calculateTotals', () => {
 
     const totals = result.current.calculateTotals();
 
-    // Subtotal: 100000
-    // Tax (VAT 7.5%): 7500
-    // WHT (5%): 5000
-    // Total: 100000 + 7500 - 5000 = 102500
-
     expect(totals.subtotal).toBe(100000);
     expect(totals.tax).toBe(7500);
     expect(totals.whtAmount).toBe(5000);
@@ -113,7 +117,6 @@ describe('useInvoice - addLineItem', () => {
   it('adds a new line item with default values', () => {
     const { result } = renderHook(() => useInvoice());
 
-    // Initial state has 1 line item
     expect(result.current.invoice.lineItems.length).toBe(1);
 
     act(() => {
@@ -126,7 +129,6 @@ describe('useInvoice - addLineItem', () => {
     expect(newItem.quantity).toBe(1);
     expect(newItem.price).toBe('');
     expect(newItem.id).toBeDefined();
-    // Verify it's a UUID (basic check)
     expect(newItem.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
   });
 
@@ -139,5 +141,70 @@ describe('useInvoice - addLineItem', () => {
     });
 
     expect(result.current.invoice.lineItems.length).toBe(3);
+  });
+});
+
+describe('useInvoice - saveClient', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+    (useSubscription as any).mockReturnValue({
+      user: { uid: 'test-user' },
+      isPro: true,
+      loading: false
+    });
+  });
+
+  it('adds a new client, saves to localStorage, and sorts alphabetically', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    act(() => {
+      result.current.saveClient({ name: 'Zebra Corp', email: 'zebra@example.com', address: '' });
+      result.current.saveClient({ name: 'Acme Corp', email: 'acme@example.com', address: '' });
+    });
+
+    expect(result.current.savedClients).toHaveLength(2);
+    expect(result.current.savedClients[0].name).toBe('Acme Corp');
+    expect(result.current.savedClients[1].name).toBe('Zebra Corp');
+
+    const stored = JSON.parse(localStorage.getItem('invoiceSavedClients') || '[]');
+    expect(stored).toHaveLength(2);
+    expect(stored[0].name).toBe('Acme Corp');
+
+    // Check syncToCloud was called (it might be debounced/timeout in the component, but saveClient calls it directly)
+    // Actually, saveClient calls syncToCloud which checks if isPro. We mocked setDoc to check if firebase gets called.
+  });
+
+  it('updates an existing client case-insensitively', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    act(() => {
+      result.current.saveClient({ name: 'Acme Corp', email: 'acme@example.com', address: 'Old Address' });
+    });
+
+    expect(result.current.savedClients).toHaveLength(1);
+    expect(result.current.savedClients[0].address).toBe('Old Address');
+
+    act(() => {
+      result.current.saveClient({ name: 'acme corp', email: 'new@example.com', address: 'New Address' });
+    });
+
+    expect(result.current.savedClients).toHaveLength(1);
+    expect(result.current.savedClients[0].name).toBe('acme corp'); // Takes the new name casing
+    expect(result.current.savedClients[0].email).toBe('new@example.com');
+    expect(result.current.savedClients[0].address).toBe('New Address');
+  });
+
+  it('rejects and returns false for clients with empty or whitespace-only names', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    let saved = true;
+    act(() => {
+      saved = result.current.saveClient({ name: '   ', email: 'empty@example.com', address: '' });
+    });
+
+    expect(saved).toBe(false);
+    expect(result.current.savedClients).toHaveLength(0);
+    expect(localStorage.getItem('invoiceSavedClients')).toBeNull();
   });
 });
