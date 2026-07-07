@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useInvoice } from './useInvoice';
 import { useSubscription } from './useSubscription';
@@ -139,5 +139,130 @@ describe('useInvoice - addLineItem', () => {
     });
 
     expect(result.current.invoice.lineItems.length).toBe(3);
+  });
+});
+
+describe('useInvoice - line item operations', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (useSubscription as any).mockReturnValue({
+      user: { uid: 'test-user' },
+      isPro: true,
+      loading: false
+    });
+  });
+
+  it('updates an existing line item', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    let lineItemId: string;
+    act(() => {
+      // initial invoice has 1 line item by default
+      lineItemId = result.current.invoice.lineItems[0].id;
+      result.current.updateLineItem(lineItemId, 'description', 'Updated Item');
+      result.current.updateLineItem(lineItemId, 'price', 1500);
+      result.current.updateLineItem(lineItemId, 'quantity', 3);
+    });
+
+    const updatedItem = result.current.invoice.lineItems[0];
+    expect(updatedItem.description).toBe('Updated Item');
+    expect(updatedItem.price).toBe(1500);
+    expect(updatedItem.quantity).toBe(3);
+  });
+
+  it('removes a line item by ID', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    let lineItemId: string;
+    act(() => {
+      lineItemId = result.current.invoice.lineItems[0].id;
+      result.current.removeLineItem(lineItemId);
+    });
+
+    expect(result.current.invoice.lineItems.length).toBe(0);
+  });
+});
+
+describe('useInvoice - saveInvoice', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (useSubscription as any).mockReturnValue({
+      user: { uid: 'test-user' },
+      isPro: true,
+      loading: false
+    });
+    vi.stubGlobal('localStorage', {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+    });
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  it('adds a new invoice to the beginning of the savedInvoices list', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    const newInvoice = { invoiceNumber: 'INV-001', total: 500 } as any;
+
+    act(() => {
+      result.current.saveInvoice(newInvoice);
+    });
+
+    expect(result.current.savedInvoices).toHaveLength(1);
+    expect(result.current.savedInvoices[0]).toEqual(newInvoice);
+    expect(localStorage.setItem).toHaveBeenCalledWith(
+      'invoiceHistory',
+      JSON.stringify([newInvoice])
+    );
+  });
+
+  it('updates an existing invoice without duplicating it', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    const initialInvoice = { invoiceNumber: 'INV-001', total: 500, status: 'draft' } as any;
+    const updatedInvoice = { invoiceNumber: 'INV-001', total: 600, status: 'paid' } as any;
+
+    act(() => {
+      result.current.saveInvoice(initialInvoice);
+    });
+
+    expect(result.current.savedInvoices).toHaveLength(1);
+
+    act(() => {
+      result.current.saveInvoice(updatedInvoice);
+    });
+
+    expect(result.current.savedInvoices).toHaveLength(1);
+    expect(result.current.savedInvoices[0].total).toBe(600);
+    expect(result.current.savedInvoices[0].status).toBe('paid');
+
+    // Check that it set the updated array in local storage
+    expect(localStorage.setItem).toHaveBeenLastCalledWith(
+      'invoiceHistory',
+      JSON.stringify([updatedInvoice])
+    );
+  });
+
+  it('adds a new invoice and prepends it when history exists', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    const invoice1 = { invoiceNumber: 'INV-001', total: 500 } as any;
+    const invoice2 = { invoiceNumber: 'INV-002', total: 1000 } as any;
+
+    act(() => {
+      result.current.saveInvoice(invoice1);
+    });
+    act(() => {
+      result.current.saveInvoice(invoice2);
+    });
+
+    expect(result.current.savedInvoices).toHaveLength(2);
+    // The most recently saved one should be first
+    expect(result.current.savedInvoices[0]).toEqual(invoice2);
+    expect(result.current.savedInvoices[1]).toEqual(invoice1);
   });
 });
