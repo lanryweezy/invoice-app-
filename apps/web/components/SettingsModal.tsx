@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../services/firebase';
 
 interface SettingsModalProps {
@@ -86,23 +86,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
         uid: user.uid
       };
 
-      // 2. Save to internal users document
+      // 2. Execute multi-step save atomically
+      const batch = writeBatch(db);
+
+      // Update internal users document
       const userDocRef = doc(db, 'users', user.uid);
-      await updateDoc(userDocRef, payload);
+      batch.update(userDocRef, payload);
 
-      // 3. Write new public profile and cleanup old one if it changed
-      const { setDoc, deleteDoc } = await import('firebase/firestore');
-
+      // Write new public profile
       if (sanitizedUsername) {
          const publicRef = doc(db, 'publicProfiles', sanitizedUsername);
-         await setDoc(publicRef, payload);
+         batch.set(publicRef, payload);
       }
 
       // Cleanup dangling old profile if username changed and old username existed
       if (originalUsername && originalUsername !== sanitizedUsername) {
           const oldPublicRef = doc(db, 'publicProfiles', originalUsername);
-          await deleteDoc(oldPublicRef);
+          batch.delete(oldPublicRef);
       }
+
+      // Commit all changes or none
+      await batch.commit();
 
       setOriginalUsername(sanitizedUsername); // Sync up after successful save
 

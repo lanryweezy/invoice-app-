@@ -12,3 +12,6 @@
 3. Enhanced analytics tracking: Added `upgrade_initiated`, `payment_success`, `payment_cancelled`, and `payment_error_callback` events to map the entire monetization funnel.
 
 **Unexpected:** N/A
+## 2025-05-16 - Safe Public Profile Updates
+**Learning:** In a Firestore database, an update that crosses multiple collections (e.g. `users` and `publicProfiles`) can suffer partial failure if not batched. If updating the user's private state succeeds but setting/deleting the public profile fails, the system is left in an inconsistent state, breaking the profile URL or leaving an orphaned document.
+**Action:** Always use `writeBatch` or transactions when a single user action logically mutates multiple collections.
