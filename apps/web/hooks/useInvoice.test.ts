@@ -100,6 +100,132 @@ describe('useInvoice - calculateTotals', () => {
   });
 });
 
+describe('useInvoice - State Mutations (saveClient, saveBusinessProfile)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.stubGlobal('localStorage', {
+      setItem: vi.fn(),
+      getItem: vi.fn().mockReturnValue(null), // Empty local storage by default
+    });
+    vi.stubGlobal('crypto', { randomUUID: () => 'mock-uuid-1234' });
+
+    (useSubscription as any).mockReturnValue({
+      user: { uid: 'test-user' },
+      isPro: true,
+      loading: false
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('saveClient returns false and does not save if name is empty', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    let success: boolean;
+    act(() => {
+      success = result.current.saveClient({ name: '   ', email: '', address: '' });
+    });
+
+    expect(success!).toBe(false);
+    expect(result.current.savedClients).toHaveLength(0);
+    expect(localStorage.setItem).not.toHaveBeenCalledWith('invoiceSavedClients', expect.anything());
+  });
+
+  it('saveClient adds a new client, sorts alphabetically, and triggers sync', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    act(() => {
+      result.current.saveClient({ name: 'Zebra Corp', email: 'z@example.com', address: '' });
+      result.current.saveClient({ name: 'Apple Inc', email: 'a@example.com', address: '' });
+    });
+
+    expect(result.current.savedClients).toHaveLength(2);
+    // Should be sorted alphabetically by name
+    expect(result.current.savedClients[0].name).toBe('Apple Inc');
+    expect(result.current.savedClients[1].name).toBe('Zebra Corp');
+
+    expect(localStorage.setItem).toHaveBeenCalledWith(
+      'invoiceSavedClients',
+      JSON.stringify(result.current.savedClients)
+    );
+  });
+
+  it('saveClient updates an existing client by matching lowercased name', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    act(() => {
+      result.current.saveClient({ name: 'Acme Corp', email: 'old@acme.com', address: 'Old St' });
+    });
+    expect(result.current.savedClients).toHaveLength(1);
+
+    act(() => {
+      // Different case, should still match
+      result.current.saveClient({ name: 'ACME corp', email: 'new@acme.com', address: 'New St' });
+    });
+
+    expect(result.current.savedClients).toHaveLength(1);
+    expect(result.current.savedClients[0].email).toBe('new@acme.com');
+    expect(result.current.savedClients[0].address).toBe('New St');
+  });
+
+  it('saveBusinessProfile returns false if name is empty', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    let success: boolean;
+    act(() => {
+      success = result.current.saveBusinessProfile({ name: '   ', email: '', address: '', tin: '', bankName: '', accountNumber: '' });
+    });
+
+    expect(success!).toBe(false);
+    expect(result.current.businessProfiles).toHaveLength(0);
+    expect(localStorage.setItem).not.toHaveBeenCalledWith('invoiceBusinessProfiles', expect.anything());
+  });
+
+  it('saveBusinessProfile adds a new profile, assigns ID, sorts alphabetically, and triggers sync', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    act(() => {
+      result.current.saveBusinessProfile({ name: 'Zebra LLC', email: '', address: '', tin: '', bankName: '', accountNumber: '' });
+      result.current.saveBusinessProfile({ name: 'Alpha LLC', email: '', address: '', tin: '', bankName: '', accountNumber: '' });
+    });
+
+    expect(result.current.businessProfiles).toHaveLength(2);
+
+    expect(result.current.businessProfiles[0].name).toBe('Alpha LLC');
+    expect(result.current.businessProfiles[0].id).toBe('mock-uuid-1234');
+    expect(result.current.businessProfiles[1].name).toBe('Zebra LLC');
+
+    expect(localStorage.setItem).toHaveBeenCalledWith(
+      'invoiceBusinessProfiles',
+      JSON.stringify(result.current.businessProfiles)
+    );
+  });
+
+  it('saveBusinessProfile updates an existing profile without changing its ID', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    // First, let's mock crypto just for this test to ensure we get a specific ID
+    vi.stubGlobal('crypto', { randomUUID: () => 'original-id' });
+
+    act(() => {
+      result.current.saveBusinessProfile({ name: 'My Business', email: 'old@example.com', address: '', tin: '', bankName: '', accountNumber: '' });
+    });
+
+    // Now change the mock to return something else, to prove we don't re-assign
+    vi.stubGlobal('crypto', { randomUUID: () => 'new-id' });
+
+    act(() => {
+      result.current.saveBusinessProfile({ name: 'my business', email: 'new@example.com', address: '', tin: '', bankName: '', accountNumber: '' });
+    });
+
+    expect(result.current.businessProfiles).toHaveLength(1);
+    expect(result.current.businessProfiles[0].email).toBe('new@example.com');
+    expect(result.current.businessProfiles[0].id).toBe('original-id'); // ID is preserved
+  });
+});
+
 describe('useInvoice - addLineItem', () => {
   beforeEach(() => {
     vi.clearAllMocks();

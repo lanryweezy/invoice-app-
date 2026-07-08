@@ -1,3 +1,7 @@
 ## 2024-07-06 - Test Coverage in InvoiceApp Monorepo
 **Learning:** This repo has a monorepo structure with tests in `apps/web`. Vitest and `@vitest/coverage-v8` handle testing and coverage reports. Vitest is configured to run tests over all files via `pnpm -w run test`. Coverage for specific files requires installing the dependencies properly. The `offlineSync.ts` file initially had zero testing for its core offline sync behaviour.
 **Action:** When adding tests in `apps/web/utils`, always write complete test suites using `vitest` covering all logical branches. We added 100% test coverage to `offlineSync.ts`.
+
+## 2026-07-08 - State Mutations and Offline Sync test coverage in useInvoice
+**Learning:** Found critical untested paths for state mutations in `useInvoice.ts`, specifically around operations that sync data via `saveClient` and `saveBusinessProfile`. In this codebase, operations that update React state (e.g., `setSavedClients`), write to `localStorage`, and queue mutations for offline sync (`syncToCloud` -> `queueMutation`) frequently lacked tests despite being critical paths. Tests were successfully added by stubbing `localStorage` and `crypto` with vi.stubGlobal and verifying state mutations + `localStorage` calls.
+**Action:** When testing React hooks that manage lists of entities and persist them locally/cloud, always ensure tests assert state is updated properly, duplicate matching logic handles casing, invalid writes (empty strings) are rejected, and `localStorage.setItem` receives the correctly mutated object graph.
