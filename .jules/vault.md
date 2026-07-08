@@ -12,3 +12,6 @@
 3. Enhanced analytics tracking: Added `upgrade_initiated`, `payment_success`, `payment_cancelled`, and `payment_error_callback` events to map the entire monetization funnel.
 
 **Unexpected:** N/A
+## 2026-07-08 - Atomic Profile Updates
+**Learning:** In Firestore, read-then-write validations (like checking if a username is already taken by another user) followed by multi-document writes (updating the user doc, setting the public profile, and optionally deleting the old public profile) are highly susceptible to race conditions and partial failures if executed sequentially. Wrapping these operations in `runTransaction` ensures atomicity. Note that Firestore requires all `transaction.get()` reads to happen before any writes (`transaction.set()`, `transaction.update()`, `transaction.delete()`) within the transaction block.
+**Action:** Always use `runTransaction` when a write depends on a preceding read validation, and ensure all reads are grouped at the beginning of the transaction callback.
