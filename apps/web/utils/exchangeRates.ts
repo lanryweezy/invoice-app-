@@ -22,7 +22,19 @@ export async function getExchangeRates(): Promise<ExchangeRates> {
   if (cached) return cached;
 
   try {
-    const res = await fetch('https://api.exchangerate-api.com/v4/latest/NGN');
+    // Protect against indefinite hangs if the external exchange rate service is slow or unresponsive
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    let res;
+    try {
+      res = await fetch('https://api.exchangerate-api.com/v4/latest/NGN', {
+        signal: controller.signal
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
     if (!res.ok) throw new Error('Failed to fetch rates');
     const data = await res.json();
 
