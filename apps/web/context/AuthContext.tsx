@@ -155,6 +155,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 resolve(true);
               }).catch((error) => {
                 console.error("Failed to save upgrade", error);
+                try {
+                  trackEvent('payment_upgrade_save_failed', {
+                    user_id: user?.uid,
+                    plan_type: planType,
+                    ref: response.reference,
+                    error: error instanceof Error ? error.message : String(error)
+                  });
+                } catch {}
                 resolve(false);
               });
             },
