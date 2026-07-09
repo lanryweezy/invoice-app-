@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useInvoice } from './useInvoice';
 import { useSubscription } from './useSubscription';
@@ -139,5 +139,150 @@ describe('useInvoice - addLineItem', () => {
     });
 
     expect(result.current.invoice.lineItems.length).toBe(3);
+  });
+});
+
+describe('useInvoice - saveClient', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (useSubscription as any).mockReturnValue({
+      user: { uid: 'test-user' },
+      isPro: true,
+      loading: false
+    });
+    vi.stubGlobal('localStorage', {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+    });
+    let uuidCounter = 0;
+    vi.stubGlobal('crypto', {
+      randomUUID: () => `mock-uuid-${uuidCounter++}`
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('rejects client with an empty name', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    // Clear calls from initial render (currency, status)
+    vi.mocked(localStorage.setItem).mockClear();
+
+    let success = false;
+    act(() => {
+      success = result.current.saveClient({ name: '   ', email: '', address: '' });
+    });
+
+    expect(success).toBe(false);
+    expect(result.current.savedClients).toHaveLength(0);
+    expect(localStorage.setItem).not.toHaveBeenCalledWith('invoiceSavedClients', expect.anything());
+  });
+
+  it('saves a new client, updates state, and persists to local storage', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    act(() => {
+      result.current.saveClient({ name: 'Acme Corp', email: 'hello@acme.com', address: '123 Acme St' });
+    });
+
+    expect(result.current.savedClients).toHaveLength(1);
+    expect(result.current.savedClients[0].name).toBe('Acme Corp');
+
+    // Should persist to local storage
+    expect(localStorage.setItem).toHaveBeenCalledWith('invoiceSavedClients', expect.any(String));
+    const savedString = vi.mocked(localStorage.setItem).mock.calls.find(c => c[0] === 'invoiceSavedClients')?.[1];
+    expect(JSON.parse(savedString as string)).toEqual([{ name: 'Acme Corp', email: 'hello@acme.com', address: '123 Acme St' }]);
+  });
+
+  it('updates an existing client case-insensitively instead of duplicating', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    act(() => {
+      result.current.saveClient({ name: 'Acme Corp', email: 'hello@acme.com', address: '123 Acme St' });
+    });
+    expect(result.current.savedClients).toHaveLength(1);
+
+    act(() => {
+      result.current.saveClient({ name: 'acme corp', email: 'new@acme.com', address: '123 Acme St' });
+    });
+
+    expect(result.current.savedClients).toHaveLength(1);
+    expect(result.current.savedClients[0].name).toBe('acme corp'); // updated case
+    expect(result.current.savedClients[0].email).toBe('new@acme.com'); // updated email
+  });
+});
+
+describe('useInvoice - saveBusinessProfile', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (useSubscription as any).mockReturnValue({
+      user: { uid: 'test-user' },
+      isPro: true,
+      loading: false
+    });
+    vi.stubGlobal('localStorage', {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+    });
+    let uuidCounter = 0;
+    vi.stubGlobal('crypto', {
+      randomUUID: () => `mock-uuid-${uuidCounter++}`
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('rejects business profile with an empty name', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    // Clear calls from initial render (currency, status)
+    vi.mocked(localStorage.setItem).mockClear();
+
+    let success = false;
+    act(() => {
+      success = result.current.saveBusinessProfile({ name: '   ', email: '', phoneNumber: '', address: '' });
+    });
+
+    expect(success).toBe(false);
+    expect(result.current.businessProfiles).toHaveLength(0);
+    expect(localStorage.setItem).not.toHaveBeenCalledWith('invoiceBusinessProfiles', expect.anything());
+  });
+
+  it('saves a new business profile with a generated ID', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    act(() => {
+      result.current.saveBusinessProfile({ name: 'My Brand', email: 'hello@mybrand.com', phoneNumber: '', address: '' });
+    });
+
+    expect(result.current.businessProfiles).toHaveLength(1);
+    expect(result.current.businessProfiles[0].name).toBe('My Brand');
+    expect(result.current.businessProfiles[0].id).toMatch(/^mock-uuid-/);
+
+    // Should persist to local storage
+    expect(localStorage.setItem).toHaveBeenCalledWith('invoiceBusinessProfiles', expect.any(String));
+  });
+
+  it('updates an existing business profile case-insensitively and preserves the ID', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    act(() => {
+      result.current.saveBusinessProfile({ name: 'My Brand', email: 'hello@mybrand.com', phoneNumber: '', address: '' });
+    });
+
+    const firstId = result.current.businessProfiles[0].id;
+
+    act(() => {
+      result.current.saveBusinessProfile({ name: 'my brand', email: 'new@mybrand.com', phoneNumber: '', address: '' });
+    });
+
+    expect(result.current.businessProfiles).toHaveLength(1);
+    expect(result.current.businessProfiles[0].name).toBe('my brand');
+    expect(result.current.businessProfiles[0].email).toBe('new@mybrand.com');
+    expect(result.current.businessProfiles[0].id).toBe(firstId); // ID preserved
   });
 });

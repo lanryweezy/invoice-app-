@@ -1,3 +1,6 @@
 ## 2024-07-06 - Test Coverage in InvoiceApp Monorepo
 **Learning:** This repo has a monorepo structure with tests in `apps/web`. Vitest and `@vitest/coverage-v8` handle testing and coverage reports. Vitest is configured to run tests over all files via `pnpm -w run test`. Coverage for specific files requires installing the dependencies properly. The `offlineSync.ts` file initially had zero testing for its core offline sync behaviour.
 **Action:** When adding tests in `apps/web/utils`, always write complete test suites using `vitest` covering all logical branches. We added 100% test coverage to `offlineSync.ts`.
+## 2026-07-09 - Test coverage added for Entity Deduplication
+**Learning:** For React hooks relying on `localStorage` and `crypto`, ensuring robust test isolation requires strictly stubbing those globals via `vi.stubGlobal` and tearing them down in `afterEach` using `vi.unstubAllGlobals()`. Further, testing unique ID logic (via `crypto.randomUUID`) is best handled by creating a predictable generator (e.g., `mock-uuid-${uuidCounter++}`) rather than returning a static value, which might false-flag duplicate detections.
+**Action:** When adding tests in `apps/web/hooks` that manage state and persistence, use `vi.stubGlobal` for browser APIs and always include a counter for mocked UUIDs to guarantee uniqueness across render cycles.
