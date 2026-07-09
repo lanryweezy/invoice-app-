@@ -12,3 +12,6 @@
 3. Enhanced analytics tracking: Added `upgrade_initiated`, `payment_success`, `payment_cancelled`, and `payment_error_callback` events to map the entire monetization funnel.
 
 **Unexpected:** N/A
+## 2026-07-09 - Atomic Profile Updates
+**Learning:** The previous implementation for claiming public profiles performed sequential read/writes (`getDoc` then `updateDoc` / `setDoc`), leading to race conditions where two users could claim the same username simultaneously. Replacing these operations with Firestore's `runTransaction` ensures the uniqueness check and the subsequent document creations/deletions occur atomically.
+**Action:** Use `runTransaction` for multi-document operations that depend on read-time conditions, particularly for enforcing global uniqueness in NoSQL databases.
