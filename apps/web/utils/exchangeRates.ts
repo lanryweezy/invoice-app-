@@ -21,8 +21,14 @@ export async function getExchangeRates(): Promise<ExchangeRates> {
   const cached = getCachedRates();
   if (cached) return cached;
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   try {
-    const res = await fetch('https://api.exchangerate-api.com/v4/latest/NGN');
+    // 🌿 Flora: Added 5s timeout safeguard to prevent the application from hanging indefinitely if the external exchange rate API is slow or unresponsive
+    const res = await fetch('https://api.exchangerate-api.com/v4/latest/NGN', {
+      signal: controller.signal
+    });
     if (!res.ok) throw new Error('Failed to fetch rates');
     const data = await res.json();
 
@@ -36,15 +42,18 @@ export async function getExchangeRates(): Promise<ExchangeRates> {
 
     cacheRates(rates);
     return rates;
-  } catch {
+  } catch (error) {
+    console.warn('[Resilience] Failed to fetch exchange rates, using fallback:', error);
     return FALLBACK_RATES;
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
 export function convertCurrency(amount: number, from: string, to: string, rates: ExchangeRates): number {
   if (from === to) return amount;
-  const inNGN = from === 'NGN' ? amount : amount * (rates[from as keyof ExchangeRates] || 1);
-  return to === 'NGN' ? inNGN : Math.round(inNGN / (rates[to as keyof ExchangeRates] || 1));
+  const inNGN = from === 'NGN' ? amount : amount * (Number(rates[from as keyof ExchangeRates]) || 1);
+  return to === 'NGN' ? inNGN : Math.round(inNGN / (Number(rates[to as keyof ExchangeRates]) || 1));
 }
 
 function getCachedRates(): ExchangeRates | null {
