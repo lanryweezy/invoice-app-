@@ -31,6 +31,7 @@ import { TemplatePage } from './components/TemplatePage';
 import { PrivacyModal } from './components/PrivacyModal';
 import { CommandPaletteProvider } from './components/CommandPaletteProvider';
 import { TermsModal } from './components/TermsModal';
+import { IntegrationsView } from './components/IntegrationsView';
 import { flushQueue, getQueueCount } from './utils/offlineSync';
 
 // NRS Compliance Components
@@ -214,7 +215,7 @@ const App: React.FC = () => {
   }, [invoice]);
 
   // Main view state
-  const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'blog' | 'blogPost' | 'publicProfile' | 'templatePage'>(() => {
+  const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'integrations' | 'blog' | 'blogPost' | 'publicProfile' | 'templatePage'>(() => {
       let path;
       try {
           path = decodeURIComponent(window.location.pathname);
@@ -225,13 +226,14 @@ const App: React.FC = () => {
       if (path.startsWith('/p/')) return 'publicProfile';
       if (path.startsWith('/templates/')) return 'templatePage';
       if (path === '/blog') return 'blog';
+      if (path === '/integrations') return 'integrations';
 
       // Handle legacy /blog/:id routes by redirecting them or showing blogPost view
       if (path.startsWith('/blog/')) {
           return 'blogPost';
       }
 
-      if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts' && !path.startsWith('/p/') && !path.startsWith('/templates/')) {
+      if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts' && path !== '/integrations' && !path.startsWith('/p/') && !path.startsWith('/templates/')) {
           return 'blogPost';
       }
       return 'editor';
@@ -279,6 +281,7 @@ const App: React.FC = () => {
   useEffect(() => {
       let path = '/';
       if (activeView === 'blog') path = '/blog';
+      else if (activeView === 'integrations') path = '/integrations';
       else if (activeView === 'blogPost' && activeBlogPostSlug !== null) path = `/${encodeURIComponent(activeBlogPostSlug)}`;
       else if (activeView === 'publicProfile' && publicUsername !== null) path = `/p/${publicUsername}`;
       else if (activeView === 'templatePage' && activeTemplateSlug !== null) path = `/templates/${encodeURIComponent(activeTemplateSlug)}`;
@@ -310,17 +313,19 @@ const App: React.FC = () => {
           try {
               path = decodeURIComponent(window.location.pathname);
           } catch (e) {
-              path = window.location.pathname; // Fallback if malformed URI
+              path = window.location.pathname;
           }
           if (path === '/blog') {
               setActiveView('blog');
+          } else if (path === '/integrations') {
+              setActiveView('integrations');
           } else if (path.startsWith('/p/')) {
               setPublicUsername(path.split('/')[2] || null);
               setActiveView('publicProfile');
           } else if (path.startsWith('/templates/')) {
               setActiveTemplateSlug(path.split('/')[2] || null);
               setActiveView('templatePage');
-          } else if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts') {
+          } else if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts' && path !== '/integrations') {
               setActiveBlogPostSlug(path.substring(1));
               setActiveView('blogPost');
           } else {
@@ -618,7 +623,8 @@ const App: React.FC = () => {
              <button onClick={() => user ? setActiveView('branches') : handleProFeatureClick('Branches')} className={`text-xs font-medium transition-colors ${activeView === 'branches' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Branches</button>
              <button onClick={() => user ? setActiveView('accounting') : handleProFeatureClick('Accounting')} className={`text-xs font-medium transition-colors ${activeView === 'accounting' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Accounting</button>
              <button onClick={() => user ? setActiveView('recurring') : handleProFeatureClick('Recurring')} className={`text-xs font-medium transition-colors ${activeView === 'recurring' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Recurring</button>
-             <button onClick={() => setActiveView('receipts')} className={`text-xs font-medium transition-colors ${activeView === 'receipts' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Receipts</button>
+             <button onClick={() => user ? setActiveView('receipts') : handleProFeatureClick('Receipts')} className={`text-xs font-medium transition-colors ${activeView === 'receipts' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Receipts</button>
+             <button onClick={() => user ? setActiveView('integrations') : handleProFeatureClick('Integrations')} className={`text-xs font-medium transition-colors ${activeView === 'integrations' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Integrations</button>
              <button onClick={() => window.location.href = '/blog'} className={`text-xs font-medium transition-colors ${activeView === 'blog' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Blog</button>
              <div className="w-px h-4 bg-slate-700"></div>
              {!loading && (
@@ -828,6 +834,15 @@ const App: React.FC = () => {
                     onRemoveReceipt={(id) => {
                         removeReceipt(id);
                         showToast('Receipt deleted');
+                    }}
+                />
+            </div>
+        ) : activeView === 'integrations' ? (
+            <div className="p-4 sm:p-8 max-w-6xl mx-auto">
+                <IntegrationsView 
+                    onUpgrade={() => {
+                        setPricingModalContent({ title: 'Unlock Integrations', message: 'Upgrade to Pro to connect payment gateways, accounting software, and more.' });
+                        setIsPricingModalOpen(true);
                     }}
                 />
             </div>
