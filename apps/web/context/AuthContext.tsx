@@ -114,7 +114,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return false;
     }
 
-    try { trackEvent('upgrade_initiated', { plan_type: planType, user_email: user.email }); } catch {}
+    try { trackEvent('upgrade_initiated', { plan_type: planType, user_id: user.uid }); } catch {}
 
     return new Promise((resolve) => {
       if (typeof window === 'undefined') {
@@ -145,7 +145,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               ]
             },
             callback: function(response: any) {
-              try { trackEvent('payment_success', { plan_type: planType, ref: response.reference, email: user.email }); } catch {}
+              try { trackEvent('payment_success', { plan_type: planType, ref: response.reference, user_id: user.uid }); } catch {}
               setDoc(doc(db, 'users', user.uid), {
                 plan: 'pro',
                 planType,
@@ -154,16 +154,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               }, { merge: true }).then(() => {
                 resolve(true);
               }).catch((error) => {
+                try { trackEvent('payment_upgrade_save_failed', { plan_type: planType, user_id: user.uid, error: String(error) }); } catch {}
                 console.error("Failed to save upgrade", error);
                 resolve(false);
               });
             },
             onClose: function() {
+              try { trackEvent('payment_cancelled', { plan_type: planType, user_id: user.uid }); } catch {}
               resolve(false);
             }
           });
           handler.openIframe();
         } catch (err) {
+          try { trackEvent('payment_error_callback', { plan_type: planType, user_id: user.uid, error: String(err) }); } catch {}
           console.error("Paystack setup error:", err);
           resolve(false);
         }
