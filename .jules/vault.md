@@ -12,3 +12,7 @@
 3. Enhanced analytics tracking: Added `upgrade_initiated`, `payment_success`, `payment_cancelled`, and `payment_error_callback` events to map the entire monetization funnel.
 
 **Unexpected:** N/A
+
+## 2024-05-18 - Enforcing Atomic Multi-Step Writes with Transactions
+**Learning:** `handleSaveProfile` in `SettingsModal.tsx` performed a read-then-write sequence (`getDoc` for uniqueness validation, followed by separate `updateDoc`, `setDoc`, and `deleteDoc` calls) without transaction boundaries. This posed a data integrity risk: a partial failure mid-sequence (e.g. updating the internal user doc but failing to write the public profile or delete the old one) would corrupt the state, and race conditions could allow concurrent claims on usernames.
+**Action:** Always wrap multi-collection writes and read-then-write validations in `runTransaction` (from `firebase/firestore`) to ensure atomicity. When doing so, ensure all reads (`transaction.get()`) happen before any writes (`transaction.set()`, `transaction.update()`, `transaction.delete()`) within the transaction block.

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, runTransaction } from 'firebase/firestore';
 import { db } from '../services/firebase';
 
 interface SettingsModalProps {
@@ -64,18 +64,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
          return;
       }
 
-      // 1. Pre-flight check: Ensure global uniqueness BEFORE writing to internal state
-      if (sanitizedUsername) {
-         const publicRef = doc(db, 'publicProfiles', sanitizedUsername);
-         const publicSnap = await getDoc(publicRef);
-
-         if (publicSnap.exists() && publicSnap.data().uid !== user.uid) {
-             setMessage('Failed: Username is already taken by another business.');
-             setSaving(false);
-             return;
-         }
-      }
-
       const payload = {
         username: sanitizedUsername,
         bio,
@@ -86,31 +74,42 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
         uid: user.uid
       };
 
-      // 2. Save to internal users document
-      const userDocRef = doc(db, 'users', user.uid);
-      await updateDoc(userDocRef, payload);
+      await runTransaction(db, async (transaction) => {
+        // 1. Pre-flight check: Ensure global uniqueness inside transaction
+        if (sanitizedUsername) {
+           const publicRef = doc(db, 'publicProfiles', sanitizedUsername);
+           const publicSnap = await transaction.get(publicRef);
 
-      // 3. Write new public profile and cleanup old one if it changed
-      const { setDoc, deleteDoc } = await import('firebase/firestore');
+           if (publicSnap.exists() && publicSnap.data().uid !== user.uid) {
+               throw new Error('USERNAME_TAKEN');
+           }
 
-      if (sanitizedUsername) {
-         const publicRef = doc(db, 'publicProfiles', sanitizedUsername);
-         await setDoc(publicRef, payload);
-      }
+           // Write new public profile
+           transaction.set(publicRef, payload);
+        }
 
-      // Cleanup dangling old profile if username changed and old username existed
-      if (originalUsername && originalUsername !== sanitizedUsername) {
-          const oldPublicRef = doc(db, 'publicProfiles', originalUsername);
-          await deleteDoc(oldPublicRef);
-      }
+        // 2. Save to internal users document
+        const userDocRef = doc(db, 'users', user.uid);
+        transaction.update(userDocRef, payload);
+
+        // 3. Cleanup dangling old profile if username changed and old username existed
+        if (originalUsername && originalUsername !== sanitizedUsername) {
+            const oldPublicRef = doc(db, 'publicProfiles', originalUsername);
+            transaction.delete(oldPublicRef);
+        }
+      });
 
       setOriginalUsername(sanitizedUsername); // Sync up after successful save
 
       setMessage('Profile updated successfully!');
       setTimeout(() => setMessage(''), 3000);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving profile:", error);
-      setMessage('Failed to update profile.');
+      if (error.message === 'USERNAME_TAKEN') {
+        setMessage('Failed: Username is already taken by another business.');
+      } else {
+        setMessage('Failed to update profile.');
+      }
     } finally {
       setSaving(false);
     }
