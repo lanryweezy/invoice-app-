@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useInvoice } from './useInvoice';
 import { useSubscription } from './useSubscription';
@@ -139,5 +139,96 @@ describe('useInvoice - addLineItem', () => {
     });
 
     expect(result.current.invoice.lineItems.length).toBe(3);
+  });
+});
+
+describe('useInvoice - saveClient', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (useSubscription as any).mockReturnValue({
+      user: { uid: 'test-user' },
+      isPro: true,
+      loading: false
+    });
+
+    let uuidCounter = 1;
+    vi.stubGlobal('crypto', {
+      randomUUID: () => `mock-uuid-${uuidCounter++}`
+    });
+
+    const mockStorage: Record<string, string> = {};
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => mockStorage[key] || null,
+      setItem: (key: string, value: string) => {
+        mockStorage[key] = value;
+      },
+      clear: () => {
+        for (const key in mockStorage) {
+          delete mockStorage[key];
+        }
+      }
+    });
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('rejects invalid writes when client name is empty', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    let success;
+    act(() => {
+      success = result.current.saveClient({ name: '   ', email: 'test@example.com' } as any);
+    });
+
+    expect(success).toBe(false);
+    expect(result.current.savedClients).toHaveLength(0);
+    expect(localStorage.getItem('invoiceSavedClients')).toBeNull();
+  });
+
+  it('adds new clients, sorts them alphabetically, and syncs state', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    act(() => {
+      result.current.saveClient({ name: 'Charlie', email: 'charlie@example.com' } as any);
+      result.current.saveClient({ name: 'Alice', email: 'alice@example.com' } as any);
+      result.current.saveClient({ name: 'Bob', email: 'bob@example.com' } as any);
+    });
+
+    const clients = result.current.savedClients;
+    expect(clients).toHaveLength(3);
+    expect(clients[0].name).toBe('Alice');
+    expect(clients[1].name).toBe('Bob');
+    expect(clients[2].name).toBe('Charlie');
+
+    const stored = JSON.parse(localStorage.getItem('invoiceSavedClients') || '[]');
+    expect(stored).toHaveLength(3);
+    expect(stored[0].name).toBe('Alice');
+  });
+
+  it('updates existing clients using case-insensitive duplicate matching', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    act(() => {
+      result.current.saveClient({ name: 'Acme Corp', email: 'contact@acme.com' } as any);
+    });
+
+    expect(result.current.savedClients).toHaveLength(1);
+    expect(result.current.savedClients[0].email).toBe('contact@acme.com');
+
+    act(() => {
+      result.current.saveClient({ name: 'acme corp', email: 'new@acme.com' } as any);
+    });
+
+    const clients = result.current.savedClients;
+    expect(clients).toHaveLength(1);
+    expect(clients[0].name).toBe('acme corp'); // Updates to the new name casing
+    expect(clients[0].email).toBe('new@acme.com');
+
+    const stored = JSON.parse(localStorage.getItem('invoiceSavedClients') || '[]');
+    expect(stored).toHaveLength(1);
+    expect(stored[0].email).toBe('new@acme.com');
   });
 });
