@@ -141,3 +141,57 @@ describe('useInvoice - addLineItem', () => {
     expect(result.current.invoice.lineItems.length).toBe(3);
   });
 });
+
+describe('useInvoice - removeLineItem', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (useSubscription as any).mockReturnValue({
+      user: { uid: 'test-user' },
+      isPro: true,
+      loading: false
+    });
+  });
+
+  it('removes a line item by id', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    // Initial state has 1 line item
+    const initialItem = result.current.invoice.lineItems[0];
+    expect(result.current.invoice.lineItems.length).toBe(1);
+
+    act(() => {
+      result.current.removeLineItem(initialItem.id);
+    });
+
+    expect(result.current.invoice.lineItems.length).toBe(0);
+  });
+});
+
+describe('useInvoice - updateLineItem', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (useSubscription as any).mockReturnValue({
+      user: { uid: 'test-user' },
+      isPro: true,
+      loading: false
+    });
+  });
+
+  it('updates a specific field of a line item', () => {
+    const { result } = renderHook(() => useInvoice());
+
+    const initialItem = result.current.invoice.lineItems[0];
+    expect(initialItem.quantity).toBe(1);
+
+    act(() => {
+      result.current.updateLineItem(initialItem.id, 'quantity', 5);
+      result.current.updateLineItem(initialItem.id, 'price', 100);
+      result.current.updateLineItem(initialItem.id, 'description', 'Updated Item');
+    });
+
+    const updatedItem = result.current.invoice.lineItems[0];
+    expect(updatedItem.quantity).toBe(5);
+    expect(updatedItem.price).toBe(100);
+    expect(updatedItem.description).toBe('Updated Item');
+  });
+});
