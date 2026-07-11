@@ -4,7 +4,7 @@ import {
   onAuthStateChanged, doc, setDoc, getDoc, User, 
   createUserWithEmailAndPassword, signInWithEmailAndPassword 
 } from '../services/firebase';
-import { onSnapshot } from 'firebase/firestore';
+import { onSnapshot, runTransaction } from 'firebase/firestore';
 import { trackEvent } from '../utils/analytics';
 
 export interface SubscriptionData {
@@ -42,10 +42,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // We do a one-time check/creation when the user first authenticates
         const checkUserRecord = async () => {
           try {
-            const userSnap = await getDoc(userRef);
-            if (!userSnap.exists()) {
-              await setDoc(userRef, { plan: 'free' });
-            }
+            await runTransaction(db, async (transaction) => {
+              const userSnap = await transaction.get(userRef);
+              if (!userSnap.exists()) {
+                // 💾 Vault: Prevent race condition overwriting offline-synced partial profile.
+                transaction.set(userRef, { plan: 'free' }, { merge: true });
+              }
+            });
           } catch (error) {
             console.error("Error checking/creating user record:", error);
           }
