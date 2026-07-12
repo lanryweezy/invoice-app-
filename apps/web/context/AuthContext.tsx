@@ -48,6 +48,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             }
           } catch (error) {
             console.error("Error checking/creating user record:", error);
+            try { trackEvent('auth_user_record_error', { user_id: currentUser.uid, error: String(error) }); } catch {}
           }
         };
         
@@ -79,6 +80,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       await signInWithPopup(auth, googleProvider);
     } catch (error) {
       console.error("Google Login failed", error);
+      try { trackEvent('auth_login_error', { provider: 'google', error: String(error) }); } catch {}
       throw error;
     }
   };
@@ -88,6 +90,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
       console.error("Email Login failed", error);
+      try { trackEvent('auth_login_error', { provider: 'email', error: String(error) }); } catch {}
       throw error;
     }
   };
@@ -97,6 +100,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       await createUserWithEmailAndPassword(auth, email, password);
     } catch (error) {
       console.error("Email Signup failed", error);
+      try { trackEvent('auth_signup_error', { provider: 'email', error: String(error) }); } catch {}
       throw error;
     }
   };
