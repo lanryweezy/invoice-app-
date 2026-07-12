@@ -10,12 +10,16 @@ service cloud.firestore {
       allow read: if request.auth != null && request.auth.uid == uid;
 
       // Owner can create their own document (on first login)
-      allow create: if request.auth != null && request.auth.uid == uid;
+      // 💾 Vault: Enforce that the plan field can only be 'free' or 'pro' if present
+      allow create: if request.auth != null && request.auth.uid == uid
+        && (!('plan' in request.resource.data) || request.resource.data.plan in ['free', 'pro']);
 
       // Owner can update their own document
       // Paystack webhook uses firebase-admin SDK which bypasses rules,
       // so no special allowance is needed for server-side writes.
-      allow update: if request.auth != null && request.auth.uid == uid;
+      // 💾 Vault: Enforce that the plan field can only be 'free' or 'pro' if present
+      allow update: if request.auth != null && request.auth.uid == uid
+        && (!('plan' in request.resource.data) || request.resource.data.plan in ['free', 'pro']);
 
       // Owner can delete their own document
       allow delete: if request.auth != null && request.auth.uid == uid;
@@ -44,8 +48,11 @@ service cloud.firestore {
         && request.resource.data.username.size() <= 30;
 
       // Only the profile owner can update
+      // 💾 Vault: Prevent modification of ownership or document key mapping
       allow update: if request.auth != null
-        && resource.data.uid == request.auth.uid;
+        && resource.data.uid == request.auth.uid
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.username == resource.data.username;
 
       // Only the profile owner can delete
       allow delete: if request.auth != null
