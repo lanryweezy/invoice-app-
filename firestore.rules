@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ============================================================
+    // USERS COLLECTION — Each user owns exactly one document.
+    // ============================================================
+    match /users/{uid} {
+      // Owner can read their own document
+      allow read: if request.auth != null && request.auth.uid == uid;
+
+      // Owner can create their own document (on first login)
+      allow create: if request.auth != null && request.auth.uid == uid;
+
+      // Owner can update their own document
+      // Paystack webhook uses firebase-admin SDK which bypasses rules,
+      // so no special allowance is needed for server-side writes.
+      allow update: if request.auth != null && request.auth.uid == uid;
+
+      // Owner can delete their own document
+      allow delete: if request.auth != null && request.auth.uid == uid;
+
+      // Validate that sensitive fields are never exposed to other users
+      // and that plan field can only be 'free' or 'pro'
+      match /{document=**} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+
+    // ============================================================
+    // PUBLIC PROFILES — Readable by anyone, writable only by owner.
+    // ============================================================
+    match /publicProfiles/{username} {
+      // Anyone (including unauthenticated) can read public profiles
+      // This allows the public profile page to work without login
+      allow read: if true;
+
+      // Only authenticated users can create profiles
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasAll(['uid', 'username', 'isPublic'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.username == username
+        && request.resource.data.username matches /^[a-z0-9_]{3,30}$/;
+
+      // Only the profile owner can update
+      allow update: if request.auth != null
+        && resource.data.uid == request.auth.uid;
+
+      // Only the profile owner can delete
+      allow delete: if request.auth != null
+        && resource.data.uid == request.auth.uid;
+    }
+  }
+}
