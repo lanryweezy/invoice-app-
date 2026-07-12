@@ -137,7 +137,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
             </div>
             <div>
               <h3 className="font-bold text-slate-900">{user?.displayName || 'User'}</h3>
-              <p className="text-sm text-slate-500">{user?.email}</p>
+              <a href={`mailto:${user?.email}`} className="text-sm text-slate-500 hover:text-teal-600 transition-colors">{user?.email}</a>
             </div>
           </div>
 
