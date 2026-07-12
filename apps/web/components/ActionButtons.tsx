@@ -32,6 +32,8 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
     const shareText = `Hi, here is the invoice #${invoiceNumber} for ${totalAmount}. Built with InvoiceApp.`;
     const shareUrl = 'https://www.invoiceapp.ng/';
     const isProforma = documentType === 'Pro-forma';
+    const isQuote = documentType === 'Quote';
+    const canConvert = isProforma || isQuote;
 
     const handleShareLink = async () => {
         if (!invoice) return;
@@ -79,12 +81,12 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   if (isMobile) {
       return (
         <div className="flex gap-2">
-            {isProforma && onConvertToInvoice && (
+            {canConvert && onConvertToInvoice && (
               <button
                 onClick={onConvertToInvoice}
                 className="p-1.5 text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors"
-                title="Convert to Invoice"
-                aria-label="Convert to Invoice"
+                title={`Convert to Invoice`}
+                aria-label={`Convert to Invoice`}
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </button>
@@ -145,7 +147,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
 
   return (
     <div className="flex gap-2 w-full lg:w-auto">
-      {isProforma && onConvertToInvoice && (
+      {canConvert && onConvertToInvoice && (
         <button
           onClick={onConvertToInvoice}
           className="flex-1 lg:flex-none inline-flex items-center justify-center px-3 py-1.5 border border-amber-300 text-xs font-bold rounded-lg text-amber-700 bg-amber-50 hover:bg-amber-100 hover:border-amber-400 transition-all shadow-sm"

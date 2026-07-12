@@ -217,7 +217,7 @@ const App: React.FC = () => {
   }, []);
 
   const handleConvertToInvoice = useCallback(() => {
-    if (!invoice || invoice.documentType !== 'Pro-forma') return;
+    if (!invoice || (invoice.documentType !== 'Pro-forma' && invoice.documentType !== 'Quote')) return;
     const newInvoiceNumber = generateSequentialInvoiceNumber();
     setInvoice(prev => ({
       ...prev,
