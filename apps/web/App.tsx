@@ -32,6 +32,7 @@ import { PrivacyModal } from './components/PrivacyModal';
 import { CommandPaletteProvider } from './components/CommandPaletteProvider';
 import { TermsModal } from './components/TermsModal';
 import { IntegrationsView } from './components/IntegrationsView';
+import { SmtpSettingsModal } from './components/SmtpSettingsModal';
 import { flushQueue, getQueueCount } from './utils/offlineSync';
 
 // NRS Compliance Components
@@ -83,6 +84,8 @@ const App: React.FC = () => {
 
   const [generatedEmail, setGeneratedEmail] = useState('');
   const [emailTemplate, setEmailTemplate] = useState<EmailTemplateType>('formal');
+  const [smtpSettings, setSmtpSettings] = useState<{ host: string; port: string; user: string; pass: string; fromEmail: string; fromName: string } | null>(null);
+  const [isSmtpModalOpen, setIsSmtpModalOpen] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -116,6 +119,29 @@ const App: React.FC = () => {
   // Offline Sync State
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [pendingSyncCount, setPendingSyncCount] = useState(0);
+
+  // Load SMTP settings from Firestore
+  useEffect(() => {
+    if (!user) { setSmtpSettings(null); return; }
+    const loadSmtp = async () => {
+      try {
+        const { doc, getDoc } = await import('firebase/firestore');
+        const { db } = await import('./services/firebase');
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        if (snap.exists() && snap.data().smtpSettings) {
+          setSmtpSettings(snap.data().smtpSettings);
+        }
+      } catch {}
+    };
+    loadSmtp();
+  }, [user]);
+
+  // Listen for SMTP settings open event from SettingsModal
+  useEffect(() => {
+    const handler = () => setIsSmtpModalOpen(true);
+    window.addEventListener('open-smtp-settings', handler);
+    return () => window.removeEventListener('open-smtp-settings', handler);
+  }, []);
 
   useEffect(() => {
     const handleOnline = async () => {
@@ -1021,6 +1047,16 @@ const App: React.FC = () => {
         emailContent={generatedEmail}
         onTemplateChange={(type) => handleGenerateEmail(type)}
         activeTemplate={emailTemplate}
+        recipientEmail={invoice.client.email}
+        smtpSettings={smtpSettings}
+        onOpenSmtpSettings={() => { setIsEmailModalOpen(false); setIsSmtpModalOpen(true); }}
+      />
+
+      <SmtpSettingsModal
+        isOpen={isSmtpModalOpen}
+        onClose={() => setIsSmtpModalOpen(false)}
+        user={user}
+        onSmtpSaved={(settings) => setSmtpSettings(settings)}
       />
 
       <PricingModal
