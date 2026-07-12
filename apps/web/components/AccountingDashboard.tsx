@@ -8,6 +8,8 @@ const EXPENSE_CATEGORIES = [
   'Salaries', 'Professional Services', 'Office Supplies', 'Internet & Phone', 'Other'
 ];
 
+type DateRange = 'all' | 'month' | 'quarter' | 'year' | 'custom';
+
 interface AccountingDashboardProps {
   invoices: Invoice[];
   expenses: Expense[];
@@ -15,6 +17,37 @@ interface AccountingDashboardProps {
   onRemoveExpense: (id: string) => void;
   isPro?: boolean;
   onUpgrade?: () => void;
+}
+
+function filterByDateRange<T extends { date?: string; issueDate?: string }>(
+  items: T[], range: DateRange, customFrom?: string, customTo?: string
+): T[] {
+  if (range === 'all') return items;
+  const now = new Date();
+  const start = new Date();
+
+  if (range === 'month') {
+    start.setFullYear(now.getFullYear(), now.getMonth(), 1);
+  } else if (range === 'quarter') {
+    const q = Math.floor(now.getMonth() / 3);
+    start.setFullYear(now.getFullYear(), q * 3, 1);
+  } else if (range === 'year') {
+    start.setFullYear(now.getFullYear(), 0, 1);
+  } else if (range === 'custom' && customFrom && customTo) {
+    const from = new Date(customFrom);
+    const to = new Date(customTo);
+    to.setHours(23, 59, 59);
+    return items.filter(item => {
+      const d = new Date(item.date || item.issueDate || '');
+      return d >= from && d <= to;
+    });
+  }
+
+  start.setHours(0, 0, 0, 0);
+  return items.filter(item => {
+    const d = new Date(item.date || item.issueDate || '');
+    return d >= start;
+  });
 }
 
 function getMonthlyData(invoices: Invoice[], expenses: Expense[]) {
@@ -52,6 +85,50 @@ function getMonthlyData(invoices: Invoice[], expenses: Expense[]) {
   }));
 }
 
+function getAgedReceivables(invoices: Invoice[]) {
+  const now = new Date();
+  const buckets = { current: 0, d1_30: 0, d31_60: 0, d61_90: 0, over90: 0 };
+  const details: { client: string; amount: number; days: number; invoiceNumber: string; dueDate: string }[] = [];
+
+  invoices.forEach(inv => {
+    if (inv.status === 'Paid' || inv.status === 'Draft') return;
+    const due = new Date(inv.dueDate);
+    const days = Math.floor((now.getTime() - due.getTime()) / 86400000);
+    const amount = inv.total || 0;
+
+    if (days <= 0) buckets.current += amount;
+    else if (days <= 30) buckets.d1_30 += amount;
+    else if (days <= 60) buckets.d31_60 += amount;
+    else if (days <= 90) buckets.d61_90 += amount;
+    else buckets.over90 += amount;
+
+    details.push({ client: inv.client.name, amount, days: Math.max(0, days), invoiceNumber: inv.invoiceNumber, dueDate: inv.dueDate });
+  });
+
+  return { buckets, details: details.sort((a, b) => b.days - a.days) };
+}
+
+function getPnLData(invoices: Invoice[], expenses: Expense[]) {
+  const revenue = invoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
+  const costOfSales = 0;
+  const grossProfit = revenue - costOfSales;
+
+  const expenseByCategory: Record<string, number> = {};
+  expenses.forEach(exp => {
+    expenseByCategory[exp.category] = (expenseByCategory[exp.category] || 0) + exp.amount;
+  });
+  const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+  const operatingProfit = grossProfit - totalExpenses;
+
+  const vatCollected = invoices.reduce((sum, inv) => sum + (inv.tax || 0), 0);
+  const whtSuffered = invoices.reduce((sum, inv) => sum + (inv.whtAmount || 0), 0);
+  const netTax = vatCollected - whtSuffered;
+
+  const netProfit = operatingProfit;
+
+  return { revenue, costOfSales, grossProfit, expenseByCategory, totalExpenses, operatingProfit, vatCollected, whtSuffered, netTax, netProfit };
+}
+
 function BarChart({ data, maxValue }: { data: { label: string; revenue: number; expenses: number }[]; maxValue: number }) {
   const scale = maxValue > 0 ? 100 / maxValue : 0;
   return (
@@ -76,11 +153,17 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('Software');
   const [vendor, setVendor] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'expenses' | 'transactions'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'expenses' | 'transactions' | 'receivables' | 'pnl'>('overview');
+  const [dateRange, setDateRange] = useState<DateRange>('all');
+  const [customFrom, setCustomFrom] = useState('');
+  const [customTo, setCustomTo] = useState('');
+
+  const filteredInvoices = useMemo(() => filterByDateRange(invoices, dateRange, customFrom, customTo), [invoices, dateRange, customFrom, customTo]);
+  const filteredExpenses = useMemo(() => filterByDateRange(expenses, dateRange, customFrom, customTo), [expenses, dateRange, customFrom, customTo]);
 
   const stats = useMemo(() => {
     let revenue = 0, totalVat = 0, totalWht = 0, compliantCount = 0, paidCount = 0, overdueCount = 0, pendingCount = 0;
-    invoices.forEach(inv => {
+    filteredInvoices.forEach(inv => {
       revenue += inv.total || 0;
       totalVat += inv.tax || 0;
       totalWht += inv.whtAmount || 0;
@@ -90,31 +173,34 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
       else pendingCount++;
     });
     return { revenue, totalVat, totalWht, compliantCount, paidCount, overdueCount, pendingCount };
-  }, [invoices]);
+  }, [filteredInvoices]);
 
-  const totalExpenses = useMemo(() => expenses.reduce((acc, exp) => acc + exp.amount, 0), [expenses]);
-  const monthlyData = useMemo(() => getMonthlyData(invoices, expenses), [invoices, expenses]);
+  const totalExpenses = useMemo(() => filteredExpenses.reduce((acc, exp) => acc + exp.amount, 0), [filteredExpenses]);
+  const monthlyData = useMemo(() => getMonthlyData(filteredInvoices, filteredExpenses), [filteredInvoices, filteredExpenses]);
   const maxMonthly = useMemo(() => Math.max(...monthlyData.map(m => m.revenue), 1), [monthlyData]);
 
   const categoryBreakdown = useMemo(() => {
     const cats: Record<string, number> = {};
-    expenses.forEach(exp => { cats[exp.category] = (cats[exp.category] || 0) + exp.amount; });
+    filteredExpenses.forEach(exp => { cats[exp.category] = (cats[exp.category] || 0) + exp.amount; });
     return Object.entries(cats).sort((a, b) => b[1] - a[1]);
-  }, [expenses]);
+  }, [filteredExpenses]);
 
-  const visibleInvoices = isPro ? invoices : invoices.slice(0, 3);
-  const visibleExpenses = isPro ? expenses : expenses.slice(0, 10);
+  const receivables = useMemo(() => getAgedReceivables(filteredInvoices), [filteredInvoices]);
+  const pnl = useMemo(() => getPnLData(filteredInvoices, filteredExpenses), [filteredInvoices, filteredExpenses]);
+
+  const visibleInvoices = isPro ? filteredInvoices : filteredInvoices.slice(0, 3);
+  const visibleExpenses = isPro ? filteredExpenses : filteredExpenses.slice(0, 10);
 
   const handleExportCSV = (type: 'expenses' | 'invoices') => {
     let csvContent: string[];
     if (type === 'expenses') {
       csvContent = ["Date,Description,Category,Vendor,Amount"];
-      expenses.forEach(exp => {
+      filteredExpenses.forEach(exp => {
         csvContent.push(`${exp.date},"${exp.description}",${exp.category},"${exp.vendor || ''}",${exp.amount}`);
       });
     } else {
       csvContent = ["InvoiceNumber,Client,Date,DueDate,Status,Subtotal,VAT,WHT,Total,NRSStatus"];
-      invoices.forEach(inv => {
+      filteredInvoices.forEach(inv => {
         csvContent.push(`${inv.invoiceNumber},"${inv.client.name}",${inv.issueDate},${inv.dueDate},${inv.status},${inv.subtotal || 0},${inv.tax || 0},${inv.whtAmount || 0},${inv.total || 0},${inv.nrsStatus || 'Draft'}`);
       });
     }
@@ -125,6 +211,40 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
     link.click();
   };
 
+  const handleExportPnL = () => {
+    const lines = [
+      'PROFIT & LOSS STATEMENT',
+      `Period: ${dateRange === 'all' ? 'All Time' : dateRange === 'month' ? 'This Month' : dateRange === 'quarter' ? 'This Quarter' : 'This Year'}`,
+      `Generated: ${new Date().toLocaleDateString('en-NG')}`,
+      '',
+      'REVENUE',
+      `  Total Revenue,₦${pnl.revenue}`,
+      '',
+      'COST OF SALES',
+      `  Cost of Sales,₦${pnl.costOfSales}`,
+      '',
+      'GROSS PROFIT,₦${pnl.grossProfit}',
+      '',
+      'OPERATING EXPENSES',
+      ...Object.entries(pnl.expenseByCategory).map(([cat, amt]) => `  ${cat},₦${amt}`),
+      `  Total Expenses,₦${pnl.totalExpenses}`,
+      '',
+      'OPERATING PROFIT,₦${pnl.operatingProfit}',
+      '',
+      'TAX SUMMARY',
+      `  VAT Collected (Output),₦${pnl.vatCollected}`,
+      `  WHT Suffered (Input Credit),₦${pnl.whtSuffered}`,
+      `  Net Tax Position,₦${pnl.netTax}`,
+      '',
+      'NET PROFIT,₦${pnl.netProfit}',
+    ];
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `invoiceapp_pnl_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+  };
+
   const handleAddExpense = (e: React.FormEvent) => {
     e.preventDefault();
     if (!desc || !amount) return;
@@ -132,6 +252,8 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
     onAddExpense({ description: desc, amount: Number(amount), date: new Date().toISOString().split('T')[0], category, vendor });
     setDesc(''); setAmount(''); setVendor('');
   };
+
+  const rangeLabel = dateRange === 'all' ? 'All Time' : dateRange === 'month' ? 'This Month' : dateRange === 'quarter' ? 'This Quarter' : dateRange === 'year' ? 'This Year' : 'Custom';
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
@@ -150,17 +272,46 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
         </div>
       </div>
 
+      {/* Date Range Filter */}
+      <div className="flex flex-wrap items-center gap-2 bg-white p-3 rounded-2xl border border-slate-200">
+        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mr-1">Period:</span>
+        {(['all', 'month', 'quarter', 'year'] as DateRange[]).map(r => (
+          <button key={r} onClick={() => setDateRange(r)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors capitalize ${
+              dateRange === r ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}>
+            {r === 'all' ? 'All Time' : r === 'month' ? 'This Month' : r === 'quarter' ? 'This Quarter' : 'This Year'}
+          </button>
+        ))}
+        <button onClick={() => setDateRange('custom')}
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+            dateRange === 'custom' ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+          }`}>
+          Custom
+        </button>
+        {dateRange === 'custom' && (
+          <div className="flex items-center gap-2 ml-2">
+            <input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)}
+              className="px-2 py-1 border border-slate-300 rounded-lg text-xs focus:border-teal-500 outline-none" />
+            <span className="text-slate-400 text-xs">to</span>
+            <input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)}
+              className="px-2 py-1 border border-slate-300 rounded-lg text-xs focus:border-teal-500 outline-none" />
+          </div>
+        )}
+        <span className="text-[10px] text-slate-400 ml-auto">{rangeLabel} · {filteredInvoices.length} invoices · {filteredExpenses.length} expenses</span>
+      </div>
+
       {/* Key Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Revenue</p>
           <p className="text-2xl font-black text-teal-600 mt-1">₦{numberFormatter.format(stats.revenue)}</p>
-          <p className="text-[10px] text-slate-500 mt-1">{invoices.length} invoices</p>
+          <p className="text-[10px] text-slate-500 mt-1">{filteredInvoices.length} invoices</p>
         </div>
         <div className="bg-white p-5 rounded-2xl border border-slate-200">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Expenses</p>
           <p className="text-2xl font-black text-red-500 mt-1">₦{numberFormatter.format(totalExpenses)}</p>
-          <p className="text-[10px] text-slate-500 mt-1">{expenses.length} entries</p>
+          <p className="text-[10px] text-slate-500 mt-1">{filteredExpenses.length} entries</p>
         </div>
         <div className="bg-white p-5 rounded-2xl border border-slate-200">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Net Profit</p>
@@ -213,13 +364,13 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit">
-        {(['overview', 'expenses', 'transactions'] as const).map(tab => (
+      <div className="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit overflow-x-auto">
+        {(['overview', 'expenses', 'transactions', 'receivables', 'pnl'] as const).map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors capitalize ${
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors capitalize whitespace-nowrap ${
               activeTab === tab ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
             }`}>
-            {tab}
+            {tab === 'pnl' ? 'P&L' : tab === 'receivables' ? 'Receivables' : tab}
           </button>
         ))}
       </div>
@@ -307,7 +458,7 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
 
       {activeTab === 'transactions' && (
         <div className="bg-white p-6 rounded-2xl border border-slate-200 relative">
-          {!isPro && invoices.length > 3 && (
+          {!isPro && filteredInvoices.length > 3 && (
             <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 backdrop-blur-sm rounded-2xl">
               <div className="bg-slate-900 text-white p-8 rounded-3xl shadow-2xl text-center max-w-sm">
                 <h3 className="text-xl font-bold mb-2">Unlock Full History</h3>
@@ -342,6 +493,173 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {activeTab === 'receivables' && (
+        <div className="space-y-6">
+          {/* Aged Summary Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="bg-white p-4 rounded-2xl border border-slate-200">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Current</p>
+              <p className="text-lg font-black text-teal-600 mt-1">₦{numberFormatter.format(receivables.buckets.current)}</p>
+              <p className="text-[10px] text-slate-500">Not yet due</p>
+            </div>
+            <div className="bg-white p-4 rounded-2xl border border-amber-200">
+              <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">1–30 Days</p>
+              <p className="text-lg font-black text-amber-600 mt-1">₦{numberFormatter.format(receivables.buckets.d1_30)}</p>
+              <p className="text-[10px] text-slate-500">Slightly overdue</p>
+            </div>
+            <div className="bg-white p-4 rounded-2xl border border-orange-200">
+              <p className="text-[10px] font-bold text-orange-500 uppercase tracking-wider">31–60 Days</p>
+              <p className="text-lg font-black text-orange-600 mt-1">₦{numberFormatter.format(receivables.buckets.d31_60)}</p>
+              <p className="text-[10px] text-slate-500">Needs follow-up</p>
+            </div>
+            <div className="bg-white p-4 rounded-2xl border border-red-200">
+              <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider">61–90 Days</p>
+              <p className="text-lg font-black text-red-600 mt-1">₦{numberFormatter.format(receivables.buckets.d61_90)}</p>
+              <p className="text-[10px] text-slate-500">Seriously overdue</p>
+            </div>
+            <div className="bg-white p-4 rounded-2xl border border-red-300">
+              <p className="text-[10px] font-bold text-red-700 uppercase tracking-wider">90+ Days</p>
+              <p className="text-lg font-black text-red-800 mt-1">₦{numberFormatter.format(receivables.buckets.over90)}</p>
+              <p className="text-[10px] text-slate-500">At risk of bad debt</p>
+            </div>
+          </div>
+
+          {/* Detailed List */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-bold text-slate-900">Outstanding Invoices</h3>
+              <p className="text-xs text-slate-500">
+                Total: <span className="font-bold text-slate-900">₦{numberFormatter.format(
+                  receivables.buckets.current + receivables.buckets.d1_30 + receivables.buckets.d31_60 + receivables.buckets.d61_90 + receivables.buckets.over90
+                )}</span>
+              </p>
+            </div>
+            {receivables.details.length === 0 ? (
+              <p className="text-sm text-slate-400 italic py-8 text-center">No outstanding invoices — all paid!</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                      <th className="pb-2 pr-4">Client</th>
+                      <th className="pb-2 pr-4">Invoice</th>
+                      <th className="pb-2 pr-4">Due Date</th>
+                      <th className="pb-2 pr-4 text-right">Days Overdue</th>
+                      <th className="pb-2 text-right">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {receivables.details.map((item, i) => (
+                      <tr key={i} className="border-b border-slate-50">
+                        <td className="py-3 pr-4 font-semibold text-slate-900">{item.client}</td>
+                        <td className="py-3 pr-4 text-slate-600">#{item.invoiceNumber}</td>
+                        <td className="py-3 pr-4 text-slate-500">{item.dueDate}</td>
+                        <td className="py-3 pr-4 text-right">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            item.days <= 0 ? 'bg-teal-100 text-teal-700' :
+                            item.days <= 30 ? 'bg-amber-100 text-amber-700' :
+                            item.days <= 60 ? 'bg-orange-100 text-orange-700' :
+                            'bg-red-100 text-red-700'
+                          }`}>
+                            {item.days <= 0 ? `${Math.abs(item.days)}d early` : `${item.days}d`}
+                          </span>
+                        </td>
+                        <td className="py-3 text-right font-bold text-slate-900">₦{numberFormatter.format(item.amount)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'pnl' && (
+        <div className="space-y-6">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h3 className="font-bold text-slate-900">Profit & Loss Statement</h3>
+                <p className="text-xs text-slate-500 mt-1">{rangeLabel}</p>
+              </div>
+              <button onClick={handleExportPnL}
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-xl text-sm transition-colors">
+                Export P&L
+              </button>
+            </div>
+
+            <div className="space-y-1">
+              {/* Revenue */}
+              <div className="flex justify-between items-center py-3 border-b border-slate-100">
+                <span className="text-sm font-semibold text-slate-700">Total Revenue</span>
+                <span className="text-sm font-bold text-teal-600">₦{numberFormatter.format(pnl.revenue)}</span>
+              </div>
+
+              {/* Cost of Sales */}
+              <div className="flex justify-between items-center py-3 border-b border-slate-100">
+                <span className="text-sm font-semibold text-slate-700">Cost of Sales</span>
+                <span className="text-sm font-bold text-red-500">₦{numberFormatter.format(pnl.costOfSales)}</span>
+              </div>
+
+              {/* Gross Profit */}
+              <div className="flex justify-between items-center py-3 border-b-2 border-slate-300 bg-slate-50 -mx-3 px-3 rounded-lg">
+                <span className="text-sm font-black text-slate-900">Gross Profit</span>
+                <span className="text-sm font-black text-slate-900">₦{numberFormatter.format(pnl.grossProfit)}</span>
+              </div>
+
+              {/* Expenses */}
+              <div className="pt-3 pb-1">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Operating Expenses</p>
+              </div>
+              {Object.entries(pnl.expenseByCategory).map(([cat, amt]) => (
+                <div key={cat} className="flex justify-between items-center py-2 pl-4">
+                  <span className="text-sm text-slate-600">{cat}</span>
+                  <span className="text-sm text-slate-700">₦{numberFormatter.format(amt)}</span>
+                </div>
+              ))}
+              <div className="flex justify-between items-center py-3 border-b border-slate-100">
+                <span className="text-sm font-semibold text-slate-700">Total Expenses</span>
+                <span className="text-sm font-bold text-red-500">₦{numberFormatter.format(pnl.totalExpenses)}</span>
+              </div>
+
+              {/* Operating Profit */}
+              <div className="flex justify-between items-center py-3 border-b-2 border-slate-300 bg-slate-50 -mx-3 px-3 rounded-lg">
+                <span className="text-sm font-black text-slate-900">Operating Profit</span>
+                <span className={`text-sm font-black ${pnl.operatingProfit >= 0 ? 'text-teal-600' : 'text-red-600'}`}>
+                  ₦{numberFormatter.format(pnl.operatingProfit)}
+                </span>
+              </div>
+
+              {/* Tax Summary */}
+              <div className="pt-3 pb-1">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tax Summary</p>
+              </div>
+              <div className="flex justify-between items-center py-2 pl-4">
+                <span className="text-sm text-slate-600">VAT Collected (Output)</span>
+                <span className="text-sm text-blue-600">₦{numberFormatter.format(pnl.vatCollected)}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 pl-4">
+                <span className="text-sm text-slate-600">WHT Suffered (Input Credit)</span>
+                <span className="text-sm text-amber-600">₦{numberFormatter.format(pnl.whtSuffered)}</span>
+              </div>
+              <div className="flex justify-between items-center py-3 border-b border-slate-100">
+                <span className="text-sm font-semibold text-slate-700">Net Tax Position</span>
+                <span className={`text-sm font-bold ${pnl.netTax >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                  ₦{numberFormatter.format(pnl.netTax)}
+                </span>
+              </div>
+
+              {/* Net Profit */}
+              <div className="flex justify-between items-center py-4 bg-slate-900 text-white -mx-3 px-3 rounded-xl mt-2">
+                <span className="text-sm font-black uppercase tracking-wider">Net Profit</span>
+                <span className="text-lg font-black">₦{numberFormatter.format(pnl.netProfit)}</span>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
