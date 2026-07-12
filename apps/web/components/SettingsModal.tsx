@@ -153,19 +153,37 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
             </p>
           </div>
 
-          <button
-            onClick={() => { onClose(); /* SmtpSettingsModal is triggered from App.tsx */ window.dispatchEvent(new CustomEvent('open-smtp-settings')); }}
-            className="w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 hover:border-teal-300 hover:bg-teal-50/50 transition-all group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center text-lg">📧</div>
-              <div className="text-left">
-                <p className="text-sm font-semibold text-slate-900">Email (SMTP) Settings</p>
-                <p className="text-xs text-slate-500">Send invoices directly from your email</p>
+          {isPro && (
+            <button
+              onClick={() => { onClose(); window.dispatchEvent(new CustomEvent('open-smtp-settings')); }}
+              className="w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 hover:border-teal-300 hover:bg-teal-50/50 transition-all group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center text-lg">📧</div>
+                <div className="text-left">
+                  <p className="text-sm font-semibold text-slate-900">Email (SMTP) Settings</p>
+                  <p className="text-xs text-slate-500">Send invoices directly from your email</p>
+                </div>
               </div>
-            </div>
-            <span className="text-slate-400 group-hover:text-teal-600 transition-colors">→</span>
-          </button>
+              <span className="text-slate-400 group-hover:text-teal-600 transition-colors">→</span>
+            </button>
+          )}
+
+          {!isPro && (
+            <button
+              onClick={() => { onClose(); window.dispatchEvent(new CustomEvent('open-smtp-settings')); }}
+              className="w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 hover:border-teal-300 hover:bg-teal-50/50 transition-all group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center text-lg">🔒</div>
+                <div className="text-left">
+                  <p className="text-sm font-semibold text-slate-900">Email (SMTP) Settings</p>
+                  <p className="text-xs text-slate-500">Pro feature — send invoices from your inbox</p>
+                </div>
+              </div>
+              <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-full">PRO</span>
+            </button>
+          )}
 
           {isPro && (
             <div className="border-t border-slate-100 pt-6">

@@ -1056,7 +1056,13 @@ const App: React.FC = () => {
         isOpen={isSmtpModalOpen}
         onClose={() => setIsSmtpModalOpen(false)}
         user={user}
+        isPro={isPro}
         onSmtpSaved={(settings) => setSmtpSettings(settings)}
+        onUpgrade={() => {
+          setIsSmtpModalOpen(false);
+          setPricingModalContent({ title: 'Unlock Direct Email', message: 'Send invoices straight from your inbox to your clients — no copy-pasting needed.' });
+          setIsPricingModalOpen(true);
+        }}
       />
 
       <PricingModal

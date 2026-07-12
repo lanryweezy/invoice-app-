@@ -157,12 +157,12 @@ export const EmailModal: React.FC<EmailModalProps> = ({ isOpen, onClose, emailCo
                     {!hasSmtp && (
                         <div className="mt-3 bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-semibold text-amber-800">Want to send emails directly?</p>
-                                <p className="text-xs text-amber-600">Connect your own SMTP (Gmail, Outlook, etc.)</p>
+                                <p className="text-sm font-semibold text-amber-800">Send directly from your inbox</p>
+                                <p className="text-xs text-amber-600">Connect Gmail, Outlook, or any SMTP — Pro feature</p>
                             </div>
                             <button onClick={(e) => { e.stopPropagation(); onOpenSmtpSettings?.(); }}
-                                className="text-xs font-bold text-amber-700 hover:text-amber-900 whitespace-nowrap">
-                                Set up SMTP →
+                                className="text-xs font-bold text-amber-700 hover:text-amber-900 whitespace-nowrap bg-amber-100 px-3 py-1.5 rounded-lg">
+                                Connect →
                             </button>
                         </div>
                     )}
