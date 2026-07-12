@@ -1,4 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+
+declare global {
+  interface Window {
+    turnstile?: { render: (container: string | HTMLElement, options: any) => string; getResponse: (widgetId: string) => string | undefined; reset: (widgetId: string) => void };
+  }
+}
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -8,12 +14,31 @@ interface AuthModalProps {
   onSignUpWithEmail: (email: string, password: string) => Promise<void>;
 }
 
+const TURNSTILE_SITEKEY = import.meta.env.VITE_TURNSTILE_SITEKEY || '';
+const TURNSTILE_ENABLED = !!TURNSTILE_SITEKEY;
+
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginWithGoogle, onLoginWithEmail, onSignUpWithEmail }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<string>('');
+
+  useEffect(() => {
+    if (!isOpen || !TURNSTILE_ENABLED) return;
+    if (window.turnstile && turnstileRef.current) {
+      widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
+        sitekey: TURNSTILE_SITEKEY,
+        callback: (token: string) => setTurnstileToken(token),
+        'expired-callback': () => setTurnstileToken(''),
+        theme: 'light',
+        size: 'normal',
+      });
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -33,6 +58,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginWi
       if (isLogin) {
         await onLoginWithEmail(email, password);
       } else {
+        if (TURNSTILE_ENABLED && !turnstileToken) {
+          setError('Please complete the verification.');
+          setLoading(false);
+          return;
+        }
         await onSignUpWithEmail(email, password);
       }
       onClose();
@@ -100,9 +130,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginWi
               />
             </div>
 
+            {TURNSTILE_ENABLED && !isLogin && (
+              <div ref={turnstileRef} className="flex justify-center" />
+            )}
+
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || (!isLogin && TURNSTILE_ENABLED && !turnstileToken)}
               className="w-full py-2.5 px-4 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg transition-colors disabled:opacity-70"
             >
               {loading ? 'Please wait...' : (isLogin ? 'Login' : 'Sign Up')}

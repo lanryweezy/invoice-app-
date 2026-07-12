@@ -3,12 +3,9 @@ import type { Invoice } from '../types';
 const STORAGE_KEY = 'invoiceapp_portal_links';
 
 export function generatePortalToken(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let token = '';
-  for (let i = 0; i < 12; i++) {
-    token += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return token;
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
 }
 
 export function createPortalLink(invoice: Invoice): string {
