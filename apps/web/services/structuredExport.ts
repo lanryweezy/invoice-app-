@@ -271,11 +271,31 @@ export function exportToCSV(invoice: Invoice): string {
   return [headers.join(','), row.join(',')].join('\n');
 }
 
-export async function exportBatch(
-  invoices: Invoice[],
-  format: 'json' | 'csv'
-): Promise<string> {
-  if (format === 'csv') {
+/**
+ * 🔩 Hinge Extension Point: BatchExportStrategy
+ *
+ * Pressure: The `exportBatch` function had a hardcoded `if (format === 'csv')` block,
+ * which would need to grow every time a new export format (like PDF or XML) was added.
+ *
+ * Contract:
+ * - Implementors provide a unique `format` string and an `export` function.
+ * - The `export` function receives an array of `Invoice` objects and must return a string
+ *   (or Promise resolving to a string) containing the formatted payload.
+ */
+export interface BatchExportStrategy {
+  format: string;
+  export(invoices: Invoice[]): string | Promise<string>;
+}
+
+const exportStrategies: BatchExportStrategy[] = [];
+
+export function registerBatchExportStrategy(strategy: BatchExportStrategy): void {
+  exportStrategies.push(strategy);
+}
+
+const csvBatchStrategy: BatchExportStrategy = {
+  format: 'csv',
+  export: (invoices: Invoice[]) => {
     const headers = [
       'InvoiceNumber', 'IssueDate', 'DueDate', 'Status', 'Currency',
       'RecipientName', 'Subtotal', 'TaxAmount', 'Total',
@@ -298,7 +318,26 @@ export async function exportBatch(
 
     return [headers.join(','), ...rows].join('\n');
   }
+};
 
-  const batch = invoices.map((inv) => buildNRSPayload(inv));
-  return JSON.stringify(batch, null, 2);
+const jsonBatchStrategy: BatchExportStrategy = {
+  format: 'json',
+  export: (invoices: Invoice[]) => {
+    const batch = invoices.map((inv) => buildNRSPayload(inv));
+    return JSON.stringify(batch, null, 2);
+  }
+};
+
+registerBatchExportStrategy(csvBatchStrategy);
+registerBatchExportStrategy(jsonBatchStrategy);
+
+export async function exportBatch(
+  invoices: Invoice[],
+  format: string
+): Promise<string> {
+  const strategy = exportStrategies.find(s => s.format === format);
+  if (!strategy) {
+    throw new Error(`Unsupported export format: ${format}`);
+  }
+  return await strategy.export(invoices);
 }
