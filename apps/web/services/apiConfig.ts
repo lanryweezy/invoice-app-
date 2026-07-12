@@ -51,11 +51,15 @@ export async function apiRequest(
   const headers = getHeaders();
 
   const startTime = Date.now();
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
+
   try {
     const response = await fetch(url, {
       method,
       headers,
       body: body ? JSON.stringify(body) : undefined,
+      signal: controller.signal,
     });
 
     const duration = Date.now() - startTime;
@@ -68,8 +72,13 @@ export async function apiRequest(
 
     return await response.json();
   } catch (error) {
+    if ((error as Error).name === 'AbortError') {
+      throw new NrsApiError(408, 'Request timed out', endpoint);
+    }
     if (error instanceof NrsApiError) throw error;
     throw new NrsApiError(0, (error as Error).message, endpoint);
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
