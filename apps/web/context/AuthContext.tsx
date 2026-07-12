@@ -4,7 +4,7 @@ import {
   onAuthStateChanged, doc, setDoc, getDoc, User, 
   createUserWithEmailAndPassword, signInWithEmailAndPassword 
 } from '../services/firebase';
-import { onSnapshot } from 'firebase/firestore';
+import { onSnapshot, runTransaction } from 'firebase/firestore';
 import { trackEvent } from '../utils/analytics';
 
 export interface SubscriptionData {
@@ -42,10 +42,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // We do a one-time check/creation when the user first authenticates
         const checkUserRecord = async () => {
           try {
-            const userSnap = await getDoc(userRef);
-            if (!userSnap.exists()) {
-              await setDoc(userRef, { plan: 'free' });
-            }
+            // 💾 Vault: Use runTransaction to prevent silent data destruction from concurrent
+            // offline sync flushes when a user document is initialized.
+            // A non-atomic read-then-write sequence here allows offline data accumulated
+            // before the check to be overwritten if it syncs in between the get and set.
+            await runTransaction(db, async (transaction) => {
+              const userSnap = await transaction.get(userRef);
+              if (!userSnap.exists()) {
+                transaction.set(userRef, { plan: 'free' }, { merge: true });
+              }
+            });
           } catch (error) {
             console.error("Error checking/creating user record:", error);
             try { trackEvent('auth_user_record_error', { user_id: currentUser.uid, error: String(error) }); } catch {}
