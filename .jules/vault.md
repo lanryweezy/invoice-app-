@@ -18,3 +18,6 @@
 ## 2024-05-18 - Prevent silent data destruction during user doc initialization
 **Learning:** A non-atomic read-then-write sequence (`getDoc` followed by `setDoc`) during user document initialization allows offline data accumulated before the check to be overwritten if it syncs in between the get and set.
 **Action:** Always wrap user document initialization in a `runTransaction` and use `{ merge: true }` in `transaction.set` to preserve concurrently accumulated fields.
+## 2024-05-19 - Enforcing field immutability and enum constraints in Firestore rules
+**Learning:** Adding validation at the application layer is insufficient if direct database writes or optimistic UI updates can bypass it. For document-based NoSQL like Firestore, property-level enum checks (e.g. `request.resource.data.plan in ['free', 'pro']`) and field immutability constraints (e.g., `request.resource.data.uid == resource.data.uid`) must be explicitly enforced in `firestore.rules` to prevent data corruption.
+**Action:** Always enforce property-level constraints directly within `firestore.rules` to prevent application layer bugs from bypassing validation and corrupting schema.
