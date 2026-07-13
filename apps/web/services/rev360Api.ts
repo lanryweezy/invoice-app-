@@ -32,9 +32,21 @@ export class Rev360Api {
 
   constructor(private baseUrl: string = 'https://rev360.nrs.gov.ng/api') {}
 
+  // 🌱 Flora: Wraps native fetch with AbortController to prevent indefinite UI hangs if rev360.nrs.gov.ng drops connections
+  private async fetchWithTimeout(url: string, options: RequestInit = {}, timeout = 15000): Promise<Response> {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+      const response = await fetch(url, { ...options, signal: controller.signal });
+      return response;
+    } finally {
+      clearTimeout(id);
+    }
+  }
+
   async authenticate(credentials: Rev360Credentials): Promise<AuthResult> {
     try {
-      const result = await fetch(`${this.baseUrl}/auth/token`, {
+      const result = await this.fetchWithTimeout(`${this.baseUrl}/auth/token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials),
@@ -62,7 +74,7 @@ export class Rev360Api {
 
   async registerInvoice(invoice: any): Promise<any> {
     try {
-      const response = await fetch(`${this.baseUrl}/invoices/register`, {
+      const response = await this.fetchWithTimeout(`${this.baseUrl}/invoices/register`, {
         method: 'POST',
         headers: this.getHeaders(),
         body: JSON.stringify(invoice),
@@ -75,9 +87,9 @@ export class Rev360Api {
 
   async fileVATReturn(vatReturn: VATReturn): Promise<any> {
     try {
-      const response = await fetch(`${this.baseUrl}/vat/returns`, {
+      const response = await this.fetchWithTimeout(`${this.baseUrl}/vat/returns`, {
         method: 'POST',
-        headers: self.getHeaders(),
+        headers: this.getHeaders(),
         body: JSON.stringify(vatReturn),
       });
       return await response.json();
@@ -88,9 +100,9 @@ export class Rev360Api {
 
   async generateWHTCertificate(invoice: any): Promise<any> {
     try {
-      const response = await fetch(`${this.baseUrl}/wht/certificate`, {
+      const response = await this.fetchWithTimeout(`${this.baseUrl}/wht/certificate`, {
         method: 'POST',
-        headers: self.getHeaders(),
+        headers: this.getHeaders(),
         body: JSON.stringify(invoice),
       });
       return await response.json();
@@ -101,8 +113,8 @@ export class Rev360Api {
 
   async checkCompliance(tin: string): Promise<any> {
     try {
-      const response = await fetch(`${this.baseUrl}/compliance/status/${tin}`, {
-        headers: self.getHeaders(),
+      const response = await this.fetchWithTimeout(`${this.baseUrl}/compliance/status/${tin}`, {
+        headers: this.getHeaders(),
       });
       return await response.json();
     } catch (error) {
