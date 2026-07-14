@@ -2,6 +2,8 @@
  * NRS API Configuration
  */
 
+import { trackEvent } from '../utils/analytics';
+
 export interface NrsApiConfig {
   baseUrl: string;
   apiKey: string;
@@ -72,10 +74,14 @@ export async function apiRequest(
 
     return await response.json();
   } catch (error) {
+    const duration = Date.now() - startTime;
     if ((error as Error).name === 'AbortError') {
+      logApiCall(endpoint, method, duration, 408);
       throw new NrsApiError(408, 'Request timed out', endpoint);
     }
     if (error instanceof NrsApiError) throw error;
+
+    logApiCall(endpoint, method, duration, 0);
     throw new NrsApiError(0, (error as Error).message, endpoint);
   } finally {
     clearTimeout(timeoutId);
@@ -95,4 +101,12 @@ export class NrsApiError extends Error {
 
 function logApiCall(endpoint: string, method: string, duration: number, status: number): void {
   console.log(`[NRS API] ${method} ${endpoint} - ${status} (${duration}ms)`);
+  try {
+    trackEvent('api_call', {
+      endpoint: endpoint,
+      method: method,
+      duration_ms: duration,
+      status: status,
+    });
+  } catch {}
 }
