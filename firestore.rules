@@ -43,6 +43,7 @@ service cloud.firestore {
         && request.resource.data.keys().hasAll(['uid', 'username', 'isPublic'])
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.username == username
+        && request.resource.data.username.matches('^[a-z0-9_]+$')
         && request.resource.data.username.size() >= 3
         && request.resource.data.username.size() <= 30;
 
