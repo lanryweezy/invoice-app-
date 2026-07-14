@@ -10,18 +10,21 @@ service cloud.firestore {
       allow read: if request.auth != null && request.auth.uid == uid;
 
       // Owner can create their own document (on first login)
-      allow create: if request.auth != null && request.auth.uid == uid;
+      // Must be free plan initially
+      allow create: if request.auth != null && request.auth.uid == uid
+        && (!('plan' in request.resource.data) || request.resource.data.plan == 'free');
 
       // Owner can update their own document
       // Paystack webhook uses firebase-admin SDK which bypasses rules,
       // so no special allowance is needed for server-side writes.
-      allow update: if request.auth != null && request.auth.uid == uid;
+      // Prevent arbitrary client-side upgrades
+      allow update: if request.auth != null && request.auth.uid == uid
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['plan', 'uid']));
 
       // Owner can delete their own document
       allow delete: if request.auth != null && request.auth.uid == uid;
 
       // Validate that sensitive fields are never exposed to other users
-      // and that plan field can only be 'free' or 'pro'
       match /{document=**} {
         allow read, write: if request.auth != null && request.auth.uid == uid;
       }
