@@ -18,6 +18,11 @@
 ## 2024-05-18 - Prevent silent data destruction during user doc initialization
 **Learning:** A non-atomic read-then-write sequence (`getDoc` followed by `setDoc`) during user document initialization allows offline data accumulated before the check to be overwritten if it syncs in between the get and set.
 **Action:** Always wrap user document initialization in a `runTransaction` and use `{ merge: true }` in `transaction.set` to preserve concurrently accumulated fields.
-## 2024-06-25 - Enum constraints and immutability in firestore.rules
+## 2026-07-14 - Securing Privilege Fields from Client Manipulation
+
+**Learning:** The application previously allowed the client frontend to directly write `plan: 'pro'` to Firestore upon a successful payment callback. Even though a backend Paystack webhook also handled the upgrade, the lack of Firestore rules meant a malicious user could execute the same `setDoc` operation to upgrade themselves for free. Enforcing field immutability in `firestore.rules` (using `!request.resource.data.diff(resource.data).affectedKeys().hasAny(['plan'])`) is critical for preventing arbitrary privilege escalation.
+
+**Action:** When securing `firestore.rules` to enforce field immutability, always update the frontend client code (e.g. `setDoc` calls) to remove writes to those newly restricted fields. Failing to do so will cause the client application to receive permission denied errors and break the UI flow. Rely on the server-side webhook (using `firebase-admin`) as the authoritative source for writing privileged state.
+## 2026-07-14 - Enum constraints and immutability in firestore.rules
 **Learning:** Firestore documents can easily be corrupted by optimistic UI updates bypassing rules if strict property-level constraints are absent. Even if the application logic correctly assumes an enum like `plan in ['free', 'pro']` or immutability of fields like `uid` and `username` in a profile, failing to enforce this explicitly in `firestore.rules` allows arbitrary string injection or ownership transfer.
 **Action:** Always enforce enum-like constraints for critical fields (`request.resource.data.field in [...]`) and lock down fields that should never change during an update (`request.resource.data.field == resource.data.field`) directly within `firestore.rules`.

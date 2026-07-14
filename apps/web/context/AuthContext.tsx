@@ -156,8 +156,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             },
             callback: function(response: any) {
               try { trackEvent('payment_success', { plan_type: planType, ref: response.reference, user_id: user.uid }); } catch {}
+              // 💾 Vault: Only save non-privileged metadata on the client.
+              // The `plan` field is securely updated by the Paystack webhook backend
+              // and locked by Firestore rules to prevent arbitrary client-side upgrades.
               setDoc(doc(db, 'users', user.uid), {
-                plan: 'pro',
                 planType,
                 upgradedAt: new Date().toISOString(),
                 paystackRef: response.reference,
