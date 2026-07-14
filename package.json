@@ -7,7 +7,9 @@
     "test": "pnpm --filter \"./apps/**\" run test"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.9",
     "fs-extra": "^11.3.5",
-    "jsdom": "^29.1.1"
+    "jsdom": "^29.1.1",
+    "typescript": "~5.8.3"
   }
 }

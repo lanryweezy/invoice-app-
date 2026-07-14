@@ -4,3 +4,6 @@
 ## 2026-07-12 - Missing timeout in core NRS API wrapper
 **Learning:** The central apiRequest fetch wrapper in apiConfig.ts lacked a timeout, meaning any latency from the NRS API would cause the entire application to hang indefinitely. Added AbortController to contain failure.
 **Action:** Always wrap external fetch calls with an AbortController timeout to ensure graceful degradation when services hang.
+## 2024-05-18 - Missing Timeouts on Native Fetch in External Service Clients
+**Learning:** Native `fetch` calls without `AbortController` in client-side architectures like Vite SPAs do not have default timeouts. If the integrated API (like `rev360.nrs.gov.ng`) degrades or drops the connection silently, it causes indefinite blocking/hanging of UI workflows relying on those promises.
+**Action:** Always wrap native `fetch` calls to third-party endpoints with an `AbortController`-based timeout mechanism, and ensure the fallback path safely catches `AbortError` or treats timeout failures gracefully according to the existing retry/fallback strategy of the module.
