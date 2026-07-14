@@ -21,3 +21,7 @@ This journal tracks critical observability learnings for InvoiceApp.ng.
 ## 2025-05-14 - Auth Telemetry Convention
 **Learning:** Found a specific logging schema and field naming convention used by this team consistently for `trackEvent` calls, particularly in `AuthContext.tsx`. These calls are wrapped in an empty `try/catch` to ensure telemetry failures never crash the app. Fields always use `snake_case` (e.g., `user_id`, `plan_type`), and errors are explicitly stringified (`String(error)`). PII is avoided in favor of UUIDs.
 **Action:** When adding observability metrics to existing systems, explicitly wrap `trackEvent` in `try/catch {}` blocks to preserve system resilience, and stick strictly to the established `snake_case` naming and `String(error)` serialization pattern.
+
+## 2024-05-24 - Network Level API Telemetry
+**Learning:** Found an observability blind spot in `apps/web/services/apiConfig.ts` where fundamental network errors (e.g., DNS resolution failures) and request timeouts (`AbortError`) bypassed the standard HTTP fetch error logging path. The catch block only threw the `NrsApiError` without tracking the network failure event, causing these issues to be invisible in production analytics.
+**Action:** Always capture latency and emit a log entry (or `trackEvent`) with synthetic status codes (`0` for network failures, `408` for timeouts) before re-throwing errors in API wrappers to ensure that total API availability, including network-level drops, is measurable.
