@@ -3,6 +3,7 @@ import type { Expense } from '../types';
 import { useSubscription } from './useSubscription';
 import { db, doc, setDoc, getDoc } from '../services/firebase';
 import { queueMutation } from '../utils/offlineSync';
+import { trackEvent } from '../utils/analytics';
 
 export const useExpenses = () => {
     const [expenses, setExpenses] = useState<Expense[]>(() => {
@@ -42,6 +43,7 @@ export const useExpenses = () => {
                     }
                 } catch (error) {
                     console.error("Failed to load cloud expenses", error);
+                    try { trackEvent('cloud_data_load_failed', { collection: 'users', doc_id: firebaseUser.uid, error: String(error) }); } catch {}
                 } finally {
                     isCloudLoaded.current = true;
                 }
