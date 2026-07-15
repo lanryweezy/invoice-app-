@@ -225,6 +225,34 @@ export const ClientPortalView: React.FC<PortalProps> = ({ invoice, onConfirmPaym
           )}
         </div>
 
+        {/* Viral CTA — prompt clients to create their own free account */}
+        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-center">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <div className="bg-teal-500 text-white p-1.5 rounded-lg">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 7h6m0 4h6m-6 4h6M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <p className="text-white font-bold text-sm">InvoiceApp</p>
+          </div>
+          <h3 className="text-white font-bold text-lg mb-2">Create professional invoices for free</h3>
+          <p className="text-slate-400 text-sm mb-4 max-w-md mx-auto">
+            Join thousands of Nigerian freelancers and SMEs sending NRS-compliant invoices, tracking payments, and getting paid faster.
+          </p>
+          <a
+            href="https://www.invoiceapp.ng/editor"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-teal-500 hover:bg-teal-400 text-white font-bold py-3 px-6 rounded-xl transition-colors text-sm"
+          >
+            Start Generating Invoices — It's Free
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </a>
+          <p className="text-slate-500 text-xs mt-3">Free plan · No credit card required · NRS compliant</p>
+        </div>
+
         {/* Footer */}
         <div className="text-center py-6">
           <p className="text-xs text-slate-400">Powered by InvoiceApp.ng — Professional invoicing for Nigerian businesses</p>

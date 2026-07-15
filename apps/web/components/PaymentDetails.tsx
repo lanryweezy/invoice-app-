@@ -62,7 +62,8 @@ const PaymentDetails: React.FC<PaymentDetailsProps> = React.memo(({ invoice, upd
       `Account: ${paymentDetails.account}\n` +
       `Name: ${paymentDetails.name}\n` +
       `Amount: ${fmt(paymentDetails.amount, paymentDetails.currency)}\n\n` +
-      `Please make payment and share the receipt. Thank you!`
+      `Please make payment and share the receipt. Thank you!\n\n` +
+      `📎 Created with InvoiceApp.ng — free invoicing for Nigerian businesses`
     );
     window.open(`https://wa.me/?text=${text}`, '_blank');
   }, [paymentDetails]);

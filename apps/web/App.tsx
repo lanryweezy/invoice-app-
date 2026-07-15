@@ -436,7 +436,18 @@ const App: React.FC = () => {
     setIsEmailModalOpen(true);
     saveInvoice(fullInvoice);
     trackEvent('generate_email', { invoice_id: invoice.invoiceNumber, template: type });
-  }, [invoice, totals, saveInvoice, emailTemplate]);
+
+    // Usage-based upgrade nudge: after 5 invoices on free plan
+    if (!isPro && savedInvoices.length >= 4) {
+      setTimeout(() => {
+        setPricingModalContent({
+          title: "You're on a roll!",
+          message: `You've created ${savedInvoices.length + 1} invoices. Upgrade to Pro for unlimited clients, cloud sync, and NRS compliance tools.`
+        });
+        setIsPricingModalOpen(true);
+      }, 1500);
+    }
+  }, [invoice, totals, saveInvoice, emailTemplate, isPro, savedInvoices.length]);
 
   const handleSaveClient = useCallback((client: Client) => {
       // Free tier restriction: max 2 clients

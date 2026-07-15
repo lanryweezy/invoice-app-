@@ -135,7 +135,8 @@ ${inv.user.address}`,
 
 export function generateEmailTemplate(inv: Invoice, templateType: EmailTemplateType = 'formal'): string {
   const { subject, body } = templates[templateType](inv);
-  return `Subject: ${subject}\n\n${body}`;
+  const footer = `\n\n---\nCreated with InvoiceApp.ng — free invoicing for Nigerian businesses\nhttps://www.invoiceapp.ng`;
+  return `Subject: ${subject}\n\n${body}${footer}`;
 }
 
 export function getEmailSubject(inv: Invoice, templateType: EmailTemplateType = 'formal'): string {
