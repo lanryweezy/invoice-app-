@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { Receipt } from '../types';
 import { useSubscription } from './useSubscription';
 import { db, doc, setDoc, getDoc } from '../services/firebase';
+import { trackEvent } from '../utils/analytics';
 
 export const useReceipts = () => {
     const [receipts, setReceipts] = useState<Receipt[]>([]);
@@ -30,6 +31,7 @@ export const useReceipts = () => {
                     }
                 } catch (error) {
                     console.error("Failed to load cloud receipts", error);
+                    try { trackEvent('cloud_data_load_failed', { collection: 'users', doc_id: firebaseUser.uid, error: String(error) }); } catch {}
                 }
             };
             loadCloudData();
@@ -43,6 +45,7 @@ export const useReceipts = () => {
                 await setDoc(userRef, { receipts: newReceipts }, { merge: true });
             } catch (error) {
                 console.error("Failed to sync receipts", error);
+                try { trackEvent('cloud_data_sync_failed', { collection: 'users', doc_id: firebaseUser.uid, error: String(error) }); } catch {}
             }
         }
     }, [isPro, firebaseUser]);

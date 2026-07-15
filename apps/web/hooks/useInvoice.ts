@@ -3,6 +3,7 @@ import type { Invoice, LineItem, Currency, InvoiceStatus, User as AppUser, Clien
 import { useSubscription } from './useSubscription';
 import { db, doc, setDoc, getDoc } from '../services/firebase';
 import { queueMutation } from '../utils/offlineSync';
+import { trackEvent } from '../utils/analytics';
 
 const DEFAULT_USER: AppUser = {
   name: '',
@@ -116,6 +117,7 @@ export const useInvoice = () => {
                 }
             } catch (error) {
                 console.error("Failed to load cloud data", error);
+                try { trackEvent('cloud_data_load_failed', { collection: 'users', doc_id: firebaseUser.uid, error: String(error) }); } catch {}
             }
         };
         loadCloudData();
