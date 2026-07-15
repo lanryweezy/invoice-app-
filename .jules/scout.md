@@ -1,1 +1,5 @@
 ## 2024-05-24 - Isolated Test Execution and Global Linting\n**Learning:** The `apps/web` workspace currently has pre-existing TypeScript (`tsc --noEmit`) and ESLint (`pnpm lint`) errors on the main branch. When running verifications for isolated changes, it is necessary to differentiate between pre-existing global errors and regressions introduced by the specific change.\n**Action:** Focus verification on running targeted tests (e.g., `vitest run path/to/file.ts`) and the full test suite (`vitest run`) to ensure no regressions are introduced, while ignoring pre-existing linter/compiler errors unless they are directly related to the modified files.
+
+## 2026-07-15 - Never Commit Generated Test Reports
+**Learning:** When generating coverage reports or test outputs into text files during exploration, they often contain ANSI escape codes and pollute the workspace, leading to rejected patches if committed.
+**Action:** Always clean up temporary files like `coverage_report.txt` using `rm` before submitting, or pipe them to `/dev/null` / use `grep` directly on standard output.
