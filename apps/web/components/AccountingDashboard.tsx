@@ -427,7 +427,7 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
               <form onSubmit={handleAddExpense} className="space-y-3">
                 <input aria-label="Expense description" value={desc} onChange={e => setDesc(e.target.value)} className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" placeholder="Description" required />
                 <div className="grid grid-cols-2 gap-3">
-                  <input aria-label="Expense amount" type="number" value={amount} onChange={e => setAmount(e.target.value)} className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" placeholder="Amount" required min="0" />
+                  <input aria-label="Expense amount" type="number" inputMode="decimal" value={amount} onChange={e => setAmount(e.target.value)} className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" placeholder="Amount" required min="0" />
                   <select aria-label="Expense category" value={category} onChange={e => setCategory(e.target.value)} className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:border-teal-500 outline-none cursor-pointer">
                     {EXPENSE_CATEGORIES.map(c => <option key={c}>{c}</option>)}
                   </select>

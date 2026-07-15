@@ -68,6 +68,7 @@ const InputField: React.FC<InputFieldProps> = React.memo(({ id, label, value, on
           id={id || name}
           type={type}
           name={name}
+          inputMode={type === 'number' ? 'decimal' : undefined}
           value={value}
           onChange={onChange}
           placeholder={placeholder}
@@ -212,6 +213,7 @@ const LineItemRow = React.memo(({ item, index, currencySymbol, currencyFormatter
                         <input
                             name="quantity"
                             type="number"
+                            inputMode="decimal"
                             min="0"
                             value={item.quantity}
                             onChange={(e) => onChange(item.id, e)}
@@ -244,6 +246,7 @@ const LineItemRow = React.memo(({ item, index, currencySymbol, currencyFormatter
                             <input
                                 name="price"
                                 type="number"
+                                inputMode="decimal"
                                 min="0"
                                 step="0.01"
                                 value={item.price}

@@ -99,6 +99,7 @@ const NRSTaxPanel: React.FC<NRSTaxPanelProps> = React.memo(({ invoice, updateInv
                 <span className="text-xs text-slate-400">VAT Rate (%)</span>
                 <input
                   type="number"
+                  inputMode="decimal"
                   min="0"
                   max="100"
                   step="0.5"

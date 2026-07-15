@@ -96,6 +96,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                             <input
                                 id="amountPaid"
                                 type="number"
+                                inputMode="decimal"
                                 step="0.01"
                                 min="0"
                                 max={totalAmount * 1.5}
