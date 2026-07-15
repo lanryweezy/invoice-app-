@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.19",
+    "@sentry/react": "^9.30.0",
     "@vercel/analytics": "^2.0.1",
     "firebase": "^12.12.1",
     "html2canvas": "^1.4.1",
