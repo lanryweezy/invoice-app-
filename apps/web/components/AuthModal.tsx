@@ -110,6 +110,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginWi
               <input
                 id="email"
                 type="email"
+                autoComplete="username email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -124,6 +125,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginWi
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
+                  autoComplete={isLogin ? "current-password" : "new-password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -147,7 +149,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginWi
             <button
               type="submit"
               disabled={loading || (!isLogin && TURNSTILE_ENABLED && !turnstileToken)}
-              className="w-full py-2.5 px-4 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg transition-colors disabled:opacity-70"
+              className="w-full py-2.5 px-4 bg-teal-600 hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98] text-white font-bold rounded-lg transition-colors disabled:opacity-70"
             >
               {loading ? 'Please wait...' : (isLogin ? 'Login' : 'Sign Up')}
             </button>

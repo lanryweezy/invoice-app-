@@ -131,7 +131,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
             <button
                 onClick={onDownloadPdf}
                 disabled={isGeneratingPdf}
-                className="p-1.5 text-white bg-teal-600 hover:bg-teal-700 disabled:bg-slate-400 disabled:cursor-not-allowed rounded-lg shadow-md shadow-teal-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-1"
+                className="p-1.5 text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98] disabled:bg-slate-400 disabled:cursor-not-allowed rounded-lg shadow-md shadow-teal-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-1"
                 title={isGeneratingPdf ? 'Generating PDF...' : 'Download PDF'}
                 aria-label="Download PDF"
             >
@@ -197,7 +197,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       <button
         onClick={onDownloadPdf}
         disabled={isGeneratingPdf}
-        className="flex-1 lg:flex-none inline-flex items-center justify-center px-3 py-1.5 border border-transparent text-xs font-bold rounded-lg shadow-md shadow-teal-200 text-white bg-teal-600 hover:bg-teal-700 disabled:bg-slate-400 disabled:cursor-not-allowed hover:shadow-lg transition-all"
+        className="flex-1 lg:flex-none inline-flex items-center justify-center px-3 py-1.5 border border-transparent text-xs font-bold rounded-lg shadow-md shadow-teal-200 text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98] disabled:bg-slate-400 disabled:cursor-not-allowed hover:shadow-lg transition-all"
         aria-label="Download PDF"
       >
         {isGeneratingPdf ? (

@@ -81,7 +81,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
             </p>
             <button
               onClick={onClose}
-              className="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl transition-colors"
+              className="w-full py-3 bg-teal-600 hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98] text-white font-bold rounded-xl transition-colors"
             >
               Start Using Pro Features
             </button>
@@ -175,7 +175,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
             <button
               onClick={handleUpgrade}
               disabled={loading}
-              className="w-full bg-teal-600 hover:bg-teal-700 active:scale-[0.98] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg shadow-teal-600/30 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm cursor-pointer"
+              className="w-full bg-teal-600 hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg shadow-teal-600/30 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm cursor-pointer"
             >
               {loading && (
                 <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">

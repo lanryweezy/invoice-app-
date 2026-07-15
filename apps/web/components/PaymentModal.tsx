@@ -194,7 +194,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                         <button
                             type="submit"
                             disabled={loading || amountPaid <= 0}
-                            className="flex-1 px-3 py-2.5 text-white font-bold bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 disabled:cursor-not-allowed rounded-xl shadow-lg shadow-teal-600/20 transition-all text-xs flex items-center justify-center gap-1.5"
+                            className="flex-1 px-3 py-2.5 text-white font-bold bg-teal-600 hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98] disabled:bg-slate-300 disabled:cursor-not-allowed rounded-xl shadow-lg shadow-teal-600/20 transition-all text-xs flex items-center justify-center gap-1.5"
                         >
                             {loading && <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>}
                             {isFullPayment ? 'Record Full Payment' : isPartial ? 'Record Partial Payment' : 'Save Payment'}

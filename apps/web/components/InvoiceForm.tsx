@@ -753,6 +753,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                         value={invoice.digitalSignature || ''} 
                         onChange={handleInvoiceMetaChange} 
                         placeholder="Type your name..."
+                        autoComplete="name"
                         icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>}
                     />
                 </div>
@@ -913,7 +914,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
 
                     <button
                         onClick={addLineItem}
-                        className="inline-flex items-center justify-center gap-2 bg-teal-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-teal-700 transition-all text-sm shadow-lg shadow-teal-200/50 hover:shadow-teal-300/50"
+                        className="inline-flex items-center justify-center gap-2 bg-teal-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98] transition-all text-sm shadow-lg shadow-teal-200/50 hover:shadow-teal-300/50"
                     >
                         <PlusIcon className="w-4 h-4" />
                         Add First Item
@@ -977,7 +978,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                                 name="name" 
                                 value={invoice.client.name} 
                                 onChange={handleClientChange} 
-                                autoComplete="off"
+                                autoComplete="organization"
                                 icon={<UserIcon className="w-4 h-4"/>}
                             />
                         </div>
@@ -1069,7 +1070,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                     <p className="text-xs text-slate-500 mb-4">Set up recurring schedules to bill clients automatically every week, month, or year.</p>
                     <button
                         onClick={onProFeatureClick}
-                        className="bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors"
+                        className="bg-teal-600 hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98] text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors"
                     >
                         Upgrade to Pro to Unlock
                     </button>
@@ -1095,7 +1096,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                     {invoice.recurringFrequency && invoice.recurringFrequency !== 'none' && onSaveRecurring && (
                          <button
                              onClick={() => onSaveRecurring(invoice)}
-                             className="w-full py-2 bg-slate-900 hover:bg-teal-700 text-white font-bold rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
+                             className="w-full py-2 bg-slate-900 hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98] text-white font-bold rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
                          >
                              {!isPro && <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>}
                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
