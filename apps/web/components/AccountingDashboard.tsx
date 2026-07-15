@@ -154,6 +154,7 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
   const [category, setCategory] = useState('Software');
   const [vendor, setVendor] = useState('');
   const [activeTab, setActiveTab] = useState<'overview' | 'expenses' | 'transactions' | 'receivables' | 'pnl'>('overview');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange>('all');
   const [customFrom, setCustomFrom] = useState('');
   const [customTo, setCustomTo] = useState('');
@@ -245,12 +246,17 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
     link.click();
   };
 
-  const handleAddExpense = (e: React.FormEvent) => {
+  const handleAddExpense = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!desc || !amount) return;
+    if (!desc || !amount || !category) return;
     if (!isPro && expenses.length >= 5) { onUpgrade?.(); return; }
-    onAddExpense({ description: desc, amount: Number(amount), date: new Date().toISOString().split('T')[0], category, vendor });
-    setDesc(''); setAmount(''); setVendor('');
+    setIsSubmitting(true);
+    try {
+      await Promise.resolve(onAddExpense({ description: desc, amount: Number(amount), date: new Date().toISOString().split('T')[0], category, vendor }));
+      setDesc(''); setAmount(''); setCategory(''); setVendor('');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const rangeLabel = dateRange === 'all' ? 'All Time' : dateRange === 'month' ? 'This Month' : dateRange === 'quarter' ? 'This Quarter' : dateRange === 'year' ? 'This Year' : 'Custom';
@@ -411,7 +417,7 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
                         if (confirm(`Delete "${exp.description}" expense?`)) {
                           onRemoveExpense(exp.id);
                         }
-                      }} className="p-1 text-slate-400 hover:text-red-500 rounded-lg transition-colors">
+                      }} aria-label={`Delete ${exp.description} expense`} title="Delete Expense" className="p-1 text-slate-400 hover:text-red-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 rounded-lg transition-colors">
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                       </button>
                     </div>
@@ -425,16 +431,24 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
             <div className="bg-white p-6 rounded-2xl border border-slate-200">
               <h3 className="font-bold text-slate-900 mb-4">Log Expense</h3>
               <form onSubmit={handleAddExpense} className="space-y-3">
-                <input value={desc} onChange={e => setDesc(e.target.value)} className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" placeholder="Description" required />
+                <input aria-label="Expense description" autoCapitalize="words" value={desc} onChange={e => setDesc(e.target.value)} className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" placeholder="e.g. Server Hosting" required />
                 <div className="grid grid-cols-2 gap-3">
-                  <input type="number" value={amount} onChange={e => setAmount(e.target.value)} className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" placeholder="Amount" required min="0" />
-                  <select value={category} onChange={e => setCategory(e.target.value)} className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:border-teal-500 outline-none cursor-pointer">
-                    {EXPENSE_CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                  <input aria-label="Expense amount" type="number" inputMode="decimal" value={amount} onChange={e => setAmount(e.target.value)} className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" placeholder="Amount" required min="0" />
+                  <select aria-label="Expense category" value={category} onChange={e => setCategory(e.target.value)} className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:border-teal-500 outline-none cursor-pointer">
+                    <option value="" disabled hidden>Category</option>
+                    {EXPENSE_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
-                <input value={vendor} onChange={e => setVendor(e.target.value)} className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" placeholder="Vendor (optional)" />
-                <button type="submit" className="w-full py-2.5 bg-teal-600 text-white font-bold rounded-xl hover:bg-teal-700 transition-colors text-sm">
-                  Add Expense
+                <input aria-label="Vendor name (optional)" autoCapitalize="words" autoComplete="organization" value={vendor} onChange={e => setVendor(e.target.value)} className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" placeholder="e.g. AWS or DigitalOcean" />
+                <button type="submit" disabled={isSubmitting} className="w-full py-2.5 bg-teal-600 text-white font-bold rounded-xl hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98] transition-colors text-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                  {isSubmitting ? (
+                    <>
+                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                      Saving...
+                    </>
+                  ) : (
+                    'Add Expense'
+                  )}
                 </button>
               </form>
             </div>

@@ -156,7 +156,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
                     <button
                       onClick={() => onGenerateNext(inv)}
                       disabled={!isActive}
-                      className="flex-1 sm:flex-none bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-xl transition-colors text-sm"
+                      className="flex-1 sm:flex-none bg-teal-600 hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98] disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-xl transition-colors text-sm"
                     >
                       Generate Now
                     </button>

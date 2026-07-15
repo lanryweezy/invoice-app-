@@ -47,7 +47,7 @@ export const NrsIntegrationPanel: React.FC<NrsIntegrationPanelProps> = ({ invoic
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold">NRS Integration</h2>
         {onClose && (
-          <button onClick={onClose} className="text-slate-400 hover:text-white">✕</button>
+          <button onClick={onClose} aria-label="Close panel" title="Close" className="text-slate-400 hover:text-white">✕</button>
         )}
       </div>
 
@@ -93,7 +93,7 @@ export const NrsIntegrationPanel: React.FC<NrsIntegrationPanelProps> = ({ invoic
               <button
                 onClick={handleValidateTin}
                 disabled={loading || tin.length !== 11}
-                className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50"
+                className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98] disabled:opacity-50"
               >
                 {loading ? 'Validating...' : 'Validate'}
               </button>
@@ -117,7 +117,7 @@ export const NrsIntegrationPanel: React.FC<NrsIntegrationPanelProps> = ({ invoic
             <button
               onClick={handleSubmit}
               disabled={loading || !invoice}
-              className="w-full px-4 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50"
+              className="w-full px-4 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98] disabled:opacity-50"
             >
               {loading ? 'Submitting...' : 'Submit to NRS'}
             </button>

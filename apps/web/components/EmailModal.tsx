@@ -99,7 +99,7 @@ export const EmailModal: React.FC<EmailModalProps> = ({ isOpen, onClose, emailCo
                             <h3 className="text-xl font-bold text-slate-900">Generate Email</h3>
                             <p className="text-sm text-slate-500">{hasSmtp ? 'Send directly or copy to clipboard' : 'Pick a template and copy to send'}</p>
                         </div>
-                        <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
+                        <button onClick={onClose} aria-label="Close modal" title="Close" className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
                             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
@@ -172,7 +172,7 @@ export const EmailModal: React.FC<EmailModalProps> = ({ isOpen, onClose, emailCo
                         <button
                             type="button"
                             disabled={sending || !recipientEmail}
-                            className="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:bg-teal-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             onClick={handleSend}
                         >
                             {sending ? (

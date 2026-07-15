@@ -121,7 +121,7 @@ export const PublicProfile: React.FC<PublicProfileProps> = ({ username }) => {
 
             <div className="border-t border-slate-100 pt-8 text-center">
                <p className="text-sm text-slate-500 mb-4">Interested in working with {profile.businessName || 'this business'}?</p>
-               <a href={`mailto:${profile.email}?subject=Request for Quote (via InvoiceApp)`} className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-slate-900 hover:bg-slate-800 transition-colors shadow-sm w-full sm:w-auto">
+               <a href={`mailto:${profile.email}?subject=Request for Quote (via InvoiceApp)`} className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.98] transition-colors shadow-sm w-full sm:w-auto">
                  Request a Quote
                </a>
             </div>

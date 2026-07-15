@@ -287,7 +287,7 @@ export const IntegrationsView: React.FC<{ onUpgrade: () => void }> = ({ onUpgrad
                   className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 ${
                     !isPro
                       ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      : 'bg-teal-600 text-white hover:bg-teal-700'
+                      : 'bg-teal-600 text-white hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98]'
                   }`}
                 >
                   {connectingId === integration.id

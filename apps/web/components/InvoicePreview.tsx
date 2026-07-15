@@ -496,7 +496,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = React.memo(({ invoi
                                 href={user.paymentLink.startsWith('http') ? user.paymentLink : `https://${user.paymentLink}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white text-xs font-bold rounded-lg shadow-md shadow-teal-600/20 hover:bg-teal-700 transition-colors"
+                                className="inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white text-xs font-bold rounded-lg shadow-md shadow-teal-600/20 hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98] transition-colors"
                             >
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
                                 Pay {invoice.currency} {(invoice.total || 0).toLocaleString()}
