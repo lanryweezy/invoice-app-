@@ -425,14 +425,14 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
             <div className="bg-white p-6 rounded-2xl border border-slate-200">
               <h3 className="font-bold text-slate-900 mb-4">Log Expense</h3>
               <form onSubmit={handleAddExpense} className="space-y-3">
-                <input value={desc} onChange={e => setDesc(e.target.value)} className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" placeholder="Description" required />
+                <input aria-label="Expense description" value={desc} onChange={e => setDesc(e.target.value)} className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" placeholder="Description" required />
                 <div className="grid grid-cols-2 gap-3">
-                  <input type="number" value={amount} onChange={e => setAmount(e.target.value)} className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" placeholder="Amount" required min="0" />
-                  <select value={category} onChange={e => setCategory(e.target.value)} className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:border-teal-500 outline-none cursor-pointer">
+                  <input aria-label="Expense amount" type="number" value={amount} onChange={e => setAmount(e.target.value)} className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" placeholder="Amount" required min="0" />
+                  <select aria-label="Expense category" value={category} onChange={e => setCategory(e.target.value)} className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:border-teal-500 outline-none cursor-pointer">
                     {EXPENSE_CATEGORIES.map(c => <option key={c}>{c}</option>)}
                   </select>
                 </div>
-                <input value={vendor} onChange={e => setVendor(e.target.value)} className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" placeholder="Vendor (optional)" />
+                <input aria-label="Vendor name (optional)" value={vendor} onChange={e => setVendor(e.target.value)} className="w-full p-2.5 border border-slate-300 rounded-xl text-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none" placeholder="Vendor (optional)" />
                 <button type="submit" className="w-full py-2.5 bg-teal-600 text-white font-bold rounded-xl hover:bg-teal-700 transition-colors text-sm">
                   Add Expense
                 </button>
