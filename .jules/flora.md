@@ -7,3 +7,6 @@
 ## 2024-05-18 - Missing Timeouts on Native Fetch in External Service Clients
 **Learning:** Native `fetch` calls without `AbortController` in client-side architectures like Vite SPAs do not have default timeouts. If the integrated API (like `rev360.nrs.gov.ng`) degrades or drops the connection silently, it causes indefinite blocking/hanging of UI workflows relying on those promises.
 **Action:** Always wrap native `fetch` calls to third-party endpoints with an `AbortController`-based timeout mechanism, and ensure the fallback path safely catches `AbortError` or treats timeout failures gracefully according to the existing retry/fallback strategy of the module.
+## 2024-07-24 - Missing Timeout on SMTP Email Endpoint
+**Learning:** Native `fetch` calls to internal backend endpoints that relay to third-party services (like `/api/send-email` connecting to custom SMTP servers) can hang indefinitely if the external service is unresponsive, causing the frontend UI to spin endlessly with no fallback.
+**Action:** Always wrap `fetch` calls to endpoints that relay to potentially slow external integrations with an `AbortController` timeout and catch `AbortError` to degrade gracefully.

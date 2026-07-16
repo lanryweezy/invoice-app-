@@ -53,6 +53,11 @@ export const EmailModal: React.FC<EmailModalProps> = ({ isOpen, onClose, emailCo
     if (!smtpSettings || !recipientEmail) return;
     setSending(true);
     setSendResult(null);
+
+    // 🌱 Flora: Protect against indefinite UI hangs if the user's custom SMTP server is unresponsive
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
     try {
       const subject = emailContent.match(/Subject: (.*)/)?.[1] || 'Your Invoice';
       const body = emailContent.substring(emailContent.indexOf('\n\n') + 2);
@@ -65,6 +70,7 @@ export const EmailModal: React.FC<EmailModalProps> = ({ isOpen, onClose, emailCo
           text: body,
           smtp: smtpSettings,
         }),
+        signal: controller.signal,
       });
       const data = await res.json();
       if (res.ok) {
@@ -74,8 +80,13 @@ export const EmailModal: React.FC<EmailModalProps> = ({ isOpen, onClose, emailCo
         setSendResult({ type: 'error', text: data.error || 'Failed to send email.' });
       }
     } catch (err: any) {
-      setSendResult({ type: 'error', text: err.message || 'Network error.' });
+      if (err.name === 'AbortError') {
+        setSendResult({ type: 'error', text: 'Email service timed out. Please try again or copy to send.' });
+      } else {
+        setSendResult({ type: 'error', text: err.message || 'Network error.' });
+      }
     } finally {
+      clearTimeout(timeoutId);
       setSending(false);
     }
   };
