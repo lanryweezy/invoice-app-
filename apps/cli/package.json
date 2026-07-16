@@ -1,0 +1,64 @@
+{
+  "name": "@invoiceapp/cli",
+  "version": "1.0.0",
+  "description": "InvoiceApp CLI - Create and manage invoices from your terminal",
+  "main": "dist/index.js",
+  "bin": {
+    "invoiceapp": "./bin/invoiceapp"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "start": "node dist/index.js",
+    "postinstall": "node scripts/postinstall.js",
+    "prepublishOnly": "npm run build",
+    "release": "npm publish",
+    "release:patch": "npm version patch && npm publish",
+    "release:minor": "npm version minor && npm publish"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/streetheart-ltd/invoice-app.git",
+    "directory": "apps/cli"
+  },
+  "keywords": [
+    "invoice",
+    "invoicing",
+    "cli",
+    "nigeria",
+    "saas",
+    "billing"
+  ],
+  "author": "Street Heart LTD",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "cli-table3": "^0.6.0",
+    "commander": "^12.0.0",
+    "firebase-admin": "^12.0.0",
+    "inquirer": "^8.2.0",
+    "nodemailer": "^6.9.0",
+    "ora": "^5.4.0",
+    "pdfkit": "^0.15.0",
+    "qrcode": "^1.5.0",
+    "sharp": "^0.33.0"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^8.2.0",
+    "@types/node": "^22.0.0",
+    "@types/nodemailer": "^6.4.0",
+    "@types/pdfkit": "^0.17.6",
+    "ts-node": "^10.9.0",
+    "typescript": "~5.8.3",
+    "vitest": "^4.1.10"
+  }
+}

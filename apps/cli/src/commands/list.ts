@@ -1,0 +1,142 @@
+import { Command } from 'commander';
+import chalk from 'chalk';
+import { ensureAuthenticated } from '../lib/config';
+import { getDb } from '../lib/firebase-client';
+import { formatCurrency, formatDate } from '../utils/formatter';
+import { createSpinner, succeed, fail } from '../utils/spinner';
+import { Invoice } from '../types';
+
+export default function registerListCommand(program: Command): void {
+  program
+    .command('list')
+    .description('List invoices with filters')
+    .option('-s, --status <status>', 'Filter by status (Draft|Sent|Paid|Overdue)')
+    .option('--from <date>', 'Start date (YYYY-MM-DD)')
+    .option('--to <date>', 'End date (YYYY-MM-DD)')
+    .option('--client <name>', 'Filter by client name (contains)')
+    .option('-l, --limit <number>', 'Limit number of results', '20')
+    .option('-f, --format <format>', 'Output format (table|json|csv)', 'table')
+    .option('--sort <field>', 'Sort by field (date|amount|status)', 'date')
+    .action(async (options) => {
+      try {
+        const config = ensureAuthenticated();
+        const spinner = createSpinner('Fetching invoices...');
+
+        try {
+          const snapshot = await getDb()
+            .collection(`users/${config.userId}/invoices`)
+            .get();
+
+          let invoices: Invoice[] = snapshot.docs.map((doc) => doc.data() as Invoice);
+
+          if (options.status) {
+            invoices = invoices.filter((inv) => 
+              inv.status.toLowerCase() === options.status.toLowerCase()
+            );
+          }
+
+          if (options.from) {
+            const fromDate = new Date(options.from);
+            invoices = invoices.filter((inv) => 
+              new Date(inv.createdAt || '') >= fromDate
+            );
+          }
+
+          if (options.to) {
+            const toDate = new Date(options.to);
+            invoices = invoices.filter((inv) => 
+              new Date(inv.createdAt || '') <= toDate
+            );
+          }
+
+          if (options.client) {
+            const clientSearch = options.client.toLowerCase();
+            invoices = invoices.filter((inv) => 
+              inv.client.name.toLowerCase().includes(clientSearch)
+            );
+          }
+
+          invoices.sort((a, b) => {
+            switch (options.sort) {
+              case 'amount':
+                return (b.total || 0) - (a.total || 0);
+              case 'status':
+                return a.status.localeCompare(b.status);
+              case 'date':
+              default:
+                return new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime();
+            }
+          });
+
+          const limit = parseInt(options.limit);
+          if (!isNaN(limit) && limit > 0) {
+            invoices = invoices.slice(0, limit);
+          }
+
+          spinner.stop();
+
+          if (invoices.length === 0) {
+            console.log(chalk.yellow('No invoices found matching the criteria.'));
+            return;
+          }
+
+          switch (options.format) {
+            case 'json':
+              console.log(JSON.stringify(invoices, null, 2));
+              break;
+            
+            case 'csv':
+              const headers = ['Invoice #', 'Client', 'Total', 'Currency', 'Status', 'Due Date', 'Created'];
+              const rows = invoices.map((inv) => [
+                inv.invoiceNumber,
+                inv.client.name,
+                (inv.total || 0).toString(),
+                inv.currency,
+                inv.status,
+                inv.dueDate ? formatDate(inv.dueDate) : 'N/A',
+                formatDate(inv.createdAt || '')
+              ]);
+              
+              console.log(headers.join(','));
+              rows.forEach((row) => console.log(row.join(',')));
+              break;
+            
+            case 'table':
+            default:
+              console.log(chalk.bold('\nInvoice List'));
+              console.log('─'.repeat(80));
+              console.log(
+                chalk.cyan('Invoice #').padEnd(20) +
+                chalk.cyan('Client').padEnd(20) +
+                chalk.cyan('Total').padEnd(15) +
+                chalk.cyan('Status').padEnd(10) +
+                chalk.cyan('Due Date')
+              );
+              console.log('─'.repeat(80));
+              
+              invoices.forEach((inv) => {
+                console.log(
+                  inv.invoiceNumber.padEnd(20) +
+                  inv.client.name.padEnd(20) +
+                  formatCurrency(inv.total || 0, inv.currency).padEnd(15) +
+                  inv.status.padEnd(10) +
+                  (inv.dueDate ? formatDate(inv.dueDate) : 'N/A')
+                );
+              });
+              console.log('─'.repeat(80));
+              break;
+          }
+
+          console.log(chalk.dim(`\n${invoices.length} invoice(s) found`));
+          
+        } catch (error: any) {
+          fail(spinner, chalk.red('Failed to fetch invoices'));
+          console.error(error.message);
+          process.exit(1);
+        }
+      } catch (error: any) {
+        console.error(chalk.red('Error:'), error.message);
+        process.exit(1);
+      }
+    });
+}

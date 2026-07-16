@@ -32,6 +32,7 @@ import { PrivacyModal } from './components/PrivacyModal';
 import { CommandPaletteProvider } from './components/CommandPaletteProvider';
 import { TermsModal } from './components/TermsModal';
 import { IntegrationsView } from './components/IntegrationsView';
+import { CLIAccessView } from './components/CLIAccessView';
 import { SmtpSettingsModal } from './components/SmtpSettingsModal';
 import { flushQueue, getQueueCount } from './utils/offlineSync';
 
@@ -241,7 +242,7 @@ const App: React.FC = () => {
   }, [invoice]);
 
   // Main view state
-  const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'integrations' | 'blog' | 'blogPost' | 'publicProfile' | 'templatePage'>(() => {
+  const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'integrations' | 'cli' | 'blog' | 'blogPost' | 'publicProfile' | 'templatePage'>(() => {
       let path;
       try {
           path = decodeURIComponent(window.location.pathname);
@@ -253,13 +254,14 @@ const App: React.FC = () => {
       if (path.startsWith('/templates/')) return 'templatePage';
       if (path === '/blog') return 'blog';
       if (path === '/integrations') return 'integrations';
+      if (path === '/cli') return 'cli';
 
       // Handle legacy /blog/:id routes by redirecting them or showing blogPost view
       if (path.startsWith('/blog/')) {
           return 'blogPost';
       }
 
-      if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts' && path !== '/integrations' && !path.startsWith('/p/') && !path.startsWith('/templates/')) {
+      if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts' && path !== '/integrations' && path !== '/cli' && !path.startsWith('/p/') && !path.startsWith('/templates/')) {
           return 'blogPost';
       }
       return 'editor';
@@ -308,6 +310,7 @@ const App: React.FC = () => {
       let path = '/';
       if (activeView === 'blog') path = '/blog';
       else if (activeView === 'integrations') path = '/integrations';
+      else if (activeView === 'cli') path = '/cli';
       else if (activeView === 'blogPost' && activeBlogPostSlug !== null) path = `/${encodeURIComponent(activeBlogPostSlug)}`;
       else if (activeView === 'publicProfile' && publicUsername !== null) path = `/p/${publicUsername}`;
       else if (activeView === 'templatePage' && activeTemplateSlug !== null) path = `/templates/${encodeURIComponent(activeTemplateSlug)}`;
@@ -345,13 +348,15 @@ const App: React.FC = () => {
               setActiveView('blog');
           } else if (path === '/integrations') {
               setActiveView('integrations');
+          } else if (path === '/cli') {
+              setActiveView('cli');
           } else if (path.startsWith('/p/')) {
               setPublicUsername(path.split('/')[2] || null);
               setActiveView('publicProfile');
           } else if (path.startsWith('/templates/')) {
               setActiveTemplateSlug(path.split('/')[2] || null);
               setActiveView('templatePage');
-          } else if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts' && path !== '/integrations') {
+          } else if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts' && path !== '/integrations' && path !== '/cli') {
               setActiveBlogPostSlug(path.substring(1));
               setActiveView('blogPost');
           } else {
@@ -662,6 +667,7 @@ const App: React.FC = () => {
              <button onClick={() => user ? setActiveView('recurring') : handleProFeatureClick('Recurring')} className={`text-xs font-medium transition-colors ${activeView === 'recurring' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Recurring</button>
              <button onClick={() => user ? setActiveView('receipts') : handleProFeatureClick('Receipts')} className={`text-xs font-medium transition-colors ${activeView === 'receipts' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Receipts</button>
              <button onClick={() => user ? setActiveView('integrations') : handleProFeatureClick('Integrations')} className={`text-xs font-medium transition-colors ${activeView === 'integrations' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Integrations</button>
+             <button onClick={() => user ? setActiveView('cli') : setIsAuthModalOpen(true)} className={`text-xs font-medium transition-colors ${activeView === 'cli' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>CLI</button>
              <button onClick={() => window.location.href = '/blog'} className={`text-xs font-medium transition-colors ${activeView === 'blog' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Blog</button>
              <div className="w-px h-4 bg-slate-700"></div>
              {!loading && (
@@ -882,6 +888,10 @@ const App: React.FC = () => {
                         setIsPricingModalOpen(true);
                     }}
                 />
+            </div>
+        ) : activeView === 'cli' ? (
+            <div className="p-4 sm:p-8">
+                <CLIAccessView />
             </div>
         ) : activeView === 'publicProfile' && publicUsername !== null ? (
             <PublicProfile username={publicUsername} />
