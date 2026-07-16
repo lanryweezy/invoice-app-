@@ -55,7 +55,7 @@ export const BranchesManager: React.FC<BranchesManagerProps> = ({ isPro = false,
                 <label htmlFor="branch-address" className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Address</label>
                 <textarea id="branch-address" rows={3} value={newBranch.address} onChange={e => setNewBranch({...newBranch, address: e.target.value})} className="w-full p-2.5 bg-white border border-slate-200 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition-all text-sm font-semibold resize-none" placeholder="Full address..." required />
              </div>
-             <button type="submit" className="w-full py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-teal-700 transition-colors shadow-lg">Save Location</button>
+             <button type="submit" className="w-full py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-teal-700 active:scale-[0.98] transition-colors shadow-lg">Save Location</button>
           </form>
         </div>
 
