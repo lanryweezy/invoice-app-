@@ -27,10 +27,10 @@ describe('portalLinks', () => {
   } as Invoice;
 
   describe('generatePortalToken', () => {
-    it('generates a 12-character alphanumeric token', () => {
+    it('generates a 64-character alphanumeric token', () => {
       const token = generatePortalToken();
-      expect(token).toHaveLength(12);
-      expect(token).toMatch(/^[A-Za-z0-9]{12}$/);
+      expect(token).toHaveLength(64);
+      expect(token).toMatch(/^[a-f0-9]{64}$/i);
     });
 
     it('generates unique tokens', () => {
@@ -47,7 +47,7 @@ describe('portalLinks', () => {
       const link = createPortalLink(mockInvoice);
 
       const token = link.split('/').pop();
-      expect(token).toHaveLength(12);
+      expect(token).toHaveLength(64);
       expect(link).toBe(`https://www.invoiceapp.ng/portal/${token}`);
 
       expect(localStorage.setItem).toHaveBeenCalledWith('invoiceapp_portal_links', expect.stringContaining(token!));
