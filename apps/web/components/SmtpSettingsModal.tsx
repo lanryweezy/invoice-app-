@@ -170,6 +170,10 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({ isOpen, on
     }
     setTesting(true);
     setMessage(null);
+
+    // 🌱 Flora: Wraps native fetch with AbortController to prevent indefinite UI hangs if the external SMTP server is unresponsive
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
     try {
       const res = await fetch('/api/send-email', {
         method: 'POST',
@@ -180,6 +184,7 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({ isOpen, on
           text: 'Your email is configured correctly! You can now send invoices directly from InvoiceApp.',
           smtp,
         }),
+        signal: controller.signal,
       });
       const data = await res.json();
       if (res.ok) {
@@ -188,8 +193,13 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({ isOpen, on
         setMessage({ type: 'error', text: data.error || 'Test failed. Check your credentials.' });
       }
     } catch (err: any) {
-      setMessage({ type: 'error', text: err.message || 'Network error.' });
+      if (err.name === 'AbortError') {
+        setMessage({ type: 'error', text: 'Request timed out. The SMTP server took too long to respond.' });
+      } else {
+        setMessage({ type: 'error', text: err.message || 'Network error.' });
+      }
     } finally {
+      clearTimeout(timeoutId);
       setTesting(false);
     }
   };
