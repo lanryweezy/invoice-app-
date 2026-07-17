@@ -1,3 +1,5 @@
+import { trackEvent } from './analytics';
+
 const CACHE_KEY = 'invoiceapp_exchange_rates';
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
 
@@ -44,6 +46,7 @@ export async function getExchangeRates(): Promise<ExchangeRates> {
     return rates;
   } catch (error) {
     console.warn('Exchange rates fetch failed or timed out. Using fallback rates.', error);
+    try { trackEvent('exchange_rates_fetch_failed', { error: String(error) }); } catch {}
     return FALLBACK_RATES;
   } finally {
     clearTimeout(timeoutId);
