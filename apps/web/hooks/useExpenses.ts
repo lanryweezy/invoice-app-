@@ -29,7 +29,6 @@ export const useExpenses = () => {
                     const queueCount = await getQueueCount();
 
                     if (queueCount > 0) {
-                        console.log("[useExpenses] Offline queue active. Preserving local storage state.");
                         return;
                     }
 
