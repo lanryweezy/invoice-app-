@@ -78,15 +78,22 @@ export const flushQueue = async (): Promise<boolean> => {
 
     const failedMutations: Mutation[] = [];
 
-    // Process sequentially to avoid race conditions on the same doc
-    for (const mutation of queue) {
-      try {
+    // Process concurrently since queueMutation guarantees unique docIds per collection in the queue
+    const results = await Promise.allSettled(
+      queue.map(async (mutation) => {
         const docRef = doc(db, mutation.collection, mutation.docId);
         // Using merge: true as this is primarily used for partial updates (e.g. { invoiceUser: ... })
         await setDoc(docRef, mutation.data, { merge: true });
         console.log(`[Offline Sync] Synced ${mutation.collection}/${mutation.docId}`);
         trackEvent('sync_item_success', { collection: mutation.collection, docId: mutation.docId });
-      } catch (err) {
+      })
+    );
+
+    for (let i = 0; i < results.length; i++) {
+      const result = results[i];
+      const mutation = queue[i];
+      if (result.status === 'rejected') {
+        const err = result.reason;
         console.error(`[Offline Sync] Failed to sync ${mutation.id}`, err);
         trackEvent('sync_item_failed', {
           collection: mutation.collection,
