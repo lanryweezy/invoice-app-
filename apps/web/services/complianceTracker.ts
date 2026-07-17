@@ -533,36 +533,54 @@ export function getComplianceIssues(invoice: Invoice): ComplianceIssue[] {
   return result.issues;
 }
 
-export function suggestFixes(issue: ComplianceIssue): string[] {
-  const suggestions: string[] = [issue.suggestion];
+/**
+ * 🔩 Hinge Extension Point: ComplianceSuggestionStrategy
+ *
+ * Pressure: The `suggestFixes` function had a growing `switch (issue.category)` block
+ * that needed modification every time a new compliance category was added.
+ *
+ * Contract:
+ * - Implementors provide a function that takes a `ComplianceIssue` and returns an array
+ *   of additional suggestion strings.
+ * - The core `suggestFixes` function will always automatically include the base `issue.suggestion`
+ *   first, so strategies only need to return supplementary context.
+ */
+export type ComplianceSuggestionStrategy = (issue: ComplianceIssue) => string[];
 
-  switch (issue.category) {
-    case 'TIN':
-      suggestions.push('TIN can be verified on FIRS portal: https://taxpromax.firs.gov.ng');
-      if (issue.field === 'customer.tin') {
-        suggestions.push('Request customer TIN before issuing invoice');
-      }
-      break;
-    case 'CAC':
-      suggestions.push('CAC number can be verified on CAC portal: https://search.cac.gov.ng');
-      break;
-    case 'VAT':
-      suggestions.push('Nigerian standard VAT rate is 7.5%');
-      suggestions.push('Some items may be zero-rated or exempt - check FIRS guidelines');
-      break;
-    case 'WHT':
-      suggestions.push('WHT rates: 10% for services, 5% for construction and consultancy');
-      suggestions.push('WHT is deducted from payment and remitted to FIRS');
-      break;
-    case 'LineItems':
-      suggestions.push('Each line item needs: description, quantity, and unit price');
-      break;
-    case 'Dates':
-      suggestions.push('Use ISO format: YYYY-MM-DD');
-      break;
+const suggestionStrategies = new Map<ComplianceCategory, ComplianceSuggestionStrategy>();
+
+export function registerSuggestionStrategy(category: ComplianceCategory, strategy: ComplianceSuggestionStrategy): void {
+  suggestionStrategies.set(category, strategy);
+}
+
+registerSuggestionStrategy('TIN', (issue) => {
+  const suggestions = ['TIN can be verified on FIRS portal: https://taxpromax.firs.gov.ng'];
+  if (issue.field === 'customer.tin') {
+    suggestions.push('Request customer TIN before issuing invoice');
   }
-
   return suggestions;
+});
+
+registerSuggestionStrategy('CAC', () => ['CAC number can be verified on CAC portal: https://search.cac.gov.ng']);
+
+registerSuggestionStrategy('VAT', () => [
+  'Nigerian standard VAT rate is 7.5%',
+  'Some items may be zero-rated or exempt - check FIRS guidelines'
+]);
+
+registerSuggestionStrategy('WHT', () => [
+  'WHT rates: 10% for services, 5% for construction and consultancy',
+  'WHT is deducted from payment and remitted to FIRS'
+]);
+
+registerSuggestionStrategy('LineItems', () => ['Each line item needs: description, quantity, and unit price']);
+
+registerSuggestionStrategy('Dates', () => ['Use ISO format: YYYY-MM-DD']);
+
+export function suggestFixes(issue: ComplianceIssue): string[] {
+  const strategy = suggestionStrategies.get(issue.category);
+  const additionalSuggestions = strategy ? strategy(issue) : [];
+  return [issue.suggestion, ...additionalSuggestions];
 }
 
 export function getComplianceHistory(invoiceId: string): ComplianceHistoryEntry[] {
