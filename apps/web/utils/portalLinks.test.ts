@@ -27,10 +27,10 @@ describe('portalLinks', () => {
   } as Invoice;
 
   describe('generatePortalToken', () => {
-    it('generates a 12-character alphanumeric token', () => {
+    it('generates a 64-character alphanumeric token', () => {
       const token = generatePortalToken();
-      expect(token).toHaveLength(12);
-      expect(token).toMatch(/^[A-Za-z0-9]{12}$/);
+      expect(token).toHaveLength(64);
+      expect(token).toMatch(/^[A-Za-z0-9]{64}$/);
     });
 
     it('generates unique tokens', () => {
@@ -47,12 +47,25 @@ describe('portalLinks', () => {
       const link = createPortalLink(mockInvoice);
 
       const token = link.split('/').pop();
-      expect(token).toHaveLength(12);
+      expect(token).toHaveLength(64);
       expect(link).toBe(`https://www.invoiceapp.ng/portal/${token}`);
 
       expect(localStorage.setItem).toHaveBeenCalledWith('invoiceapp_portal_links', expect.stringContaining(token!));
       expect(localStorage.setItem).toHaveBeenCalledWith('invoiceapp_portal_links', expect.stringContaining('INV-001'));
       expect(localStorage.setItem).toHaveBeenCalledWith('invoiceapp_portal_links', expect.stringContaining('Acme Corp'));
+    });
+
+    it('handles a missing invoice total by defaulting to 0', () => {
+      vi.mocked(localStorage.getItem).mockReturnValue(null);
+      const noTotalInvoice = { ...mockInvoice, total: undefined } as unknown as Invoice;
+
+      const link = createPortalLink(noTotalInvoice);
+      const token = link.split('/').pop();
+
+      const setCall = vi.mocked(localStorage.setItem).mock.calls[0][1];
+      const parsedStored = JSON.parse(setCall);
+
+      expect(parsedStored[token!].total).toBe(0);
     });
 
     it('uses existing portalToken if present on the invoice', () => {

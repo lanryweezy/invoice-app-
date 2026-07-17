@@ -9,3 +9,6 @@
 ## 2024-07-12 - Splitting test files & strict mock return values
 **Learning:** When adding tests for a large module (like `useInvoice`), keep files under 200 lines by separating them based on the functionality they test (e.g., `useInvoice-clients.test.ts`, `useInvoice-totals.test.ts`). Also, ensure mocked database functions return appropriate mock strings rather than `undefined` to accurately mirror data flow (e.g. `doc: vi.fn(() => 'mock-doc-ref')`).
 **Action:** When mocking functions in external modules that are expected to return a reference or primitive value to be passed down further (like Firebase's `doc`), always supply a stubbed return value instead of an empty mock to prevent silent downstream errors. Group large test files logically and split them early.
+## 2024-07-17 - portalLinks.test.ts token length validation
+**Learning:** The portalLinks logic generates a 64-character token via crypto.getRandomValues, but the tests were asserting a length of 12. Also added missing validation test for handling missing totals.
+**Action:** Always ensure that regex constraints in test suites properly match the actual output of the code being tested. Updated `/^[A-Za-z0-9]{12}$/` to `/^[A-Za-z0-9]{64}$/` to correctly assert the length.
