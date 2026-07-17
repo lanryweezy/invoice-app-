@@ -42,11 +42,15 @@ const WHT_KEYWORDS: Record<WHTType, string[]> = {
   dividend: ['dividend', 'distribution', 'profit share', 'bonus'],
 };
 
+const WHT_REGEXES = (Object.entries(WHT_KEYWORDS) as [WHTType, string[]][]).map(([type, keywords]) => ({
+  type,
+  regex: new RegExp(keywords.join('|'), 'i')
+}));
+
 export function detectWHTType(description: string): WHTType {
-  const lower = description.toLowerCase();
-  for (const [type, keywords] of Object.entries(WHT_KEYWORDS)) {
-    if (keywords.some((kw) => lower.includes(kw))) {
-      return type as WHTType;
+  for (const { type, regex } of WHT_REGEXES) {
+    if (regex.test(description)) {
+      return type;
     }
   }
   return 'professional';
