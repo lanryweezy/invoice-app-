@@ -51,5 +51,23 @@ describe('apiConfig', () => {
         expect(apiError.endpoint).toBe('/timeout-endpoint');
       }
     });
+
+    it('throws NrsApiError with response message when response is not ok', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 400,
+        json: vi.fn().mockResolvedValue({ message: 'Bad request data' }),
+      });
+
+      try {
+        await apiRequest('/test-endpoint');
+        expect.fail('Should have thrown an error');
+      } catch (error) {
+        expect(error).toBeInstanceOf(NrsApiError);
+        const apiError = error as NrsApiError;
+        expect(apiError.statusCode).toBe(400);
+        expect(apiError.message).toBe('Bad request data');
+      }
+    });
   });
 });
