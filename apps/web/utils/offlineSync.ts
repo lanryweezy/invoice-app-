@@ -71,7 +71,6 @@ export const flushQueue = async (): Promise<boolean> => {
       return true; // Nothing to sync
     }
 
-    console.log(`[Offline Sync] Flushing ${queue.length} items to cloud...`);
     trackEvent('sync_flush_started', { queue_length: queue.length });
 
     // Sort by timestamp to ensure older mutations are processed first (if we had distinct mutations per doc)
