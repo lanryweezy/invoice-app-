@@ -1,4 +1,4 @@
-import { interpolate, Easing } from 'remotion';
+import { Easing } from 'remotion';
 import { PHI } from './golden';
 
 // Natural easing curves — no straight lines
