@@ -109,21 +109,31 @@ function getAgedReceivables(invoices: Invoice[]) {
 }
 
 function getPnLData(invoices: Invoice[], expenses: Expense[]) {
-  const revenue = invoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
+  let revenue = 0;
+  let vatCollected = 0;
+  let whtSuffered = 0;
+
+  for (let i = 0; i < invoices.length; i++) {
+    const inv = invoices[i];
+    revenue += inv.total || 0;
+    vatCollected += inv.tax || 0;
+    whtSuffered += inv.whtAmount || 0;
+  }
+
   const costOfSales = 0;
   const grossProfit = revenue - costOfSales;
 
   const expenseByCategory: Record<string, number> = {};
-  expenses.forEach(exp => {
+  let totalExpenses = 0;
+
+  for (let i = 0; i < expenses.length; i++) {
+    const exp = expenses[i];
     expenseByCategory[exp.category] = (expenseByCategory[exp.category] || 0) + exp.amount;
-  });
-  const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+    totalExpenses += exp.amount;
+  }
+
   const operatingProfit = grossProfit - totalExpenses;
-
-  const vatCollected = invoices.reduce((sum, inv) => sum + (inv.tax || 0), 0);
-  const whtSuffered = invoices.reduce((sum, inv) => sum + (inv.whtAmount || 0), 0);
   const netTax = vatCollected - whtSuffered;
-
   const netProfit = operatingProfit;
 
   return { revenue, costOfSales, grossProfit, expenseByCategory, totalExpenses, operatingProfit, vatCollected, whtSuffered, netTax, netProfit };
