@@ -49,3 +49,7 @@
 ## 2026-05-27 - [Extracting inline functions to fix React.memo]
 **Learning:** Passing inline arrow functions directly in JSX to memoized components (e.g., `<InvoiceForm updateInvoice={(key, value) => updateInvoice(key, value)} />`) defeats `React.memo`. The inline function reference is recreated on every render of the parent component, causing the shallow comparison to fail and forcing the child component to re-render, negating any performance benefits of memoization.
 **Action:** Always extract inline callback functions into `useCallback` hooks in the parent component before passing them down to components wrapped in `React.memo`.
+
+## 2026-07-17 - [Debounce frequent window events]
+**Learning:** Attaching heavy UI updates or layout calculations (such as updating preview scales) directly to synchronous window events like `resize` or `scroll` causes massive re-render cascades and layout thrashing, severely degrading UI responsiveness.
+**Action:** Always wrap the handlers for high-frequency window events (`resize`, `scroll`, `mousemove`) with a debounce or throttle mechanism (e.g. `setTimeout`) to limit execution frequency, clearing the previous timeout on subsequent fires.

@@ -58,22 +58,22 @@ const InvoicePreview = React.lazy(() => import('./components/InvoicePreview').th
 const numberFormatter = new Intl.NumberFormat();
 
 const App: React.FC = () => {
-  const { 
-    invoice, 
-    setInvoice, 
-    updateInvoice, 
-    addLineItem, 
-    removeLineItem, 
-    updateLineItem, 
-    calculateTotals, 
+  const {
+    invoice,
+    setInvoice,
+    updateInvoice,
+    addLineItem,
+    removeLineItem,
+    updateLineItem,
+    calculateTotals,
     savedInvoices,
     saveInvoice,
-    savedClients, 
-    saveClient, 
-    businessProfiles, 
-    saveBusinessProfile, 
-    recurringInvoices, 
-    saveRecurringInvoice, 
+    savedClients,
+    saveClient,
+    businessProfiles,
+    saveBusinessProfile,
+    recurringInvoices,
+    saveRecurringInvoice,
     removeRecurringInvoice,
     toggleRecurringActive
   } = useInvoice();
@@ -88,7 +88,7 @@ const App: React.FC = () => {
   const [smtpSettings, setSmtpSettings] = useState<{ host: string; port: string; user: string; pass: string; fromEmail: string; fromName: string } | null>(null);
   const [isSmtpModalOpen, setIsSmtpModalOpen] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-  
+
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [viewingReceipt, setViewingReceipt] = useState<any>(null);
 
@@ -383,15 +383,22 @@ const App: React.FC = () => {
       setPreviewScale(newScale);
     };
 
-    const timeoutId = setTimeout(updateScale, 10);
-    window.addEventListener("resize", updateScale);
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const handleResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(updateScale, 50); // ⚡ Bolt: Debounce resize event to prevent rapid re-renders
+    };
+
+    timeoutId = setTimeout(updateScale, 10);
+    window.addEventListener("resize", handleResize);
 
     return () => {
         clearTimeout(timeoutId);
-        window.removeEventListener("resize", updateScale);
+        window.removeEventListener("resize", handleResize);
     };
   }, [activeMobileTab]);
-  
+
   const [template, setTemplate] = useState<TemplateId>(() => {
     return (localStorage.getItem('invoiceTemplate') as TemplateId) || 'classic';
   });
@@ -631,10 +638,10 @@ const App: React.FC = () => {
         <meta name="twitter:image" content="https://www.invoiceapp.ng/og-image.jpg" />
       </Helmet>
 
-      <Toast 
-        message={toast.message} 
-        isVisible={toast.isVisible} 
-        onClose={() => setToast(prev => ({ ...prev, isVisible: false }))} 
+      <Toast
+        message={toast.message}
+        isVisible={toast.isVisible}
+        onClose={() => setToast(prev => ({ ...prev, isVisible: false }))}
         type={toast.type}
       />
 
@@ -692,13 +699,13 @@ const App: React.FC = () => {
       {activeView === 'editor' && (
       <div className="flex-none z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all">
         <div className="max-w-[1600px] mx-auto">
-            
+
             {/* Desktop Command Bar Content */}
             <div className="hidden md:flex items-center justify-between px-6 py-3">
                  {/* Left: Status */}
                 <div className="flex items-center gap-3">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border
-                        ${invoice.status === 'Paid' ? 'bg-teal-100 text-teal-800 border-teal-200' : 
+                        ${invoice.status === 'Paid' ? 'bg-teal-100 text-teal-800 border-teal-200' :
                           invoice.status === 'Sent' ? 'bg-blue-100 text-blue-800 border-blue-200' :
                           'bg-slate-100 text-slate-800 border-slate-200'}`}>
                         {invoice.status}
@@ -713,8 +720,8 @@ const App: React.FC = () => {
 
                 {/* Right: Actions */}
                 <div className="flex items-center gap-2">
-                    <ActionButtons 
-                        onGenerateEmail={handleGenerateEmail} 
+                    <ActionButtons
+                        onGenerateEmail={handleGenerateEmail}
                         onDownloadPdf={handleDownloadPdf}
                         isMobile={false}
                         invoiceNumber={invoice.invoiceNumber}
@@ -724,7 +731,7 @@ const App: React.FC = () => {
                         invoice={invoice}
                         isGeneratingPdf={isGeneratingPdf}
                     />
-                    
+
                     {/* NRS Compliance Buttons */}
                     <div className="flex items-center gap-1 border-l pl-2 ml-2">
                         <button
@@ -774,8 +781,8 @@ const App: React.FC = () => {
 
                     {/* Compact Actions */}
                     <div className="flex items-center">
-                        <ActionButtons 
-                            onGenerateEmail={handleGenerateEmail} 
+                        <ActionButtons
+                            onGenerateEmail={handleGenerateEmail}
                             onDownloadPdf={handleDownloadPdf}
                             isMobile={true}
                             invoiceNumber={invoice.invoiceNumber}
@@ -830,21 +837,21 @@ const App: React.FC = () => {
       <main className="flex-1 min-h-0 w-full max-w-[1600px] mx-auto overflow-y-auto">
         {activeView === 'branches' ? (
             <div className="p-4 sm:p-8 max-w-4xl mx-auto">
-                <BranchesManager 
-                    isPro={isPro} 
+                <BranchesManager
+                    isPro={isPro}
                     onUpgrade={() => {
                         setPricingModalContent({ title: 'Multi-Location Management', message: 'Upgrade to Pro to manage branches across Nigeria and track location-specific revenue.' });
                         setIsPricingModalOpen(true);
-                    }} 
+                    }}
                 />
             </div>
         ) : activeView === 'accounting' ? (
             <div className="p-4 sm:p-8 max-w-6xl mx-auto">
-                <AccountingDashboard 
-                    invoices={savedInvoices} 
-                    expenses={expenses} 
-                    onAddExpense={addExpense} 
-                    onRemoveExpense={removeExpense} 
+                <AccountingDashboard
+                    invoices={savedInvoices}
+                    expenses={expenses}
+                    onAddExpense={addExpense}
+                    onRemoveExpense={removeExpense}
                     isPro={isPro}
                     onUpgrade={() => {
                         setPricingModalContent({ title: 'Unlock Full Financial History', message: 'Upgrade to Pro to see your full transaction history, download detailed audit logs, and export for NRS bulk filing.' });
@@ -882,7 +889,7 @@ const App: React.FC = () => {
             </div>
         ) : activeView === 'integrations' ? (
             <div className="p-4 sm:p-8 max-w-6xl mx-auto">
-                <IntegrationsView 
+                <IntegrationsView
                     onUpgrade={() => {
                         setPricingModalContent({ title: 'Unlock Integrations', message: 'Upgrade to Pro to connect payment gateways, accounting software, and more.' });
                         setIsPricingModalOpen(true);
@@ -902,8 +909,8 @@ const App: React.FC = () => {
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto mb-4"></div>
                     <p className="text-slate-600 font-medium">Loading blog...</p>
-                    <button 
-                        onClick={() => window.location.reload()} 
+                    <button
+                        onClick={() => window.location.reload()}
                         className="mt-4 text-xs text-teal-600 hover:text-teal-700 font-bold underline"
                     >
                         Click here if it doesn't load
@@ -912,7 +919,7 @@ const App: React.FC = () => {
             </div>
         ) : (
         <div className="flex flex-col md:flex-row h-full">
-          
+
           {/* LEFT COLUMN: Editor Form - Independent Scroll */}
           <div className={`w-full md:w-[45%] lg:w-[40%] bg-white md:border-r border-slate-200 h-full overflow-y-auto custom-scrollbar flex flex-col ${activeMobileTab === 'edit' ? 'block' : 'hidden md:flex'}`}>
             <div className="p-4 sm:p-6 lg:p-8 flex-1">
@@ -946,7 +953,7 @@ const App: React.FC = () => {
                        </span>
                        <div className="h-px bg-slate-200 w-12"></div>
                    </div>
-                   
+
                     <p className="text-xs text-slate-500 text-center leading-relaxed">
                         Built for Nigerian freelancers & SMEs. Free plan stores data locally. Pro plan adds optional cloud sync.
                     </p>
@@ -983,10 +990,10 @@ const App: React.FC = () => {
           >
             {/* Background Pattern */}
             <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0" style={{ backgroundImage: 'radial-gradient(#0f766e 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
-            
+
             {/* Removed overflow-hidden to prevent clipping, added padding bottom for scroll space */}
             <div className="p-4 sm:p-6 lg:p-8 min-h-full flex flex-col items-center relative z-10 pt-8">
-              
+
               {/* Responsive scaling wrapper */}
               <div
                 className="origin-top-left transition-transform duration-200 ease-in-out pb-32 md:pb-0"
