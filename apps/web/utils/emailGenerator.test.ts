@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { generateEmailTemplate, getEmailSubject, getEmailBody } from './emailGenerator';
+import { generateEmailTemplate, getEmailSubject, getEmailBody, registerEmailTemplate } from './emailGenerator';
 import type { Invoice } from '../types';
 
 describe('emailGenerator', () => {
@@ -135,6 +135,37 @@ describe('emailGenerator', () => {
       const emailText = generateEmailTemplate(mockInvoice, 'formal');
       expect(emailText.startsWith('Subject: Invoice INV-1234 from John Doe\n\nDear Acme Corp')).toBe(true);
       expect(emailText).toContain('Bank: GTBank');
+    });
+  });
+
+  describe('Extensibility (EmailTemplateStrategy)', () => {
+    it('allows registering and using a custom template', () => {
+      registerEmailTemplate({
+        id: 'holiday',
+        name: 'Holiday Special',
+        description: 'Festive greetings with invoice',
+        icon: '🎄',
+        generate: (inv) => ({
+          subject: `Happy Holidays from ${inv.user.name}! (Invoice ${inv.invoiceNumber})`,
+          body: `Wishing you the best this season, ${inv.client.name}!\n\nHere is your invoice for ${inv.total}.`
+        })
+      });
+
+      const subject = getEmailSubject(mockInvoice, 'holiday');
+      expect(subject).toBe('Happy Holidays from John Doe! (Invoice INV-1234)');
+
+      const body = getEmailBody(mockInvoice, 'holiday');
+      expect(body).toContain('Wishing you the best this season, Acme Corp!');
+      expect(body).toContain('150000');
+
+      const fullEmail = generateEmailTemplate(mockInvoice, 'holiday');
+      expect(fullEmail).toContain('Subject: Happy Holidays');
+      expect(fullEmail).toContain('Created with InvoiceApp.ng');
+    });
+
+    it('falls back to formal if an unknown template is requested', () => {
+      const subject = getEmailSubject(mockInvoice, 'nonexistent');
+      expect(subject).toBe('Invoice INV-1234 from John Doe');
     });
   });
 });

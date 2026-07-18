@@ -1,6 +1,3 @@
-## 2026-07-12 - Extract strategy interface from exportBatch
-**Learning:** Introduced a `BatchExportStrategy` interface and registry to abstract away the batch export formats, eliminating a hardcoded if-chain and adhering to the Open-Closed Principle for future formats.
-**Action:** Wait for the second case (JSON + CSV existed) to introduce an interface. Always provide a fallback (like throwing an Error) when a runtime lookup fails. Ensure new extension point hooks document their contract clearly.
-## 2024-05-24 - Compliance Suggestion Strategy
-**Learning:** Refactoring a large, growing `switch` statement (e.g., in a compliance checking rule set) into a Strategy Pattern via a `Map` registry is a highly effective way to open a module for extension without requiring modifications to the core iterating or execution function. It keeps the core logic extremely small and delegates rule-specific suggestions entirely to registered implementations.
-**Action:** Actively look for `switch` blocks in pure functions or configuration-heavy logic that are frequently updated, and extract them into registries or strategy interfaces to honor the Open/Closed Principle.
+## 2024-07-18 - Extensible String Union Types
+**Learning:** When turning a closed system into a registry, converting a strict union type (`'a' | 'b'`) to just `string` degrades the developer experience by removing IDE autocomplete.
+**Action:** Use the `(string & {})` pattern for type definitions (e.g., `type TemplateType = 'a' | 'b' | (string & {})`) to maintain strict autocompletion for built-in cases while allowing arbitrary strings for plugins.

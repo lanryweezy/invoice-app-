@@ -1,6 +1,6 @@
 import type { Invoice } from '../types';
 
-export type EmailTemplateType = 'formal' | 'casual' | 'followup' | 'overdue';
+export type EmailTemplateType = 'formal' | 'casual' | 'followup' | 'overdue' | (string & {});
 
 export interface EmailTemplate {
   id: EmailTemplateType;
@@ -33,7 +33,7 @@ function bankDetails(inv: Invoice): string {
   ].join('\n');
 }
 
-const templates: Record<EmailTemplateType, (inv: Invoice) => { subject: string; body: string }> = {
+const templates: Record<string, (inv: Invoice) => { subject: string; body: string }> = {
   formal: (inv) => ({
     subject: `Invoice ${inv.invoiceNumber} from ${inv.user.name}`,
     body: `Dear ${inv.client.name},
@@ -134,15 +134,37 @@ ${inv.user.address}`,
 };
 
 export function generateEmailTemplate(inv: Invoice, templateType: EmailTemplateType = 'formal'): string {
-  const { subject, body } = templates[templateType](inv);
+  const template = templates[templateType] || templates['formal'];
+  const { subject, body } = template(inv);
   const footer = `\n\n---\nCreated with InvoiceApp.ng — free invoicing for Nigerian businesses\nhttps://www.invoiceapp.ng`;
   return `Subject: ${subject}\n\n${body}${footer}`;
 }
 
 export function getEmailSubject(inv: Invoice, templateType: EmailTemplateType = 'formal'): string {
-  return templates[templateType](inv).subject;
+  const template = templates[templateType] || templates['formal'];
+  return template(inv).subject;
 }
 
 export function getEmailBody(inv: Invoice, templateType: EmailTemplateType = 'formal'): string {
-  return templates[templateType](inv).body;
+  const template = templates[templateType] || templates['formal'];
+  return template(inv).body;
+}
+
+/**
+ * 🔩 Hinge Extension Point: EmailTemplateStrategy
+ *
+ * Pressure: The email generator required modifying a central type, array, and map to add a new template.
+ * Contract: Implementors provide metadata (id, name, description, icon) and a generator
+ *           function returning { subject, body }. The core handles fallback and the footer signature.
+ */
+export interface EmailTemplateStrategy extends EmailTemplate {
+  generate: (inv: Invoice) => { subject: string; body: string };
+}
+
+export function registerEmailTemplate(strategy: EmailTemplateStrategy): void {
+  const { generate, ...metadata } = strategy;
+  if (!EMAIL_TEMPLATES.some(t => t.id === strategy.id)) {
+    EMAIL_TEMPLATES.push(metadata);
+  }
+  templates[strategy.id] = generate;
 }
