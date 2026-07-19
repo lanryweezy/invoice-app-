@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { trackEvent } from '../utils/analytics';
 
 interface PricingModalProps {
   isOpen: boolean;
@@ -227,10 +228,3 @@ function Feature({ text, included = false, bold = false }: { text: string; inclu
   );
 }
 
-function trackEvent(event: string, params: Record<string, any>) {
-  try {
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', event, params);
-    }
-  } catch {}
-}
