@@ -2,6 +2,6 @@
 **Learning:** For a more native mobile-like feel, primary buttons (like form submissions) should always use the `active:scale-[0.98]` Tailwind class to provide direct visual feedback immediately on press/tap. This prevents users from clicking multiple times before any async loading state kicks in or when the action is purely synchronous (like updating local state in BranchesManager).
 **Action:** When creating or modifying primary form action buttons, always check if `active:scale-[0.98]` is present.
 
-## 2024-07-23 - Modal Accessibility IDs and Focus
-**Learning:** In React components acting as modals (`role="dialog"`), simply adding `aria-labelledby="[id]"` is not enough; we must ensure the targeted ID actually exists on the modal's title element (e.g. `id="[id]"` on `<h2>` or `<h3>`). Additionally, interactive elements like modal close buttons must have clear focus rings, specifically pairing `focus-visible:ring-2` with `focus-visible:ring-offset-2` to guarantee visibility against varying backgrounds.
-**Action:** When auditing or creating a modal, verify the `aria-labelledby` ID is present on the header element and ensure close buttons use `focus-visible:ring-offset-2`.
+## 2024-07-19 - Auth Modal Focus States
+**Learning:** Some elements in the Auth Modal (like the close button and the Google Login button) lacked comprehensive `focus-visible` ring states, which are critical for keyboard navigation. Additionally, the password visibility toggle button was missing an `aria-label`, making it less accessible for screen readers since the text changes dynamically. Adding `id` to modal titles is also crucial so `aria-labelledby` points correctly.
+**Action:** When auditing modals or interactive components, ensure `aria-labelledby` IDs actually exist on the target element, all interactive buttons have `focus-visible` states (using offsets if needed for contrast), and icon/text-toggle buttons have clear `aria-label`s.

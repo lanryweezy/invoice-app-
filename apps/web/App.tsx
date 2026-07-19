@@ -53,9 +53,7 @@ import { logAction, getAuditTrail } from './services/auditTrail';
 // Lazy load heavy preview component
 const InvoicePreview = React.lazy(() => import('./components/InvoicePreview').then(module => ({ default: module.InvoicePreview })));
 
-// ⚡ Bolt: Cache Intl.NumberFormat instance globally to avoid ~0.6ms overhead per instantiation inside render loop.
-// Use default locale instead of hardcoding 'en-US' to preserve original toLocaleString behavior.
-const numberFormatter = new Intl.NumberFormat();
+import { numberFormatter } from './utils/formatters';
 
 const App: React.FC = () => {
   const {
@@ -657,7 +655,7 @@ const App: React.FC = () => {
             <div>
               <h1 className="text-lg font-bold text-white leading-none tracking-tight">InvoiceApp</h1>
               <div className="flex items-center gap-2 mt-1">
-                  <p className="text-[10px] uppercase tracking-widest text-teal-400 font-bold leading-none">Generator {isPro && <span className="bg-gradient-to-r from-teal-400 to-teal-300 text-slate-900 px-1.5 py-0.5 rounded text-[9px] ml-1">PRO</span>}</p>
+                  <p className="text-[10px] uppercase tracking-widest text-teal-400 font-bold leading-none">.ng {isPro && <span className="bg-gradient-to-r from-teal-400 to-teal-300 text-slate-900 px-1.5 py-0.5 rounded text-[9px] ml-1">PRO</span>}</p>
                   {isOffline && (
                       <span className="flex items-center gap-1 text-[9px] uppercase tracking-wider font-bold bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded border border-amber-500/30" title="Changes will sync when reconnected">
                           <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-3-3m0 0l-3 3m3-3v8" /></svg>
@@ -973,9 +971,6 @@ const App: React.FC = () => {
                    <div className="pt-4 border-t border-slate-200/50 text-center">
                        <p className="text-[11px] text-slate-400 font-medium">
                           © {new Date().getFullYear()} InvoiceApp.
-                       </p>
-                       <p className="text-[11px] font-bold text-slate-600 mt-1 flex items-center justify-center gap-1">
-                           Made with <span className="text-red-500">❤️</span> in Lagos 🇳🇬
                        </p>
                    </div>
                </div>

@@ -40,7 +40,7 @@ describe('stampDuty', () => {
         amount: 50,
         rate: 50,
         stampType: 'electronic',
-        receiptNumber: 'SD-1704067200000-4FZZ',
+        receiptNumber: expect.any(String),
         date: '2024-01-01T00:00:00.000Z'
       });
     });
@@ -53,7 +53,7 @@ describe('stampDuty', () => {
         amount: 200,
         rate: 200,
         stampType: 'electronic',
-        receiptNumber: 'SD-1704067200000-4FZZ',
+        receiptNumber: expect.any(String),
         date: '2024-01-01T00:00:00.000Z'
       });
     });

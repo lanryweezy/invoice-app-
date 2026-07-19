@@ -29,6 +29,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
     isGeneratingPdf = false,
 }) => {
     const [linkCopied, setLinkCopied] = useState(false);
+    const [isShareOpen, setIsShareOpen] = useState(false);
     const shareText = `Hi, here is the invoice #${invoiceNumber} for ${totalAmount}. Built with InvoiceApp.`;
     const shareUrl = 'https://www.invoiceapp.ng/';
     const isProforma = documentType === 'Pro-forma';
@@ -91,43 +92,60 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </button>
             )}
-            {invoice && (
+            <div
+              className="relative"
+              onMouseEnter={() => setIsShareOpen(true)}
+              onMouseLeave={() => setIsShareOpen(false)}
+            >
               <button
-                onClick={handleShareLink}
-                className="p-1.5 text-slate-600 hover:text-teal-600 bg-slate-100 hover:bg-teal-50 rounded-lg transition-colors"
-                title={linkCopied ? 'Link copied!' : 'Copy shareable link'}
+                  className="p-1.5 text-slate-600 hover:text-blue-500 bg-slate-100 hover:bg-blue-50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  title="Share options"
+                  aria-label="Share options"
+                  onClick={() => setIsShareOpen(!isShareOpen)}
               >
-                {linkCopied ? (
-                  <svg className="w-4 h-4 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                ) : (
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-                )}
+                  <ShareIcon className="w-4 h-4" />
               </button>
-            )}
-            <button
-                onClick={onGenerateEmail}
-                className="p-1.5 text-slate-600 hover:text-teal-600 bg-slate-100 hover:bg-teal-50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
-                title="Email Invoice"
-                aria-label="Email Invoice"
-            >
-                <MailIcon className="w-4 h-4" />
-            </button>
-            <button
-                onClick={handleWhatsAppShare}
-                className="p-1.5 text-slate-600 hover:text-green-600 bg-slate-100 hover:bg-green-50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
-                title="Share via WhatsApp"
-                aria-label="Share via WhatsApp"
-            >
-                <WhatsAppIcon className="w-4 h-4" />
-            </button>
-            <button
-                onClick={handleNativeShare}
-                className="p-1.5 text-slate-600 hover:text-blue-500 bg-slate-100 hover:bg-blue-50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                title="Share"
-                aria-label="Share Invoice"
-            >
-                <ShareIcon className="w-4 h-4" />
-            </button>
+
+              {isShareOpen && (
+                <div className="absolute top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg flex flex-col p-1 gap-1 z-50 min-w-[max-content]">
+                  {invoice && (
+                    <button
+                      onClick={handleShareLink}
+                      className="flex items-center gap-2 p-1.5 text-slate-600 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors text-xs whitespace-nowrap"
+                      title={linkCopied ? 'Link copied!' : 'Copy shareable link'}
+                    >
+                      {linkCopied ? (
+                        <svg className="w-3 h-3 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                      ) : (
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                      )}
+                      Copy Link
+                    </button>
+                  )}
+                  <button
+                      onClick={onGenerateEmail}
+                      className="flex items-center gap-2 p-1.5 text-slate-600 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors text-xs whitespace-nowrap"
+                  >
+                      <MailIcon className="w-3 h-3" />
+                      Email
+                  </button>
+                  <button
+                      onClick={handleWhatsAppShare}
+                      className="flex items-center gap-2 p-1.5 text-slate-600 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors text-xs whitespace-nowrap"
+                  >
+                      <WhatsAppIcon className="w-3 h-3" />
+                      WhatsApp
+                  </button>
+                  <button
+                      onClick={handleXShare}
+                      className="flex items-center gap-2 p-1.5 text-slate-600 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-colors text-xs whitespace-nowrap"
+                  >
+                      <XIcon className="w-3 h-3" />
+                      X / Twitter
+                  </button>
+                </div>
+              )}
+            </div>
             <button
                 onClick={onDownloadPdf}
                 disabled={isGeneratingPdf}
@@ -157,43 +175,61 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
           Convert to Invoice
         </button>
       )}
-      {invoice && (
+      <div
+        className="relative flex-1 lg:flex-none"
+        onMouseEnter={() => setIsShareOpen(true)}
+        onMouseLeave={() => setIsShareOpen(false)}
+      >
         <button
-          onClick={handleShareLink}
-          className="flex-1 lg:flex-none inline-flex items-center justify-center px-3 py-1.5 border border-slate-200 text-xs font-bold rounded-lg text-slate-600 bg-white hover:bg-slate-50 hover:text-teal-600 hover:border-teal-200 transition-all shadow-sm"
-          title={linkCopied ? 'Link copied!' : 'Copy shareable link'}
+          onClick={() => setIsShareOpen(!isShareOpen)}
+          className="w-full inline-flex items-center justify-center px-3 py-1.5 border border-slate-200 text-xs font-bold rounded-lg text-slate-600 bg-white hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          title="Share options"
+          aria-label="Share options"
         >
-          {linkCopied ? (
-            <svg className="w-3.5 h-3.5 mr-1.5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-          ) : (
-            <svg className="w-3.5 h-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-          )}
-          {linkCopied ? 'Copied!' : 'Link'}
+          <ShareIcon className="w-3.5 h-3.5 mr-1.5 text-blue-500" />
+          Share
         </button>
-      )}
-      <button
-        onClick={onGenerateEmail}
-        className="flex-1 lg:flex-none inline-flex items-center justify-center px-3 py-1.5 border border-slate-200 text-xs font-bold rounded-lg text-slate-600 bg-white hover:bg-slate-50 hover:text-teal-600 hover:border-teal-200 transition-all shadow-sm"
-      >
-        <MailIcon className="w-3.5 h-3.5 mr-1.5 text-teal-500" />
-        Email
-      </button>
-      <button
-        onClick={handleWhatsAppShare}
-        className="flex-1 lg:flex-none inline-flex items-center justify-center px-3 py-1.5 border border-slate-200 text-xs font-bold rounded-lg text-slate-600 bg-white hover:bg-slate-50 hover:text-green-600 hover:border-green-200 transition-all shadow-sm"
-        aria-label="Share via WhatsApp"
-      >
-        <WhatsAppIcon className="w-3.5 h-3.5 mr-1.5 text-green-500" />
-        WA
-      </button>
-      <button
-        onClick={handleXShare}
-        className="flex-1 lg:flex-none inline-flex items-center justify-center px-3 py-1.5 border border-slate-200 text-xs font-bold rounded-lg text-slate-600 bg-white hover:bg-slate-50 hover:text-black hover:border-slate-300 transition-all shadow-sm"
-        aria-label="Share on X"
-      >
-        <XIcon className="w-3.5 h-3.5 mr-1.5 text-slate-900" />
-        X
-      </button>
+
+        {isShareOpen && (
+          <div className="absolute top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg flex flex-col p-1 gap-1 z-50 min-w-[max-content] right-0 lg:left-0 lg:right-auto">
+            {invoice && (
+              <button
+                onClick={handleShareLink}
+                className="flex items-center gap-2 px-3 py-2 text-slate-600 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors text-xs font-medium whitespace-nowrap"
+                title={linkCopied ? 'Link copied!' : 'Copy shareable link'}
+              >
+                {linkCopied ? (
+                  <svg className="w-3.5 h-3.5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                ) : (
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                )}
+                Copy Link
+              </button>
+            )}
+            <button
+              onClick={onGenerateEmail}
+              className="flex items-center gap-2 px-3 py-2 text-slate-600 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors text-xs font-medium whitespace-nowrap"
+            >
+              <MailIcon className="w-3.5 h-3.5" />
+              Email
+            </button>
+            <button
+              onClick={handleWhatsAppShare}
+              className="flex items-center gap-2 px-3 py-2 text-slate-600 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors text-xs font-medium whitespace-nowrap"
+            >
+              <WhatsAppIcon className="w-3.5 h-3.5" />
+              WhatsApp
+            </button>
+            <button
+              onClick={handleXShare}
+              className="flex items-center gap-2 px-3 py-2 text-slate-600 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-colors text-xs font-medium whitespace-nowrap"
+            >
+              <XIcon className="w-3.5 h-3.5" />
+              X / Twitter
+            </button>
+          </div>
+        )}
+      </div>
       <button
         onClick={onDownloadPdf}
         disabled={isGeneratingPdf}

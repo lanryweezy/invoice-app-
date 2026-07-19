@@ -30,7 +30,7 @@ describe('useInvoice - Totals', () => {
       loading: false
     });
 
-    vi.stubGlobal('crypto', { randomUUID: vi.fn(() => 'mock-uuid-totals') });
+    vi.stubGlobal('crypto', { randomUUID: vi.fn(() => 'mock-uuid-totals'), getRandomValues: vi.fn((arr) => { for(let i=0; i<arr.length; i++) arr[i] = 1; return arr; }) });
     vi.stubGlobal('localStorage', { getItem: vi.fn(), setItem: vi.fn(), clear: vi.fn() });
   });
 

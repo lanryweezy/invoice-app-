@@ -29,7 +29,13 @@ export function calculateStampDuty(
     amount: rate,
     rate,
     stampType: 'electronic',
-    receiptNumber: `SD-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+    // Security Fix: Prevent predictable receipt numbers
+    receiptNumber: (() => {
+      const array = new Uint8Array(4);
+      crypto.getRandomValues(array);
+      const randomStr = Array.from(array, b => b.toString(16).padStart(2, '0')).join('').toUpperCase().substring(0, 4);
+      return `SD-${Date.now()}-${randomStr}`;
+    })(),
     date: new Date().toISOString(),
   };
 }
