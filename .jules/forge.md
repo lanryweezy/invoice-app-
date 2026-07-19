@@ -36,3 +36,9 @@
 ## 2026-07-19 - Testing `JSON.parse` wrapper error paths via mock data mutation
 **Learning:** When asserting the `catch` fallback block in logic that parses external stringified states (like `localStorage` data reading), the `catch` handler must be invoked by supplying functionally invalid parser data (like `'not-json'`) rather than artificially throwing standard errors via the mock. However, ensuring you test *both* scenarios guarantees robustness against IO failures *and* data corruption without losing coverage.
 **Action:** When adding malformed JSON path tests, implement them as strictly additive cases alongside existing `mockImplementation(() => { throw new Error(...) })` tests rather than replacing them.
+## 2026-07-19 - Error Path Testing for Queues
+**Learning:** When unit testing queued database mutations handling errors, explicitly simulating failures of underlying asynchronous writes (like  promise rejections) is required to ensure robust error logging, prevent unhandled promise rejections, and verify telemetry tracking functions run correctly.
+**Action:** Use  paired with  to explicitly assert the exact fallback logging or handling mechanism during an error sequence.
+## $(date +%Y-%m-%d) - Error Path Testing for Queues
+**Learning:** When unit testing queued database mutations handling errors, explicitly simulating failures of underlying asynchronous writes (like `setItem` promise rejections) is required to ensure robust error logging, prevent unhandled promise rejections, and verify telemetry tracking functions run correctly.
+**Action:** Use `vi.mocked(api).mockRejectedValueOnce` paired with `expect(consoleSpy).toHaveBeenCalledWith` to explicitly assert the exact fallback logging or handling mechanism during an error sequence.

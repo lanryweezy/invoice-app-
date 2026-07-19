@@ -90,6 +90,16 @@ describe('offlineSync', () => {
 
       expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to queue mutation', expect.any(Error));
     });
+
+    it('handles exceptions when setItem fails and logs error', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.mocked(localforage.getItem).mockResolvedValue([]);
+      vi.mocked(localforage.setItem).mockRejectedValueOnce(new Error('Set Error'));
+
+      await queueMutation('invoices', 'doc-1', {});
+
+      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to queue mutation', expect.any(Error));
+    });
   });
 
   describe('flushQueue', () => {
