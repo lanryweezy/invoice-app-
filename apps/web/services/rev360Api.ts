@@ -3,6 +3,7 @@
  */
 
 import { apiRequest } from './apiConfig';
+import { trackEvent } from '../utils/analytics';
 
 export interface Rev360Credentials {
   clientId: string;
@@ -36,9 +37,33 @@ export class Rev360Api {
   private async fetchWithTimeout(url: string, options: RequestInit = {}, timeout = 15000): Promise<Response> {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeout);
+    const startTime = Date.now();
     try {
       const response = await fetch(url, { ...options, signal: controller.signal });
+      const duration = Date.now() - startTime;
+      try {
+        trackEvent('rev360_api_call', {
+          endpoint: url,
+          method: options.method || 'GET',
+          status: response.status,
+          duration_ms: duration,
+        });
+      } catch {}
       return response;
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      const isTimeout = (error as Error).name === 'AbortError';
+      const syntheticStatus = isTimeout ? 408 : 0;
+      try {
+        trackEvent('rev360_api_call', {
+          endpoint: url,
+          method: options.method || 'GET',
+          status: syntheticStatus,
+          duration_ms: duration,
+          error: String(error),
+        });
+      } catch {}
+      throw error;
     } finally {
       clearTimeout(id);
     }
@@ -120,13 +145,6 @@ export class Rev360Api {
     } catch (error) {
       return { status: 'unknown', message: 'Compliance check failed' };
     }
-  }
-
-  private getHeaders(): Record<string, string> {
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.accessToken}`,
-    };
   }
 }
 
