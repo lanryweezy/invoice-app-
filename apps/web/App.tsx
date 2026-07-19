@@ -974,9 +974,6 @@ const App: React.FC = () => {
                        <p className="text-[11px] text-slate-400 font-medium">
                           © {new Date().getFullYear()} InvoiceApp.
                        </p>
-                       <p className="text-[11px] font-bold text-slate-600 mt-1 flex items-center justify-center gap-1">
-                           Made with <span className="text-red-500">❤️</span> in Lagos 🇳🇬
-                       </p>
                    </div>
                </div>
             </div>
