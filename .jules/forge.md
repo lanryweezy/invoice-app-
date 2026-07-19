@@ -1,3 +1,6 @@
+## 2024-03-24 - Audit Trail Tests Added
+**Learning:** Testing logic involving `localforage` mock behavior inside vitest is robust and supports testing higher-order behaviors like formatting, mapping, and escaping strings correctly as long as we properly stub the `getItem` and `setItem` calls beforehand.
+**Action:** When working on data-storage interacting services in the web layer, always use Vitest's `vi.mock` capabilities to bypass real IndexedDB dependencies so edge cases (such as gracefully handling missing `previousValues` properties or empty storage limits) can be safely tested locally.
 ## 2024-07-06 - Test Coverage in InvoiceApp Monorepo
 **Learning:** This repo has a monorepo structure with tests in `apps/web`. Vitest and `@vitest/coverage-v8` handle testing and coverage reports. Vitest is configured to run tests over all files via `pnpm -w run test`. Coverage for specific files requires installing the dependencies properly. The `offlineSync.ts` file initially had zero testing for its core offline sync behaviour.
 **Action:** When adding tests in `apps/web/utils`, always write complete test suites using `vitest` covering all logical branches. We added 100% test coverage to `offlineSync.ts`.
