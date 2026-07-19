@@ -125,13 +125,13 @@ export const useInvoice = () => {
   }, [isPro, firebaseUser]);
 
   // Sync to Cloud helper with Offline Support
-  const syncToCloud = useCallback(async (data: Partial<{ 
-      invoiceUser: AppUser, 
+  const syncToCloud = useCallback(async (data: Partial<{
+      invoiceUser: AppUser,
       savedInvoices: Invoice[],
-      savedClients: Client[], 
-      businessProfiles: BusinessProfile[], 
-      recurringInvoices: Invoice[], 
-      currentInvoice: Invoice 
+      savedClients: Client[],
+      businessProfiles: BusinessProfile[],
+      recurringInvoices: Invoice[],
+      currentInvoice: Invoice
   }>) => {
       if (isPro && firebaseUser) {
           if (!navigator.onLine) {
@@ -148,7 +148,7 @@ export const useInvoice = () => {
           }
       }
   }, [isPro, firebaseUser]);
-  
+
   // Persist Currency
   useEffect(() => {
     localStorage.setItem('invoiceCurrency', invoice.currency);
@@ -232,16 +232,16 @@ export const useInvoice = () => {
     // Safe cast discountRate to number
     const safeDiscountRate = Number(invoice.discountRate) || 0;
     const safeShipping = Number(invoice.shippingAmount) || 0;
-    
+
     const discountAmount = invoice.discountType === 'percentage'
         ? subtotal * (safeDiscountRate / 100)
         : safeDiscountRate;
 
     const taxableAmount = Math.max(0, subtotal - discountAmount);
-    
+
     // Calculate final tax amount based on discounted subtotal
     const taxAmount = taxableAmount * (invoice.taxRate / 100);
-    
+
     // Calculate WHT based on subtotal before VAT but after discount
     const whtAmount = taxableAmount * ((invoice.whtRate || 0) / 100);
 
@@ -258,7 +258,7 @@ export const useInvoice = () => {
         // Check if exists, update if so, otherwise add
         const normalizedName = client.name.trim().toLowerCase();
         const existingIndex = prev.findIndex(c => c.name.toLowerCase() === normalizedName);
-        
+
         let newClients;
         if (existingIndex >= 0) {
             newClients = [...prev];
@@ -266,10 +266,10 @@ export const useInvoice = () => {
         } else {
             newClients = [...prev, client];
         }
-        
+
         // Sort alphabetically
         newClients.sort((a, b) => a.name.localeCompare(b.name));
-        
+
         localStorage.setItem('invoiceSavedClients', JSON.stringify(newClients));
         syncToCloud({ savedClients: newClients });
         return newClients;
@@ -351,7 +351,7 @@ export const useInvoice = () => {
         } else {
             newInvoices = [inv, ...prev]; // Newest first
         }
-        
+
         localStorage.setItem('invoiceHistory', JSON.stringify(newInvoices));
         syncToCloud({ savedInvoices: newInvoices });
         return newInvoices;
