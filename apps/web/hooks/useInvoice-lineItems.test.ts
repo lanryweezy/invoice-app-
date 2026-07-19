@@ -34,7 +34,8 @@ describe('useInvoice - Line Items', () => {
 
     uuidCounter = 0;
     vi.stubGlobal('crypto', {
-      randomUUID: vi.fn(() => `mock-uuid-line-item-${uuidCounter++}`)
+      randomUUID: vi.fn(() => `mock-uuid-line-item-${uuidCounter++}`),
+      getRandomValues: vi.fn((arr) => { for(let i=0; i<arr.length; i++) arr[i] = 1; return arr; })
     });
 
     vi.stubGlobal('localStorage', { getItem: vi.fn(), setItem: vi.fn(), clear: vi.fn() });

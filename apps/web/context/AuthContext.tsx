@@ -147,7 +147,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             email: user.email || 'user@example.com',
             amount: amount * 100,
             currency: 'NGN',
-            ref: 'INV-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+            // Security Fix: Use cryptographically secure random numbers for references
+            ref: (() => {
+              const array = new Uint16Array(1);
+              crypto.getRandomValues(array);
+              return 'INV-' + Date.now() + '-' + (array[0] % 1000);
+            })(),
             metadata: {
               custom_fields: [
                 { display_name: "User ID", variable_name: "user_id", value: user.uid },

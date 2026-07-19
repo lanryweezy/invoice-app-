@@ -37,7 +37,11 @@ interface ComplianceCheck {
 }
 
 function generateIssueId(): string {
-  return `issue-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+  // Security Fix: Use cryptographically secure random numbers for Key IDs
+  const array = new Uint8Array(4);
+  crypto.getRandomValues(array);
+  const randomStr = Array.from(array, b => b.toString(16).padStart(2, '0')).join('').substring(0, 4);
+  return `issue-${Date.now()}-${randomStr}`;
 }
 
 function isValidTIN(tin: string | undefined): boolean {
