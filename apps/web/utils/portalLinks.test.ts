@@ -139,5 +139,13 @@ describe('portalLinks', () => {
 
       expect(linkData).toBeNull();
     });
+
+    it('returns null if stored links contain malformed JSON', () => {
+      vi.mocked(localStorage.getItem).mockReturnValue('not-json');
+
+      const linkData = getPortalLink('my-token');
+
+      expect(linkData).toBeNull();
+    });
   });
 });

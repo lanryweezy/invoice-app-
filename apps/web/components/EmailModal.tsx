@@ -67,7 +67,6 @@ export const EmailModal: React.FC<EmailModalProps> = ({ isOpen, onClose, emailCo
           to: recipientEmail,
           subject,
           text: body,
-          smtp: smtpSettings,
         }),
         signal: controller.signal,
       });

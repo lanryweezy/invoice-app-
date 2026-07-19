@@ -30,6 +30,32 @@ describe('invoiceSequence', () => {
       );
     });
 
+    it('resets sequence to 1 when crossing over to a new month during runtime', () => {
+      // Setup initial state using memory-backed mock for localStorage
+      let storage: string | null = null;
+      vi.mocked(localStorage.getItem).mockImplementation(() => storage);
+      vi.mocked(localStorage.setItem).mockImplementation((key, value) => {
+        storage = value;
+      });
+
+      // 1. Generate an invoice in the current month (May)
+      const invoice1 = generateSequentialInvoiceNumber();
+      expect(invoice1).toBe('INV-2024-05-0001');
+
+      const invoice2 = generateSequentialInvoiceNumber();
+      expect(invoice2).toBe('INV-2024-05-0002');
+
+      // 2. Advance time to next month (June)
+      vi.setSystemTime(new Date('2024-06-01T00:00:00Z'));
+
+      // 3. Generate a new invoice, it should reset to 1
+      const invoice3 = generateSequentialInvoiceNumber();
+      expect(invoice3).toBe('INV-2024-06-0001');
+
+      const invoice4 = generateSequentialInvoiceNumber();
+      expect(invoice4).toBe('INV-2024-06-0002');
+    });
+
     it('generates the next sequence when storage exists for the same month', () => {
       vi.mocked(localStorage.getItem).mockReturnValue(
         JSON.stringify({ month: '2024-05', sequence: 5 })
