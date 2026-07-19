@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { generateNRSJSON } from './eInvoicing';
+import { generateNRSJSON, validateNRSCompliance } from './eInvoicing';
 import type { Invoice } from '../types';
 
 describe('eInvoicing', () => {
@@ -177,11 +177,9 @@ describe('eInvoicing', () => {
       expect(result.customer.tin).toBe('');
       expect(result.lineItems[0].taxCategory).toBe('Standard'); // Default
       expect(result.lineItems[0].unitOfMeasure).toBe('PCS'); // Default
-import { describe, it, expect } from 'vitest';
-import { validateNRSCompliance } from './eInvoicing';
-import type { Invoice } from '../types';
+    });
+  });
 
-describe('eInvoicing', () => {
   const validInvoice: Invoice = {
     invoiceNumber: 'INV-100',
     issueDate: '2024-01-01',

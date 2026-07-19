@@ -3,13 +3,13 @@ import { checkCompliance, suggestFixes, type ComplianceIssue } from './complianc
 import type { Invoice } from '../types';
 
 describe('complianceTracker', () => {
-  const validInvoice: Invoice = {
+  const validInvoice = {
     invoiceNumber: 'INV-001',
     issueDate: '2024-01-01',
     dueDate: '2024-01-31',
     currency: 'NGN',
     total: 161250,
-    status: 'pending',
+    status: 'Draft',
     taxRate: 7.5,
     tax: 11250,
     whtRate: 5,
@@ -31,10 +31,10 @@ describe('complianceTracker', () => {
       cacNumber: 'RC654321',
     },
     lineItems: [
-      { description: 'Service', quantity: 1, price: '150000', taxRate: 7.5 },
+      { id: '1', description: 'Service', quantity: 1, price: 150000 },
     ],
     notes: '',
-  };
+  } as unknown as Invoice;
 
   describe('checkCompliance', () => {
     it('returns a 100% score for a fully compliant invoice', () => {

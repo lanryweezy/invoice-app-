@@ -55,8 +55,8 @@ export async function getExchangeRates(): Promise<ExchangeRates> {
 
 export function convertCurrency(amount: number, from: string, to: string, rates: ExchangeRates): number {
   if (from === to) return amount;
-  const inNGN = from === 'NGN' ? amount : amount * (rates[from as keyof ExchangeRates] || 1);
-  return to === 'NGN' ? inNGN : Math.round(inNGN / (rates[to as keyof ExchangeRates] || 1));
+  const inNGN = from === 'NGN' ? amount : amount * ((rates[from as keyof ExchangeRates] as number) || 1);
+  return to === 'NGN' ? inNGN : Math.round(inNGN / ((rates[to as keyof ExchangeRates] as number) || 1));
 }
 
 function getCachedRates(): ExchangeRates | null {

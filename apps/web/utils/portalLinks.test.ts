@@ -23,8 +23,8 @@ describe('portalLinks', () => {
     client: { name: 'Acme Corp', email: 'acme@example.com' },
     total: 1000,
     currency: 'NGN',
-    status: 'pending'
-  } as Invoice;
+    status: 'Draft'
+  } as unknown as Invoice;
 
   describe('generatePortalToken', () => {
     it('generates a 64-character alphanumeric token', () => {

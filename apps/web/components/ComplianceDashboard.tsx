@@ -10,7 +10,9 @@ import {
 import type { ComplianceIssue, ComplianceCategory } from '../services/complianceTracker';
 
 interface ComplianceDashboardProps {
-  invoices: Invoice[];
+  invoices?: Invoice[];
+  invoice?: Invoice;
+  onClose?: () => void;
   onFixIssue?: (invoiceNumber: string, issue: ComplianceIssue) => void;
 }
 
@@ -39,21 +41,26 @@ const CATEGORY_ICONS: Record<ComplianceCategory, string> = {
 const numberFormatter = new Intl.NumberFormat();
 
 export const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({
-  invoices,
+  invoices = [], invoice, onClose,
   onFixIssue,
 }) => {
   const [selectedInvoice, setSelectedInvoice] = useState<string | null>(null);
   const [filterCategory, setFilterCategory] = useState<ComplianceCategory | 'All'>('All');
   const [showFixPanel, setShowFixPanel] = useState<ComplianceIssue | null>(null);
 
-  const stats = useMemo(() => getOverallComplianceStats(invoices), [invoices]);
+  const targetInvoices = useMemo(() => {
+    if (invoice) return [invoice];
+    return invoices;
+  }, [invoice, invoices]);
+
+  const stats = useMemo(() => getOverallComplianceStats(targetInvoices), [targetInvoices]);
 
   const invoiceResults = useMemo(() => {
-    return invoices.map((inv) => ({
+    return targetInvoices.map((inv) => ({
       invoice: inv,
       result: checkCompliance(inv),
     }));
-  }, [invoices]);
+  }, [targetInvoices]);
 
   const allIssues = useMemo(() => {
     const issues: (ComplianceIssue & { invoiceNumber: string })[] = [];
@@ -83,7 +90,7 @@ export const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({
   }, []);
 
   const handleExportCSV = () => {
-    const report = exportComplianceReport(invoices);
+    const report = exportComplianceReport(targetInvoices);
     const blob = new Blob([report], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -96,7 +103,7 @@ export const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({
   };
 
   const handleExportJSON = () => {
-    const report = exportComplianceReportJSON(invoices);
+    const report = exportComplianceReportJSON(targetInvoices);
     const blob = new Blob([report], { type: 'application/json' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -369,13 +376,13 @@ export const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({
                 </div>
                 <div className="flex gap-1">
                   {Object.entries(result.categoryScores)
-                    .filter(([, score]) => score < 100)
+                    .filter(([, score]) => (score as number) < 100)
                     .slice(0, 4)
                     .map(([cat, score]) => (
                       <span
                         key={cat}
                         className={`w-6 h-6 rounded text-[8px] font-bold flex items-center justify-center ${
-                          score >= 80 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+                          (score as number) >= 80 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
                         }`}
                         title={`${cat}: ${score}%`}
                       >

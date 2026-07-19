@@ -7,7 +7,7 @@ localforage.config({
   description: 'Invoice audit trail logs'
 });
 
-export type AuditAction = 'create' | 'edit' | 'delete' | 'send' | 'pay' | 'status_change' | 'export' | 'download';
+export type AuditAction = 'create' | 'edit' | 'delete' | 'send' | 'pay' | 'status_change' | 'export' | 'download' | 'compliance_check';
 
 export interface AuditEntry {
   id: string;

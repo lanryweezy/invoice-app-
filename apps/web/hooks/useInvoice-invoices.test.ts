@@ -24,6 +24,15 @@ describe('useInvoice - Invoices', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
+    vi.stubGlobal('crypto', {
+      getRandomValues: (arr: Uint8Array) => {
+        for (let i = 0; i < arr.length; i++) {
+          arr[i] = Math.floor(Math.random() * 256);
+        }
+        return arr;
+      },
+      randomUUID: () => '123e4567-e89b-12d3-a456-426614174000',
+    });
 
     (useSubscription as any).mockReturnValue({
       user: { uid: 'test-user' },
@@ -31,7 +40,15 @@ describe('useInvoice - Invoices', () => {
       loading: false
     });
 
-    vi.stubGlobal('crypto', { randomUUID: vi.fn(() => 'mock-uuid-invoice') });
+    vi.stubGlobal('crypto', {
+      randomUUID: vi.fn(() => 'mock-uuid-invoice'),
+      getRandomValues: (arr: Uint8Array) => {
+        for (let i = 0; i < arr.length; i++) {
+          arr[i] = Math.floor(Math.random() * 256);
+        }
+        return arr;
+      }
+    });
     vi.stubGlobal('localStorage', { getItem: vi.fn(), setItem: vi.fn(), clear: vi.fn() });
   });
 

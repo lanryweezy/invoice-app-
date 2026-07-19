@@ -644,7 +644,7 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
               {Object.entries(pnl.expenseByCategory).map(([cat, amt]) => (
                 <div key={cat} className="flex justify-between items-center py-2 pl-4">
                   <span className="text-sm text-slate-600">{cat}</span>
-                  <span className="text-sm text-slate-700">₦{numberFormatter.format(amt)}</span>
+                  <span className="text-sm text-slate-700">₦{numberFormatter.format(amt as number)}</span>
                 </div>
               ))}
               <div className="flex justify-between items-center py-3 border-b border-slate-100">
