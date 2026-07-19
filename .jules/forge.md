@@ -1,3 +1,6 @@
+## 2024-03-24 - Audit Trail Tests Added
+**Learning:** Testing logic involving `localforage` mock behavior inside vitest is robust and supports testing higher-order behaviors like formatting, mapping, and escaping strings correctly as long as we properly stub the `getItem` and `setItem` calls beforehand.
+**Action:** When working on data-storage interacting services in the web layer, always use Vitest's `vi.mock` capabilities to bypass real IndexedDB dependencies so edge cases (such as gracefully handling missing `previousValues` properties or empty storage limits) can be safely tested locally.
 ## 2024-07-06 - Test Coverage in InvoiceApp Monorepo
 **Learning:** This repo has a monorepo structure with tests in `apps/web`. Vitest and `@vitest/coverage-v8` handle testing and coverage reports. Vitest is configured to run tests over all files via `pnpm -w run test`. Coverage for specific files requires installing the dependencies properly. The `offlineSync.ts` file initially had zero testing for its core offline sync behaviour.
 **Action:** When adding tests in `apps/web/utils`, always write complete test suites using `vitest` covering all logical branches. We added 100% test coverage to `offlineSync.ts`.
@@ -23,3 +26,10 @@
 ## 2024-05-30 - Added missing edge case test for same currency conversion in exchangeRates
 **Learning:** Even simple logic branches like `if (from === to) return amount;` need explicit tests, especially when business logic specifically relies on certain currency strings (like 'NGN').
 **Action:** When writing utility functions for conversions, always test the "no-op" identical inputs using the exact specific strings (e.g. 'NGN' to 'NGN') the business logic is built around.
+
+## 2024-07-19 - Testing Time-Dependent State Reset Logic
+**Learning:** Testing logic that depends on date transitions (like sequence resets on month changes) requires precise manipulation of the system time during the test run. Using `vi.setSystemTime` between successive function calls allows us to simulate the passage of time accurately without waiting. Also, mocking stateful APIs like `localStorage` using memory-backed variables is essential to capture the intermediate states across time jumps.
+**Action:** When testing components or utilities that track time-based state (like daily quotas, monthly counters, or expirations), simulate the passage of time by updating `vi.setSystemTime` in the middle of a test case and use memory-backed mocks for storage.
+## 2026-07-19 - Testing `JSON.parse` wrapper error paths via mock data mutation
+**Learning:** When asserting the `catch` fallback block in logic that parses external stringified states (like `localStorage` data reading), the `catch` handler must be invoked by supplying functionally invalid parser data (like `'not-json'`) rather than artificially throwing standard errors via the mock. However, ensuring you test *both* scenarios guarantees robustness against IO failures *and* data corruption without losing coverage.
+**Action:** When adding malformed JSON path tests, implement them as strictly additive cases alongside existing `mockImplementation(() => { throw new Error(...) })` tests rather than replacing them.

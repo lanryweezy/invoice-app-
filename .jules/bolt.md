@@ -60,3 +60,4 @@
 ## 2024-05-18 - Avoid N+1 execution by mapping intermediate results once
 **Learning:** When generating both summary stats and detailed lists from an array, ensure expensive transformations (like `checkCompliance`) aren't run multiple times per item. Pre-calculating them into a `results` array and passing that down halves processing time.
 **Action:** Extract statistical calculation logic into pure functions that accept the intermediate result array (e.g. `calculateStatsFromResults(results)`) rather than accepting raw entities and re-calculating everything.
+## 2026-07-19 - Prevent JSON bloat when optimizing arrays\n**Learning:** Caching detailed array evaluations inside a summary stats object eliminates N+1 loops, but can inadvertently blow up JSON export sizes if that stats object is passed raw to `JSON.stringify()`.\n**Action:** Always use destructuring (e.g., `const { results: _, ...summaryStats } = stats;`) to strip caching fields before final serialization.
