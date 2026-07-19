@@ -19,6 +19,13 @@ describe('digitalSignature', () => {
     currency: 'NGN'
   } as Invoice;
 
+  const mockInvoiceMissingData = {
+    ...mockInvoice,
+    user: { name: 'Acme Corp' },
+    client: { name: 'Client Ltd' },
+    total: undefined,
+  } as unknown as Invoice;
+
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2024-01-01T12:00:00Z'));
@@ -44,6 +51,15 @@ describe('digitalSignature', () => {
       expect(cert.expiresAt).toBe('2025-01-01T12:00:00.000Z');
       expect(cert.algorithm).toBe('SHA-256 with RSA');
       expect(cert.publicKey).toBeDefined();
+    });
+
+    it('defaults cacNumber to an empty string if not provided', () => {
+      const cert = generateCertificate({
+        name: 'Test Business',
+        tin: 'TIN123'
+      });
+
+      expect(cert.cacNumber).toBe('');
     });
   });
 
@@ -107,6 +123,22 @@ describe('digitalSignature', () => {
       expect(signatureData.signature).toBeDefined();
       expect(signatureData.certificateId).toMatch(/^SIG-/);
     });
+
+    it('creates a valid signature data object with fallback defaults for missing invoice data', () => {
+      const signatureData = signInvoice(mockInvoiceMissingData);
+
+      expect(signatureData.payload.totalAmount).toBe(0);
+      expect(signatureData.payload.issuerTIN).toBe('');
+      expect(signatureData.signature).toBeDefined();
+    });
+
+    it('generates a different signature when a custom private key is provided', () => {
+      const defaultSignatureData = signInvoice(mockInvoice);
+      const customSignatureData = signInvoice(mockInvoice, 'custom-private-key');
+
+      expect(customSignatureData.signature).toBeDefined();
+      expect(customSignatureData.signature).not.toBe(defaultSignatureData.signature);
+    });
   });
 
   describe('verifySignature', () => {
@@ -115,9 +147,34 @@ describe('digitalSignature', () => {
       expect(verifySignature(mockInvoice, signatureData)).toBe(true);
     });
 
-    it('returns false if payload details do not match', () => {
+    it('returns false if totalAmount does not match', () => {
       const signatureData = signInvoice(mockInvoice);
       const modifiedInvoice = { ...mockInvoice, total: 20000 } as Invoice;
+      expect(verifySignature(modifiedInvoice, signatureData)).toBe(false);
+    });
+
+    it('returns false if issuerName does not match', () => {
+      const signatureData = signInvoice(mockInvoice);
+      const modifiedInvoice = { ...mockInvoice, user: { ...mockInvoice.user, name: 'Different Corp' } } as Invoice;
+      expect(verifySignature(modifiedInvoice, signatureData)).toBe(false);
+    });
+
+    it('returns false if currency does not match', () => {
+      const signatureData = signInvoice(mockInvoice);
+      const modifiedInvoice = { ...mockInvoice, currency: 'USD' } as Invoice;
+      expect(verifySignature(modifiedInvoice, signatureData)).toBe(false);
+    });
+
+    it('returns false if invoiceNumber does not match', () => {
+      const signatureData = signInvoice(mockInvoice);
+      const modifiedInvoice = { ...mockInvoice, invoiceNumber: 'INV-999' } as Invoice;
+      expect(verifySignature(modifiedInvoice, signatureData)).toBe(false);
+    });
+
+    it('returns false if payload hash does not match', () => {
+      const signatureData = signInvoice(mockInvoice);
+      // Modify a field that affects computeInvoiceHash but isn't directly checked before it
+      const modifiedInvoice = { ...mockInvoice, issueDate: '2024-12-31' } as Invoice;
       expect(verifySignature(modifiedInvoice, signatureData)).toBe(false);
     });
 
