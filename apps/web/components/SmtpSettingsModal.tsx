@@ -225,20 +225,20 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({ isOpen, on
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true" onClick={onClose}>
+    <div className="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="smtp-modal-title" onClick={onClose}>
       <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" />
       <div className="flex min-h-full items-center justify-center p-4">
         <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg border border-slate-200 animate-in fade-in zoom-in duration-200 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
           <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex justify-between items-center z-10">
             <div>
-              <h3 className="text-xl font-bold text-slate-900">
+              <h3 id="smtp-modal-title" className="text-xl font-bold text-slate-900">
                 {step === 'choose' ? 'Connect Your Email' : `Setup ${selectedPreset?.name || 'Custom'}`}
               </h3>
               <p className="text-sm text-slate-500 mt-0.5">
                 {step === 'choose' ? 'Send invoices from your own email address' : 'Follow the steps below'}
               </p>
             </div>
-            <button onClick={onClose} aria-label="Close modal" title="Close" className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
+            <button onClick={onClose} aria-label="Close modal" title="Close" className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 rounded-full transition-colors">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>

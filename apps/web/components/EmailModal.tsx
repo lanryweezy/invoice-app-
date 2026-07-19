@@ -106,10 +106,10 @@ export const EmailModal: React.FC<EmailModalProps> = ({ isOpen, onClose, emailCo
                 <div className="p-6">
                     <div className="flex justify-between items-center mb-4">
                         <div>
-                            <h3 className="text-xl font-bold text-slate-900">Generate Email</h3>
+                            <h3 id="modal-title" className="text-xl font-bold text-slate-900">Generate Email</h3>
                             <p className="text-sm text-slate-500">{hasSmtp ? 'Send directly or copy to clipboard' : 'Pick a template and copy to send'}</p>
                         </div>
-                        <button onClick={onClose} aria-label="Close modal" title="Close" className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
+                        <button onClick={onClose} aria-label="Close modal" title="Close" className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 rounded-full transition-colors">
                             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
