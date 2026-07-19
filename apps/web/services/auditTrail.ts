@@ -126,27 +126,61 @@ function escapeCSV(value: string): string {
   return value;
 }
 
+/**
+ * 🔩 Hinge Extension Point: AuditExportStrategy
+ *
+ * Pressure: The `exportAuditTrail` function had hardcoded logic for 'json' and 'csv',
+ * which would need modification every time a new export format (like PDF or XML) was added.
+ *
+ * Contract:
+ * - Implementors provide a unique `format` string and an `export` function.
+ * - The `export` function receives an array of `AuditEntry` objects and must return a string
+ *   (or Promise resolving to a string) containing the formatted payload.
+ */
+export interface AuditExportStrategy {
+  format: string;
+  export(entries: AuditEntry[]): string | Promise<string>;
+}
+
+const auditExportStrategies = new Map<string, AuditExportStrategy>();
+
+export function registerAuditExportStrategy(strategy: AuditExportStrategy): void {
+  auditExportStrategies.set(strategy.format, strategy);
+}
+
+registerAuditExportStrategy({
+  format: 'json',
+  export: (entries) => JSON.stringify(entries, null, 2)
+});
+
+registerAuditExportStrategy({
+  format: 'csv',
+  export: (entries) => {
+    const headers = ['ID', 'Invoice ID', 'Action', 'User ID', 'Timestamp', 'Details', 'Previous Values', 'New Values'];
+    const rows = entries.map((e) => [
+      escapeCSV(e.id),
+      escapeCSV(e.invoiceId),
+      escapeCSV(e.action),
+      escapeCSV(e.userId),
+      escapeCSV(e.timestamp),
+      escapeCSV(JSON.stringify(e.details)),
+      escapeCSV(JSON.stringify(e.previousValues ?? {})),
+      escapeCSV(JSON.stringify(e.newValues ?? {})),
+    ].join(','));
+    return [headers.join(','), ...rows].join('\n');
+  }
+});
+
 export async function exportAuditTrail(
   invoiceId: string,
-  format: 'csv' | 'json'
+  format: 'csv' | 'json' | (string & {})
 ): Promise<string> {
   const trail = await getAuditTrail(invoiceId);
+  const strategy = auditExportStrategies.get(format);
 
-  if (format === 'json') {
-    return JSON.stringify(trail, null, 2);
+  if (!strategy) {
+    throw new Error(`Unsupported export format: ${format}`);
   }
 
-  const headers = ['ID', 'Invoice ID', 'Action', 'User ID', 'Timestamp', 'Details', 'Previous Values', 'New Values'];
-  const rows = trail.map((e) => [
-    escapeCSV(e.id),
-    escapeCSV(e.invoiceId),
-    escapeCSV(e.action),
-    escapeCSV(e.userId),
-    escapeCSV(e.timestamp),
-    escapeCSV(JSON.stringify(e.details)),
-    escapeCSV(JSON.stringify(e.previousValues ?? {})),
-    escapeCSV(JSON.stringify(e.newValues ?? {})),
-  ].join(','));
-
-  return [headers.join(','), ...rows].join('\n');
+  return strategy.export(trail);
 }
