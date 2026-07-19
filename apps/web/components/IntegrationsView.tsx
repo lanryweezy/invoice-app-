@@ -161,11 +161,16 @@ export const IntegrationsView: React.FC<{ onUpgrade: () => void }> = ({ onUpgrad
 
     // Simulate connection flow - in production, this would open OAuth
     setTimeout(async () => {
-      const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, {
-        integrations: arrayUnion(integration.id),
-      });
-      setConnectingId(null);
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, {
+          integrations: arrayUnion(integration.id),
+        });
+      } catch (err) {
+        console.error('Failed to connect integration', err);
+      } finally {
+        setConnectingId(null);
+      }
     }, 1500);
   };
 
@@ -173,11 +178,16 @@ export const IntegrationsView: React.FC<{ onUpgrade: () => void }> = ({ onUpgrad
     if (!user) return;
 
     setConnectingId(integration.id);
-    const userRef = doc(db, 'users', user.uid);
-    await updateDoc(userRef, {
-      integrations: arrayRemove(integration.id),
-    });
-    setConnectingId(null);
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, {
+        integrations: arrayRemove(integration.id),
+      });
+    } catch (err) {
+      console.error('Failed to disconnect integration', err);
+    } finally {
+      setConnectingId(null);
+    }
   };
 
   const categories = [
