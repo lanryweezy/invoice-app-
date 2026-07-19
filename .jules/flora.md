@@ -7,3 +7,6 @@
 ## 2024-05-18 - Missing Timeouts on Native Fetch in External Service Clients
 **Learning:** Native `fetch` calls without `AbortController` in client-side architectures like Vite SPAs do not have default timeouts. If the integrated API (like `rev360.nrs.gov.ng`) degrades or drops the connection silently, it causes indefinite blocking/hanging of UI workflows relying on those promises.
 **Action:** Always wrap native `fetch` calls to third-party endpoints with an `AbortController`-based timeout mechanism, and ensure the fallback path safely catches `AbortError` or treats timeout failures gracefully according to the existing retry/fallback strategy of the module.
+## 2026-07-19 - Unhandled Promises in setTimeout Callbacks
+**Learning:** When executing async database calls (e.g., Firestore `updateDoc`) inside `setTimeout` within a React component (like in `IntegrationsView.tsx`), unhandled rejections bypass standard promise chains and React error boundaries. This can leave UI state (like `setConnectingId(null)`) permanently stuck if the operation fails.
+**Action:** Always wrap async operations inside `setTimeout` or event listeners with `try/catch/finally` blocks to ensure errors are caught and UI state is deterministically reset in the `finally` block.
