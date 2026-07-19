@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import type { Expense, Invoice } from '../types';
-
-const numberFormatter = new Intl.NumberFormat();
+import { numberFormatter } from '../utils/formatters';
 
 const EXPENSE_CATEGORIES = [
   'Software', 'Hardware', 'Marketing', 'Travel', 'Rent', 'Utilities',

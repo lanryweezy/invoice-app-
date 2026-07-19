@@ -3,9 +3,7 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import type { Receipt, TemplateId } from '../types';
 import { DownloadIcon, MailIcon, XIcon } from './Icons';
-
-// ⚡ Bolt: Cache Intl.NumberFormat instance globally to avoid ~0.6ms overhead per instantiation inside render loop.
-const numberFormatter = new Intl.NumberFormat();
+import { numberFormatter } from '../utils/formatters';
 
 interface ReceiptPreviewProps {
     receipt: Receipt;

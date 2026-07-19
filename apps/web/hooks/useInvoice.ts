@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, Dispatch, SetStateAction } from 'react';
 import type { Invoice, LineItem, Currency, InvoiceStatus, User as AppUser, Client, BusinessProfile } from '../types';
 import { useSubscription } from './useSubscription';
 import { db, doc, setDoc, getDoc } from '../services/firebase';
@@ -70,22 +70,28 @@ const getInitialInvoiceState = (): Invoice => {
   };
 };
 
+type SyncToCloudFn = (data: Partial<{
+    invoiceUser: AppUser,
+    savedInvoices: Invoice[],
+    savedClients: Client[],
+    businessProfiles: BusinessProfile[],
+    recurringInvoices: Invoice[],
+    currentInvoice: Invoice
+}>) => Promise<void>;
 
-export const useInvoice = () => {
-  const [invoice, setInvoice] = useState<Invoice>(getInitialInvoiceState());
-  const [savedInvoices, setSavedInvoices] = useState<Invoice[]>([]);
-  const [savedClients, setSavedClients] = useState<Client[]>([]);
-  const [businessProfiles, setBusinessProfiles] = useState<BusinessProfile[]>([]);
-  const [recurringInvoices, setRecurringInvoices] = useState<Invoice[]>([]);
-  const { user: firebaseUser, isPro } = useSubscription();
-
-  // Cloud Sync: Load data from Firestore if Pro
+const useCloudSync = (
+  isPro: boolean,
+  firebaseUser: any,
+  setInvoice: Dispatch<SetStateAction<Invoice>>,
+  setRecurringInvoices: Dispatch<SetStateAction<Invoice[]>>,
+  setSavedInvoices: Dispatch<SetStateAction<Invoice[]>>,
+  setSavedClients: Dispatch<SetStateAction<Client[]>>,
+  setBusinessProfiles: Dispatch<SetStateAction<BusinessProfile[]>>
+): SyncToCloudFn => {
   useEffect(() => {
     if (isPro && firebaseUser) {
         const loadCloudData = async () => {
             try {
-                // To prevent clobbering un-synced offline local data with stale cloud data,
-                // we first check if there is an active offline queue.
                 const { getQueueCount } = await import('../utils/offlineSync');
                 const queueCount = await getQueueCount();
 
@@ -99,24 +105,11 @@ export const useInvoice = () => {
 
                 if (userSnap.exists()) {
                     const data = userSnap.data();
-                    if (data.invoiceUser) {
-                        setInvoice(prev => ({ ...prev, user: data.invoiceUser }));
-                    }
-                    if (data.savedInvoices) {
-                        setSavedInvoices(data.savedInvoices);
-                    }
-                    if (data.savedClients) {
-                        setSavedClients(data.savedClients);
-                    }
-                    if (data.businessProfiles) {
-                        setBusinessProfiles(data.businessProfiles);
-                    }
-                    if (data.recurringInvoices) {
-                        setRecurringInvoices(data.recurringInvoices);
-                    }
-                    if (data.currentInvoice) {
-                        setInvoice(data.currentInvoice);
-                    }
+                    if (data.recurringInvoices) setRecurringInvoices(data.recurringInvoices);
+                    if (data.currentInvoice) setInvoice(data.currentInvoice);
+                    if (data.savedInvoices) setSavedInvoices(data.savedInvoices);
+                    if (data.savedClients) setSavedClients(data.savedClients);
+                    if (data.businessProfiles) setBusinessProfiles(data.businessProfiles);
                 }
             } catch (error) {
                 console.error("Failed to load cloud data", error);
@@ -125,17 +118,9 @@ export const useInvoice = () => {
         };
         loadCloudData();
     }
-  }, [isPro, firebaseUser]);
+  }, [isPro, firebaseUser, setInvoice, setRecurringInvoices, setSavedInvoices, setSavedClients, setBusinessProfiles]);
 
-  // Sync to Cloud helper with Offline Support
-  const syncToCloud = useCallback(async (data: Partial<{ 
-      invoiceUser: AppUser, 
-      savedInvoices: Invoice[],
-      savedClients: Client[], 
-      businessProfiles: BusinessProfile[], 
-      recurringInvoices: Invoice[], 
-      currentInvoice: Invoice 
-  }>) => {
+  const syncToCloud = useCallback(async (data: Parameters<SyncToCloudFn>[0]) => {
       if (isPro && firebaseUser) {
           if (!navigator.onLine) {
               await queueMutation('users', firebaseUser.uid, data);
@@ -151,35 +136,40 @@ export const useInvoice = () => {
           }
       }
   }, [isPro, firebaseUser]);
-  
-  // Persist Currency
+
+  return syncToCloud;
+};
+
+const useLocalPersistence = (
+  invoice: Invoice,
+  syncToCloud: SyncToCloudFn,
+  setSavedClients: Dispatch<SetStateAction<Client[]>>,
+  setBusinessProfiles: Dispatch<SetStateAction<BusinessProfile[]>>,
+  setRecurringInvoices: Dispatch<SetStateAction<Invoice[]>>
+) => {
   useEffect(() => {
     localStorage.setItem('invoiceCurrency', invoice.currency);
   }, [invoice.currency]);
 
-  // Persist Status
   useEffect(() => {
     localStorage.setItem('invoiceStatus', invoice.status);
   }, [invoice.status]);
 
-  // Persist User Details (Logo, Name, etc.)
   useEffect(() => {
     const timeoutId = setTimeout(() => {
         localStorage.setItem('invoiceUser', JSON.stringify(invoice.user));
         syncToCloud({ invoiceUser: invoice.user });
-    }, 500); // Debounce save
+    }, 500);
     return () => clearTimeout(timeoutId);
   }, [invoice.user, syncToCloud]);
 
-  // Persist full draft/current invoice to cloud to allow cross-device drafting and offline sync
   useEffect(() => {
     const timeoutId = setTimeout(() => {
         syncToCloud({ currentInvoice: invoice });
-    }, 1500); // 1.5s debounce to avoid thrashing on every keystroke
+    }, 1500);
     return () => clearTimeout(timeoutId);
   }, [invoice, syncToCloud]);
 
-  // Load saved clients, business profiles and recurring invoices
   useEffect(() => {
     try {
         const storedClients = localStorage.getItem('invoiceSavedClients');
@@ -195,11 +185,13 @@ export const useInvoice = () => {
             setRecurringInvoices(JSON.parse(storedRecurring));
         }
     } catch(e) { console.error('Failed to load local data', e); }
-  }, []);
+  }, [setSavedClients, setBusinessProfiles, setRecurringInvoices]);
+};
 
+const useInvoiceMutations = (invoice: Invoice, setInvoice: Dispatch<SetStateAction<Invoice>>) => {
   const updateInvoice = useCallback(<K extends keyof Invoice>(key: K, value: Invoice[K]) => {
     setInvoice(prev => ({ ...prev, [key]: value }));
-  }, []);
+  }, [setInvoice]);
 
   const addLineItem = useCallback(() => {
     const newItem: LineItem = {
@@ -212,14 +204,14 @@ export const useInvoice = () => {
       ...prev,
       lineItems: [...prev.lineItems, newItem],
     }));
-  }, []);
+  }, [setInvoice]);
 
   const removeLineItem = useCallback((id: string) => {
     setInvoice(prev => ({
       ...prev,
       lineItems: prev.lineItems.filter(item => item.id !== id),
     }));
-  }, []);
+  }, [setInvoice]);
 
   const updateLineItem = useCallback((id: string, field: keyof Omit<LineItem, 'id'>, value: string | number) => {
     setInvoice(prev => ({
@@ -228,23 +220,23 @@ export const useInvoice = () => {
         item.id === id ? { ...item, [field]: value } : item
       ),
     }));
-  }, []);
+  }, [setInvoice]);
 
   const calculateTotals = useCallback(() => {
     const subtotal = invoice.lineItems.reduce((acc, item) => acc + (item.quantity * Number(item.price)), 0);
     // Safe cast discountRate to number
     const safeDiscountRate = Number(invoice.discountRate) || 0;
     const safeShipping = Number(invoice.shippingAmount) || 0;
-    
+
     const discountAmount = invoice.discountType === 'percentage'
         ? subtotal * (safeDiscountRate / 100)
         : safeDiscountRate;
 
     const taxableAmount = Math.max(0, subtotal - discountAmount);
-    
+
     // Calculate final tax amount based on discounted subtotal
     const taxAmount = taxableAmount * (invoice.taxRate / 100);
-    
+
     // Calculate WHT based on subtotal before VAT but after discount
     const whtAmount = taxableAmount * ((invoice.whtRate || 0) / 100);
 
@@ -254,6 +246,16 @@ export const useInvoice = () => {
     return { subtotal, discountAmount, tax: taxAmount, whtAmount, shipping: safeShipping, total: finalTotal };
   }, [invoice.lineItems, invoice.taxRate, invoice.whtRate, invoice.discountRate, invoice.shippingAmount, invoice.discountType]);
 
+  return { updateInvoice, addLineItem, removeLineItem, updateLineItem, calculateTotals };
+};
+
+const useEntityManagement = (
+  syncToCloud: SyncToCloudFn,
+  setSavedClients: Dispatch<SetStateAction<Client[]>>,
+  setBusinessProfiles: Dispatch<SetStateAction<BusinessProfile[]>>,
+  setRecurringInvoices: Dispatch<SetStateAction<Invoice[]>>,
+  setSavedInvoices: Dispatch<SetStateAction<Invoice[]>>
+) => {
   const saveClient = useCallback((client: Client) => {
     if (!client.name.trim()) return false;
 
@@ -261,7 +263,7 @@ export const useInvoice = () => {
         // Check if exists, update if so, otherwise add
         const normalizedName = client.name.trim().toLowerCase();
         const existingIndex = prev.findIndex(c => c.name.toLowerCase() === normalizedName);
-        
+
         let newClients;
         if (existingIndex >= 0) {
             newClients = [...prev];
@@ -269,16 +271,16 @@ export const useInvoice = () => {
         } else {
             newClients = [...prev, client];
         }
-        
+
         // Sort alphabetically
         newClients.sort((a, b) => a.name.localeCompare(b.name));
-        
+
         localStorage.setItem('invoiceSavedClients', JSON.stringify(newClients));
         syncToCloud({ savedClients: newClients });
         return newClients;
     });
     return true;
-  }, [syncToCloud]);
+  }, [syncToCloud, setSavedClients]);
 
   const saveRecurringInvoice = useCallback((invoiceToSave: Invoice) => {
     setRecurringInvoices(prev => {
@@ -289,7 +291,7 @@ export const useInvoice = () => {
         syncToCloud({ recurringInvoices: updated });
         return updated;
     });
-  }, [syncToCloud]);
+  }, [syncToCloud, setRecurringInvoices]);
 
   const removeRecurringInvoice = useCallback((index: number) => {
       setRecurringInvoices(prev => {
@@ -298,7 +300,7 @@ export const useInvoice = () => {
           syncToCloud({ recurringInvoices: updated });
           return updated;
       });
-  }, [syncToCloud]);
+  }, [syncToCloud, setRecurringInvoices]);
 
   const toggleRecurringActive = useCallback((index: number, isActive: boolean) => {
       setRecurringInvoices(prev => {
@@ -308,7 +310,7 @@ export const useInvoice = () => {
           syncToCloud({ recurringInvoices: updated });
           return updated;
       });
-  }, [syncToCloud]);
+  }, [syncToCloud, setRecurringInvoices]);
 
   const saveBusinessProfile = useCallback((profile: AppUser) => {
       if (!profile.name.trim()) return false;
@@ -332,7 +334,7 @@ export const useInvoice = () => {
           return newProfiles;
       });
       return true;
-  }, [syncToCloud]);
+  }, [syncToCloud, setBusinessProfiles]);
 
   const removeBusinessProfile = useCallback((id: string) => {
       setBusinessProfiles(prev => {
@@ -341,7 +343,7 @@ export const useInvoice = () => {
           syncToCloud({ businessProfiles: newProfiles });
           return newProfiles;
       });
-  }, [syncToCloud]);
+  }, [syncToCloud, setBusinessProfiles]);
 
   const saveInvoice = useCallback((inv: Invoice) => {
     setSavedInvoices(prev => {
@@ -354,31 +356,45 @@ export const useInvoice = () => {
         } else {
             newInvoices = [inv, ...prev]; // Newest first
         }
-        
+
         localStorage.setItem('invoiceHistory', JSON.stringify(newInvoices));
         syncToCloud({ savedInvoices: newInvoices });
         return newInvoices;
     });
-  }, [syncToCloud]);
+  }, [syncToCloud, setSavedInvoices]);
+
+  return {
+    saveClient,
+    saveRecurringInvoice,
+    removeRecurringInvoice,
+    toggleRecurringActive,
+    saveBusinessProfile,
+    removeBusinessProfile,
+    saveInvoice
+  };
+};
+
+export const useInvoice = () => {
+  const [invoice, setInvoice] = useState<Invoice>(getInitialInvoiceState());
+  const [savedInvoices, setSavedInvoices] = useState<Invoice[]>([]);
+  const [savedClients, setSavedClients] = useState<Client[]>([]);
+  const [businessProfiles, setBusinessProfiles] = useState<BusinessProfile[]>([]);
+  const [recurringInvoices, setRecurringInvoices] = useState<Invoice[]>([]);
+  const { user: firebaseUser, isPro } = useSubscription();
+
+  const syncToCloud = useCloudSync(isPro, firebaseUser, setInvoice, setRecurringInvoices, setSavedInvoices, setSavedClients, setBusinessProfiles);
+  useLocalPersistence(invoice, syncToCloud, setSavedClients, setBusinessProfiles, setRecurringInvoices);
+  const mutations = useInvoiceMutations(invoice, setInvoice);
+  const entities = useEntityManagement(syncToCloud, setSavedClients, setBusinessProfiles, setRecurringInvoices, setSavedInvoices);
 
   return {
     invoice,
     setInvoice,
-    updateInvoice,
-    addLineItem,
-    removeLineItem,
-    updateLineItem,
-    calculateTotals,
+    ...mutations,
     savedInvoices,
-    saveInvoice,
     savedClients,
-    saveClient,
     businessProfiles,
-    saveBusinessProfile,
-    removeBusinessProfile,
     recurringInvoices,
-    saveRecurringInvoice,
-    removeRecurringInvoice,
-    toggleRecurringActive
+    ...entities
   };
 };

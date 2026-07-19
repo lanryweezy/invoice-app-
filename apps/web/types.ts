@@ -58,7 +58,7 @@ export interface Expense {
 }
 
 export interface Receipt {
-  id: string; // e.g., RCP-2026-xxx
+  id: string; // e.g., RCP-2026-001
   invoiceNumber: string;
   paymentMethod: string;
   transactionReference: string;

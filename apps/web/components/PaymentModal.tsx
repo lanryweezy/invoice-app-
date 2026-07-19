@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { Invoice } from '../types';
-
-const numberFormatter = new Intl.NumberFormat();
+import { numberFormatter } from '../utils/formatters';
 
 interface PaymentModalProps {
     isOpen: boolean;

@@ -1,3 +1,8 @@
+## 2026-07-19 - Fast Single Regex Matching
+
+**Learning:** When optimizing multiple regex calls over an array into a single combined regex, attempting to use unanchored lookaheads to enforce precedence order (`(?=.*?(?<type1>...))|(?=.*?(?<type2>...))`) causes catastrophic backtracking (O(N^2) time) if the string does not contain the target keywords. A standard combination (`(?<type1>...)|(?<type2>...)`) resolves in O(N) but alters matching logic from sequential precedence to left-to-right positional priority.
+
+**Action:** When a fallback default exists and strict cross-string precedence is explicitly dropped in favor of raw performance, build a single compiled regex using `Object.entries(keywords).map(([type, kw]) => '(?<' + type + '>' + kw.join('|') + ')').join('|')`. To dynamically map the matched groups back to types, extract the keys using `Object.keys()` over the keywords configuration and iterate them inside the `exec` callback instead of hardcoding.
 ## 2025-05-13 - [Intl.NumberFormat in render loop]
 **Learning:** `new Intl.NumberFormat()` is relatively slow to instantiate (~1ms per instantiation in Node, which can add up if called frequently or inside tight loops). In `InvoiceForm.tsx` and `InvoicePreview.tsx`, we are instantiating it inside the component render body. Moving it to `useMemo` or a constant outside the component can save unnecessary re-creations during renders. However, because it depends on the dynamic `currency` prop/state, it makes sense to wrap it in `useMemo`.
 
@@ -57,3 +62,7 @@
 ## 2026-07-20 - [Date instantiation inside loops]
 **Learning:** Comparing Date objects (using `<` or `>`) works by implicitly calling `.valueOf()` which gets the timestamp. However, when comparing inside a loop like `filter`, explicitly converting the static `start`/`to` boundary conditions into `.getTime()` numbers beforehand, and then parsing the inner `item.date` directly to `.getTime()` is slightly faster and removes the overhead of comparing complex Date objects.
 **Action:** When filtering dates inside an array loop, convert the boundary target dates into numerical timestamps outside the loop, and use numerical comparison `getTime()` against them inside the loop.
+## 2024-05-18 - Avoid N+1 execution by mapping intermediate results once
+**Learning:** When generating both summary stats and detailed lists from an array, ensure expensive transformations (like `checkCompliance`) aren't run multiple times per item. Pre-calculating them into a `results` array and passing that down halves processing time.
+**Action:** Extract statistical calculation logic into pure functions that accept the intermediate result array (e.g. `calculateStatsFromResults(results)`) rather than accepting raw entities and re-calculating everything.
+## 2026-07-19 - Prevent JSON bloat when optimizing arrays\n**Learning:** Caching detailed array evaluations inside a summary stats object eliminates N+1 loops, but can inadvertently blow up JSON export sizes if that stats object is passed raw to `JSON.stringify()`.\n**Action:** Always use destructuring (e.g., `const { results: _, ...summaryStats } = stats;`) to strip caching fields before final serialization.
