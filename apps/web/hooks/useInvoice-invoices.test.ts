@@ -31,7 +31,7 @@ describe('useInvoice - Invoices', () => {
       loading: false
     });
 
-    vi.stubGlobal('crypto', { randomUUID: vi.fn(() => 'mock-uuid-invoice') });
+    vi.stubGlobal('crypto', { randomUUID: vi.fn(() => 'mock-uuid-invoice'), getRandomValues: vi.fn((arr: any) => { for(let i=0; i<arr.length; i++) arr[i] = Math.floor(Math.random() * 256); return arr; }) });
     vi.stubGlobal('localStorage', { getItem: vi.fn(), setItem: vi.fn(), clear: vi.fn() });
   });
 
