@@ -23,3 +23,7 @@
 ## 2024-05-30 - Added missing edge case test for same currency conversion in exchangeRates
 **Learning:** Even simple logic branches like `if (from === to) return amount;` need explicit tests, especially when business logic specifically relies on certain currency strings (like 'NGN').
 **Action:** When writing utility functions for conversions, always test the "no-op" identical inputs using the exact specific strings (e.g. 'NGN' to 'NGN') the business logic is built around.
+
+## 2024-07-19 - Testing Time-Dependent State Reset Logic
+**Learning:** Testing logic that depends on date transitions (like sequence resets on month changes) requires precise manipulation of the system time during the test run. Using `vi.setSystemTime` between successive function calls allows us to simulate the passage of time accurately without waiting. Also, mocking stateful APIs like `localStorage` using memory-backed variables is essential to capture the intermediate states across time jumps.
+**Action:** When testing components or utilities that track time-based state (like daily quotas, monthly counters, or expirations), simulate the passage of time by updating `vi.setSystemTime` in the middle of a test case and use memory-backed mocks for storage.
