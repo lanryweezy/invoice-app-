@@ -30,6 +30,30 @@ describe('invoiceSequence', () => {
       );
     });
 
+    it('resets sequence to 1 when simulating an older cached month using vi.setSystemTime', () => {
+      let storage: string | null = null;
+      vi.mocked(localStorage.getItem).mockImplementation(() => storage);
+      vi.mocked(localStorage.setItem).mockImplementation((key, value) => {
+        storage = value;
+      });
+
+      // Advance to December 2023 and generate
+      vi.setSystemTime(new Date('2023-12-15T12:00:00Z'));
+      const invoiceDec = generateSequentialInvoiceNumber();
+      expect(invoiceDec).toBe('INV-2023-12-0001');
+
+      const invoiceDec2 = generateSequentialInvoiceNumber();
+      expect(invoiceDec2).toBe('INV-2023-12-0002');
+
+      // Advance to January 2024 and generate
+      vi.setSystemTime(new Date('2024-01-05T12:00:00Z'));
+      const invoiceJan = generateSequentialInvoiceNumber();
+
+      // Sequence must reset to 1
+      expect(invoiceJan).toBe('INV-2024-01-0001');
+      expect(storage).toBe(JSON.stringify({ month: '2024-01', sequence: 1 }));
+    });
+
     it('resets sequence to 1 when crossing over to a new month during runtime', () => {
       // Setup initial state using memory-backed mock for localStorage
       let storage: string | null = null;
