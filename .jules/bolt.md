@@ -1,3 +1,8 @@
+## 2026-07-19 - Fast Single Regex Matching
+
+**Learning:** When optimizing multiple regex calls over an array into a single combined regex, attempting to use unanchored lookaheads to enforce precedence order (`(?=.*?(?<type1>...))|(?=.*?(?<type2>...))`) causes catastrophic backtracking (O(N^2) time) if the string does not contain the target keywords. A standard combination (`(?<type1>...)|(?<type2>...)`) resolves in O(N) but alters matching logic from sequential precedence to left-to-right positional priority.
+
+**Action:** When a fallback default exists and strict cross-string precedence is explicitly dropped in favor of raw performance, build a single compiled regex using `Object.entries(keywords).map(([type, kw]) => '(?<' + type + '>' + kw.join('|') + ')').join('|')`. To dynamically map the matched groups back to types, extract the keys using `Object.keys()` over the keywords configuration and iterate them inside the `exec` callback instead of hardcoding.
 ## 2025-05-13 - [Intl.NumberFormat in render loop]
 **Learning:** `new Intl.NumberFormat()` is relatively slow to instantiate (~1ms per instantiation in Node, which can add up if called frequently or inside tight loops). In `InvoiceForm.tsx` and `InvoicePreview.tsx`, we are instantiating it inside the component render body. Moving it to `useMemo` or a constant outside the component can save unnecessary re-creations during renders. However, because it depends on the dynamic `currency` prop/state, it makes sense to wrap it in `useMemo`.
 
