@@ -19,9 +19,6 @@
 ## 2026-07-18 - Missing test coverage for structured exports
 **Learning:** The `apps/web/services/structuredExport.ts` file contained critical functions for JSON, XML, and CSV generation, but these functions were initially completely untested. Testing formatting and escaping strings for these output types is crucial as subtle errors can lead to malformed exports.
 **Action:** Always ensure robust testing for export functions, particularly focusing on validating exact data structures (like generated XML/CSV output and string escaping).
-## 2024-05-19 - Test coverage sprint
-**Learning:** Testing heavily branched mapping objects (like templates) and class methods requires exhaustive tests for mapping and network/service failures respectively, but the actual module structure doesn't always show coverage in files correctly mapped due to types. Mocking `global.fetch` and checking synthetic statuses ensures testing of specific retry mechanisms.
-**Action:** When testing external modules, explicitly test error mappings like AbortError instead of just success responses.
 ## 2026-07-19 - Splitting hook tests for useInvoice mutations
 **Learning:** The `useInvoice.ts` hook handles many separate data mutations (invoices, business profiles, line items, etc.) which makes it hard to test comprehensively in a single file without exceeding line constraints. The existing pattern splits tests by domain (e.g., `-clients`, `-totals`). When adding coverage for saving invoices and business profiles, creating new dedicated test files (`-invoices.test.ts` and `-businessProfiles.test.ts`) makes it easy to isolate and rigorously test both success states, edge cases (case-insensitivity, empty fields), and interactions with mocks.
 **Action:** When testing complex, multi-domain hooks in this repository, always split new coverage into separate, focused test files following the `<hookName>-<domain>.test.ts` naming convention rather than appending to existing unrelated test files.
@@ -33,10 +30,7 @@
 ## 2024-07-19 - Testing Time-Dependent State Reset Logic
 **Learning:** Testing logic that depends on date transitions (like sequence resets on month changes) requires precise manipulation of the system time during the test run. Using `vi.setSystemTime` between successive function calls allows us to simulate the passage of time accurately without waiting. Also, mocking stateful APIs like `localStorage` using memory-backed variables is essential to capture the intermediate states across time jumps.
 **Action:** When testing components or utilities that track time-based state (like daily quotas, monthly counters, or expirations), simulate the passage of time by updating `vi.setSystemTime` in the middle of a test case and use memory-backed mocks for storage.
-## 2026-07-19 - Testing `JSON.parse` wrapper error paths via mock data mutation
-**Learning:** When asserting the `catch` fallback block in logic that parses external stringified states (like `localStorage` data reading), the `catch` handler must be invoked by supplying functionally invalid parser data (like `'not-json'`) rather than artificially throwing standard errors via the mock. However, ensuring you test *both* scenarios guarantees robustness against IO failures *and* data corruption without losing coverage.
-**Action:** When adding malformed JSON path tests, implement them as strictly additive cases alongside existing `mockImplementation(() => { throw new Error(...) })` tests rather than replacing them.
 
-## 2026-07-19 - Testing JSON.parse catch branch in portalLinks
-**Learning:** Testing logic involving `JSON.parse` wrappers must include explicit tests for functionally invalid parser data (like `'not-json'`) to cover catch blocks.
-**Action:** When adding malformed JSON path tests, mock the data source to return a malformed JSON string rather than forcing the mock to throw an error.
+## 2024-05-19 - Testing missing inputs does not mean expecting NaN
+**Learning:** Testing payload generators that produce JSON objects should never expect or assert \`NaN\` for numeric values. \`NaN\` is an invalid JSON type.
+**Action:** When a function computes \`NaN\` from missing optional numeric inputs, write the test to expect a safe valid fallback like \`0\` and modify the core function to explicitly implement that fallback if it does not already. Do not codify the bug in the test assertion.
