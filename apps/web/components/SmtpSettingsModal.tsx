@@ -182,7 +182,6 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({ isOpen, on
           to: smtp.fromEmail || smtp.user,
           subject: 'InvoiceApp — Test Email',
           text: 'Your email is configured correctly! You can now send invoices directly from InvoiceApp.',
-          smtp,
         }),
         signal: controller.signal,
       });
