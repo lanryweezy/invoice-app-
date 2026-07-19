@@ -23,49 +23,32 @@ function filterByDateRange<T extends { date?: string; issueDate?: string }>(
   items: T[], range: DateRange, customFrom?: string, customTo?: string
 ): T[] {
   if (range === 'all') return items;
-
-  // ⚡ Bolt: Use YYYY-MM-DD string comparisons instead of instantiating `new Date()`
-  // inside the `.filter()` loop to reduce CPU overhead during dashboard renders.
-  let startStr = '';
-  let endStr = '9999-12-31'; // Future date for upper bound
-
   const now = new Date();
   const start = new Date();
 
-  // Note: We avoid `.toISOString()` which uses UTC and can cause off-by-one errors in positive timezones.
-  // We use local date formatting instead to get the exact YYYY-MM-DD string in the user's timezone.
-  const formatLocalDate = (d: Date) => {
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
-  };
-
   if (range === 'month') {
     start.setFullYear(now.getFullYear(), now.getMonth(), 1);
-    startStr = formatLocalDate(start);
   } else if (range === 'quarter') {
     const q = Math.floor(now.getMonth() / 3);
     start.setFullYear(now.getFullYear(), q * 3, 1);
-    startStr = formatLocalDate(start);
   } else if (range === 'year') {
     start.setFullYear(now.getFullYear(), 0, 1);
-    startStr = formatLocalDate(start);
   } else if (range === 'custom' && customFrom && customTo) {
-    startStr = customFrom;
-    endStr = customTo;
-  } else {
-    // Fallback: Default to today
-    start.setHours(0, 0, 0, 0);
-    startStr = formatLocalDate(start);
+    const fromTime = new Date(customFrom).getTime();
+    const toTime = new Date(customTo);
+    toTime.setHours(23, 59, 59);
+    const toTimeValue = toTime.getTime();
+    return items.filter(item => {
+      const dTime = new Date(item.date || item.issueDate || '').getTime();
+      return dTime >= fromTime && dTime <= toTimeValue;
+    });
   }
 
+  start.setHours(0, 0, 0, 0);
+  const startTime = start.getTime();
   return items.filter(item => {
-    let dStr = item.date || item.issueDate || '';
-    if (!dStr) return false;
-    // Extract YYYY-MM-DD in case the string has a time component
-    dStr = dStr.substring(0, 10);
-    return dStr >= startStr && dStr <= endStr;
+    const dTime = new Date(item.date || item.issueDate || '').getTime();
+    return dTime >= startTime;
   });
 }
 
