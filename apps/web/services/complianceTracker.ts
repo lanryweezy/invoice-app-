@@ -37,7 +37,11 @@ interface ComplianceCheck {
 }
 
 function generateIssueId(): string {
-  return `issue-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+  // Security Fix: Use cryptographically secure random numbers for Key IDs
+  const array = new Uint8Array(4);
+  crypto.getRandomValues(array);
+  const randomStr = Array.from(array, b => b.toString(16).padStart(2, '0')).join('').substring(0, 4);
+  return `issue-${Date.now()}-${randomStr}`;
 }
 
 function isValidTIN(tin: string | undefined): boolean {
@@ -619,6 +623,7 @@ export function getOverallComplianceStats(invoices: Invoice[]): {
   compliantCount: number;
   nonCompliantCount: number;
   categoryAverages: Record<ComplianceCategory, number>;
+  results: ComplianceCheckResult[];
 } {
   if (invoices.length === 0) {
     return {
@@ -636,6 +641,7 @@ export function getOverallComplianceStats(invoices: Invoice[]): {
         Dates: 0,
         General: 0,
       },
+      results: [],
     };
   }
 
@@ -653,8 +659,10 @@ export function getOverallComplianceStats(invoices: Invoice[]): {
     General: { total: 0, count: 0 },
   };
 
+  const results: ComplianceCheckResult[] = [];
   for (const invoice of invoices) {
     const result = checkCompliance(invoice);
+    results.push(result);
     totalScore += result.score;
     totalIssues += result.issues.length;
     if (result.score >= 80) compliantCount++;
@@ -677,6 +685,7 @@ export function getOverallComplianceStats(invoices: Invoice[]): {
     compliantCount,
     nonCompliantCount: invoices.length - compliantCount,
     categoryAverages,
+    results,
   };
 }
 
@@ -704,8 +713,9 @@ export function exportComplianceReport(invoices: Invoice[]): string {
   lines.push('=== Invoice Details ===');
   lines.push('Invoice Number,Score,Issues');
 
-  for (const invoice of invoices) {
-    const result = checkCompliance(invoice);
+  for (let i = 0; i < invoices.length; i++) {
+    const invoice = invoices[i];
+    const result = stats.results[i];
     lines.push(
       `${invoice.invoiceNumber},${result.score}%,${result.issues.length}`
     );
@@ -716,8 +726,8 @@ export function exportComplianceReport(invoices: Invoice[]): string {
 
 export function exportComplianceReportJSON(invoices: Invoice[]): string {
   const stats = getOverallComplianceStats(invoices);
-  const details = invoices.map((invoice) => {
-    const result = checkCompliance(invoice);
+  const details = invoices.map((invoice, i) => {
+    const result = stats.results[i];
     return {
       invoiceNumber: invoice.invoiceNumber,
       score: result.score,
@@ -726,10 +736,12 @@ export function exportComplianceReportJSON(invoices: Invoice[]): string {
     };
   });
 
+  const { results: _, ...summaryStats } = stats;
+
   return JSON.stringify(
     {
       generatedAt: new Date().toISOString(),
-      summary: stats,
+      summary: summaryStats,
       invoices: details,
     },
     null,

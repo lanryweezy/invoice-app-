@@ -43,7 +43,6 @@ export const queueMutation = async (collectionName: string, docId: string, data:
     }
 
     await localforage.setItem('syncQueue', queue);
-    console.log(`[Offline Sync] Queued mutation for ${collectionName}/${docId}`);
     trackEvent('sync_mutation_queued', { collection: collectionName, docId });
   } catch (error) {
     console.error("[Offline Sync] Failed to queue mutation", error);
@@ -84,7 +83,6 @@ export const flushQueue = async (): Promise<boolean> => {
         const docRef = doc(db, mutation.collection, mutation.docId);
         // Using merge: true as this is primarily used for partial updates (e.g. { invoiceUser: ... })
         await setDoc(docRef, mutation.data, { merge: true });
-        console.log(`[Offline Sync] Synced ${mutation.collection}/${mutation.docId}`);
         trackEvent('sync_item_success', { collection: mutation.collection, docId: mutation.docId });
       })
     );

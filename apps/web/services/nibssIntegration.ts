@@ -76,7 +76,10 @@ const paymentStatuses = new Map<string, NIBSSPaymentStatus>();
 
 function generateReference(): string {
   const timestamp = Date.now().toString(36).toUpperCase();
-  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+  // Security Fix: Use cryptographically secure random numbers for payment references
+  const array = new Uint8Array(4);
+  crypto.getRandomValues(array);
+  const random = Array.from(array, b => b.toString(16).padStart(2, '0')).join('').toUpperCase().substring(0, 6);
   return `NIBSS-${timestamp}-${random}`;
 }
 
@@ -84,7 +87,10 @@ function generateReceiptNumber(): string {
   const date = new Date();
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
-  const seq = String(Math.floor(Math.random() * 9999)).padStart(4, '0');
+  // Security Fix: Prevent predictable receipt numbers
+  const array2 = new Uint16Array(1);
+  crypto.getRandomValues(array2);
+  const seq = String(array2[0] % 10000).padStart(4, '0');
   return `RCP-NIBSS-${year}${month}-${seq}`;
 }
 

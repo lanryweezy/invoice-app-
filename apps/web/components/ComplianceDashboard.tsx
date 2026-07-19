@@ -8,6 +8,7 @@ import {
   exportComplianceReportJSON,
 } from '../services/complianceTracker';
 import type { ComplianceIssue, ComplianceCategory } from '../services/complianceTracker';
+import { numberFormatter } from '../utils/formatters';
 
 interface ComplianceDashboardProps {
   invoices: Invoice[];
@@ -35,8 +36,6 @@ const CATEGORY_ICONS: Record<ComplianceCategory, string> = {
   Dates: 'D',
   General: 'G',
 };
-
-const numberFormatter = new Intl.NumberFormat();
 
 export const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({
   invoices,
