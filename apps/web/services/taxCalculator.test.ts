@@ -113,3 +113,15 @@ describe('taxCalculator', () => {
     });
   });
 });
+
+  describe('calculateWHT with edge cases', () => {
+    it('returns 0 WHT for unknown whtType', () => {
+        const invoice: Invoice = {
+            items: [ { description: 'Item 1', amount: 1000, type: 'standard' } ],
+            whtType: 'unknown' as any
+        };
+        const breakdown = getTaxBreakdown(invoice);
+        expect(breakdown.whtRate).toBe(0);
+        expect(breakdown.wht).toBe(0);
+    });
+  });

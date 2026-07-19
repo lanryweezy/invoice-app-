@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import type { Invoice } from '../types';
-
-const numberFormatter = new Intl.NumberFormat();
+import { numberFormatter } from '../utils/formatters';
 
 interface PortalProps {
   invoice: Invoice;

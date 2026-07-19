@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import type { Invoice } from '../types';
-
-const numberFormatter = new Intl.NumberFormat();
+import { numberFormatter } from '../utils/formatters';
 
 const frequencyLabels: Record<string, string> = {
   weekly: 'Every Week',
