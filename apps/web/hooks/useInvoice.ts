@@ -38,7 +38,10 @@ const getInitialInvoiceState = (): Invoice => {
   const generateRandomInvoiceNumber = () => {
     // Generates a string like "INV-2026-X8B9Q"
     const year = new Date().getFullYear();
-    const randomChars = Math.random().toString(36).substring(2, 7).toUpperCase();
+    // Security Fix: Use cryptographically secure random numbers for invoice references
+    const array = new Uint8Array(4);
+    crypto.getRandomValues(array);
+    const randomChars = Array.from(array, b => b.toString(16).padStart(2, '0')).join('').toUpperCase().substring(0, 5);
     return `INV-${year}-${randomChars}`;
   };
 
