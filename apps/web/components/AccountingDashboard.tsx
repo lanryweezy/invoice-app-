@@ -34,19 +34,21 @@ function filterByDateRange<T extends { date?: string; issueDate?: string }>(
   } else if (range === 'year') {
     start.setFullYear(now.getFullYear(), 0, 1);
   } else if (range === 'custom' && customFrom && customTo) {
-    const from = new Date(customFrom);
-    const to = new Date(customTo);
-    to.setHours(23, 59, 59);
+    const fromTime = new Date(customFrom).getTime();
+    const toTime = new Date(customTo);
+    toTime.setHours(23, 59, 59);
+    const toTimeValue = toTime.getTime();
     return items.filter(item => {
-      const d = new Date(item.date || item.issueDate || '');
-      return d >= from && d <= to;
+      const dTime = new Date(item.date || item.issueDate || '').getTime();
+      return dTime >= fromTime && dTime <= toTimeValue;
     });
   }
 
   start.setHours(0, 0, 0, 0);
+  const startTime = start.getTime();
   return items.filter(item => {
-    const d = new Date(item.date || item.issueDate || '');
-    return d >= start;
+    const dTime = new Date(item.date || item.issueDate || '').getTime();
+    return dTime >= startTime;
   });
 }
 

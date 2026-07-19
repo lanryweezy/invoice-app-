@@ -53,3 +53,7 @@
 ## 2026-07-17 - [Debounce frequent window events]
 **Learning:** Attaching heavy UI updates or layout calculations (such as updating preview scales) directly to synchronous window events like `resize` or `scroll` causes massive re-render cascades and layout thrashing, severely degrading UI responsiveness.
 **Action:** Always wrap the handlers for high-frequency window events (`resize`, `scroll`, `mousemove`) with a debounce or throttle mechanism (e.g. `setTimeout`) to limit execution frequency, clearing the previous timeout on subsequent fires.
+
+## 2026-07-20 - [Date instantiation inside loops]
+**Learning:** Comparing Date objects (using `<` or `>`) works by implicitly calling `.valueOf()` which gets the timestamp. However, when comparing inside a loop like `filter`, explicitly converting the static `start`/`to` boundary conditions into `.getTime()` numbers beforehand, and then parsing the inner `item.date` directly to `.getTime()` is slightly faster and removes the overhead of comparing complex Date objects.
+**Action:** When filtering dates inside an array loop, convert the boundary target dates into numerical timestamps outside the loop, and use numerical comparison `getTime()` against them inside the loop.
