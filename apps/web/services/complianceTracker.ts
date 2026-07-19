@@ -617,14 +617,14 @@ export function saveComplianceCheck(result: ComplianceCheckResult): void {
   );
 }
 
-export function getOverallComplianceStats(invoices: Invoice[]): {
+export function calculateStatsFromResults(results: ComplianceCheckResult[]): {
   averageScore: number;
   totalIssues: number;
   compliantCount: number;
   nonCompliantCount: number;
   categoryAverages: Record<ComplianceCategory, number>;
 } {
-  if (invoices.length === 0) {
+  if (results.length === 0) {
     return {
       averageScore: 0,
       totalIssues: 0,
@@ -657,8 +657,7 @@ export function getOverallComplianceStats(invoices: Invoice[]): {
     General: { total: 0, count: 0 },
   };
 
-  for (const invoice of invoices) {
-    const result = checkCompliance(invoice);
+  for (const result of results) {
     totalScore += result.score;
     totalIssues += result.issues.length;
     if (result.score >= 80) compliantCount++;
@@ -676,16 +675,27 @@ export function getOverallComplianceStats(invoices: Invoice[]): {
   }
 
   return {
-    averageScore: Math.round(totalScore / invoices.length),
+    averageScore: Math.round(totalScore / results.length),
     totalIssues,
     compliantCount,
-    nonCompliantCount: invoices.length - compliantCount,
+    nonCompliantCount: results.length - compliantCount,
     categoryAverages,
   };
 }
 
+export function getOverallComplianceStats(invoices: Invoice[]): {
+  averageScore: number;
+  totalIssues: number;
+  compliantCount: number;
+  nonCompliantCount: number;
+  categoryAverages: Record<ComplianceCategory, number>;
+} {
+  return calculateStatsFromResults(invoices.map(checkCompliance));
+}
+
 export function exportComplianceReport(invoices: Invoice[]): string {
-  const stats = getOverallComplianceStats(invoices);
+  const results = invoices.map(checkCompliance);
+  const stats = calculateStatsFromResults(results);
   const lines: string[] = [
     'Invoice Compliance Report',
     `Generated: ${new Date().toLocaleString('en-NG')}`,
@@ -708,8 +718,9 @@ export function exportComplianceReport(invoices: Invoice[]): string {
   lines.push('=== Invoice Details ===');
   lines.push('Invoice Number,Score,Issues');
 
-  for (const invoice of invoices) {
-    const result = checkCompliance(invoice);
+  for (let i = 0; i < invoices.length; i++) {
+    const invoice = invoices[i];
+    const result = results[i];
     lines.push(
       `${invoice.invoiceNumber},${result.score}%,${result.issues.length}`
     );
@@ -719,9 +730,10 @@ export function exportComplianceReport(invoices: Invoice[]): string {
 }
 
 export function exportComplianceReportJSON(invoices: Invoice[]): string {
-  const stats = getOverallComplianceStats(invoices);
-  const details = invoices.map((invoice) => {
-    const result = checkCompliance(invoice);
+  const results = invoices.map(checkCompliance);
+  const stats = calculateStatsFromResults(results);
+  const details = invoices.map((invoice, index) => {
+    const result = results[index];
     return {
       invoiceNumber: invoice.invoiceNumber,
       score: result.score,

@@ -57,3 +57,6 @@
 ## 2026-07-20 - [Date instantiation inside loops]
 **Learning:** Comparing Date objects (using `<` or `>`) works by implicitly calling `.valueOf()` which gets the timestamp. However, when comparing inside a loop like `filter`, explicitly converting the static `start`/`to` boundary conditions into `.getTime()` numbers beforehand, and then parsing the inner `item.date` directly to `.getTime()` is slightly faster and removes the overhead of comparing complex Date objects.
 **Action:** When filtering dates inside an array loop, convert the boundary target dates into numerical timestamps outside the loop, and use numerical comparison `getTime()` against them inside the loop.
+## 2024-05-18 - Avoid N+1 execution by mapping intermediate results once
+**Learning:** When generating both summary stats and detailed lists from an array, ensure expensive transformations (like `checkCompliance`) aren't run multiple times per item. Pre-calculating them into a `results` array and passing that down halves processing time.
+**Action:** Extract statistical calculation logic into pure functions that accept the intermediate result array (e.g. `calculateStatsFromResults(results)`) rather than accepting raw entities and re-calculating everything.
