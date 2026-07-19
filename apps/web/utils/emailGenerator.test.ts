@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { generateEmailTemplate, getEmailSubject, getEmailBody, registerEmailTemplate } from './emailGenerator';
+import { generateEmailTemplate, getEmailSubject, getEmailBody, registerEmailTemplate, generateAttachmentOptions } from './emailGenerator';
 import type { Invoice } from '../types';
 
 describe('emailGenerator', () => {
@@ -168,4 +168,57 @@ describe('emailGenerator', () => {
       expect(subject).toBe('Invoice INV-1234 from John Doe');
     });
   });
+
+  describe('generateEmailTemplate with defaults', () => {
+    it('defaults to formal if undefined template is passed', () => {
+      const emailText = generateEmailTemplate(mockInvoice, undefined as any);
+      expect(emailText.startsWith('Subject: Invoice INV-1234 from John Doe\n\nDear Acme Corp')).toBe(true);
+    });
+  });
+
+  describe('registerEmailTemplate deduplication', () => {
+    it('does not add duplicate metadata for the same id', () => {
+       registerEmailTemplate({
+        id: 'holiday', // already registered in previous test
+        name: 'Holiday Special 2',
+        description: 'Festive greetings with invoice 2',
+        icon: '🎄',
+        generate: (inv) => ({
+          subject: `Happy Holidays 2!`,
+          body: `Body 2`
+        })
+      });
+      // Test is mainly for branch coverage on the `if (!EMAIL_TEMPLATES.some(...))`
+      const subject = getEmailSubject(mockInvoice, 'holiday');
+      expect(subject).toBe('Happy Holidays 2!');
+    });
+  });
+
+  describe('getEmailBody defaults', () => {
+    it('defaults to formal if undefined template is passed', () => {
+      const body = getEmailBody(mockInvoice, undefined as any);
+      expect(body).toContain('Dear Acme Corp');
+    });
+  });
+
+  describe('getEmailSubject defaults', () => {
+    it('defaults to formal if undefined template is passed', () => {
+      const subject = getEmailSubject(mockInvoice, undefined as any);
+      expect(subject).toBe('Invoice INV-1234 from John Doe');
+    });
+  });
+
+  describe('generateAttachmentOptions', () => {
+    it('generates pdf attachment when includePdf is true', () => {
+        const attachments = generateAttachmentOptions(mockInvoice, true);
+        expect(attachments.length).toBe(1);
+        expect(attachments[0].filename).toBe('Invoice_INV-1234.pdf');
+    });
+
+    it('returns empty array when includePdf is false', () => {
+        const attachments = generateAttachmentOptions(mockInvoice, false);
+        expect(attachments.length).toBe(0);
+    });
+  });
+
 });

@@ -16,3 +16,6 @@
 ## 2026-07-18 - Missing test coverage for structured exports
 **Learning:** The `apps/web/services/structuredExport.ts` file contained critical functions for JSON, XML, and CSV generation, but these functions were initially completely untested. Testing formatting and escaping strings for these output types is crucial as subtle errors can lead to malformed exports.
 **Action:** Always ensure robust testing for export functions, particularly focusing on validating exact data structures (like generated XML/CSV output and string escaping).
+## 2024-05-19 - Test coverage sprint
+**Learning:** Testing heavily branched mapping objects (like templates) and class methods requires exhaustive tests for mapping and network/service failures respectively, but the actual module structure doesn't always show coverage in files correctly mapped due to types. Mocking `global.fetch` and checking synthetic statuses ensures testing of specific retry mechanisms.
+**Action:** When testing external modules, explicitly test error mappings like AbortError instead of just success responses.
