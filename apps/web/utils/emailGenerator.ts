@@ -168,3 +168,16 @@ export function registerEmailTemplate(strategy: EmailTemplateStrategy): void {
   }
   templates[strategy.id] = generate;
 }
+
+// 🧪 Forge: Generate attachment metadata
+export function generateAttachmentOptions(inv: Invoice, includePdf = true): any[] {
+  const attachments = [];
+  if (includePdf) {
+     attachments.push({
+         filename: `Invoice_${inv.invoiceNumber}.pdf`,
+         type: 'application/pdf',
+         content: 'BASE64_PLACEHOLDER_PDF_CONTENT'
+     });
+  }
+  return attachments;
+}
