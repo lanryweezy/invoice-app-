@@ -6,3 +6,8 @@
 ## 2026-07-18 - File Truncation when Reading Source Files
 **Learning:** When reading files using `cat`, the output may be truncated, which hides function signatures and implementations further down the file, leading to hallucinatory test implementations.
 **Action:** Use tools like `cat <file> | tail -n +<line_number>` or `grep` to bypass truncation and ensure you read the full function implementation before writing tests.
+## 2024-05-15 - localforage Mocking
+
+**Learning:** Testing services that rely on `localforage` (like `auditTrail.ts`) requires mocking its `config`, `getItem`, and `setItem` methods globally using `vi.mock('localforage', ...)` to prevent unhandled promise rejections and IndexedDB initialization errors during Vitest runs.
+
+**Action:** When adding tests for modules using `localforage`, use `vi.mock('localforage', () => ({ default: { config: vi.fn(), getItem: vi.fn(), setItem: vi.fn() } }))` before `describe` blocks.
