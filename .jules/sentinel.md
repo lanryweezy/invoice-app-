@@ -10,3 +10,7 @@
 **Vulnerability:** Across multiple core services (e.g. `auditTrail`, `complianceTracker`, `stampDuty`, `nibssIntegration`, `digitalSignature`, `useInvoice`), `Math.random()` was being used to generate sensitive references, keys, and receipt IDs.
 **Learning:** `Math.random()` is predictable and not cryptographically secure, which could allow attackers to guess or brute-force invoice identifiers or payment links.
 **Prevention:** Always use `crypto.getRandomValues()` for generating UUIDs, tokens, identifiers, and any cryptographically sensitive string within frontend/backend codebases.
+## 2025-02-14 - Fix SSRF and Open Relay in SMTP Endpoint
+**Vulnerability:** The `/api/send-email` serverless function previously accepted raw SMTP configuration (host, port, credentials) directly from the client's request body to instantiate a nodemailer transport, exposing the server to Server-Side Request Forgery (SSRF) and Open Email Relay abuse.
+**Learning:** Accepting connection parameters from untrusted clients effectively turns a server into an open proxy. Attackers could pass internal network IPs to scan ports or use the Vercel infrastructure to blast spam through their own (or compromised) SMTP servers while masking their true IP.
+**Prevention:** Never trust client payloads for backend infrastructure connections. Always hardcode or read connection secrets (like SMTP details) exclusively from server-side environment variables (`process.env`).
