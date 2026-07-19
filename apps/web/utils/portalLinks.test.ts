@@ -102,6 +102,18 @@ describe('portalLinks', () => {
 
       expect(parsedStored[token!]).toBeDefined();
     });
+
+    it('handles malformed JSON in stored links gracefully by creating a fresh object', () => {
+      vi.mocked(localStorage.getItem).mockReturnValue('not-json');
+
+      const link = createPortalLink(mockInvoice);
+      const token = link.split('/').pop();
+
+      const setCall = vi.mocked(localStorage.setItem).mock.calls[0][1];
+      const parsedStored = JSON.parse(setCall);
+
+      expect(parsedStored[token!]).toBeDefined();
+    });
   });
 
   describe('getPortalLink', () => {
