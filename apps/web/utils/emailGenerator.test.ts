@@ -23,10 +23,10 @@ describe('emailGenerator', () => {
       address: '456 Market St'
     },
     lineItems: [
-      { description: 'Web Design', quantity: 1, price: '100000' },
-      { description: 'Hosting', quantity: 1, price: '50000' }
+      { id: '1', description: 'Web Design', quantity: 1, price: 100000 },
+      { id: '2', description: 'Hosting', quantity: 1, price: 50000 }
     ]
-  } as Invoice;
+  } as unknown as Invoice;
 
   describe('getEmailSubject', () => {
     it('generates formal subject', () => {

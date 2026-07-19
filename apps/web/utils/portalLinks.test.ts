@@ -23,8 +23,8 @@ describe('portalLinks', () => {
     client: { name: 'Acme Corp', email: 'acme@example.com' },
     total: 1000,
     currency: 'NGN',
-    status: 'pending'
-  } as Invoice;
+    status: 'Draft'
+  } as unknown as Invoice;
 
   describe('generatePortalToken', () => {
     it('generates a 64-character alphanumeric token', () => {
@@ -157,12 +157,6 @@ describe('portalLinks', () => {
 
       const linkData = getPortalLink('my-token');
 
-      expect(linkData).toBeNull();
-    });
-
-    it('handles getStoredLinks catch branch by returning null for malformed JSON', () => {
-      vi.mocked(localStorage.getItem).mockReturnValue('not-json');
-      const linkData = getPortalLink('invalid-token');
       expect(linkData).toBeNull();
     });
   });

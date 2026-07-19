@@ -37,7 +37,11 @@ interface ComplianceCheck {
 }
 
 function generateIssueId(): string {
-  return `issue-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+  // Security Fix: Use cryptographically secure random numbers for Key IDs
+  const array = new Uint8Array(4);
+  crypto.getRandomValues(array);
+  const randomStr = Array.from(array, b => b.toString(16).padStart(2, '0')).join('').substring(0, 4);
+  return `issue-${Date.now()}-${randomStr}`;
 }
 
 function isValidTIN(tin: string | undefined): boolean {
@@ -620,68 +624,12 @@ export function getOverallComplianceStats(invoices: Invoice[]): {
   nonCompliantCount: number;
   categoryAverages: Record<ComplianceCategory, number>;
 } {
-  if (invoices.length === 0) {
-    return {
-      averageScore: 0,
-      totalIssues: 0,
-      compliantCount: 0,
-      nonCompliantCount: 0,
-      categoryAverages: {
-        TIN: 0,
-        CAC: 0,
-        VAT: 0,
-        WHT: 0,
-        LineItems: 0,
-        Totals: 0,
-        Dates: 0,
-        General: 0,
-      },
-    };
-  }
-
-  let totalScore = 0;
-  let totalIssues = 0;
-  let compliantCount = 0;
-  const categorySums: Record<ComplianceCategory, { total: number; count: number }> = {
-    TIN: { total: 0, count: 0 },
-    CAC: { total: 0, count: 0 },
-    VAT: { total: 0, count: 0 },
-    WHT: { total: 0, count: 0 },
-    LineItems: { total: 0, count: 0 },
-    Totals: { total: 0, count: 0 },
-    Dates: { total: 0, count: 0 },
-    General: { total: 0, count: 0 },
-  };
-
-  for (const invoice of invoices) {
-    const result = checkCompliance(invoice);
-    totalScore += result.score;
-    totalIssues += result.issues.length;
-    if (result.score >= 80) compliantCount++;
-
-    for (const cat of Object.keys(result.categoryScores) as ComplianceCategory[]) {
-      categorySums[cat].total += result.categoryScores[cat];
-      categorySums[cat].count++;
-    }
-  }
-
-  const categoryAverages: Record<ComplianceCategory, number> = {} as Record<ComplianceCategory, number>;
-  for (const cat of Object.keys(categorySums) as ComplianceCategory[]) {
-    const { total, count } = categorySums[cat];
-    categoryAverages[cat] = count > 0 ? Math.round(total / count) : 0;
-  }
-
-  return {
-    averageScore: Math.round(totalScore / invoices.length),
-    totalIssues,
-    compliantCount,
-    nonCompliantCount: invoices.length - compliantCount,
-    categoryAverages,
-  };
+  return calculateStatsFromResults(invoices.map(checkCompliance));
 }
 
 export function exportComplianceReport(invoices: Invoice[]): string {
-  const stats = getOverallComplianceStats(invoices);
+  const results = invoices.map(checkCompliance);
+  const stats = calculateStatsFromResults(results);
   const lines: string[] = [
     'Invoice Compliance Report',
     `Generated: ${new Date().toLocaleString('en-NG')}`,
@@ -704,8 +652,9 @@ export function exportComplianceReport(invoices: Invoice[]): string {
   lines.push('=== Invoice Details ===');
   lines.push('Invoice Number,Score,Issues');
 
-  for (const invoice of invoices) {
-    const result = checkCompliance(invoice);
+  for (let i = 0; i < invoices.length; i++) {
+    const invoice = invoices[i];
+    const result = results[i];
     lines.push(
       `${invoice.invoiceNumber},${result.score}%,${result.issues.length}`
     );
@@ -714,10 +663,11 @@ export function exportComplianceReport(invoices: Invoice[]): string {
   return lines.join('\n');
 }
 
+
 export function exportComplianceReportJSON(invoices: Invoice[]): string {
   const stats = getOverallComplianceStats(invoices);
-  const details = invoices.map((invoice) => {
-    const result = checkCompliance(invoice);
+  const details = invoices.map((invoice, i) => {
+    const result = stats.results[i];
     return {
       invoiceNumber: invoice.invoiceNumber,
       score: result.score,
@@ -726,10 +676,12 @@ export function exportComplianceReportJSON(invoices: Invoice[]): string {
     };
   });
 
+  const { results: _, ...summaryStats } = stats;
+
   return JSON.stringify(
     {
       generatedAt: new Date().toISOString(),
-      summary: stats,
+      summary: summaryStats,
       invoices: details,
     },
     null,

@@ -38,9 +38,9 @@ import { flushQueue, getQueueCount } from './utils/offlineSync';
 
 // NRS Compliance Components
 import { ComplianceDashboard } from './components/ComplianceDashboard';
-import { NRSTaxPanel } from './components/NRSTaxPanel';
+import NRSTaxPanel from './components/NRSTaxPanel';
 import { QRCodeDisplay } from './components/QRCodeDisplay';
-import { TINValidator } from './components/TINValidator';
+import TINValidator from './components/TINValidator';
 import { PaymentDetails } from './components/PaymentDetails';
 
 // NRS Compliance Services
@@ -203,7 +203,7 @@ const App: React.FC = () => {
       const score = getComplianceScore(invoice);
       setComplianceScore(score);
       setIsComplianceOpen(true);
-      logAction(invoice.id || 'new', 'compliance_check', user?.email || 'anonymous', `Score: ${score}`);
+      logAction(invoice.id || 'new', 'compliance_check', user?.email || 'anonymous', { score });
     }
   }, [invoice, user]);
 
@@ -235,7 +235,7 @@ const App: React.FC = () => {
     const subtotal = invoice.subtotal || 0;
     const vat = calculateVAT(subtotal);
     const wht = calculateWHT(subtotal, 'professional');
-    const stamp = calculateStampDuty('invoice', subtotal);
+    const stamp = calculateStampDuty(subtotal);
     return { vat, wht, stamp, total: vat + wht + stamp };
   }, [invoice]);
 
