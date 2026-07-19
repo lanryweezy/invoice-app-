@@ -159,5 +159,11 @@ describe('portalLinks', () => {
 
       expect(linkData).toBeNull();
     });
+
+    it('handles getStoredLinks catch branch by returning null for malformed JSON', () => {
+      vi.mocked(localStorage.getItem).mockReturnValue('not-json');
+      const linkData = getPortalLink('invalid-token');
+      expect(linkData).toBeNull();
+    });
   });
 });

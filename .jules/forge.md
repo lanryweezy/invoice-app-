@@ -36,3 +36,7 @@
 ## 2026-07-19 - Testing `JSON.parse` wrapper error paths via mock data mutation
 **Learning:** When asserting the `catch` fallback block in logic that parses external stringified states (like `localStorage` data reading), the `catch` handler must be invoked by supplying functionally invalid parser data (like `'not-json'`) rather than artificially throwing standard errors via the mock. However, ensuring you test *both* scenarios guarantees robustness against IO failures *and* data corruption without losing coverage.
 **Action:** When adding malformed JSON path tests, implement them as strictly additive cases alongside existing `mockImplementation(() => { throw new Error(...) })` tests rather than replacing them.
+
+## 2026-07-19 - Testing JSON.parse catch branch in portalLinks
+**Learning:** Testing logic involving `JSON.parse` wrappers must include explicit tests for functionally invalid parser data (like `'not-json'`) to cover catch blocks.
+**Action:** When adding malformed JSON path tests, mock the data source to return a malformed JSON string rather than forcing the mock to throw an error.
