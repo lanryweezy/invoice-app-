@@ -53,9 +53,7 @@ import { logAction, getAuditTrail } from './services/auditTrail';
 // Lazy load heavy preview component
 const InvoicePreview = React.lazy(() => import('./components/InvoicePreview').then(module => ({ default: module.InvoicePreview })));
 
-// ⚡ Bolt: Cache Intl.NumberFormat instance globally to avoid ~0.6ms overhead per instantiation inside render loop.
-// Use default locale instead of hardcoding 'en-US' to preserve original toLocaleString behavior.
-const numberFormatter = new Intl.NumberFormat();
+import { numberFormatter } from './utils/formatters';
 
 const App: React.FC = () => {
   const {
