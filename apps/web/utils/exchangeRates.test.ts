@@ -141,6 +141,7 @@ describe('exchangeRates', () => {
 
     it('returns the same amount if from and to are identical', () => {
       expect(convertCurrency(500, 'USD', 'USD', mockRates)).toBe(500);
+      expect(convertCurrency(500, 'NGN', 'NGN', mockRates)).toBe(500);
     });
 
     it('converts NGN to another currency', () => {
