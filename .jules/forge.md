@@ -30,3 +30,7 @@
 ## 2024-07-19 - Testing Time-Dependent State Reset Logic
 **Learning:** Testing logic that depends on date transitions (like sequence resets on month changes) requires precise manipulation of the system time during the test run. Using `vi.setSystemTime` between successive function calls allows us to simulate the passage of time accurately without waiting. Also, mocking stateful APIs like `localStorage` using memory-backed variables is essential to capture the intermediate states across time jumps.
 **Action:** When testing components or utilities that track time-based state (like daily quotas, monthly counters, or expirations), simulate the passage of time by updating `vi.setSystemTime` in the middle of a test case and use memory-backed mocks for storage.
+
+## 2024-05-19 - Testing missing inputs does not mean expecting NaN
+**Learning:** Testing payload generators that produce JSON objects should never expect or assert \`NaN\` for numeric values. \`NaN\` is an invalid JSON type.
+**Action:** When a function computes \`NaN\` from missing optional numeric inputs, write the test to expect a safe valid fallback like \`0\` and modify the core function to explicitly implement that fallback if it does not already. Do not codify the bug in the test assertion.

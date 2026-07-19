@@ -3,7 +3,8 @@ import {
   checkCompliance,
   getComplianceScore,
   getComplianceIssues,
-  ComplianceIssue
+  ComplianceIssue,
+  suggestFixes
 } from './complianceTracker';
 import type { Invoice } from '../types';
 
@@ -266,11 +267,8 @@ describe('complianceTracker', () => {
       const issues = getComplianceIssues(invoice);
       expect(issues.length).toBeGreaterThan(0);
       expect(issues[0].category).toBe('TIN');
-import { describe, it, expect } from 'vitest';
-import { checkCompliance, suggestFixes, type ComplianceIssue } from './complianceTracker';
-import type { Invoice } from '../types';
-
-describe('complianceTracker', () => {
+    });
+  });
   const validInvoice: Invoice = {
     invoiceNumber: 'INV-001',
     issueDate: '2024-01-01',
