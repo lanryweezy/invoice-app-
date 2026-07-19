@@ -37,11 +37,7 @@ interface ComplianceCheck {
 }
 
 function generateIssueId(): string {
-  // Security Fix: Use cryptographically secure random numbers for Key IDs
-  const array = new Uint8Array(4);
-  crypto.getRandomValues(array);
-  const randomStr = Array.from(array, b => b.toString(16).padStart(2, '0')).join('').substring(0, 4);
-  return `issue-${Date.now()}-${randomStr}`;
+  return `issue-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
 }
 
 function isValidTIN(tin: string | undefined): boolean {
@@ -617,164 +613,12 @@ export function saveComplianceCheck(result: ComplianceCheckResult): void {
   );
 }
 
-export function calculateStatsFromResults(results: ComplianceCheckResult[]): {
-}
-
-export function getComplianceHistory(invoiceId: string): ComplianceHistoryEntry[] {
-  const stored = localStorage.getItem(`compliance_history_${invoiceId}`);
-  if (!stored) return [];
-
-  try {
-    return JSON.parse(stored) as ComplianceHistoryEntry[];
-  } catch {
-    return [];
-  }
-}
-
-export function saveComplianceCheck(result: ComplianceCheckResult): void {
-  const history = getComplianceHistory(result.invoiceId);
-  history.push({
-    invoiceId: result.invoiceId,
-    score: result.score,
-    checkedAt: result.checkedAt,
-    issueCount: result.issues.length,
-  });
-
-  if (history.length > 50) {
-    history.splice(0, history.length - 50);
-  }
-
-  localStorage.setItem(
-    `compliance_history_${result.invoiceId}`,
-    JSON.stringify(history)
-  );
-}
-
 export function getOverallComplianceStats(invoices: Invoice[]): {
   averageScore: number;
   totalIssues: number;
   compliantCount: number;
   nonCompliantCount: number;
   categoryAverages: Record<ComplianceCategory, number>;
-} {
-  if (results.length === 0) {
-    return {
-      averageScore: 0,
-      totalIssues: 0,
-      compliantCount: 0,
-      nonCompliantCount: 0,
-      categoryAverages: {
-        TIN: 0,
-        CAC: 0,
-        VAT: 0,
-        WHT: 0,
-        LineItems: 0,
-        Totals: 0,
-        Dates: 0,
-        General: 0,
-      },
-    };
-  }
-
-  let totalScore = 0;
-  let totalIssues = 0;
-  let compliantCount = 0;
-  const categorySums: Record<ComplianceCategory, { total: number; count: number }> = {
-    TIN: { total: 0, count: 0 },
-    CAC: { total: 0, count: 0 },
-    VAT: { total: 0, count: 0 },
-    WHT: { total: 0, count: 0 },
-    LineItems: { total: 0, count: 0 },
-    Totals: { total: 0, count: 0 },
-    Dates: { total: 0, count: 0 },
-    General: { total: 0, count: 0 },
-  };
-
-  for (const result of results) {
-    totalScore += result.score;
-    totalIssues += result.issues.length;
-    if (result.score >= 80) compliantCount++;
-
-    for (const cat of Object.keys(result.categoryScores) as ComplianceCategory[]) {
-      categorySums[cat].total += result.categoryScores[cat];
-      categorySums[cat].count++;
-    }
-  }
-
-  const categoryAverages: Record<ComplianceCategory, number> = {} as Record<ComplianceCategory, number>;
-  for (const cat of Object.keys(categorySums) as ComplianceCategory[]) {
-    const { total, count } = categorySums[cat];
-    categoryAverages[cat] = count > 0 ? Math.round(total / count) : 0;
-  }
-
-  return {
-    averageScore: Math.round(totalScore / results.length),
-    totalIssues,
-    compliantCount,
-    nonCompliantCount: results.length - compliantCount,
-    categoryAverages,
-  };
-}
-
-export function getOverallComplianceStats(invoices: Invoice[]): {
-  averageScore: number;
-  totalIssues: number;
-  compliantCount: number;
-  nonCompliantCount: number;
-  categoryAverages: Record<ComplianceCategory, number>;
-} {
-  return calculateStatsFromResults(invoices.map(checkCompliance));
-}
-
-export function exportComplianceReport(invoices: Invoice[]): string {
-  const results = invoices.map(checkCompliance);
-  const stats = calculateStatsFromResults(results);
-  const lines: string[] = [
-    'Invoice Compliance Report',
-    `Generated: ${new Date().toLocaleString('en-NG')}`,
-    '',
-    '=== Summary ===',
-    `Total Invoices: ${invoices.length}`,
-    `Average Score: ${stats.averageScore}%`,
-    `Compliant: ${stats.compliantCount}`,
-    `Non-Compliant: ${stats.nonCompliantCount}`,
-    `Total Issues: ${stats.totalIssues}`,
-    '',
-    '=== Category Scores ===',
-  ];
-
-  for (const [cat, score] of Object.entries(stats.categoryAverages)) {
-    lines.push(`${cat}: ${score}%`);
-  }
-
-  lines.push('');
-  lines.push('=== Invoice Details ===');
-  lines.push('Invoice Number,Score,Issues');
-
-  for (let i = 0; i < invoices.length; i++) {
-    const invoice = invoices[i];
-    const result = results[i];
-    lines.push(
-      `${invoice.invoiceNumber},${result.score}%,${result.issues.length}`
-    );
-  }
-
-  return lines.join('\n');
-}
-
-export function exportComplianceReportJSON(invoices: Invoice[]): string {
-  const results = invoices.map(checkCompliance);
-  const stats = calculateStatsFromResults(results);
-  const details = invoices.map((invoice, index) => {
-    const result = results[index];
-    return {
-      invoiceNumber: invoice.invoiceNumber,
-      score: result.score,
-      issues: result.issues,
-      checkedAt: result.checkedAt,
-    };
-  });
-  results: ComplianceCheckResult[];
 } {
   if (invoices.length === 0) {
     return {
@@ -792,7 +636,6 @@ export function exportComplianceReportJSON(invoices: Invoice[]): string {
         Dates: 0,
         General: 0,
       },
-      results: [],
     };
   }
 
@@ -810,10 +653,8 @@ export function exportComplianceReportJSON(invoices: Invoice[]): string {
     General: { total: 0, count: 0 },
   };
 
-  const results: ComplianceCheckResult[] = [];
   for (const invoice of invoices) {
     const result = checkCompliance(invoice);
-    results.push(result);
     totalScore += result.score;
     totalIssues += result.issues.length;
     if (result.score >= 80) compliantCount++;
@@ -836,7 +677,6 @@ export function exportComplianceReportJSON(invoices: Invoice[]): string {
     compliantCount,
     nonCompliantCount: invoices.length - compliantCount,
     categoryAverages,
-    results,
   };
 }
 
@@ -864,9 +704,8 @@ export function exportComplianceReport(invoices: Invoice[]): string {
   lines.push('=== Invoice Details ===');
   lines.push('Invoice Number,Score,Issues');
 
-  for (let i = 0; i < invoices.length; i++) {
-    const invoice = invoices[i];
-    const result = stats.results[i];
+  for (const invoice of invoices) {
+    const result = checkCompliance(invoice);
     lines.push(
       `${invoice.invoiceNumber},${result.score}%,${result.issues.length}`
     );
@@ -877,8 +716,8 @@ export function exportComplianceReport(invoices: Invoice[]): string {
 
 export function exportComplianceReportJSON(invoices: Invoice[]): string {
   const stats = getOverallComplianceStats(invoices);
-  const details = invoices.map((invoice, i) => {
-    const result = stats.results[i];
+  const details = invoices.map((invoice) => {
+    const result = checkCompliance(invoice);
     return {
       invoiceNumber: invoice.invoiceNumber,
       score: result.score,
@@ -887,19 +726,10 @@ export function exportComplianceReportJSON(invoices: Invoice[]): string {
     };
   });
 
-  const { results: _, ...summaryStats } = stats;
-
   return JSON.stringify(
     {
       generatedAt: new Date().toISOString(),
       summary: stats,
-      invoices: details,
-    },
-    null,
-    2
-  );
-}
-      summary: summaryStats,
       invoices: details,
     },
     null,
