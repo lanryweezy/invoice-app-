@@ -130,27 +130,65 @@ function escapeCSV(value: string): string {
   return value;
 }
 
+/**
+ * 🔩 Hinge Extension Point: AuditExportStrategy
+ *
+ * Pressure: The `exportAuditTrail` function had a hardcoded `if (format === 'json')` block,
+ * requiring core modification for every new export format (like XML or PDF).
+ *
+ * Contract:
+ * - Implementors provide a unique `format` string and an `export` function.
+ * - The `export` function receives an array of `AuditEntry` objects and must return a string
+ *   containing the formatted payload.
+ */
+export interface AuditExportStrategy {
+  format: string;
+  export(trail: AuditEntry[]): string;
+}
+
+const auditExportStrategies: AuditExportStrategy[] = [];
+
+export function registerAuditExportStrategy(strategy: AuditExportStrategy): void {
+  auditExportStrategies.push(strategy);
+}
+
+const jsonAuditStrategy: AuditExportStrategy = {
+  format: 'json',
+  export: (trail: AuditEntry[]) => JSON.stringify(trail, null, 2)
+};
+
+const csvAuditStrategy: AuditExportStrategy = {
+  format: 'csv',
+  export: (trail: AuditEntry[]) => {
+    const headers = ['ID', 'Invoice ID', 'Action', 'User ID', 'Timestamp', 'Details', 'Previous Values', 'New Values'];
+    const rows = trail.map((e) => [
+      escapeCSV(e.id),
+      escapeCSV(e.invoiceId),
+      escapeCSV(e.action),
+      escapeCSV(e.userId),
+      escapeCSV(e.timestamp),
+      escapeCSV(JSON.stringify(e.details)),
+      escapeCSV(JSON.stringify(e.previousValues ?? {})),
+      escapeCSV(JSON.stringify(e.newValues ?? {})),
+    ].join(','));
+
+    return [headers.join(','), ...rows].join('\n');
+  }
+};
+
+registerAuditExportStrategy(jsonAuditStrategy);
+registerAuditExportStrategy(csvAuditStrategy);
+
 export async function exportAuditTrail(
   invoiceId: string,
-  format: 'csv' | 'json'
+  format: 'csv' | 'json' | (string & {})
 ): Promise<string> {
   const trail = await getAuditTrail(invoiceId);
 
-  if (format === 'json') {
-    return JSON.stringify(trail, null, 2);
+  const strategy = auditExportStrategies.find(s => s.format === format);
+  if (!strategy) {
+    throw new Error(`Unsupported export format: ${format}`);
   }
 
-  const headers = ['ID', 'Invoice ID', 'Action', 'User ID', 'Timestamp', 'Details', 'Previous Values', 'New Values'];
-  const rows = trail.map((e) => [
-    escapeCSV(e.id),
-    escapeCSV(e.invoiceId),
-    escapeCSV(e.action),
-    escapeCSV(e.userId),
-    escapeCSV(e.timestamp),
-    escapeCSV(JSON.stringify(e.details)),
-    escapeCSV(JSON.stringify(e.previousValues ?? {})),
-    escapeCSV(JSON.stringify(e.newValues ?? {})),
-  ].join(','));
-
-  return [headers.join(','), ...rows].join('\n');
+  return strategy.export(trail);
 }

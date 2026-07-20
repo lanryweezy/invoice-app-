@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { logAction, getAuditTrail, searchAuditTrail, getAuditSummary, exportAuditTrail } from './auditTrail';
+import { logAction, getAuditTrail, searchAuditTrail, getAuditSummary, exportAuditTrail, registerAuditExportStrategy } from './auditTrail';
 import localforage from 'localforage';
 import type { Invoice } from '../types';
 
@@ -242,6 +242,22 @@ describe('auditTrail', () => {
       // JSON.stringify({}) is "{}" which doesn't have any of those, so it should just be "{}" without outer quotes.
       const stringifiedEmpty = JSON.stringify({});
       expect(simpleRow.endsWith(`${stringifiedEmpty},${stringifiedEmpty}`)).toBe(true);
+    });
+
+    it('exports using a dynamically registered custom strategy', async () => {
+      registerAuditExportStrategy({
+        format: 'custom-xml',
+        export: (trail) => {
+          return `<audit><count>${trail.length}</count></audit>`;
+        }
+      });
+
+      const result = await exportAuditTrail('inv-1', 'custom-xml');
+      expect(result).toBe('<audit><count>2</count></audit>');
+    });
+
+    it('throws an error for an unsupported format', async () => {
+      await expect(exportAuditTrail('inv-1', 'unsupported' as any)).rejects.toThrow('Unsupported export format: unsupported');
     });
   });
 });
