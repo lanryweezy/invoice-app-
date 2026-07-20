@@ -197,24 +197,6 @@ const App: React.FC = () => {
     startupSync();
   }, [showToast]);
 
-  // NRS Compliance Functions
-  const handleCheckCompliance = useCallback(() => {
-    if (invoice) {
-      const score = getComplianceScore(invoice);
-      setComplianceScore(score);
-      setIsComplianceOpen(true);
-      logAction(invoice.id || 'new', 'compliance_check', user?.email || 'anonymous', { score });
-    }
-  }, [invoice, user]);
-
-  const handleGenerateQR = useCallback(() => {
-    setIsQRCodeOpen(true);
-  }, []);
-
-  const handleShowPaymentDetails = useCallback(() => {
-    setIsPaymentDetailsOpen(true);
-  }, []);
-
   const handleConvertToInvoice = useCallback(() => {
     if (!invoice || (invoice.documentType !== 'Pro-forma' && invoice.documentType !== 'Quote')) return;
     const newInvoiceNumber = generateSequentialInvoiceNumber();
@@ -729,31 +711,6 @@ const App: React.FC = () => {
                         invoice={invoice}
                         isGeneratingPdf={isGeneratingPdf}
                     />
-
-                    {/* NRS Compliance Buttons */}
-                    <div className="flex items-center gap-1 border-l pl-2 ml-2">
-                        <button
-                            onClick={handleCheckCompliance}
-                            className="px-3 py-2 text-xs font-medium bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors"
-                            title="Check NRS Compliance"
-                        >
-                            ✓ NRS
-                        </button>
-                        <button
-                            onClick={handleGenerateQR}
-                            className="px-3 py-2 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
-                            title="Generate QR Code"
-                        >
-                            QR
-                        </button>
-                        <button
-                            onClick={handleShowPaymentDetails}
-                            className="px-3 py-2 text-xs font-medium bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors"
-                            title="Payment Details"
-                        >
-                            Pay
-                        </button>
-                    </div>
                 </div>
             </div>
 
