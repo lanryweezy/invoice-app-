@@ -2,6 +2,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { queueMutation, flushQueue, getQueueCount, Mutation } from './offlineSync';
 import localforage from 'localforage';
 import { doc, setDoc } from '../services/firebase';
+import { trackEvent } from './analytics';
+
+vi.mock('./analytics', () => ({
+  trackEvent: vi.fn(),
+}));
 
 vi.mock('localforage', () => {
   return {
@@ -90,6 +95,15 @@ describe('offlineSync', () => {
 
       expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to queue mutation', expect.any(Error));
     });
+
+    it('handles non-Error exceptions and logs stringified error', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.mocked(localforage.getItem).mockRejectedValue('String Error');
+
+      await queueMutation('invoices', 'doc-1', {});
+
+      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to queue mutation', 'String Error');
+    });
   });
 
   describe('flushQueue', () => {
@@ -152,6 +166,56 @@ describe('offlineSync', () => {
       ]);
     });
 
+    it('handles non-Error rejections during sync and logs stringified error', async () => {
+      vi.mocked(localforage.getItem).mockResolvedValue([
+        { id: '1', collection: 'invoices', docId: 'doc-1', data: { val: 1 }, timestamp: 100 }
+      ]);
+      vi.mocked(doc).mockImplementation((db, coll, id) => `${coll}/${id}` as any);
+
+      vi.mocked(setDoc).mockRejectedValueOnce('Network Failure String');
+
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      const result = await flushQueue();
+
+      expect(result).toBe(false);
+      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to sync 1', 'Network Failure String');
+
+      expect(localforage.setItem).toHaveBeenCalledWith('syncQueue', [
+        { id: '1', collection: 'invoices', docId: 'doc-1', data: { val: 1 }, timestamp: 100 }
+      ]);
+    });
+
+    it('handles synchronous exceptions thrown by setDoc during flushQueue', async () => {
+      vi.mocked(localforage.getItem).mockResolvedValue([
+        { id: '1', collection: 'invoices', docId: 'doc-1', data: { val: 1 }, timestamp: 100 }
+      ]);
+      vi.mocked(doc).mockImplementation((db, coll, id) => `${coll}/${id}` as any);
+
+      // Simulate a synchronous error from setDoc
+      vi.mocked(setDoc).mockImplementationOnce(() => {
+        throw new Error('Synchronous setDoc error');
+      });
+
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      const result = await flushQueue();
+
+      expect(result).toBe(false);
+      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to sync 1', expect.any(Error));
+
+      expect(trackEvent).toHaveBeenCalledWith('sync_item_failed', {
+        collection: 'invoices',
+        docId: 'doc-1',
+        error: 'Synchronous setDoc error'
+      });
+
+      // Failed mutation is retained in the queue for retry
+      expect(localforage.setItem).toHaveBeenCalledWith('syncQueue', [
+        { id: '1', collection: 'invoices', docId: 'doc-1', data: { val: 1 }, timestamp: 100 }
+      ]);
+    });
+
     it('handles critical failure during queue fetch', async () => {
       vi.mocked(localforage.getItem).mockRejectedValue(new Error('Fatal read error'));
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -160,6 +224,16 @@ describe('offlineSync', () => {
 
       expect(result).toBe(false);
       expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Critical failure during flushQueue', expect.any(Error));
+    });
+
+    it('handles non-Error critical failure and logs stringified error', async () => {
+      vi.mocked(localforage.getItem).mockRejectedValue('Fatal String Error');
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      const result = await flushQueue();
+
+      expect(result).toBe(false);
+      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Critical failure during flushQueue', 'Fatal String Error');
     });
   });
 

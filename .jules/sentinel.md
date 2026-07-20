@@ -14,3 +14,7 @@
 **Vulnerability:** The `/api/send-email` serverless function previously accepted raw SMTP configuration (host, port, credentials) directly from the client's request body to instantiate a nodemailer transport, exposing the server to Server-Side Request Forgery (SSRF) and Open Email Relay abuse.
 **Learning:** Accepting connection parameters from untrusted clients effectively turns a server into an open proxy. Attackers could pass internal network IPs to scan ports or use the Vercel infrastructure to blast spam through their own (or compromised) SMTP servers while masking their true IP.
 **Prevention:** Never trust client payloads for backend infrastructure connections. Always hardcode or read connection secrets (like SMTP details) exclusively from server-side environment variables (`process.env`).
+## 2025-02-14 - Missing Input Length Limits
+**Vulnerability:** The `/api/send-email` endpoint accepted arbitrary lengths for `to`, `subject`, `text`, and `html` fields from user input.
+**Learning:** This exposes the endpoint to possible Denial of Service (DoS) attacks or unintended system load if attackers supply excessively large payloads to be processed by the server and SMTP transporter.
+**Prevention:** Always implement input validation, particularly maximum length constraints, on any user-provided data sent to API endpoints to prevent excessive resource consumption.

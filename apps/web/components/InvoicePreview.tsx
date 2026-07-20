@@ -359,14 +359,6 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = React.memo(({ invoi
   return (
     <article className={`text-slate-900 h-full flex flex-col relative overflow-hidden ${template === 'elegant' ? 'font-serif' : template === 'tech' ? 'font-mono' : 'font-sans'}`}>
       
-      {/* NRS Verified Badge */}
-      {invoice.nrsStatus === 'Verified' && (
-        <div className="absolute top-4 right-4 z-50 flex items-center gap-1.5 bg-teal-50 border border-teal-200 px-3 py-1.5 rounded-full shadow-sm">
-            <svg className="w-4 h-4 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-            <span className="text-[10px] font-black text-teal-700 uppercase tracking-tighter">NRS Verified</span>
-        </div>
-      )}
-
       {/* Paid Stamp/Watermark */}
       {status === 'Paid' && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50 opacity-[0.15] select-none">

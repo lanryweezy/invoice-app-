@@ -39,3 +39,12 @@
 ## 2024-07-19 - Testing exception handling for mocked database operations
 **Learning:** Testing pure success paths is not enough; simulating exceptions in asynchronous dependencies (like `localforage` throwing `Storage quota exceeded`) ensures that error handling bubbles up correctly and that actions which fail to persist don't leave the system in an inconsistent state.
 **Action:** When writing tests for features that persist to storage or make network calls, explicitly use `mockRejectedValueOnce` on the mocked dependency to verify the failure path natively throws or rejects up to the caller boundary.
+## 2025-05-19 - Test Coverage for Non-Error Rejections in offlineSync
+**Learning:** In asynchronous Promise queues (e.g., `Promise.allSettled` in `flushQueue`), rejections can occur with non-Error objects (like plain strings). While tests may cover standard `new Error()` cases, explicit tests for non-Error strings ensure fallback stringification logic (`String(error)`) works correctly and provides full branch coverage.
+**Action:** When writing future tests for `catch` blocks or Promise rejections in this repo, explicitly include a test case that rejects with a non-Error string alongside the standard `new Error()` cases.
+## 2026-04-14 - Testing JSON.parse Error Branches
+**Learning:** When testing the `catch` branch of `JSON.parse` wrappers (e.g., when reading from `localStorage`), mocking the data source to return a malformed JSON string (like `'not-json'`) rather than forcing a mock to throw an error is the most explicit way to verify the parser's syntax error handling capabilities.
+**Action:** When testing JSON parsing logic, always include a test case that provides a malformed string to ensure correct fallback execution.
+## 2026-07-20 - Testing Sync Error Paths
+**Learning:** When testing `Promise.allSettled` mapping loops (e.g., in offline sync queues), write distinct test cases for both asynchronous promise rejections (e.g., via `mockRejectedValue`) and synchronous exceptions thrown directly within the mapping function (e.g., via `mockImplementation` throwing an Error) to guarantee comprehensive coverage of error handling paths.
+**Action:** Always explicitly test both sync throws and async rejections for critical queue processing logic.

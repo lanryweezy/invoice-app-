@@ -38,9 +38,9 @@ import { flushQueue, getQueueCount } from './utils/offlineSync';
 
 // NRS Compliance Components
 import { ComplianceDashboard } from './components/ComplianceDashboard';
-import { NRSTaxPanel } from './components/NRSTaxPanel';
+import NRSTaxPanel from './components/NRSTaxPanel';
 import { QRCodeDisplay } from './components/QRCodeDisplay';
-import { TINValidator } from './components/TINValidator';
+import TINValidator from './components/TINValidator';
 import { PaymentDetails } from './components/PaymentDetails';
 
 // NRS Compliance Services
@@ -197,24 +197,6 @@ const App: React.FC = () => {
     startupSync();
   }, [showToast]);
 
-  // NRS Compliance Functions
-  const handleCheckCompliance = useCallback(() => {
-    if (invoice) {
-      const score = getComplianceScore(invoice);
-      setComplianceScore(score);
-      setIsComplianceOpen(true);
-      logAction(invoice.id || 'new', 'compliance_check', user?.email || 'anonymous', `Score: ${score}`);
-    }
-  }, [invoice, user]);
-
-  const handleGenerateQR = useCallback(() => {
-    setIsQRCodeOpen(true);
-  }, []);
-
-  const handleShowPaymentDetails = useCallback(() => {
-    setIsPaymentDetailsOpen(true);
-  }, []);
-
   const handleConvertToInvoice = useCallback(() => {
     if (!invoice || (invoice.documentType !== 'Pro-forma' && invoice.documentType !== 'Quote')) return;
     const newInvoiceNumber = generateSequentialInvoiceNumber();
@@ -235,7 +217,7 @@ const App: React.FC = () => {
     const subtotal = invoice.subtotal || 0;
     const vat = calculateVAT(subtotal);
     const wht = calculateWHT(subtotal, 'professional');
-    const stamp = calculateStampDuty('invoice', subtotal);
+    const stamp = calculateStampDuty(subtotal);
     return { vat, wht, stamp, total: vat + wht + stamp };
   }, [invoice]);
 
@@ -686,7 +668,7 @@ const App: React.FC = () => {
                          )}
                      </div>
                  ) : (
-                     <button onClick={() => setIsAuthModalOpen(true)} className="text-xs font-bold text-slate-300 hover:text-white transition-colors">Login / Sign up</button>
+                     <button onClick={() => setIsAuthModalOpen(true)} className="text-xs font-bold text-slate-300 hover:text-white transition-colors">Login</button>
                  )
              )}
           </div>
@@ -729,31 +711,6 @@ const App: React.FC = () => {
                         invoice={invoice}
                         isGeneratingPdf={isGeneratingPdf}
                     />
-
-                    {/* NRS Compliance Buttons */}
-                    <div className="flex items-center gap-1 border-l pl-2 ml-2">
-                        <button
-                            onClick={handleCheckCompliance}
-                            className="px-3 py-2 text-xs font-medium bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors"
-                            title="Check NRS Compliance"
-                        >
-                            ✓ NRS
-                        </button>
-                        <button
-                            onClick={handleGenerateQR}
-                            className="px-3 py-2 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
-                            title="Generate QR Code"
-                        >
-                            QR
-                        </button>
-                        <button
-                            onClick={handleShowPaymentDetails}
-                            className="px-3 py-2 text-xs font-medium bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors"
-                            title="Payment Details"
-                        >
-                            Pay
-                        </button>
-                    </div>
                 </div>
             </div>
 

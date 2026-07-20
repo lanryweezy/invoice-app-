@@ -12,6 +12,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Missing required fields: to, subject, and html or text' });
   }
 
+  // Security Enhancement: Input length validation (DoS prevention)
+  if (to.length > 255 || subject.length > 255) {
+    return res.status(400).json({ error: 'Invalid input: "to" and "subject" fields must not exceed 255 characters' });
+  }
+
+  if ((text && text.length > 50000) || (html && html.length > 50000)) {
+    return res.status(400).json({ error: 'Invalid input: Message body is too large (max 50,000 characters)' });
+  }
+
   if (!process.env.SMTP_HOST || !process.env.SMTP_PORT || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
     return res.status(500).json({ error: 'Server SMTP configuration is missing.' });
   }
