@@ -4,3 +4,6 @@
 ## 2026-04-14 - Testing JSON.parse Error Branches
 **Learning:** When testing the `catch` branch of `JSON.parse` wrappers (e.g., when reading from `localStorage`), mocking the data source to return a malformed JSON string (like `'not-json'`) rather than forcing a mock to throw an error is the most explicit way to verify the parser's syntax error handling capabilities.
 **Action:** When testing JSON parsing logic, always include a test case that provides a malformed string to ensure correct fallback execution.
+## 2026-07-20 - Testing Sync Error Paths
+**Learning:** When testing `Promise.allSettled` mapping loops (e.g., in offline sync queues), write distinct test cases for both asynchronous promise rejections (e.g., via `mockRejectedValue`) and synchronous exceptions thrown directly within the mapping function (e.g., via `mockImplementation` throwing an Error) to guarantee comprehensive coverage of error handling paths.
+**Action:** Always explicitly test both sync throws and async rejections for critical queue processing logic.
