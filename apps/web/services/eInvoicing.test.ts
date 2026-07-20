@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { generateNRSJSON, validateNRSCompliance } from './eInvoicing';
+import { generateNRSJSON, generateNRSXML, validateNRSCompliance, exportStructuredData, submitToNRS, generateNRSInvoiceData } from './eInvoicing';
 import type { Invoice } from '../types';
 
 describe('eInvoicing', () => {
@@ -285,6 +285,90 @@ describe('eInvoicing', () => {
       const result = validateNRSCompliance(invalid);
       expect(result.compliant).toBe(false);
       expect(result.errors.some(e => e.field === 'total' || e.field === 'lineItems')).toBe(true);
+    });
+  });
+
+  describe('generateNRSXML', () => {
+    it('should generate valid XML without crashing when optional nested properties are undefined', () => {
+      // Missing phone number and optional cacNumbers to prove .replace doesn't crash
+      const sparseInvoice = {
+        ...validInvoice,
+        user: { ...validInvoice.user, phoneNumber: undefined, cacNumber: undefined },
+        client: { ...validInvoice.client, cacNumber: undefined }
+      } as Invoice;
+
+      let xmlResult: string;
+      expect(() => {
+        xmlResult = generateNRSXML(sparseInvoice);
+      }).not.toThrow();
+
+      expect(xmlResult).toContain('<NRSInvoice version="1.0.0">');
+    });
+  });
+
+  describe('exportStructuredData', () => {
+    it('exports json, xml, and formats correctly', () => {
+      const result = exportStructuredData(validInvoice);
+
+      expect(result.json).toBeDefined();
+      expect(result.xml).toBeDefined();
+      expect(result.validation).toBeDefined();
+      expect(result.exports).toHaveLength(3);
+      expect(result.exports[0].format).toBe('NRS-JSON');
+      expect(result.exports[1].format).toBe('NRS-XML');
+      expect(result.exports[2].format).toBe('CSV');
+
+      // Check CSV contains header and totals
+      const csv = result.exports[2].data;
+      expect(csv).toContain('Description,Quantity,UnitPrice,TaxCategory,UnitOfMeasure,LineTotal');
+      expect(csv).toContain('TOTAL');
+    });
+  });
+
+  describe('submitToNRS', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2024-03-15T12:00:00Z'));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('returns success for a compliant invoice', async () => {
+      const result = await submitToNRS(validInvoice, 'mock-signature');
+      expect(result.success).toBe(true);
+      expect(result.submissionId).toMatch(/^NRS-INV-100-/);
+      expect(result.message).toContain('prepared for NRS submission');
+    });
+
+    it('returns failure for a non-compliant invoice', async () => {
+      const invalid = { ...validInvoice, user: { ...validInvoice.user, tin: '' } } as Invoice;
+      const result = await submitToNRS(invalid);
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('failed NRS validation');
+    });
+  });
+
+  describe('generateNRSInvoiceData', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2024-03-15T12:00:00Z'));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('generates all required NRS data in a single object', () => {
+      const result = generateNRSInvoiceData(validInvoice);
+
+      expect(result.nrsJSON).toBeDefined();
+      expect(result.nrsXML).toBeDefined();
+      expect(result.validation).toBeDefined();
+      expect(result.hash).toBeDefined();
+      expect(result.timestamp).toBe('2024-03-15T12:00:00.000Z');
     });
   });
 });

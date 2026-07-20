@@ -198,7 +198,7 @@ export function generateNRSJSON(invoice: Invoice): NRSInvoiceJSON {
 
 export function generateNRSXML(invoice: Invoice): string {
   const json = generateNRSJSON(invoice);
-  const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const esc = (s: string) => (s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
   const lines = [
     '<?xml version="1.0" encoding="UTF-8"?>',
