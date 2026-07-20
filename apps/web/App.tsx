@@ -25,6 +25,7 @@ import { AuthModal } from './components/AuthModal';
 import { useReceipts } from './hooks/useReceipts';
 import { ReceiptsManager } from './components/ReceiptsManager';
 import { ReceiptPreview } from './components/ReceiptPreview';
+import { FeatureGate } from './components/FeatureGate';
 import { PaymentModal } from './components/PaymentModal';
 import { PublicProfile } from './components/PublicProfile';
 import { TemplatePage } from './components/TemplatePage';
@@ -222,6 +223,7 @@ const App: React.FC = () => {
   }, [invoice]);
 
   // Main view state
+  const [gatedFeature, setGatedFeature] = useState<'Branches' | 'Accounting' | 'Recurring' | 'Receipts' | 'Integrations' | null>(null);
   const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'integrations' | 'cli' | 'blog' | 'blogPost' | 'publicProfile' | 'templatePage'>(() => {
       let path;
       try {
@@ -474,15 +476,11 @@ const App: React.FC = () => {
       showToast('Business profile saved!');
   }, [saveBusinessProfile, showToast]);
 
-  const handleProFeatureClick = useCallback((featureName: 'Branches' | 'Accounting' | 'Recurring') => {
+  const handleProFeatureClick = useCallback((featureName: 'Branches' | 'Accounting' | 'Recurring' | 'Receipts' | 'Integrations') => {
       if (!isPro) {
-          setPricingModalContent({
-              title: `${featureName} is a Pro Feature`,
-              message: `Upgrade to Pro to unlock ${featureName.toLowerCase()} and much more.`
-          });
-          setIsPricingModalOpen(true);
+          setGatedFeature(featureName);
       } else {
-          setActiveView(featureName.toLowerCase() as 'branches' | 'accounting' | 'recurring');
+          setActiveView(featureName.toLowerCase() as 'branches' | 'accounting' | 'recurring' | 'receipts' | 'integrations');
       }
   }, [isPro]);
 
@@ -790,7 +788,37 @@ const App: React.FC = () => {
       )}
 
       <main className="flex-1 min-h-0 w-full max-w-[1600px] mx-auto overflow-y-auto">
-        {activeView === 'branches' ? (
+
+        {gatedFeature ? (
+          <div className="p-4 sm:p-8 max-w-6xl mx-auto">
+            <FeatureGate
+              featureName={gatedFeature}
+              headline={
+                gatedFeature === 'Accounting' ? "You've done the hard work. Let's show you the numbers." :
+                gatedFeature === 'Branches' ? "Grow beyond one location." :
+                "Unlock more power for your business."
+              }
+              subhead={
+                gatedFeature === 'Accounting' ? "See profit, track who owes you, and be ready for tax season – all from InvoiceApp." :
+                gatedFeature === 'Branches' ? "Manage multiple offices, track location-specific revenue, and organize your teams." :
+                `Upgrade to unlock ${gatedFeature} and streamline your workflow.`
+              }
+              bullets={
+                gatedFeature === 'Accounting' ? ["See who hasn't paid", "Know your monthly profit", "Export for your accountant"] :
+                gatedFeature === 'Branches' ? ["Add unlimited locations", "Set location-specific addresses", "Filter reports by branch"] :
+                ["Unlimited clients and invoices", "Cloud sync across devices", "Priority support"]
+              }
+              onUpgrade={() => {
+                  setPricingModalContent({ title: `Unlock ${gatedFeature}`, message: `Upgrade to Pro to unlock ${gatedFeature} and much more.` });
+                  setIsPricingModalOpen(true);
+              }}
+              onDismiss={() => {
+                  setGatedFeature(null);
+                  setActiveView('editor');
+              }}
+            />
+          </div>
+        ) : activeView === 'branches' ? (
             <div className="p-4 sm:p-8 max-w-4xl mx-auto">
                 <BranchesManager
                     isPro={isPro}
