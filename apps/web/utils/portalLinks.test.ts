@@ -104,7 +104,7 @@ describe('portalLinks', () => {
     });
 
     it('handles malformed JSON in stored links gracefully by creating a fresh object, testing the catch branch in getStoredLinks', () => {
-      vi.mocked(localStorage.getItem).mockReturnValue('not-json');
+      vi.mocked(localStorage.getItem).mockReturnValue('invalid-json-{');
 
       const link = createPortalLink(mockInvoice);
       const token = link.split('/').pop();
@@ -112,6 +112,7 @@ describe('portalLinks', () => {
       const setCall = vi.mocked(localStorage.setItem).mock.calls[0][1];
       const parsedStored = JSON.parse(setCall);
 
+      expect(localStorage.getItem).toHaveBeenCalledWith('invoiceapp_portal_links');
       expect(parsedStored[token!]).toBeDefined();
     });
   });
@@ -153,10 +154,11 @@ describe('portalLinks', () => {
     });
 
     it('returns null if stored links contain malformed JSON, testing the catch branch in getStoredLinks', () => {
-      vi.mocked(localStorage.getItem).mockReturnValue('not-json');
+      vi.mocked(localStorage.getItem).mockReturnValue('invalid-json-{');
 
       const linkData = getPortalLink('my-token');
 
+      expect(localStorage.getItem).toHaveBeenCalledWith('invoiceapp_portal_links');
       expect(linkData).toBeNull();
     });
   });
