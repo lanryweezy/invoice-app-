@@ -130,7 +130,14 @@ const App: React.FC = () => {
         if (snap.exists() && snap.data().smtpSettings) {
           setSmtpSettings(snap.data().smtpSettings);
         }
-      } catch {}
+      } catch (error) {
+        console.warn('[App] Failed to load SMTP settings:', error);
+        try {
+          trackEvent('smtp_settings_load_failed', { user_id: user.uid, error: String(error) });
+        } catch (analyticsError) {
+          console.error('[App] Failed to track SMTP load failure:', analyticsError);
+        }
+      }
     };
     loadSmtp();
   }, [user]);

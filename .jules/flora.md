@@ -10,3 +10,6 @@
 ## 2026-07-19 - Unhandled Promises in setTimeout Callbacks
 **Learning:** When executing async database calls (e.g., Firestore `updateDoc`) inside `setTimeout` within a React component (like in `IntegrationsView.tsx`), unhandled rejections bypass standard promise chains and React error boundaries. This can leave UI state (like `setConnectingId(null)`) permanently stuck if the operation fails.
 **Action:** Always wrap async operations inside `setTimeout` or event listeners with `try/catch/finally` blocks to ensure errors are caught and UI state is deterministically reset in the `finally` block.
+## 2024-07-20 - Swallowed Errors in Configuration Initialization
+**Learning:** When fetching configuration data asynchronously from the database during app initialization (e.g., `loadSmtp` in `App.tsx`), do not swallow failures with empty `catch` blocks. Instrument fetch operations with structured error logging (e.g., `trackEvent('smtp_settings_load_failed')`) defensively wrapped in a `try/catch` block to ensure silent fallbacks to default states remain visible in telemetry.
+**Action:** Always wrap async database or configuration fetches during initialization in `try/catch` blocks and explicitly track failures using analytics/logging before silently defaulting to unconfigured states.
