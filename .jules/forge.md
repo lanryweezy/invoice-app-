@@ -36,3 +36,6 @@
 ## 2026-07-19 - Testing `JSON.parse` wrapper error paths via mock data mutation
 **Learning:** When asserting the `catch` fallback block in logic that parses external stringified states (like `localStorage` data reading), the `catch` handler must be invoked by supplying functionally invalid parser data (like `'not-json'`) rather than artificially throwing standard errors via the mock. However, ensuring you test *both* scenarios guarantees robustness against IO failures *and* data corruption without losing coverage.
 **Action:** When adding malformed JSON path tests, implement them as strictly additive cases alongside existing `mockImplementation(() => { throw new Error(...) })` tests rather than replacing them.
+## 2024-07-19 - Testing exception handling for mocked database operations
+**Learning:** Testing pure success paths is not enough; simulating exceptions in asynchronous dependencies (like `localforage` throwing `Storage quota exceeded`) ensures that error handling bubbles up correctly and that actions which fail to persist don't leave the system in an inconsistent state.
+**Action:** When writing tests for features that persist to storage or make network calls, explicitly use `mockRejectedValueOnce` on the mocked dependency to verify the failure path natively throws or rejects up to the caller boundary.
