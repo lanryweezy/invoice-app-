@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { logAction, getAuditTrail, searchAuditTrail, getAuditSummary, exportAuditTrail } from './auditTrail';
+import { logAction, getAuditTrail, searchAuditTrail, getAuditSummary, exportAuditTrail, registerAuditExportStrategy } from './auditTrail';
 import localforage from 'localforage';
 import type { Invoice } from '../types';
 
@@ -242,6 +242,27 @@ describe('auditTrail', () => {
       // JSON.stringify({}) is "{}" which doesn't have any of those, so it should just be "{}" without outer quotes.
       const stringifiedEmpty = JSON.stringify({});
       expect(simpleRow.endsWith(`${stringifiedEmpty},${stringifiedEmpty}`)).toBe(true);
+    });
+
+    it('throws an error for unsupported export formats', async () => {
+      await expect(exportAuditTrail('inv-1', 'pdf' as any)).rejects.toThrow(
+        'Unsupported export format: pdf'
+      );
+    });
+
+    it('allows registering and executing custom export strategies', async () => {
+      // Register a mock 'xml' strategy
+      registerAuditExportStrategy({
+        format: 'xml',
+        export: (entries) => {
+          const rows = entries.map((e) => `<entry id="${e.id}">${e.action}</entry>`).join('');
+          return `<audit>${rows}</audit>`;
+        }
+      });
+
+      const result = await exportAuditTrail('inv-1', 'xml');
+
+      expect(result).toBe('<audit><entry id="1">edit</entry><entry id="2">create</entry></audit>');
     });
   });
 });

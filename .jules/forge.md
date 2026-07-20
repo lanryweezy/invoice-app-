@@ -36,3 +36,6 @@
 ## 2026-07-19 - Testing `JSON.parse` wrapper error paths via mock data mutation
 **Learning:** When asserting the `catch` fallback block in logic that parses external stringified states (like `localStorage` data reading), the `catch` handler must be invoked by supplying functionally invalid parser data (like `'not-json'`) rather than artificially throwing standard errors via the mock. However, ensuring you test *both* scenarios guarantees robustness against IO failures *and* data corruption without losing coverage.
 **Action:** When adding malformed JSON path tests, implement them as strictly additive cases alongside existing `mockImplementation(() => { throw new Error(...) })` tests rather than replacing them.
+## 2026-07-19 - Testing Extensible Strategy Patterns
+**Learning:** When testing extensible patterns like `registerAuditExportStrategy` that utilize `(string & {})` for loosely-typed ID mapping, verify not only the successful registration and invocation but also the failure path for an unregistered custom string ID (which might be typed correctly via casting but fails at runtime).
+**Action:** When adding tests for dynamic registries or strategies in the future, include a test asserting that an unregistered key passed via `as any` or custom string explicitly throws the expected "Unsupported" error.
