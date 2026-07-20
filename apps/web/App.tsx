@@ -668,7 +668,7 @@ const App: React.FC = () => {
                          )}
                      </div>
                  ) : (
-                     <button onClick={() => setIsAuthModalOpen(true)} className="text-xs font-bold text-slate-300 hover:text-white transition-colors">Login / Sign up</button>
+                     <button onClick={() => setIsAuthModalOpen(true)} className="text-xs font-bold text-slate-300 hover:text-white transition-colors">Login</button>
                  )
              )}
           </div>
