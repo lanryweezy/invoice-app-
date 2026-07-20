@@ -818,6 +818,12 @@ const App: React.FC = () => {
             <div className="p-4 sm:p-8 max-w-4xl mx-auto">
                 <RecurringManager
                     recurringInvoices={recurringInvoices}
+                    isPro={isPro}
+                    onUpgrade={() => {
+                        setPricingModalContent({ title: 'Recurring Invoices', message: 'Upgrade to Pro to save and auto-generate recurring invoices.' });
+                        setIsPricingModalOpen(true);
+                    }}
+                    onGoToEditor={() => setActiveView('editor')}
                     onGenerateNext={(inv) => {
                         setInvoice({
                             ...inv,
@@ -853,7 +859,13 @@ const App: React.FC = () => {
             </div>
         ) : activeView === 'cli' ? (
             <div className="p-4 sm:p-8">
-                <CLIAccessView />
+                <CLIAccessView
+                    isPro={isPro}
+                    onUpgrade={() => {
+                        setPricingModalContent({ title: 'CLI Access', message: 'Upgrade to Pro to control InvoiceApp from your terminal.' });
+                        setIsPricingModalOpen(true);
+                    }}
+                />
             </div>
         ) : activeView === 'publicProfile' && publicUsername !== null ? (
             <PublicProfile username={publicUsername} />

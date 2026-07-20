@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../services/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { PremiumGate } from './PremiumGate';
 
 function generateToken(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -30,8 +31,13 @@ const CLI_COMMANDS = [
   { command: 'invoiceapp status', description: 'Check your account and sync status' },
 ];
 
-export const CLIAccessView: React.FC = () => {
-  const { user, isPro } = useAuth();
+interface CLIAccessViewProps {
+  isPro?: boolean;
+  onUpgrade?: () => void;
+}
+
+export const CLIAccessView: React.FC<CLIAccessViewProps> = ({ isPro, onUpgrade }) => {
+  const { user } = useAuth();
   const [tokenData, setTokenData] = useState<CLITokenData | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -99,6 +105,54 @@ export const CLIAccessView: React.FC = () => {
           <h2 className="text-xl font-bold text-slate-900 mb-2">CLI Access</h2>
           <p className="text-slate-600">Please sign in to generate your CLI token.</p>
         </div>
+      </div>
+    );
+  }
+
+  if (!isPro) {
+    return (
+      <div className="max-w-3xl mx-auto p-4 sm:p-8">
+        <PremiumGate
+          title="Control InvoiceApp from your terminal."
+          subhead="You ship code from your terminal. Now ship invoices from there too. Automate your billing like you automate deployments."
+          bullets={[
+            "Create invoices from CI or scripts.",
+            "Bulk‑update status without touching the UI.",
+            "Pipe invoice data into your own tools."
+          ]}
+          heroVisual={
+            <div className="bg-slate-900 rounded-xl p-4 w-full max-w-md text-left shadow-2xl relative overflow-hidden group">
+              <div className="absolute top-0 left-0 w-full h-8 bg-slate-800 flex items-center px-4 gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                <div className="text-[10px] text-slate-400 font-mono ml-2">bash</div>
+              </div>
+              <div className="pt-8 font-mono text-sm">
+                <div className="text-teal-400">$ <span className="text-white">invoiceapp create</span></div>
+                <div className="text-slate-400 mt-2">✔ Client: <span className="text-teal-300">Acme Corp</span></div>
+                <div className="text-slate-400">✔ Amount: <span className="text-teal-300">₦250,000</span></div>
+                <div className="text-slate-400">✔ Status: <span className="text-teal-300">Sent 🚀</span></div>
+              </div>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigator.clipboard.writeText('invoiceapp create --client "Acme Corp" --amount 250000');
+                  alert('Command copied to clipboard!');
+                }}
+                className="absolute right-3 top-11 px-2.5 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity font-sans flex items-center gap-1.5"
+              >
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+                Copy sample command
+              </button>
+            </div>
+          }
+          primaryCta="Unlock CLI Access"
+          secondaryCta="View docs without CLI"
+          onPrimaryClick={onUpgrade || (() => {})}
+          onSecondaryClick={() => window.open('https://invoiceapp.ng/docs', '_blank')}
+        />
       </div>
     );
   }

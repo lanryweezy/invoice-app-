@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../services/firebase';
 import { doc, onSnapshot, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { PremiumGate } from './PremiumGate';
 
 interface Integration {
   id: string;
@@ -126,6 +127,7 @@ export const IntegrationsView: React.FC<{ onUpgrade: () => void }> = ({ onUpgrad
   const [integrations, setIntegrations] = useState<Integration[]>([]);
   const [connectingId, setConnectingId] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [showGate, setShowGate] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -151,7 +153,7 @@ export const IntegrationsView: React.FC<{ onUpgrade: () => void }> = ({ onUpgrad
 
   const handleConnect = async (integration: Integration) => {
     if (!isPro) {
-      onUpgrade();
+      setShowGate(true);
       return;
     }
 
@@ -211,26 +213,6 @@ export const IntegrationsView: React.FC<{ onUpgrade: () => void }> = ({ onUpgrad
           Connect your favorite tools to streamline your invoicing workflow.
         </p>
       </div>
-
-      {/* Pro Badge */}
-      {!isPro && (
-        <div className="bg-gradient-to-r from-teal-500 to-teal-600 rounded-xl p-6 mb-8 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-bold text-lg mb-1">Unlock All Integrations</h3>
-              <p className="text-teal-100 text-sm">
-                Upgrade to Pro to connect payment gateways, accounting software, and more.
-              </p>
-            </div>
-            <button
-              onClick={onUpgrade}
-              className="bg-white text-teal-600 px-4 py-2 rounded-lg font-bold text-sm hover:bg-teal-50 transition-colors"
-            >
-              Upgrade to Pro
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Category Tabs */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
@@ -331,6 +313,27 @@ export const IntegrationsView: React.FC<{ onUpgrade: () => void }> = ({ onUpgrad
           Request Integration →
         </button>
       </div>
+
+      {showGate && (
+        <PremiumGate
+          isModal
+          title="Connect InvoiceApp to the tools you already use."
+          subhead="Your invoices shouldn’t live alone. Plug into your accounting, CRM, and payment tools so everything updates itself."
+          bullets={[
+            "Sync paid invoices to your accounting tool.",
+            "Log payments in your CRM automatically.",
+            "Send receipts via your chat app or email tool."
+          ]}
+          proofText="Teams using integrations save 4+ hours per week on admin."
+          primaryCta="Unlock Integrations"
+          secondaryCta="Not now"
+          onPrimaryClick={() => {
+            setShowGate(false);
+            onUpgrade();
+          }}
+          onSecondaryClick={() => setShowGate(false)}
+        />
+      )}
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PremiumGate } from './PremiumGate';
 
 interface BranchesManagerProps {
   isPro?: boolean;
@@ -10,11 +11,12 @@ export const BranchesManager: React.FC<BranchesManagerProps> = ({ isPro = false,
     { id: 1, name: 'Lagos HQ', address: '123 Victoria Island' }
   ]);
   const [newBranch, setNewBranch] = useState({ name: '', address: '' });
+  const [showGate, setShowGate] = useState(false);
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isPro && branches.length >= 1) {
-        onUpgrade?.();
+        setShowGate(true);
         return;
     }
     if (newBranch.name && newBranch.address) {
@@ -44,8 +46,15 @@ export const BranchesManager: React.FC<BranchesManagerProps> = ({ isPro = false,
       <p className="text-slate-500 mb-8">Manage your business branches across different locations and set default addresses.</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-        <div className={!isPro && branches.length >= 1 ? 'opacity-50 pointer-events-none' : ''}>
-          <form onSubmit={handleAdd} className="space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-inner">
+        <div className={!isPro && branches.length >= 1 ? 'opacity-50 cursor-pointer' : ''}
+          onClickCapture={(e) => {
+            if (!isPro && branches.length >= 1) {
+              e.preventDefault();
+              e.stopPropagation();
+              setShowGate(true);
+            }
+          }}>
+          <form onSubmit={handleAdd} className={`space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-inner ${!isPro && branches.length >= 1 ? 'pointer-events-none' : ''}`}>
              <h3 className="font-black text-slate-900 mb-4 uppercase tracking-widest text-xs">Add New Branch</h3>
              <div>
                 <label htmlFor="branch-name" className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Branch Name</label>
@@ -89,7 +98,7 @@ export const BranchesManager: React.FC<BranchesManagerProps> = ({ isPro = false,
                </div>
              ))}
              {!isPro && (
-                 <div className="p-5 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center text-center opacity-60">
+                 <div onClick={() => setShowGate(true)} className="cursor-pointer p-5 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center text-center opacity-60 hover:opacity-100 transition-opacity">
                      <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center mb-3">
                          <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                      </div>
@@ -99,6 +108,25 @@ export const BranchesManager: React.FC<BranchesManagerProps> = ({ isPro = false,
            </div>
         </div>
       </div>
+      {showGate && (
+        <PremiumGate
+          isModal
+          title="See every branch’s performance in one place."
+          subhead="You’re growing beyond one location. Know which location is carrying the business and which needs help."
+          bullets={[
+            "Separate invoices and payments by branch.",
+            "Compare revenue and overdue amounts per branch.",
+            "Give branch managers access to only their data."
+          ]}
+          primaryCta="Unlock Branches"
+          secondaryCta="Continue with one location"
+          onPrimaryClick={() => {
+            setShowGate(false);
+            if (onUpgrade) onUpgrade();
+          }}
+          onSecondaryClick={() => setShowGate(false)}
+        />
+      )}
     </div>
   );
 };
