@@ -44,7 +44,7 @@ export type DocumentType = 'Tax Invoice' | 'Pro-forma' | 'Receipt' | 'Quote';
 
 export type NRSComplianceStatus = 'None' | 'Pending' | 'Verified' | 'Failed';
 
-export type RecurringFrequency = 'none' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+export type RecurringFrequency = 'none' | 'weekly' | 'monthly' | 'quarterly' | 'yearly' | (string & {});
 
 export interface Expense {
   id: string;
