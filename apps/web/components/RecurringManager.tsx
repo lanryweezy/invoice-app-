@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import type { Invoice } from '../types';
 import { numberFormatter } from '../utils/formatters';
+import { PremiumGate } from './PremiumGate';
 
 /**
  * 🔩 Hinge Extension Point: RecurringFrequencyStrategy
@@ -72,6 +73,9 @@ function formatDate(dateStr: string): string {
 
 interface RecurringManagerProps {
   recurringInvoices: Invoice[];
+  isPro?: boolean;
+  onUpgrade?: () => void;
+  onGoToEditor?: () => void;
   onGenerateNext: (invoice: Invoice) => void;
   onRemove: (index: number) => void;
   onToggleActive: (index: number, isActive: boolean) => void;
@@ -79,6 +83,9 @@ interface RecurringManagerProps {
 
 export const RecurringManager: React.FC<RecurringManagerProps> = ({
   recurringInvoices,
+  isPro = false,
+  onUpgrade,
+  onGoToEditor,
   onGenerateNext,
   onRemove,
   onToggleActive,
@@ -96,6 +103,24 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
     }, 0);
     return { active, total, monthlyEstimate };
   }, [recurringInvoices]);
+
+  if (!isPro) {
+    return (
+      <PremiumGate
+        title="Turn your best clients into automatic monthly income."
+        subhead="Sleep knowing next month’s invoices are already scheduled."
+        bullets={[
+          "Auto‑send on your chosen date",
+          "No more forgetting renewals",
+          "See predictable monthly revenue"
+        ]}
+        primaryCta="Unlock Recurring"
+        secondaryCta="Send a one‑time invoice"
+        onPrimaryClick={onUpgrade || (() => {})}
+        onSecondaryClick={onGoToEditor || (() => {})}
+      />
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-6">
