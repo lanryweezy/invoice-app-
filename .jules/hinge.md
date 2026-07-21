@@ -6,6 +6,6 @@
 
 **Learning:** Hardcoded literal formats (like `format: 'csv' | 'json'`) inside core service functions (`exportAuditTrail`) block extensibility and force core modifications when a new format (e.g., PDF) is needed. Converting the literal type to a registry lookup pattern allows external modules to inject new formats without altering the core function.
 **Action:** When you find a function taking a format literal and branching on it, extract those branches into an `ExportStrategy` registry. Update the function to look up the strategy by format key, maintaining existing functionality while enabling additive extensibility.
-## 2025-02-28 - Preserving IDE Autocomplete when extending String Unions
-**Learning:** When making a string union type (like `RecurringFrequency = 'weekly' | 'monthly'`) extensible for custom strings registered via an extension point, simply changing it to `string` destroys IDE autocomplete for the core types.
-**Action:** Always use the `| (string & {})` pattern when expanding string unions for plugin registries. This allows arbitrary strings to be accepted by the compiler without collapsing the union, preserving DX (autocomplete) for the original literals.
+## 2024-07-20 - Extract audit export logic into strategy registry
+**Learning:** Hard-coded `if`/`else` structures checking for specific format strings (like 'csv' or 'json') in core functions represent latent extension pressure. Defining an explicit strategy interface and mapping registered strategies by format ID provides a flexible and type-safe extension hook without breaking existing calling patterns or requiring caller changes.
+**Action:** When adding support for an arbitrary number of output formats (like exports or templates), preemptively refactor to use a registry pattern with a stable, documented strategy contract to prevent the core switch/if-chain from growing indefinitely.
