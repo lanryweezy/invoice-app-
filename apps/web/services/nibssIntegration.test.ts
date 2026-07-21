@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getBankDetails, getSupportedBanks } from './nibssIntegration';
+import { getBankDetails, getSupportedBanks, generatePaymentLink } from './nibssIntegration';
 
 describe('nibssIntegration', () => {
   describe('getBankDetails', () => {
@@ -52,6 +52,56 @@ describe('nibssIntegration', () => {
       const banks2 = getSupportedBanks();
       expect(banks1).not.toBe(banks2);
       expect(banks1).toEqual(banks2);
+    });
+  });
+
+  describe('generatePaymentLink', () => {
+    it('successfully generates a link for valid inputs', () => {
+      const amount = 10000;
+      const bank = '044';
+      const accountNumber = '1234567890';
+      const customerName = 'John Doe';
+
+      const link = generatePaymentLink(amount, bank, accountNumber, customerName);
+
+      expect(link).toBeDefined();
+      expect(link.amount).toBe(amount);
+      expect(link.accountNumber).toBe(accountNumber);
+      expect(link.customerName).toBe(customerName);
+      expect(link.bank).toBe('Access Bank');
+      expect(link.status).toBe('active');
+      expect(link.url).toMatch(/^https:\/\/nibss\.ng\/pay\/NIBSS-[A-Z0-9]+-[A-Z0-9]{6}$/);
+      expect(link.reference).toMatch(/^NIBSS-[A-Z0-9]+-[A-Z0-9]{6}$/);
+    });
+
+    it('throws an error when amount is <= 0', () => {
+      expect(() => {
+        generatePaymentLink(0, '044', '1234567890', 'John Doe');
+      }).toThrow('Amount must be greater than zero.');
+
+      expect(() => {
+        generatePaymentLink(-5000, '044', '1234567890', 'John Doe');
+      }).toThrow('Amount must be greater than zero.');
+    });
+
+    it('throws an error when account number length is not exactly 10 digits', () => {
+      expect(() => {
+        generatePaymentLink(10000, '044', '123456789', 'John Doe');
+      }).toThrow('Account number must be exactly 10 digits.');
+
+      expect(() => {
+        generatePaymentLink(10000, '044', '12345678901', 'John Doe');
+      }).toThrow('Account number must be exactly 10 digits.');
+
+      expect(() => {
+        generatePaymentLink(10000, '044', 'abcdefghij', 'John Doe');
+      }).toThrow('Account number must be exactly 10 digits.');
+    });
+
+    it('throws an error when the bank code is unknown', () => {
+      expect(() => {
+        generatePaymentLink(10000, 'Unknown Bank', '1234567890', 'John Doe');
+      }).toThrow('Bank "Unknown Bank" not supported. Use getSupportedBanks() for available options.');
     });
   });
 });
