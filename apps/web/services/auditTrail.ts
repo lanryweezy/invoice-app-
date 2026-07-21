@@ -7,7 +7,7 @@ localforage.config({
   description: 'Invoice audit trail logs'
 });
 
-export type AuditAction = 'create' | 'edit' | 'delete' | 'send' | 'pay' | 'status_change' | 'export' | 'download' | 'compliance_check';
+export type AuditAction = 'create' | 'edit' | 'delete' | 'send' | 'pay' | 'status_change' | 'export' | 'download';
 
 export interface AuditEntry {
   id: string;
@@ -30,11 +30,7 @@ export interface AuditFilters {
 }
 
 function generateId(): string {
-  // Security Fix: Use cryptographically secure random numbers for Key IDs
-  const array = new Uint8Array(4);
-  crypto.getRandomValues(array);
-  const randomStr = Array.from(array, b => b.toString(16).padStart(2, '0')).join('').toUpperCase().substring(0, 6);
-  return `AUD-${Date.now()}-${randomStr}`;
+  return `AUD-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 }
 
 async function getAllEntries(): Promise<AuditEntry[]> {
@@ -133,35 +129,35 @@ function escapeCSV(value: string): string {
 /**
  * 🔩 Hinge Extension Point: AuditExportStrategy
  *
- * Pressure: The `exportAuditTrail` function had a hardcoded `if (format === 'json')` block,
- * requiring core modification for every new export format (like XML or PDF).
+ * Pressure: The `exportAuditTrail` function had hardcoded logic for 'json' and 'csv',
+ * which would need modification every time a new export format (like PDF or XML) was added.
  *
  * Contract:
  * - Implementors provide a unique `format` string and an `export` function.
  * - The `export` function receives an array of `AuditEntry` objects and must return a string
- *   containing the formatted payload.
+ *   (or Promise resolving to a string) containing the formatted payload.
  */
 export interface AuditExportStrategy {
   format: string;
-  export(trail: AuditEntry[]): string;
+  export(entries: AuditEntry[]): string | Promise<string>;
 }
 
-const auditExportStrategies: AuditExportStrategy[] = [];
+const auditExportStrategies = new Map<string, AuditExportStrategy>();
 
 export function registerAuditExportStrategy(strategy: AuditExportStrategy): void {
-  auditExportStrategies.push(strategy);
+  auditExportStrategies.set(strategy.format, strategy);
 }
 
-const jsonAuditStrategy: AuditExportStrategy = {
+registerAuditExportStrategy({
   format: 'json',
-  export: (trail: AuditEntry[]) => JSON.stringify(trail, null, 2)
-};
+  export: (entries) => JSON.stringify(entries, null, 2)
+});
 
-const csvAuditStrategy: AuditExportStrategy = {
+registerAuditExportStrategy({
   format: 'csv',
-  export: (trail: AuditEntry[]) => {
+  export: (entries) => {
     const headers = ['ID', 'Invoice ID', 'Action', 'User ID', 'Timestamp', 'Details', 'Previous Values', 'New Values'];
-    const rows = trail.map((e) => [
+    const rows = entries.map((e) => [
       escapeCSV(e.id),
       escapeCSV(e.invoiceId),
       escapeCSV(e.action),
@@ -171,21 +167,17 @@ const csvAuditStrategy: AuditExportStrategy = {
       escapeCSV(JSON.stringify(e.previousValues ?? {})),
       escapeCSV(JSON.stringify(e.newValues ?? {})),
     ].join(','));
-
     return [headers.join(','), ...rows].join('\n');
   }
-};
-
-registerAuditExportStrategy(jsonAuditStrategy);
-registerAuditExportStrategy(csvAuditStrategy);
+});
 
 export async function exportAuditTrail(
   invoiceId: string,
   format: 'csv' | 'json' | (string & {})
 ): Promise<string> {
   const trail = await getAuditTrail(invoiceId);
+  const strategy = auditExportStrategies.get(format);
 
-  const strategy = auditExportStrategies.find(s => s.format === format);
   if (!strategy) {
     throw new Error(`Unsupported export format: ${format}`);
   }

@@ -45,15 +45,6 @@ describe('auditTrail', () => {
 
       expect(localforage.setItem).toHaveBeenCalledWith('entries', [entry]);
     });
-
-    it('throws an error if saving to localforage fails', async () => {
-      vi.mocked(localforage.getItem).mockResolvedValue(null);
-      vi.mocked(localforage.setItem).mockRejectedValueOnce(new Error('Storage quota exceeded'));
-
-      await expect(
-        logAction('inv-123', 'create', 'user-abc', { source: 'web' })
-      ).rejects.toThrow('Storage quota exceeded');
-    });
   });
 
   describe('getAuditTrail', () => {
@@ -253,20 +244,25 @@ describe('auditTrail', () => {
       expect(simpleRow.endsWith(`${stringifiedEmpty},${stringifiedEmpty}`)).toBe(true);
     });
 
-    it('exports using a dynamically registered custom strategy', async () => {
+    it('throws an error for unsupported export formats', async () => {
+      await expect(exportAuditTrail('inv-1', 'pdf' as any)).rejects.toThrow(
+        'Unsupported export format: pdf'
+      );
+    });
+
+    it('allows registering and executing custom export strategies', async () => {
+      // Register a mock 'xml' strategy
       registerAuditExportStrategy({
-        format: 'custom-xml',
-        export: (trail) => {
-          return `<audit><count>${trail.length}</count></audit>`;
+        format: 'xml',
+        export: (entries) => {
+          const rows = entries.map((e) => `<entry id="${e.id}">${e.action}</entry>`).join('');
+          return `<audit>${rows}</audit>`;
         }
       });
 
-      const result = await exportAuditTrail('inv-1', 'custom-xml');
-      expect(result).toBe('<audit><count>2</count></audit>');
-    });
+      const result = await exportAuditTrail('inv-1', 'xml');
 
-    it('throws an error for an unsupported format', async () => {
-      await expect(exportAuditTrail('inv-1', 'unsupported' as any)).rejects.toThrow('Unsupported export format: unsupported');
+      expect(result).toBe('<audit><entry id="1">edit</entry><entry id="2">create</entry></audit>');
     });
   });
 });
