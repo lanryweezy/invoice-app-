@@ -18,3 +18,7 @@
 **Vulnerability:** The `/api/send-email` endpoint accepted arbitrary lengths for `to`, `subject`, `text`, and `html` fields from user input.
 **Learning:** This exposes the endpoint to possible Denial of Service (DoS) attacks or unintended system load if attackers supply excessively large payloads to be processed by the server and SMTP transporter.
 **Prevention:** Always implement input validation, particularly maximum length constraints, on any user-provided data sent to API endpoints to prevent excessive resource consumption.
+## 2025-02-14 - Exposed Error Details in SMTP Endpoint
+**Vulnerability:** The `/api/send-email` endpoint was directly returning the `error.message` and `error.code` from Nodemailer failures in its JSON response.
+**Learning:** This can inadvertently expose sensitive internal infrastructure details, such as IP addresses, stack traces, internal paths, or misconfigurations, to unauthenticated users when the SMTP server fails or rejects a connection.
+**Prevention:** Always implement a secure error boundary for external API responses. Log detailed error information internally via `console.error` or a logging provider, but return a sanitized, generic message (e.g., "Failed to send email") to the client.
