@@ -1,6 +1,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import type { Invoice } from '../types';
+import { formatCurrency } from '../utils/formatters';
 
 interface PaymentDetailsProps {
   invoice: Invoice;
@@ -25,7 +26,7 @@ const NIGERIAN_BANKS = [
 ];
 
 const fmt = (amount: number, currency: string) =>
-  new Intl.NumberFormat('en-NG', { style: 'currency', currency }).format(amount);
+  formatCurrency(amount, currency, 'en-NG');
 
 const PaymentDetails: React.FC<PaymentDetailsProps> = React.memo(({ invoice, updateInvoice }) => {
   const [copiedField, setCopiedField] = useState<string | null>(null);

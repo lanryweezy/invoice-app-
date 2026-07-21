@@ -1,6 +1,7 @@
 
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import type { Invoice, LineItem, Currency, InvoiceStatus, Client } from '../types';
+import { getCurrencyFormatter } from '../utils/formatters';
 import { TrashIcon, PlusIcon, UploadIcon, ChevronDownIcon, ChevronUpIcon, EmptyBoxIcon, SaveIcon, UserIcon, MailIcon, MapPinIcon, BriefcaseIcon, BankIcon, HashIcon, WalletIcon, CalendarIcon, InfoIcon, SparklesIcon, ListIcon, PhoneIcon } from './Icons';
 
 interface InvoiceFormProps {
@@ -463,11 +464,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
       }
   }, [invoice.taxRate, updateInvoice]);
 
-  // ⚡ Bolt: Memoize Intl.NumberFormat to avoid expensive recreation (~1ms) on every render
-  const currencyFormatter = useMemo(() => new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: invoice.currency,
-  }), [invoice.currency]);
+  const currencyFormatter = useMemo(() => getCurrencyFormatter(invoice.currency, 'en-US'), [invoice.currency]);
   
   // ⚡ Bolt: Memoize currency symbol to avoid expensive toLocaleString calls on every render (~0.6ms)
   const currencySymbol = useMemo(() => {
