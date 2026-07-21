@@ -216,6 +216,36 @@ describe('offlineSync', () => {
       ]);
     });
 
+    it('handles synchronous non-Error exceptions thrown by setDoc during flushQueue', async () => {
+      vi.mocked(localforage.getItem).mockResolvedValue([
+        { id: '1', collection: 'invoices', docId: 'doc-1', data: { val: 1 }, timestamp: 100 }
+      ]);
+      vi.mocked(doc).mockImplementation((db, coll, id) => `${coll}/${id}` as any);
+
+      // Simulate a synchronous string error from setDoc
+      vi.mocked(setDoc).mockImplementationOnce(() => {
+        throw 'Synchronous setDoc string error';
+      });
+
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      const result = await flushQueue();
+
+      expect(result).toBe(false);
+      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to sync 1', 'Synchronous setDoc string error');
+
+      expect(trackEvent).toHaveBeenCalledWith('sync_item_failed', {
+        collection: 'invoices',
+        docId: 'doc-1',
+        error: 'Synchronous setDoc string error'
+      });
+
+      // Failed mutation is retained in the queue for retry
+      expect(localforage.setItem).toHaveBeenCalledWith('syncQueue', [
+        { id: '1', collection: 'invoices', docId: 'doc-1', data: { val: 1 }, timestamp: 100 }
+      ]);
+    });
+
     it('handles critical failure during queue fetch', async () => {
       vi.mocked(localforage.getItem).mockRejectedValue(new Error('Fatal read error'));
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});

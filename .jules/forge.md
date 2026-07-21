@@ -39,3 +39,7 @@
 ## 2026-07-19 - Testing Extensible Strategy Patterns
 **Learning:** When testing extensible patterns like `registerAuditExportStrategy` that utilize `(string & {})` for loosely-typed ID mapping, verify not only the successful registration and invocation but also the failure path for an unregistered custom string ID (which might be typed correctly via casting but fails at runtime).
 **Action:** When adding tests for dynamic registries or strategies in the future, include a test asserting that an unregistered key passed via `as any` or custom string explicitly throws the expected "Unsupported" error.
+
+## 2024-07-21 - Promise.allSettled Error Types
+**Learning:** `Promise.allSettled` loop error handling tests must explicitly verify all four quadrants of exceptions (asynchronous Promise rejection Error, asynchronous Promise rejection string/non-Error, synchronous thrown Error, synchronous thrown string/non-Error). If synchronous strings are thrown directly from mapped functions (e.g., mocked implementations of `setDoc`), the catch block or rejection stringification might misinterpret the error format if untested, leading to unlogged silent failures or data loss.
+**Action:** When mapping over items and executing async logic in `allSettled`, always include tests mocking implementations to throw bare strings (e.g., `throw 'String Error'`) instead of just `Error` objects, to guarantee robust serialization in observability tools and graceful degradation without crashing the loop.
