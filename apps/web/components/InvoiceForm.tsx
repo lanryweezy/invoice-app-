@@ -52,7 +52,7 @@ const InputField: React.FC<InputFieldProps> = React.memo(({ id, label, value, on
 
   return (
     <div className={className}>
-      {!noLabel && <label htmlFor={id || name} className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider flex items-center gap-1.5">{label}</label>}
+      {!noLabel && <label htmlFor={id || name} className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider flex items-center gap-1.5 cursor-pointer">{label}</label>}
       <div className="relative group">
           {icon && (
               <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-teal-600 pointer-events-none">
@@ -709,7 +709,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                         icon={<HashIcon className="w-4 h-4" />}
                     />
                     <div>
-                        <label htmlFor="documentType" className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Document Type</label>
+                        <label htmlFor="documentType" className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider cursor-pointer">Document Type</label>
                         <div className="relative">
                             <select
                                 id="documentType"
@@ -730,7 +730,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
 
                 <div className="grid grid-cols-2 gap-5">
                     <div>
-                        <label htmlFor="status" className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Status</label>
+                        <label htmlFor="status" className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider cursor-pointer">Status</label>
                         <div className="relative">
                             <select
                                 id="status"
@@ -781,7 +781,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                 {/* Financials Row */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="col-span-1">
-                        <label htmlFor="currency" className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Currency</label>
+                        <label htmlFor="currency" className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider cursor-pointer">Currency</label>
                         <div className="relative">
                             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
                                 <WalletIcon className="w-4 h-4" />

@@ -9,3 +9,6 @@
 ## 2025-07-20 - Palette: Add missing ARIA labels to icon-only buttons
 **Learning:** Found that custom icon-only buttons inside generic action managers (`RecurringManager`, `TINValidator`) frequently miss `aria-label`s, rendering them inaccessible to screen readers. Even if they have a `title` attribute for visual tooltips, it does not guarantee accessibility.
 **Action:** When auditing or implementing icon-only buttons across the app, always strictly require an `aria-label` or `aria-labelledby`, ensuring both visual (title/tooltip) and non-visual contexts are addressed.
+## 2024-07-21 - Added cursor-pointer to form labels
+**Learning:** Found that many `<label>` elements connected via `htmlFor` to input fields lacked a `cursor-pointer` class, which decreases visual affordance for users indicating they can click the text to focus the input.
+**Action:** Always add `cursor-pointer` to `htmlFor` labels in React/Tailwind forms to make the clickable hit area visually obvious.
