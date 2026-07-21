@@ -104,7 +104,7 @@ describe('portalLinks', () => {
     });
 
     it('handles malformed JSON in stored links gracefully by creating a fresh object, testing the catch branch in getStoredLinks', () => {
-      vi.mocked(localStorage.getItem).mockReturnValue('invalid-json-{');
+      vi.mocked(localStorage.getItem).mockReturnValue('not-json');
 
       const link = createPortalLink(mockInvoice);
       const token = link.split('/').pop();
@@ -154,7 +154,7 @@ describe('portalLinks', () => {
     });
 
     it('returns null if stored links contain malformed JSON, testing the catch branch in getStoredLinks', () => {
-      vi.mocked(localStorage.getItem).mockReturnValue('invalid-json-{');
+      vi.mocked(localStorage.getItem).mockReturnValue('not-json');
 
       const linkData = getPortalLink('my-token');
 
