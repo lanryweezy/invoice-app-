@@ -45,6 +45,15 @@ describe('auditTrail', () => {
 
       expect(localforage.setItem).toHaveBeenCalledWith('entries', [entry]);
     });
+
+    it('throws an error if saving to localforage fails', async () => {
+      vi.mocked(localforage.getItem).mockResolvedValue(null);
+      vi.mocked(localforage.setItem).mockRejectedValueOnce(new Error('Storage quota exceeded'));
+
+      await expect(
+        logAction('inv-123', 'create', 'user-abc', { source: 'web' })
+      ).rejects.toThrow('Storage quota exceeded');
+    });
   });
 
   describe('getAuditTrail', () => {
