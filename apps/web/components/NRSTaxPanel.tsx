@@ -1,6 +1,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import type { Invoice, LineItem } from '../types';
+import { getCurrencyFormatter } from '../utils/formatters';
 
 interface NRSTaxPanelProps {
   invoice: Invoice;
@@ -55,10 +56,7 @@ const NRSTaxPanel: React.FC<NRSTaxPanelProps> = React.memo(({ invoice, updateInv
     return { subtotal, vat, wht, stampDuty, discountAmount, afterDiscount, totalTax, total };
   }, [invoice.lineItems, invoice.taxRate, invoice.whtRate, invoice.discountType, invoice.discountRate, invoice.shippingAmount]);
 
-  const fmt = useMemo(() => new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: invoice.currency,
-  }), [invoice.currency]);
+  const fmt = useMemo(() => getCurrencyFormatter(invoice.currency, 'en-US'), [invoice.currency]);
 
   return (
     <div className="bg-slate-900 rounded-xl border border-slate-700 shadow-lg overflow-hidden">
