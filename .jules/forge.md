@@ -7,3 +7,6 @@
 ## 2026-07-20 - Testing Sync Error Paths
 **Learning:** When testing `Promise.allSettled` mapping loops (e.g., in offline sync queues), write distinct test cases for both asynchronous promise rejections (e.g., via `mockRejectedValue`) and synchronous exceptions thrown directly within the mapping function (e.g., via `mockImplementation` throwing an Error) to guarantee comprehensive coverage of error handling paths.
 **Action:** Always explicitly test both sync throws and async rejections for critical queue processing logic.
+## 2024-03-26 - XML Generation Escaping Bugs
+**Learning:** XML generation methods (like `generateNRSXML`) using manual string replacements (e.g., `.replace()`) can silently crash with `TypeError: Cannot read properties of undefined (reading 'replace')` if optional fields on the payload fall back to `undefined` or null and are not gracefully coalesced to empty strings.
+**Action:** When testing exports or transformations containing optional nested properties, always write tests that mock missing optional properties to ensure that the transformer functions coalesce defaults instead of throwing runtime errors.
