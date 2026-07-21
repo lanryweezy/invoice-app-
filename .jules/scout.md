@@ -11,3 +11,6 @@
 **Learning:** Testing services that rely on `localforage` (like `auditTrail.ts`) requires mocking its `config`, `getItem`, and `setItem` methods globally using `vi.mock('localforage', ...)` to prevent unhandled promise rejections and IndexedDB initialization errors during Vitest runs.
 
 **Action:** When adding tests for modules using `localforage`, use `vi.mock('localforage', () => ({ default: { config: vi.fn(), getItem: vi.fn(), setItem: vi.fn() } }))` before `describe` blocks.
+## 2024-05-24 - Storage Read Error Handling Tests
+**Learning:** When testing `localStorage.getItem` or similar persistence reading utilities, both runtime execution errors (e.g. `mockImplementation(() => { throw new Error('Quota exceeded') })`) and data corruption errors (e.g. `mockReturnValue('invalid-json')` failing inside `JSON.parse`) must be explicitly simulated. Often, developers only test one type of failure, leaving the other uncovered.
+**Action:** When adding tests for storage reads, explicitly add a test case that injects an invalid string (like `'not-json'`) and confirms the catch branch of `JSON.parse` is hit and handled gracefully without crashing the application.

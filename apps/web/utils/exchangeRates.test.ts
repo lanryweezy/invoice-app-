@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { getExchangeRates, convertCurrency } from './exchangeRates';
+import { trackEvent } from './analytics';
+
+vi.mock('./analytics', () => ({
+  trackEvent: vi.fn(),
+}));
 
 describe('exchangeRates', () => {
   beforeEach(() => {
@@ -115,6 +120,14 @@ describe('exchangeRates', () => {
       expect(rates.USD).toBe(1550);
     });
 
+    it('handles invalid JSON in localStorage gracefully', async () => {
+      vi.mocked(localStorage.getItem).mockReturnValue('invalid-json');
+      vi.mocked(fetch).mockRejectedValue(new Error('Network error'));
+
+      const rates = await getExchangeRates();
+      expect(rates.USD).toBe(1550);
+    });
+
     it('handles localStorage errors gracefully during cache write', async () => {
       vi.mocked(localStorage.getItem).mockReturnValue(null);
       vi.mocked(localStorage.setItem).mockImplementation(() => { throw new Error('Quota exceeded'); });
@@ -127,6 +140,17 @@ describe('exchangeRates', () => {
 
       const rates = await getExchangeRates();
       expect(rates.USD).toBe(1000); // Write failed but rates still returned
+    });
+
+    it('handles trackEvent exception during fetch error handling gracefully', async () => {
+      vi.mocked(localStorage.getItem).mockReturnValue(null);
+      vi.mocked(fetch).mockRejectedValue(new Error('Network error'));
+      vi.mocked(trackEvent).mockImplementation(() => { throw new Error('Analytics failed'); });
+
+      const rates = await getExchangeRates();
+
+      expect(rates.USD).toBe(1550); // Should still return fallbacks without throwing
+      expect(trackEvent).toHaveBeenCalled();
     });
   });
 
