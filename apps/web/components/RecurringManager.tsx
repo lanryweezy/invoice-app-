@@ -2,27 +2,66 @@ import React, { useMemo } from 'react';
 import type { Invoice } from '../types';
 import { numberFormatter } from '../utils/formatters';
 
-const frequencyLabels: Record<string, string> = {
-  weekly: 'Every Week',
-  monthly: 'Every Month',
-  quarterly: 'Every 3 Months',
-  yearly: 'Every Year',
-};
+/**
+ * 🔩 Hinge Extension Point: RecurringFrequencyStrategy
+ *
+ * Pressure: The `RecurringManager` component had hardcoded maps for colors/labels,
+ * and switch statements in `getNextDueDate` and `monthlyEstimate` that needed
+ * modification every time a new recurring frequency was added.
+ *
+ * Contract:
+ * - Implementors provide a `RecurringFrequencyStrategy` with an ID, visual metadata
+ *   (label, color), a function to compute the next due date, and a multiplier
+ *   for monthly revenue estimations.
+ */
+export interface RecurringFrequencyStrategy {
+  id: string;
+  label: string;
+  colorClass: string;
+  monthlyMultiplier: number;
+  getNextDate: (lastGenerated: Date) => Date;
+}
 
-const frequencyColors: Record<string, string> = {
-  weekly: 'bg-blue-100 text-blue-800',
-  monthly: 'bg-teal-100 text-teal-800',
-  quarterly: 'bg-purple-100 text-purple-800',
-  yearly: 'bg-amber-100 text-amber-800',
-};
+const frequencyStrategies = new Map<string, RecurringFrequencyStrategy>();
+
+export function registerRecurringStrategy(strategy: RecurringFrequencyStrategy): void {
+  frequencyStrategies.set(strategy.id, strategy);
+}
+
+registerRecurringStrategy({
+  id: 'weekly',
+  label: 'Every Week',
+  colorClass: 'bg-blue-100 text-blue-800',
+  monthlyMultiplier: 4.33,
+  getNextDate: (d) => { d.setDate(d.getDate() + 7); return d; }
+});
+registerRecurringStrategy({
+  id: 'monthly',
+  label: 'Every Month',
+  colorClass: 'bg-teal-100 text-teal-800',
+  monthlyMultiplier: 1,
+  getNextDate: (d) => { d.setMonth(d.getMonth() + 1); return d; }
+});
+registerRecurringStrategy({
+  id: 'quarterly',
+  label: 'Every 3 Months',
+  colorClass: 'bg-purple-100 text-purple-800',
+  monthlyMultiplier: 1 / 3,
+  getNextDate: (d) => { d.setMonth(d.getMonth() + 3); return d; }
+});
+registerRecurringStrategy({
+  id: 'yearly',
+  label: 'Every Year',
+  colorClass: 'bg-amber-100 text-amber-800',
+  monthlyMultiplier: 1 / 12,
+  getNextDate: (d) => { d.setFullYear(d.getFullYear() + 1); return d; }
+});
 
 function getNextDueDate(lastGenerated: string, frequency: string): string {
   const d = new Date(lastGenerated);
-  switch (frequency) {
-    case 'weekly': d.setDate(d.getDate() + 7); break;
-    case 'monthly': d.setMonth(d.getMonth() + 1); break;
-    case 'quarterly': d.setMonth(d.getMonth() + 3); break;
-    case 'yearly': d.setFullYear(d.getFullYear() + 1); break;
+  const strategy = frequencyStrategies.get(frequency);
+  if (strategy) {
+    strategy.getNextDate(d);
   }
   return d.toISOString().split('T')[0];
 }
@@ -48,14 +87,12 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
     const active = recurringInvoices.filter(i => i.recurringIsActive).length;
     const total = recurringInvoices.length;
     const monthlyEstimate = recurringInvoices.reduce((sum, inv) => {
-      if (!inv.recurringIsActive || !inv.total) return sum;
-      switch (inv.recurringFrequency) {
-        case 'weekly': return sum + inv.total * 4.33;
-        case 'monthly': return sum + inv.total;
-        case 'quarterly': return sum + inv.total / 3;
-        case 'yearly': return sum + inv.total / 12;
-        default: return sum;
+      if (!inv.recurringIsActive || !inv.total || !inv.recurringFrequency) return sum;
+      const strategy = frequencyStrategies.get(inv.recurringFrequency);
+      if (strategy) {
+        return sum + inv.total * strategy.monthlyMultiplier;
       }
+      return sum;
     }, 0);
     return { active, total, monthlyEstimate };
   }, [recurringInvoices]);
@@ -134,8 +171,8 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-bold text-slate-900 truncate">{inv.client.name || 'Unnamed Client'}</h3>
-                        <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${frequencyColors[inv.recurringFrequency || 'monthly']}`}>
-                          {inv.recurringFrequency}
+                        <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${frequencyStrategies.get(inv.recurringFrequency || 'monthly')?.colorClass || 'bg-slate-100 text-slate-800'}`}>
+                          {frequencyStrategies.get(inv.recurringFrequency || 'monthly')?.label || inv.recurringFrequency}
                         </span>
                       </div>
                       <p className="text-sm text-slate-500 mt-0.5">
