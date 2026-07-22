@@ -43,3 +43,10 @@
 ## 2024-07-21 - Promise.allSettled Error Types
 **Learning:** `Promise.allSettled` loop error handling tests must explicitly verify all four quadrants of exceptions (asynchronous Promise rejection Error, asynchronous Promise rejection string/non-Error, synchronous thrown Error, synchronous thrown string/non-Error). If synchronous strings are thrown directly from mapped functions (e.g., mocked implementations of `setDoc`), the catch block or rejection stringification might misinterpret the error format if untested, leading to unlogged silent failures or data loss.
 **Action:** When mapping over items and executing async logic in `allSettled`, always include tests mocking implementations to throw bare strings (e.g., `throw 'String Error'`) instead of just `Error` objects, to guarantee robust serialization in observability tools and graceful degradation without crashing the loop.
+## 2024-05-24 - Testing JSON.parse failure paths
+
+**Learning:** When applying testing patterns for error paths (e.g., simulating `JSON.parse` failures by mocking a return of 'not-json'), we must not delete or replace existing tests that assert other valid failure modes (such as explicit IO exceptions generated via `throw new Error`). Both forms of exceptions (data corruption and execution exceptions) must be verified simultaneously to prevent coverage regressions.
+**Action:** Always maintain dedicated test cases for string-based data corruption ('not-json') separately from standard Error instances to ensure full reliability of exception handling.
+## 2024-07-22 - Empty Test Blocks Must Be Avoided
+**Learning:** Adding empty test blocks (e.g. tests containing only comments explaining why something cannot be tested) is considered a major violation as these tests will always pass, artificially inflating the test suite count while testing nothing.
+**Action:** When acting as Forge, never commit empty test blocks. If a branch is untestable due to missing mocks or unexported state (like internal Maps), skip the test entirely rather than adding an empty stub, or find an alternative way to test it.
