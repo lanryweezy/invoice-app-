@@ -39,3 +39,6 @@
 ## 2026-07-19 - Testing Extensible Strategy Patterns
 **Learning:** When testing extensible patterns like `registerAuditExportStrategy` that utilize `(string & {})` for loosely-typed ID mapping, verify not only the successful registration and invocation but also the failure path for an unregistered custom string ID (which might be typed correctly via casting but fails at runtime).
 **Action:** When adding tests for dynamic registries or strategies in the future, include a test asserting that an unregistered key passed via `as any` or custom string explicitly throws the expected "Unsupported" error.
+## 2024-07-22 - Empty Test Blocks Must Be Avoided
+**Learning:** Adding empty test blocks (e.g. tests containing only comments explaining why something cannot be tested) is considered a major violation as these tests will always pass, artificially inflating the test suite count while testing nothing.
+**Action:** When acting as Forge, never commit empty test blocks. If a branch is untestable due to missing mocks or unexported state (like internal Maps), skip the test entirely rather than adding an empty stub, or find an alternative way to test it.
