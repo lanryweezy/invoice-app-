@@ -14,3 +14,6 @@
 ## 2024-03-XX - Implement Value-Driven Feature Gating for Accounting
 **Learning:** Current "Pro feature" gates block users and create friction. Replacing them with in-app sales pages that focus on value, context, and emotion converts better.
 **Action:** Replace `handleProFeatureClick` modals with full-screen, value-driven feature landing pages.
+## 2024-07-22 - Added unit tests for formatCurrency utility
+**Learning:** `apps/web/utils/formatters.test.ts` failed `tsc --noEmit` due to internal `@vitest` type resolution errors (e.g., `Cannot find module '@vitest/utils/display'`) and ECMAScript target mismatch, despite the tests running perfectly with `vitest`.
+**Action:** Rely on `vitest` execution to validate the correctness of `.test.ts` files in this workspace rather than strict `tsc` checks.
