@@ -22,3 +22,7 @@
 **Vulnerability:** The `/api/send-email` endpoint was directly returning the `error.message` and `error.code` from Nodemailer failures in its JSON response.
 **Learning:** This can inadvertently expose sensitive internal infrastructure details, such as IP addresses, stack traces, internal paths, or misconfigurations, to unauthenticated users when the SMTP server fails or rejects a connection.
 **Prevention:** Always implement a secure error boundary for external API responses. Log detailed error information internally via `console.error` or a logging provider, but return a sanitized, generic message (e.g., "Failed to send email") to the client.
+## 2024-07-22 - Fix Webhook Signature Validation
+**Vulnerability:** The Paystack webhook validation in `functions/index.js` was using `JSON.stringify(req.body)` to compute the HMAC signature.
+**Learning:** Reconstructing a JSON payload with `JSON.stringify` can introduce property order and whitespace differences compared to the raw request. This can cause valid webhook signatures to fail validation, leading to missed events. In addition, computing hashes against processed request bodies increases the risk of tampering.
+**Prevention:** Always use the raw unparsed request body (`req.rawBody`) when computing cryptographic signatures for webhooks to ensure bit-for-bit accuracy.
