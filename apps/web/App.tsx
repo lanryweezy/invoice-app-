@@ -32,6 +32,9 @@ import { TemplatePage } from './components/TemplatePage';
 import { PrivacyModal } from './components/PrivacyModal';
 import { CommandPaletteProvider } from './components/CommandPaletteProvider';
 import { TermsModal } from './components/TermsModal';
+import { PrivacyPage } from './components/PrivacyPage';
+import { TermsPage } from './components/TermsPage';
+import { SupportPage } from './components/SupportPage';
 import { IntegrationsView } from './components/IntegrationsView';
 import { CLIAccessView } from './components/CLIAccessView';
 import { SmtpSettingsModal } from './components/SmtpSettingsModal';
@@ -231,7 +234,7 @@ const App: React.FC = () => {
 
   // Main view state
   const [gatedFeature, setGatedFeature] = useState<'Branches' | 'Accounting' | 'Recurring' | 'Receipts' | 'Integrations' | null>(null);
-  const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'integrations' | 'cli' | 'blog' | 'blogPost' | 'publicProfile' | 'templatePage'>(() => {
+  const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'integrations' | 'cli' | 'blog' | 'blogPost' | 'publicProfile' | 'templatePage' | 'privacy' | 'terms' | 'support'>(() => {
       let path;
       try {
           path = decodeURIComponent(window.location.pathname);
@@ -239,6 +242,9 @@ const App: React.FC = () => {
           path = window.location.pathname; // Fallback if malformed URI
       }
 
+      if (path === '/privacy') return 'privacy';
+      if (path === '/terms') return 'terms';
+      if (path === '/support') return 'support';
       if (path.startsWith('/p/')) return 'publicProfile';
       if (path.startsWith('/templates/')) return 'templatePage';
       if (path === '/blog') return 'blog';
@@ -659,7 +665,7 @@ const App: React.FC = () => {
              <button onClick={() => user ? setActiveView('recurring') : handleProFeatureClick('Recurring')} className={`text-xs font-medium transition-colors ${activeView === 'recurring' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Recurring</button>
              <button onClick={() => user ? setActiveView('receipts') : handleProFeatureClick('Receipts')} className={`text-xs font-medium transition-colors ${activeView === 'receipts' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Receipts</button>
              <button onClick={() => user ? setActiveView('integrations') : handleProFeatureClick('Integrations')} className={`text-xs font-medium transition-colors ${activeView === 'integrations' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Integrations</button>
-             <button onClick={() => user ? setActiveView('cli') : setIsAuthModalOpen(true)} className={`text-xs font-medium transition-colors ${activeView === 'cli' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>CLI</button>
+                 <button onClick={() => setActiveView('cli')} className={`text-xs font-medium transition-colors ${activeView === 'cli' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>CLI</button>
              <button onClick={() => window.location.href = '/blog'} className={`text-xs font-medium transition-colors ${activeView === 'blog' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Blog</button>
              <div className="w-px h-4 bg-slate-700"></div>
              {!loading && (
@@ -890,6 +896,12 @@ const App: React.FC = () => {
             <div className="p-4 sm:p-8">
                 <CLIAccessView />
             </div>
+        ) : activeView === 'privacy' ? (
+            <PrivacyPage />
+        ) : activeView === 'terms' ? (
+            <TermsPage />
+        ) : activeView === 'support' ? (
+            <SupportPage />
         ) : activeView === 'publicProfile' && publicUsername !== null ? (
             <PublicProfile username={publicUsername} />
         ) : activeView === 'templatePage' && activeTemplateSlug !== null ? (
@@ -950,13 +962,13 @@ const App: React.FC = () => {
 
                    {/* Links */}
                    <div className="flex justify-center gap-6 text-xs font-bold text-slate-600">
-                       <button onClick={() => setIsPrivacyModalOpen(true)} className="hover:text-teal-600 transition-colors">Privacy</button>
+                       <button onClick={() => window.location.href = '/privacy'} className="hover:text-teal-600 transition-colors">Privacy</button>
                        <span className="text-slate-300">•</span>
-                       <button onClick={() => setIsTermsModalOpen(true)} className="hover:text-teal-600 transition-colors">Terms</button>
+                       <button onClick={() => window.location.href = '/terms'} className="hover:text-teal-600 transition-colors">Terms</button>
                        <span className="text-slate-300">•</span>
                        <button onClick={() => window.location.href = '/blog'} className="hover:text-teal-600 transition-colors">Blog</button>
                        <span className="text-slate-300">•</span>
-                       <button onClick={() => showToast('Contact: hello@invoiceapp.ng', 'success')} className="hover:text-teal-600 transition-colors">Contact</button>
+                       <button onClick={() => window.location.href = '/support'} className="hover:text-teal-600 transition-colors">Support</button>
                    </div>
 
                    {/* Copyright */}
