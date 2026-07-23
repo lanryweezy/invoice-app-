@@ -13,23 +13,16 @@
     }
   ],
   "rewrites": [
-    {
-      "beforeFiles": [
-        { "source": "/blog", "destination": "/marketing/blog/" },
-        { "source": "/blog/:match*", "destination": "/marketing/blog/:match*" },
-        { "source": "/templates", "destination": "/marketing/templates/" },
-        { "source": "/templates/:match*", "destination": "/marketing/templates/:match*" },
-        { "source": "/tools", "destination": "/marketing/tools/" },
-        { "source": "/tools/:match*", "destination": "/marketing/tools/:match*" },
-        { "source": "/nrs-compliance-dossier", "destination": "/marketing/nrs-compliance-dossier/" },
-        { "source": "/_astro/:match*", "destination": "/marketing/_astro/:match*" },
-        { "source": "/favicon.svg", "destination": "/marketing/favicon.svg" }
-      ]
-    },
-    {
-      "afterFiles": [
-        { "source": "/(.*)", "destination": "/web/index.html" }
-      ]
-    }
+    { "source": "/blog", "destination": "/marketing/blog/" },
+    { "source": "/blog/:match*", "destination": "/marketing/blog/:match*" },
+    { "source": "/templates", "destination": "/marketing/templates/" },
+    { "source": "/templates/:match*", "destination": "/marketing/templates/:match*" },
+    { "source": "/tools", "destination": "/marketing/tools/" },
+    { "source": "/tools/:match*", "destination": "/marketing/tools/:match*" },
+    { "source": "/nrs-compliance-dossier", "destination": "/marketing/nrs-compliance-dossier/" },
+    { "source": "/_astro/:match*", "destination": "/marketing/_astro/:match*" },
+    { "source": "/favicon.svg", "destination": "/marketing/favicon.svg" },
+    { "source": "/web/:match*", "destination": "/web/:match*" },
+    { "source": "/(.*)", "destination": "/web/index.html" }
   ]
 }
