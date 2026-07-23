@@ -91,6 +91,10 @@ const path = Astro.url.pathname;
             href="/blog"
             class={`text-xs font-medium transition-colors ${path.startsWith('/blog') ? 'text-white' : 'text-slate-400 hover:text-white'}`}
           >Blog</a>
+          <a
+            href="/cli"
+            class={`text-xs font-medium transition-colors ${path.startsWith('/cli') ? 'text-white' : 'text-slate-400 hover:text-white'}`}
+          >CLI</a>
           <div class="w-px h-4 bg-slate-700"></div>
           <a
             href="/editor"
@@ -113,6 +117,7 @@ const path = Astro.url.pathname;
           <a href="/editor#recurring" class="text-sm font-medium text-slate-400 hover:text-white py-2 transition-colors">Recurring</a>
           <a href="/editor#receipts" class="text-sm font-medium text-slate-400 hover:text-white py-2 transition-colors">Receipts</a>
           <a href="/blog" class="text-sm font-medium text-slate-400 hover:text-white py-2 transition-colors">Blog</a>
+          <a href="/cli" class="text-sm font-medium text-slate-400 hover:text-white py-2 transition-colors">CLI</a>
           <div class="w-px h-4 bg-slate-700 my-1"></div>
           <a href="/editor" class="text-sm font-bold text-slate-300 hover:text-white py-2 transition-colors">Login / Sign up</a>
         </nav>
