@@ -1,41 +1,45 @@
 const { execSync } = require('child_process');
-const fs = require('fs-extra');
+const fs = require('fs');
 const path = require('path');
 
 async function build() {
-  try {
-    const rootDir = path.resolve(__dirname, '..');
-    const distDir = path.join(rootDir, 'dist');
-    const webDist = path.join(rootDir, 'apps/web/dist');
-    const marketingDist = path.join(rootDir, 'apps/marketing/dist');
+  const rootDir = path.resolve(__dirname, '..');
+  const webDist = path.join(rootDir, 'apps/web/dist');
+  const marketingDist = path.join(rootDir, 'apps/marketing/dist');
 
-    console.log('--- Cleaning dist directory ---');
-    await fs.remove(distDir);
-    await fs.ensureDir(distDir);
+  console.log('--- Building Web App ---');
+  execSync('npm run build', { cwd: path.join(rootDir, 'apps/web'), stdio: 'inherit' });
 
-    console.log('--- Building Web App (React) ---');
-    execSync('npm run build', { cwd: path.join(rootDir, 'apps/web'), stdio: 'inherit' });
+  console.log('--- Building Marketing App ---');
+  execSync('npm run build', { cwd: path.join(rootDir, 'apps/marketing'), stdio: 'inherit' });
 
-    console.log('--- Building Marketing App (Astro) ---');
-    execSync('npm run build', { cwd: path.join(rootDir, 'apps/marketing'), stdio: 'inherit' });
-
-    console.log('--- Organizing Build Output ---');
-    
-    // Move Web Dist to dist/web
-    await fs.ensureDir(path.join(distDir, 'web'));
-    await fs.copy(webDist, path.join(distDir, 'web'));
-    console.log('✓ Web app moved to dist/web');
-
-    // Move Marketing Dist to dist/marketing
-    await fs.ensureDir(path.join(distDir, 'marketing'));
-    await fs.copy(marketingDist, path.join(distDir, 'marketing'));
-    console.log('✓ Marketing app moved to dist/marketing');
-
-    console.log('--- Build Complete ---');
-  } catch (error) {
-    console.error('Build failed:', error);
-    process.exit(1);
+  console.log('--- Merging marketing into web dist ---');
+  // Copy marketing assets into web dist so Vercel serves them together
+  const copyDir = (src, dest) => {
+    if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+    for (const item of fs.readdirSync(src)) {
+      const srcPath = path.join(src, item);
+      const destPath = path.join(dest, item);
+      if (fs.statSync(srcPath).isDirectory()) {
+        copyDir(srcPath, destPath);
+      } else {
+        fs.copyFileSync(srcPath, destPath);
+      }
+    }
+  };
+  
+  // Copy marketing/blog, marketing/_astro, etc. to web dist root
+  for (const item of fs.readdirSync(marketingDist)) {
+    const srcPath = path.join(marketingDist, item);
+    const destPath = path.join(webDist, item);
+    if (fs.statSync(srcPath).isDirectory()) {
+      copyDir(srcPath, destPath);
+    } else if (!fs.existsSync(destPath)) {
+      fs.copyFileSync(srcPath, destPath);
+    }
   }
+  
+  console.log('✓ Build complete');
 }
 
 build();
