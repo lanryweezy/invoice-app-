@@ -89,10 +89,10 @@ function generateReceiptNumber(): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   // Security Fix: Prevent predictable receipt numbers
-  const array2 = new Uint16Array(1);
-  crypto.getRandomValues(array2);
-  const seq = String(array2[0] % 10000).padStart(4, '0');
-  return `RCP-NIBSS-${year}${month}-${seq}`;
+  const array = new Uint8Array(4);
+  crypto.getRandomValues(array);
+  const random = Array.from(array, b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+  return `RCP-NIBSS-${year}${month}-${random}`;
 }
 
 function lookupBank(input: string): BankInfo | undefined {
