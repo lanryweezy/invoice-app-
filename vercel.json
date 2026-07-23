@@ -1,5 +1,6 @@
 {
   "installCommand": "pnpm install --no-frozen-lockfile",
+  "outputDirectory": "apps/web/dist",
   "headers": [
     {
       "source": "/(.*)",
@@ -22,7 +23,6 @@
     { "source": "/nrs-compliance-dossier", "destination": "/marketing/nrs-compliance-dossier/" },
     { "source": "/_astro/:match*", "destination": "/marketing/_astro/:match*" },
     { "source": "/favicon.svg", "destination": "/marketing/favicon.svg" },
-    { "source": "/web/:match*", "destination": "/web/:match*" },
-    { "source": "/(.*)", "destination": "/web/index.html" }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
