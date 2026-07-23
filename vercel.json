@@ -14,32 +14,22 @@
   ],
   "rewrites": [
     {
-      "source": "/_astro/:match*",
-      "destination": "/marketing/_astro/:match*"
+      "beforeFiles": [
+        { "source": "/blog", "destination": "/marketing/blog/" },
+        { "source": "/blog/:match*", "destination": "/marketing/blog/:match*" },
+        { "source": "/templates", "destination": "/marketing/templates/" },
+        { "source": "/templates/:match*", "destination": "/marketing/templates/:match*" },
+        { "source": "/tools", "destination": "/marketing/tools/" },
+        { "source": "/tools/:match*", "destination": "/marketing/tools/:match*" },
+        { "source": "/nrs-compliance-dossier", "destination": "/marketing/nrs-compliance-dossier/" },
+        { "source": "/_astro/:match*", "destination": "/marketing/_astro/:match*" },
+        { "source": "/favicon.svg", "destination": "/marketing/favicon.svg" }
+      ]
     },
     {
-      "source": "/favicon.svg",
-      "destination": "/marketing/favicon.svg"
-    },
-    {
-      "source": "/blog/:match*",
-      "destination": "/marketing/blog/:match*"
-    },
-    {
-      "source": "/templates/:match*",
-      "destination": "/marketing/templates/:match*"
-    },
-    {
-      "source": "/tools/:match*",
-      "destination": "/marketing/tools/:match*"
-    },
-    {
-      "source": "/nrs-compliance-dossier",
-      "destination": "/marketing/nrs-compliance-dossier/"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/web/index.html"
+      "afterFiles": [
+        { "source": "/(.*)", "destination": "/web/index.html" }
+      ]
     }
   ]
 }
