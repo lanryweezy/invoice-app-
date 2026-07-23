@@ -317,6 +317,7 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({ isOpen, on
                     <input type={showPassword ? 'text' : 'password'} value={smtp.pass} onChange={e => setSmtp(s => ({ ...s, pass: e.target.value }))}
                       placeholder="App password (not your regular password)" className="w-full rounded-lg border-slate-300 text-sm focus:border-teal-500 focus:ring-teal-500 pr-16" />
                     <button type="button" onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
                       className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400 hover:text-slate-600 px-2 py-1">
                       {showPassword ? 'Hide' : 'Show'}
                     </button>
