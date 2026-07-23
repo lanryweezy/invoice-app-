@@ -44,11 +44,11 @@ export function getHeaders(): Record<string, string> {
   };
 }
 
-export async function apiRequest(
+export async function apiRequest<T = unknown, R = unknown>(
   endpoint: string,
   method: string = 'GET',
-  body?: any
-): Promise<any> {
+  body?: T
+): Promise<R> {
   const url = `${config.baseUrl}${endpoint}`;
   const headers = getHeaders();
 

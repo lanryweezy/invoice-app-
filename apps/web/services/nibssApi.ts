@@ -54,7 +54,7 @@ const NIGERIAN_BANKS: Bank[] = [
 
 export async function initiatePayment(payment: PaymentRequest): Promise<PaymentResult> {
   try {
-    const result = await apiRequest('/v1/payment/initiate', 'POST', payment);
+    const result = await apiRequest<PaymentRequest, any>('/v1/payment/initiate', 'POST', payment);
     return {
       success: true,
       transactionId: result.transaction_id,
@@ -81,7 +81,7 @@ export async function checkPaymentStatus(transactionId: string): Promise<any> {
 
 export async function verifyBank(bankCode: string): Promise<boolean> {
   try {
-    const result = await apiRequest(`/v1/bank/verify/${bankCode}`);
+    const result = await apiRequest<undefined, any>(`/v1/bank/verify/${bankCode}`);
     return result.valid || false;
   } catch (error) {
     return false;
@@ -90,7 +90,7 @@ export async function verifyBank(bankCode: string): Promise<boolean> {
 
 export async function getAccountName(accountNumber: string, bankCode: string): Promise<AccountName | null> {
   try {
-    const result = await apiRequest('/v1/account/name', 'POST', {
+    const result = await apiRequest<{ account_number: string, bank_code: string }, any>('/v1/account/name', 'POST', {
       account_number: accountNumber,
       bank_code: bankCode,
     });
