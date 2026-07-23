@@ -12,3 +12,6 @@
 ## 2024-07-21 - Added cursor-pointer to form labels
 **Learning:** Found that many `<label>` elements connected via `htmlFor` to input fields lacked a `cursor-pointer` class, which decreases visual affordance for users indicating they can click the text to focus the input.
 **Action:** Always add `cursor-pointer` to `htmlFor` labels in React/Tailwind forms to make the clickable hit area visually obvious.
+## 2025-07-23 - Accessibility consistency for toggle buttons
+**Learning:** Found an inconsistency where the `aria-label` for toggling password visibility was present in `AuthModal.tsx` but missing in `SmtpSettingsModal.tsx`. Toggling states should have explicit accessibility labels (like 'Show password'/'Hide password') for screen reader users when the visual label ("Show") might lack sufficient context on its own.
+**Action:** Always verify that interactive icon-only or generic-labeled buttons (like 'Show', 'Close') include explicit, descriptive `aria-label` attributes across all similar components in the UI.
