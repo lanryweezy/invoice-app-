@@ -128,6 +128,10 @@ export const getQueueCount = async (): Promise<number> => {
     const queue = await localforage.getItem<Mutation[]>('syncQueue');
     return queue ? queue.length : 0;
   } catch (e) {
+    console.error("[Offline Sync] Failed to get queue count", e);
+    trackEvent('sync_queue_count_failed', {
+      error: e instanceof Error ? e.message : String(e)
+    });
     return 0;
   }
 };

@@ -254,9 +254,14 @@ describe('offlineSync', () => {
     });
 
     it('returns 0 when fetch fails', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       vi.mocked(localforage.getItem).mockRejectedValue(new Error('DB Error'));
       const count = await getQueueCount();
       expect(count).toBe(0);
+      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to get queue count', expect.any(Error));
+      expect(trackEvent).toHaveBeenCalledWith('sync_queue_count_failed', {
+        error: 'DB Error'
+      });
     });
   });
 });
