@@ -479,7 +479,7 @@ const App: React.FC = () => {
 
       if (saveClient(client)) {
           showToast('Client saved to list');
-          trackEvent('save_client', { client_name: client.name });
+          trackEvent('save_client');
       } else {
           showToast('Client name is required', 'error');
       }

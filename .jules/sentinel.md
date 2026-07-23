@@ -30,3 +30,7 @@
 **Vulnerability:** Several `window.open` calls across the application (e.g., in `SettingsModal.tsx`, `PaymentDetails.tsx`, and `ActionButtons.tsx`) used `_blank` without setting `noopener,noreferrer`.
 **Learning:** Using `target="_blank"` or `window.open` without `noopener` or `noreferrer` exposes the application to Reverse Tabnabbing, where the newly opened page can maliciously redirect the original page using `window.opener.location`. This is especially dangerous when linking to external, user-provided, or untrusted URLs.
 **Prevention:** Always include `'noopener,noreferrer'` in the features parameter of `window.open(url, '_blank', ...)` to sever the relationship between the tabs.
+## 2024-05-24 - Remove Client PII from Analytics Tracking
+**Vulnerability:** Client's name (PII) was being sent to a third-party analytics service (`trackEvent('save_client', { client_name: client.name })`).
+**Learning:** Sending PII data to third-party analytics services without anonymization or hashing creates a privacy and data exposure risk.
+**Prevention:** Analytics events should be designed carefully to only send metadata, avoiding real names or any identifiers that can be traced back to individuals.
