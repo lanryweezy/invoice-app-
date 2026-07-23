@@ -1,0 +1,5 @@
+## 2024-07-23 - Canva vs Kreathief (InvoiceApp): PDF Export Quality
+**Gap:** Canva and professional tools output crisp, vector-based PDFs with selectable text, embedded fonts, and tiny file sizes. Kreathief outputs a compressed 0.8 quality JPEG embedded inside a PDF container. Text is unselectable, blurry upon zooming, and the file size is bloated.
+**Root cause:** Architectural/Prioritisation. The codebase uses `html2canvas` to screenshot the DOM and `jsPDF.addImage(imgData, 'JPEG')` to wrap it (`apps/web/App.tsx`, lines 570-583). This is a lazy frontend hack, not a professional rendering engine.
+**Proposal:** Rip out `html2canvas`. Replace it with `@react-pdf/renderer` to generate actual vector PDFs from React components, or generate standard HTML and print to PDF via a serverless function.
+**Strategic note:** If a professional sends an invoice and their client cannot highlight and copy the bank account number because it is a JPEG, Kreathief looks like a toy, destroying trust instantly.
