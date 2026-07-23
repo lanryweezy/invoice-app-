@@ -1,6 +1,4 @@
 import React, { useState, useCallback, useMemo, useEffect, Suspense, useRef } from 'react';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
 
 import { InvoiceForm } from './components/InvoiceForm';
 import { ActionButtons } from './components/ActionButtons';
@@ -566,6 +564,9 @@ const App: React.FC = () => {
       clone.style.width = '100%';
       clone.style.height = 'auto';
       container.appendChild(clone);
+
+      const { default: html2canvas } = await import('html2canvas');
+      const { jsPDF } = await import('jspdf');
 
       const canvas = await html2canvas(container, {
         scale: 2,
