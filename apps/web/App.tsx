@@ -123,6 +123,18 @@ const App: React.FC = () => {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [pendingSyncCount, setPendingSyncCount] = useState(0);
 
+  // Check for auth query param on load
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('auth') === '1') {
+      setIsAuthModalOpen(true);
+
+      // Clean up the URL by removing the query param
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, []);
+
   // Load SMTP settings from Firestore
   useEffect(() => {
     if (!user) { setSmtpSettings(null); return; }
@@ -665,7 +677,7 @@ const App: React.FC = () => {
              <button onClick={() => user ? setActiveView('recurring') : handleProFeatureClick('Recurring')} className={`text-xs font-medium transition-colors ${activeView === 'recurring' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Recurring</button>
              <button onClick={() => user ? setActiveView('receipts') : handleProFeatureClick('Receipts')} className={`text-xs font-medium transition-colors ${activeView === 'receipts' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Receipts</button>
              <button onClick={() => user ? setActiveView('integrations') : handleProFeatureClick('Integrations')} className={`text-xs font-medium transition-colors ${activeView === 'integrations' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Integrations</button>
-                 <button onClick={() => setActiveView('cli')} className={`text-xs font-medium transition-colors ${activeView === 'cli' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>CLI</button>
+                 <button onClick={() => setIsAuthModalOpen(true)} className="text-xs font-bold text-slate-300 hover:text-white transition-colors">Login</button>
              <button onClick={() => window.location.href = '/blog'} className={`text-xs font-medium transition-colors ${activeView === 'blog' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Blog</button>
              <div className="w-px h-4 bg-slate-700"></div>
              {!loading && (
