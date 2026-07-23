@@ -66,7 +66,7 @@ const PaymentDetails: React.FC<PaymentDetailsProps> = React.memo(({ invoice, upd
       `Please make payment and share the receipt. Thank you!\n\n` +
       `📎 Created with InvoiceApp.ng — free invoicing for Nigerian businesses`
     );
-    window.open(`https://wa.me/?text=${text}`, '_blank');
+    window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
   }, [paymentDetails]);
 
   const handleShare = useCallback(async () => {

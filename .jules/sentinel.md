@@ -26,3 +26,7 @@
 **Vulnerability:** The Paystack webhook validation in `functions/index.js` was using `JSON.stringify(req.body)` to compute the HMAC signature.
 **Learning:** Reconstructing a JSON payload with `JSON.stringify` can introduce property order and whitespace differences compared to the raw request. This can cause valid webhook signatures to fail validation, leading to missed events. In addition, computing hashes against processed request bodies increases the risk of tampering.
 **Prevention:** Always use the raw unparsed request body (`req.rawBody`) when computing cryptographic signatures for webhooks to ensure bit-for-bit accuracy.
+## 2025-02-14 - Fix Reverse Tabnabbing Vulnerability in window.open Calls
+**Vulnerability:** Several `window.open` calls across the application (e.g., in `SettingsModal.tsx`, `PaymentDetails.tsx`, and `ActionButtons.tsx`) used `_blank` without setting `noopener,noreferrer`.
+**Learning:** Using `target="_blank"` or `window.open` without `noopener` or `noreferrer` exposes the application to Reverse Tabnabbing, where the newly opened page can maliciously redirect the original page using `window.opener.location`. This is especially dangerous when linking to external, user-provided, or untrusted URLs.
+**Prevention:** Always include `'noopener,noreferrer'` in the features parameter of `window.open(url, '_blank', ...)` to sever the relationship between the tabs.
