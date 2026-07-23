@@ -4,7 +4,15 @@ import {
   getSupportedBanks,
   generatePaymentLink,
   generateBankTransferDetails,
+  verifyPayment,
+  getPaymentStatus,
+  generateReceipt,
+  generateReceiptHTML,
+  getFormattedBankDetails,
+  isPaymentExpired,
+  cancelPaymentLink,
 } from './nibssIntegration';
+import { vi, afterEach, beforeEach } from 'vitest';
 
 describe('nibssIntegration', () => {
   describe('getBankDetails', () => {
@@ -119,6 +127,159 @@ describe('nibssIntegration', () => {
       expect(() => {
         generateBankTransferDetails(15000, 'FakeBank', '0987654321', 'Jane Smith');
       }).toThrow('Bank "FakeBank" not supported.');
+    });
+  });
+
+  describe('verifyPayment', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('returns a failed status when the transaction is not found', () => {
+      const status = verifyPayment('NON-EXISTENT-REF');
+      expect(status.status).toBe('failed');
+      expect(status.message).toBe('Transaction not found in NIBSS system');
+    });
+
+    it('returns the status for an existing payment link', () => {
+      const link = generatePaymentLink(5000, '044', '1234567890', 'John Doe');
+      const status = verifyPayment(link.reference);
+      expect(status.status).toBe('pending');
+      expect(status.reference).toBe(link.reference);
+    });
+
+    it('marks the payment as expired if the link has expired', () => {
+      const link = generatePaymentLink(5000, '044', '1234567890', 'John Doe');
+      vi.advanceTimersByTime(25 * 60 * 60 * 1000); // advance 25 hours
+      const status = verifyPayment(link.reference);
+      expect(status.status).toBe('expired');
+      expect(status.message).toBe('Payment link has expired');
+    });
+  });
+
+  describe('getPaymentStatus', () => {
+    it('returns undefined when invoiceId does not match any reference', () => {
+      expect(getPaymentStatus('UNKNOWN-INVOICE')).toBeUndefined();
+    });
+
+    it('returns status by invoice ID via payment statuses', () => {
+      const details = generateBankTransferDetails(1000, '044', '1234567890', 'Test');
+      const status = getPaymentStatus(details.reference);
+      expect(status).toBeDefined();
+      expect(status?.reference).toBe(details.reference);
+    });
+
+    it('returns status by invoice ID via payment links', () => {
+      const link = generatePaymentLink(2000, '044', '1234567890', 'Test');
+      const status = getPaymentStatus(link.reference);
+      expect(status).toBeDefined();
+      expect(status?.reference).toBe(link.reference);
+    });
+  });
+
+  describe('generateReceipt', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2024-01-01T12:00:00Z'));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('generates a valid receipt from payment details', () => {
+      const receipt = generateReceipt({
+        invoiceNumber: 'INV-001',
+        payer: 'Alice',
+        payee: 'Bob',
+        amount: 500,
+        bank: 'Access Bank',
+        reference: 'REF-123'
+      });
+
+      expect(receipt.invoiceNumber).toBe('INV-001');
+      expect(receipt.amount).toBe(500);
+      expect(receipt.receiptNumber).toMatch(/^RCP-NIBSS-/);
+      expect(receipt.paidAt).toBe(new Date().toISOString());
+    });
+  });
+
+  describe('generateReceiptHTML', () => {
+    it('generates an HTML string containing receipt data', () => {
+      const receipt = generateReceipt({
+        invoiceNumber: 'INV-002',
+        payer: 'Charlie',
+        payee: 'Dave',
+        amount: 1500,
+        bank: 'GTB',
+        reference: 'REF-456'
+      });
+
+      const html = generateReceiptHTML(receipt);
+      expect(html).toContain('INV-002');
+      expect(html).toContain('Charlie');
+      expect(html).toContain('REF-456');
+      expect(html).toContain('NIBSS Electronic Payment Confirmation');
+    });
+  });
+
+  describe('getFormattedBankDetails', () => {
+    it('returns formatted details for a supported bank', () => {
+      const formatted = getFormattedBankDetails('044', '1234567890');
+      expect(formatted).toContain('Bank: Access Bank');
+      expect(formatted).toContain('Account Number: 1234567890');
+      expect(formatted).toContain('Bank Code: 044');
+    });
+
+    it('returns "Bank not found" for an unsupported bank', () => {
+      const formatted = getFormattedBankDetails('Unknown', '1234567890');
+      expect(formatted).toBe('Bank not found');
+    });
+  });
+
+  describe('isPaymentExpired', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('returns true if the reference is not found', () => {
+      expect(isPaymentExpired('NOT-FOUND')).toBe(true);
+    });
+
+    it('returns false for an active payment link', () => {
+      const link = generatePaymentLink(5000, '044', '1234567890', 'John Doe');
+      expect(isPaymentExpired(link.reference)).toBe(false);
+    });
+
+    it('returns true if the payment link has expired', () => {
+      const link = generatePaymentLink(5000, '044', '1234567890', 'John Doe');
+      vi.advanceTimersByTime(25 * 60 * 60 * 1000);
+      expect(isPaymentExpired(link.reference)).toBe(true);
+    });
+  });
+
+  describe('cancelPaymentLink', () => {
+    it('returns false when trying to cancel an unknown reference', () => {
+      expect(cancelPaymentLink('NOT-FOUND')).toBe(false);
+    });
+
+    it('cancels an active payment link and updates status', () => {
+      const link = generatePaymentLink(5000, '044', '1234567890', 'John Doe');
+      const success = cancelPaymentLink(link.reference);
+
+      expect(success).toBe(true);
+
+      const status = verifyPayment(link.reference);
+      expect(status.status).toBe('expired');
+      expect(status.message).toBe('Payment cancelled by merchant');
     });
   });
 });

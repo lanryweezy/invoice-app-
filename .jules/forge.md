@@ -39,3 +39,6 @@
 ## 2026-07-19 - Testing Extensible Strategy Patterns
 **Learning:** When testing extensible patterns like `registerAuditExportStrategy` that utilize `(string & {})` for loosely-typed ID mapping, verify not only the successful registration and invocation but also the failure path for an unregistered custom string ID (which might be typed correctly via casting but fails at runtime).
 **Action:** When adding tests for dynamic registries or strategies in the future, include a test asserting that an unregistered key passed via `as any` or custom string explicitly throws the expected "Unsupported" error.
+## 2024-07-23 - Testing expiration logic on pure dates
+**Learning:** In the NIBSS integration (`apps/web/services/nibssIntegration.ts`), the `isPaymentExpired` function evaluates expiration purely based on the `expiresAt` timestamp, ignoring the state of the `status` field.
+**Action:** When writing tests that verify cancellation logic (e.g., `cancelPaymentLink`), do not assert that `isPaymentExpired` becomes true unless mock timers (`vi.useFakeTimers()`) have been explicitly advanced past the expiration date.
