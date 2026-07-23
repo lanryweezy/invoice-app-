@@ -52,14 +52,14 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
     const handleWhatsAppShare = () => {
         trackEvent('share_whatsapp', { invoice_number: invoiceNumber });
         const text = encodeURIComponent(`${shareText} ${shareUrl}`);
-        window.open(`https://wa.me/?text=${text}`, '_blank');
+        window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
     };
 
     const handleXShare = () => {
         trackEvent('share_x', { invoice_number: invoiceNumber });
         const text = encodeURIComponent(shareText);
         const url = encodeURIComponent(shareUrl);
-        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=InvoiceApp,Nigeria,Freelance`, '_blank');
+        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}&hashtags=InvoiceApp,Nigeria,Freelance`, '_blank', 'noopener,noreferrer');
     };
 
     const handleNativeShare = async () => {

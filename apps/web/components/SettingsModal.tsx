@@ -309,7 +309,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
                 <button
                   onClick={() => {
                     const text = encodeURIComponent(`I use InvoiceApp to create professional invoices for my business. It's free and NRS-compliant. Try it: https://invoiceapp.ng/editor?ref=${user.uid}`);
-                    window.open(`https://wa.me/?text=${text}`, '_blank');
+                    window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
                   }}
                   className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1"
                 >
