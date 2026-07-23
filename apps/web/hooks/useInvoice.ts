@@ -158,14 +158,18 @@ const useLocalPersistence = (
   useEffect(() => {
     const timeoutId = setTimeout(() => {
         localStorage.setItem('invoiceUser', JSON.stringify(invoice.user));
-        syncToCloud({ invoiceUser: invoice.user });
+        // 🌱 Flora: Catch floating promise rejections inside setTimeout to prevent silent failures
+        // bypassing standard React error boundaries.
+        syncToCloud({ invoiceUser: invoice.user }).catch(console.error);
     }, 500);
     return () => clearTimeout(timeoutId);
   }, [invoice.user, syncToCloud]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-        syncToCloud({ currentInvoice: invoice });
+        // 🌱 Flora: Catch floating promise rejections inside setTimeout to prevent silent failures
+        // bypassing standard React error boundaries.
+        syncToCloud({ currentInvoice: invoice }).catch(console.error);
     }, 1500);
     return () => clearTimeout(timeoutId);
   }, [invoice, syncToCloud]);
