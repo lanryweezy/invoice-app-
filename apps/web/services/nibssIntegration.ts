@@ -1,4 +1,5 @@
 import type { Invoice } from '../types';
+import { formatCurrency } from '../utils/formatters';
 
 export type BankCode = '044' | '014' | '023' | '011' | '057' | '033' | '030' | '032' | '050' | '035';
 
@@ -102,10 +103,7 @@ function lookupBank(input: string): BankInfo | undefined {
 }
 
 function formatAmount(amount: number): string {
-  return new Intl.NumberFormat('en-NG', {
-    style: 'currency',
-    currency: 'NGN',
-  }).format(amount);
+  return formatCurrency(amount, 'NGN', 'en-NG');
 }
 
 export function getBankDetails(bank: string): BankInfo | undefined {
