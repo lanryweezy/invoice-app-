@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { apiRequest, NrsApiError } from './apiConfig';
+import { apiRequest, NrsApiError, getHeaders, setApiKey, setTin, setSandbox } from './apiConfig';
 
 vi.mock('../utils/analytics', () => ({
   trackEvent: vi.fn(),
@@ -14,6 +14,34 @@ describe('apiConfig', () => {
 
   afterEach(() => {
     global.fetch = originalFetch;
+  });
+
+  describe('getHeaders', () => {
+    it('returns default headers', () => {
+      setApiKey('');
+      setTin('');
+      setSandbox(true);
+      const headers = getHeaders();
+      expect(headers).toEqual({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ',
+        'X-TIN': '',
+        'X-Environment': 'sandbox',
+      });
+    });
+
+    it('returns headers with updated config', () => {
+      setApiKey('test-api-key');
+      setTin('12345678');
+      setSandbox(false);
+      const headers = getHeaders();
+      expect(headers).toEqual({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer test-api-key',
+        'X-TIN': '12345678',
+        'X-Environment': 'production',
+      });
+    });
   });
 
   describe('apiRequest', () => {
