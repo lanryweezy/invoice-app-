@@ -38,7 +38,7 @@
       "destination": "/marketing/nrs-compliance-dossier/"
     },
     {
-      "source": "/((?!web/).*)",
+      "source": "/(.*)",
       "destination": "/web/index.html"
     }
   ]
