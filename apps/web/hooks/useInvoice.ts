@@ -184,7 +184,10 @@ const useLocalPersistence = (
         if (storedRecurring) {
             setRecurringInvoices(JSON.parse(storedRecurring));
         }
-    } catch(e) { console.error('Failed to load local data', e); }
+    } catch(e) {
+        console.error('Failed to load local data', e);
+        try { trackEvent('local_data_load_failed', { error: String(e) }); } catch {}
+    }
   }, [setSavedClients, setBusinessProfiles, setRecurringInvoices]);
 };
 
