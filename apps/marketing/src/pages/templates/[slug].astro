@@ -14,9 +14,25 @@ const formatter = new Intl.NumberFormat('en-NG', {
   style: 'currency',
   currency: 'NGN',
 });
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "CreativeWork",
+  "name": template.title,
+  "description": template.description,
+  "author": {
+    "@type": "Organization",
+    "name": "InvoiceApp"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "NGN"
+  }
+};
 ---
 
 <BaseLayout title={template.title} description={template.description}>
+  <script type="application/ld+json" set:html={JSON.stringify(schema)} slot="head" />
   <div class="max-w-6xl mx-auto py-16 px-6">
     <nav class="flex mb-8 text-sm font-medium text-slate-500">
         <a href="/templates" class="hover:text-teal-600 transition-colors">Templates</a>
