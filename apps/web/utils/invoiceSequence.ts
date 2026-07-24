@@ -1,3 +1,4 @@
+import { trackEvent } from './analytics';
 const STORAGE_KEY = 'invoiceapp_invoice_sequence';
 
 // 🏗️ Mason: Extracted duplicated date parsing logic to a single source of truth
@@ -19,7 +20,10 @@ function getCurrentSequence(): number {
       }
       return 0;
     }
-  } catch {}
+  } catch (error) {
+    console.error('Failed to read invoice sequence from storage', error);
+    try { trackEvent('invoice_sequence_read_error', { error: String(error) }); } catch {}
+  }
   return 0;
 }
 
