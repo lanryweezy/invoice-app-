@@ -35,13 +35,8 @@ export default defineConfig(({ mode }) => {
                 handler: 'CacheFirst',
                 options: {
                   cacheName: 'google-fonts-cache',
-                  expiration: {
-                    maxEntries: 10,
-                    maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
-                  },
-                  cacheableResponse: {
-                    statuses: [0, 200]
-                  }
+                  expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+                  cacheableResponse: { statuses: [0, 200] }
                 }
               },
               {
@@ -49,13 +44,8 @@ export default defineConfig(({ mode }) => {
                 handler: 'CacheFirst',
                 options: {
                   cacheName: 'gstatic-fonts-cache',
-                  expiration: {
-                    maxEntries: 10,
-                    maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
-                  },
-                  cacheableResponse: {
-                    statuses: [0, 200]
-                  }
+                  expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+                  cacheableResponse: { statuses: [0, 200] }
                 }
               },
               {
@@ -63,22 +53,32 @@ export default defineConfig(({ mode }) => {
                 handler: 'StaleWhileRevalidate',
                 options: {
                   cacheName: 'unsplash-images-cache',
-                  expiration: {
-                    maxEntries: 50,
-                    maxAgeSeconds: 60 * 60 * 24 * 30 // <== 30 days
-                  },
-                  cacheableResponse: {
-                    statuses: [0, 200]
-                  }
+                  expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 30 },
+                  cacheableResponse: { statuses: [0, 200] }
+                }
+              },
+              {
+                urlPattern: /^https:\/\/firestore\.googleapis\.com\/.*/i,
+                handler: 'NetworkFirst',
+                options: {
+                  cacheName: 'firebase-cache',
+                  expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 7 },
+                  cacheableResponse: { statuses: [0, 200] }
                 }
               }
             ]
           },
           manifest: {
-            name: 'InvoiceApp',
+            name: 'InvoiceApp — Invoice Generator for Nigeria',
             short_name: 'InvoiceApp',
-            description: 'Professional invoices for Nigerian freelancers and small businesses.',
-            theme_color: '#0f172a',
+            description: 'Create professional, NRS-compliant invoices for Nigerian freelancers and SMEs. Free invoicing with Paystack payments.',
+            theme_color: '#0f766e',
+            background_color: '#f8fafc',
+            display: 'standalone',
+            orientation: 'portrait-primary',
+            scope: '/',
+            start_url: '/editor',
+            categories: ['business', 'finance'],
             icons: [
               {
                 src: 'favicon.svg',
@@ -89,6 +89,12 @@ export default defineConfig(({ mode }) => {
                 src: 'favicon.svg',
                 sizes: '512x512',
                 type: 'image/svg+xml'
+              },
+              {
+                src: 'favicon.svg',
+                sizes: '512x512',
+                type: 'image/svg+xml',
+                purpose: 'maskable'
               }
             ]
           }
