@@ -91,7 +91,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginWi
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
         <div className="flex justify-between items-center p-6 border-b border-slate-100">
-          <h2 id="auth-modal-title" className="text-xl font-bold text-slate-900">Login</h2>
+          <h2 id="auth-modal-title" className="text-xl font-bold text-slate-900">{isLogin ? 'Login' : 'Sign up'}</h2>
           <button onClick={onClose} aria-label="Close modal" className="text-slate-400 hover:text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-500 rounded-lg">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
@@ -152,9 +152,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginWi
               disabled={loading || (!isLogin && TURNSTILE_ENABLED && !turnstileToken)}
               className="w-full py-2.5 px-4 bg-teal-600 hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98] text-white font-bold rounded-lg transition-colors disabled:opacity-70"
             >
-              {loading ? 'Please wait...' : 'Login'}
+              {loading ? 'Please wait...' : (isLogin ? 'Login' : 'Sign up')}
             </button>
           </form>
+
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-sm text-slate-600 hover:text-teal-600 font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-teal-500 rounded px-2 py-1 transition-colors"
+            >
+              {isLogin ? "Don't have an account? Sign up" : "Already have an account? Log in"}
+            </button>
+          </div>
 
           <div className="mt-6 flex items-center justify-center">
             <div className="h-px bg-slate-200 flex-1"></div>

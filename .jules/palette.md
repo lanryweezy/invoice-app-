@@ -15,3 +15,6 @@
 ## 2025-07-23 - Accessibility consistency for toggle buttons
 **Learning:** Found an inconsistency where the `aria-label` for toggling password visibility was present in `AuthModal.tsx` but missing in `SmtpSettingsModal.tsx`. Toggling states should have explicit accessibility labels (like 'Show password'/'Hide password') for screen reader users when the visual label ("Show") might lack sufficient context on its own.
 **Action:** Always verify that interactive icon-only or generic-labeled buttons (like 'Show', 'Close') include explicit, descriptive `aria-label` attributes across all similar components in the UI.
+## 2024-07-24 - Modal Context Switching
+**Learning:** Auth modals with hardcoded strings (e.g. exclusively "Login" text and titles) create friction when they actually support dual contexts (Login and Sign Up via logic paths). Users shouldn't have to close the modal to find a different entry point.
+**Action:** When a modal component has internal state for different contexts (like `isLogin`), ensure the header title, submit button, and a prominent toggle switch are dynamically linked to that state to provide seamless context switching.
