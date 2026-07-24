@@ -20,7 +20,7 @@ export const ReceiptPreview: React.FC<ReceiptPreviewProps> = ({ receipt, templat
         if (!receiptRef.current) return;
 
         try {
-            const { default: html2canvas } = await import('html2canvas');
+            const { default: html2canvas } = await import('html2canvas-pro');
             const { jsPDF } = await import('jspdf');
 
             const canvas = await html2canvas(receiptRef.current, { scale: 2, useCORS: true });

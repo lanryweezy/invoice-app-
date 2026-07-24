@@ -5,7 +5,7 @@ export default defineConfig({
   timeout: 30000,
   retries: 1,
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: 'http://localhost:3000',
     headless: true,
     viewport: { width: 1280, height: 720 },
     screenshot: 'only-on-failure',
@@ -13,7 +13,7 @@ export default defineConfig({
   },
   webServer: {
     command: 'cd apps/web && pnpm dev',
-    port: 5173,
+    port: 3000,
     reuseExistingServer: true,
     timeout: 30000,
   },

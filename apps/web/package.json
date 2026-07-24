@@ -9,11 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@tailwindcss/typography": "^0.5.19",
     "@sentry/react": "^9.30.0",
+    "@tailwindcss/typography": "^0.5.19",
     "@vercel/analytics": "^2.0.1",
     "firebase": "^12.12.1",
-    "html2canvas": "^1.4.1",
+    "html2canvas-pro": "^2.3.1",
     "jspdf": "^3.0.3",
     "localforage": "^1.10.0",
     "qrcode": "^1.5.4",
