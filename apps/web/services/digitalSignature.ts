@@ -1,3 +1,4 @@
+import { generateSecureId } from '../utils/crypto';
 import type { Invoice } from '../types';
 
 export interface SignaturePayload {
@@ -81,9 +82,7 @@ function computeSignatureHash(data: string): string {
 
 function generateKeyId(): string {
   // Security Fix: Use cryptographically secure random numbers for Key IDs
-  const array = new Uint8Array(4);
-  crypto.getRandomValues(array);
-  const randomStr = Array.from(array, b => b.toString(16).padStart(2, '0')).join('').toUpperCase().substring(0, 6);
+  const randomStr = generateSecureId(6);
   return `SIG-${Date.now()}-${randomStr}`;
 }
 

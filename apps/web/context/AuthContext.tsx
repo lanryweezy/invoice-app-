@@ -6,6 +6,7 @@ import {
 } from '../services/firebase';
 import { onSnapshot, runTransaction } from 'firebase/firestore';
 import { trackEvent } from '../utils/analytics';
+import { generateSecureId } from '../utils/crypto';
 
 export interface SubscriptionData {
   plan: 'free' | 'pro';
@@ -149,9 +150,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             currency: 'NGN',
             // Security Fix: Use cryptographically secure random numbers for references
             ref: (() => {
-              const array = new Uint16Array(1);
-              crypto.getRandomValues(array);
-              return 'INV-' + Date.now() + '-' + (array[0] % 1000);
+              return 'INV-' + Date.now() + '-' + generateSecureId(3);
             })(),
             metadata: {
               custom_fields: [
