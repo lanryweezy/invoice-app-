@@ -6,6 +6,7 @@ import { createPortalLink } from '../utils/portalLinks';
 import type { Invoice } from '../types';
 
 interface ActionButtonsProps {
+  onNewInvoice?: () => void;
   onGenerateEmail: () => void;
   onDownloadPdf: () => void;
   isMobile?: boolean;
@@ -82,6 +83,16 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   if (isMobile) {
       return (
         <div className="flex gap-2">
+            {onNewInvoice && (
+              <button
+                onClick={onNewInvoice}
+                className="p-1.5 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+                title="New Invoice"
+                aria-label="New Invoice"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+              </button>
+            )}
             {canConvert && onConvertToInvoice && (
               <button
                 onClick={onConvertToInvoice}
@@ -165,6 +176,16 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
 
   return (
     <div className="flex gap-2 w-full lg:w-auto">
+      {onNewInvoice && (
+        <button
+          onClick={onNewInvoice}
+          className="flex-1 lg:flex-none inline-flex items-center justify-center px-3 py-1.5 border border-slate-200 text-xs font-bold rounded-lg text-slate-600 bg-white hover:bg-slate-50 hover:text-slate-900 transition-all shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"
+          aria-label="New Invoice"
+        >
+          <svg className="w-3.5 h-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+          New
+        </button>
+      )}
       {canConvert && onConvertToInvoice && (
         <button
           onClick={onConvertToInvoice}
