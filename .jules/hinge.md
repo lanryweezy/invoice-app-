@@ -9,3 +9,7 @@
 ## 2024-07-20 - Extract audit export logic into strategy registry
 **Learning:** Hard-coded `if`/`else` structures checking for specific format strings (like 'csv' or 'json') in core functions represent latent extension pressure. Defining an explicit strategy interface and mapping registered strategies by format ID provides a flexible and type-safe extension hook without breaking existing calling patterns or requiring caller changes.
 **Action:** When adding support for an arbitrary number of output formats (like exports or templates), preemptively refactor to use a registry pattern with a stable, documented strategy contract to prevent the core switch/if-chain from growing indefinitely.
+
+## 2024-07-24 - Dynamic Regex Generation Requires Syntax Validation
+**Learning:** When creating an extension point that dynamically constructs a Regular Expression (like compiling a list of keywords into capture groups), the `type` or identifier provided by the implementor must be strictly validated. If a consumer registers a category with an invalid regex capture group name (e.g., using hyphens or spaces), the dynamic `new RegExp()` instantiation will throw a `SyntaxError` at runtime and crash the application.
+**Action:** Always add rigorous sanitization or validation (e.g., `/^[a-zA-Z_][a-zA-Z0-9_]*$/`) against implementor-provided keys if those keys are subsequently injected into compiled runtime constructs like regex patterns.

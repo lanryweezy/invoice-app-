@@ -4,7 +4,9 @@ import {
   calculateWHT,
   generateWHTCertificate,
   getWHTSummary,
-  Invoice
+  Invoice,
+  registerWHTCategory,
+  resetWHTCategories
 } from './whrCalculator';
 
 describe('whrCalculator', () => {
@@ -172,6 +174,32 @@ describe('whrCalculator', () => {
         totalWHT: 0,
         byType: {}
       });
+    });
+  });
+  describe('Extensibility', () => {
+    afterEach(() => {
+      resetWHTCategories();
+    });
+
+    it('allows registering a new WHT strategy', () => {
+      registerWHTCategory({
+        type: 'royalties',
+        rate: 0.15,
+        keywords: ['royalty', 'intellectual property', 'licensing fee']
+      });
+
+      expect(detectWHTType('Software licensing fee')).toBe('royalties');
+      expect(calculateWHT(1000, 'royalties')).toBe(150);
+    });
+
+    it('throws error for invalid regex group types', () => {
+      expect(() => {
+        registerWHTCategory({
+          type: 'invalid-type-name!',
+          rate: 0.2,
+          keywords: ['test']
+        });
+      }).toThrow();
     });
   });
 });
