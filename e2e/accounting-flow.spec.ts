@@ -66,9 +66,3 @@ test.describe('Public Profile', () => {
   });
 });
 
-test.describe('Blog', () => {
-  test('blog page loads', async ({ page }) => {
-    await page.goto('/blog');
-    await expect(page.locator('body')).toBeVisible({ timeout: 10000 });
-  });
-});

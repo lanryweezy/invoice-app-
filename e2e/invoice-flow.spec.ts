@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Invoice Creation Flow', () => {
   test('loads the app and shows the editor', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('text=Invoice')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: 'InvoiceApp' }).first()).toBeVisible({ timeout: 10000 });
   });
 
   test('can fill in client details', async ({ page }) => {

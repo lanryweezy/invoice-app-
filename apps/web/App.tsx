@@ -578,7 +578,7 @@ const App: React.FC = () => {
       clone.style.height = 'auto';
       container.appendChild(clone);
 
-      const { default: html2canvas } = await import('html2canvas');
+      const { default: html2canvas } = await import('html2canvas-pro');
       const { jsPDF } = await import('jspdf');
 
       const canvas = await html2canvas(container, {
