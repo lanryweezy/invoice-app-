@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.invoiceapp.ng/sitemap.xml
+Sitemap: https://www.invoiceapp.ng/sitemap-index.xml
