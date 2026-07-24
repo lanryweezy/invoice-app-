@@ -39,7 +39,7 @@ export interface QRCodeResult {
 
 export async function validateTIN(tin: string): Promise<TINValidationResult> {
   try {
-    const result = await apiRequest('/v1/tin/validate', 'POST', { tin });
+    const result = await apiRequest<{ tin: string }, any>('/v1/tin/validate', 'POST', { tin });
     return {
       valid: result.valid || false,
       tin,
@@ -59,7 +59,7 @@ export async function validateTIN(tin: string): Promise<TINValidationResult> {
 
 export async function submitInvoice(invoice: InvoiceSubmission): Promise<InvoiceSubmissionResult> {
   try {
-    const result = await apiRequest('/v1/e-invoice/submit', 'POST', invoice);
+    const result = await apiRequest<InvoiceSubmission, any>('/v1/e-invoice/submit', 'POST', invoice);
     return {
       success: true,
       nrsInvoiceId: result.invoice_id,
@@ -86,7 +86,7 @@ export async function checkInvoiceStatus(nrsInvoiceId: string): Promise<any> {
 
 export async function generateQRCode(invoiceId: string): Promise<QRCodeResult> {
   try {
-    const result = await apiRequest('/v1/qr/generate', 'POST', { invoice_id: invoiceId });
+    const result = await apiRequest<{ invoice_id: string }, any>('/v1/qr/generate', 'POST', { invoice_id: invoiceId });
     return {
       qrCodeUrl: result.qr_code_url,
       verificationUrl: result.verification_url,
