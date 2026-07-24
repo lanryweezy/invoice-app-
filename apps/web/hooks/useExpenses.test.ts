@@ -1,9 +1,13 @@
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useExpenses } from './useExpenses';
 import * as firebaseFirestore from 'firebase/firestore';
 import { useSubscription } from './useSubscription';
+import * as offlineSync from '../utils/offlineSync';
+import { trackEvent } from '../utils/analytics';
+vi.mock('../utils/analytics', () => ({ trackEvent: vi.fn() }));
+
 
 // Mock useSubscription
 vi.mock('./useSubscription', () => ({
@@ -11,12 +15,37 @@ vi.mock('./useSubscription', () => ({
 }));
 
 // Mock firebase/firestore
+
+vi.mock('../services/firebase', async (importOriginal) => {
+    const actual = await importOriginal();
+    return {
+        ...actual,
+        analytics: null, // or mock whatever triggers dynamic config
+        getAnalytics: vi.fn(),
+        isSupported: vi.fn().mockResolvedValue(false),
+        app: {}
+    };
+});
+
+
+vi.mock('firebase/analytics', () => ({
+    getAnalytics: vi.fn(),
+    isSupported: vi.fn().mockResolvedValue(false),
+    logEvent: vi.fn()
+}));
+
 vi.mock('firebase/firestore', () => ({
     doc: vi.fn(),
     setDoc: vi.fn().mockResolvedValue(undefined),
     getDoc: vi.fn().mockResolvedValue({ exists: () => false }),
     getFirestore: vi.fn(),
     db: {}
+}));
+
+// Mock offlineSync
+vi.mock('../utils/offlineSync', () => ({
+    queueMutation: vi.fn().mockResolvedValue(undefined),
+    getQueueCount: vi.fn().mockResolvedValue(0)
 }));
 
 // Mock crypto.randomUUID
@@ -33,6 +62,8 @@ if (typeof crypto !== 'undefined' && crypto.randomUUID) {
 }
 
 describe('useExpenses', () => {
+    let navigatorOnLine = true;
+
     beforeEach(() => {
         vi.clearAllMocks();
         vi.useFakeTimers();
@@ -43,6 +74,16 @@ describe('useExpenses', () => {
             isPro: true,
             loading: false
         });
+        navigatorOnLine = true;
+        vi.stubGlobal('navigator', {
+            get onLine() {
+                return navigatorOnLine;
+            }
+        });
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
     });
 
     it('should debounce syncToCloud calls', async () => {
@@ -111,5 +152,240 @@ describe('useExpenses', () => {
         });
 
         expect(result.current.expenses.length).toBe(0);
+    });
+
+    it('queues mutation locally when offline instead of syncing to cloud', async () => {
+        navigatorOnLine = false;
+
+        const { result } = renderHook(() => useExpenses());
+        await act(async () => { await Promise.resolve(); });
+
+        const expense = { title: 'Offline Expense', amount: 100, date: '2023-01-01', category: 'Food' };
+
+        act(() => {
+            result.current.addExpense(expense);
+        });
+
+        await act(async () => {
+            await Promise.resolve();
+        });
+
+        await act(async () => {
+            vi.advanceTimersByTime(1000);
+        });
+
+        expect(firebaseFirestore.setDoc).not.toHaveBeenCalled();
+        expect(offlineSync.queueMutation).toHaveBeenCalledWith('users', 'test-user', { expenses: result.current.expenses });
+    });
+
+    it('queues mutation locally when cloud sync throws an error', async () => {
+        (firebaseFirestore.setDoc as any).mockRejectedValueOnce(new Error('Network Error'));
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        const { result } = renderHook(() => useExpenses());
+        await act(async () => { await Promise.resolve(); });
+
+        const expense = { title: 'Error Expense', amount: 100, date: '2023-01-01', category: 'Food' };
+
+        act(() => {
+            result.current.addExpense(expense);
+        });
+
+        await act(async () => {
+            await Promise.resolve();
+        });
+
+        await act(async () => {
+            vi.advanceTimersByTime(1000);
+            await Promise.resolve();
+        });
+
+        expect(firebaseFirestore.setDoc).toHaveBeenCalledTimes(1);
+        expect(consoleSpy).toHaveBeenCalledWith("Failed to sync expenses, queueing locally instead", expect.any(Error));
+        expect(offlineSync.queueMutation).toHaveBeenCalledWith('users', 'test-user', { expenses: result.current.expenses });
+    });
+
+    it('does not attempt cloud load or sync when user is not Pro', async () => {
+        (useSubscription as any).mockReturnValue({
+            user: { uid: 'free-user' },
+            isPro: false,
+            loading: false
+        });
+
+        const { result } = renderHook(() => useExpenses());
+        await act(async () => { await Promise.resolve(); });
+
+        const expense = { title: 'Free Expense', amount: 10, date: '2023-01-01', category: 'Food' };
+
+        act(() => {
+            result.current.addExpense(expense);
+        });
+
+        await act(async () => {
+            await Promise.resolve();
+        });
+
+        await act(async () => {
+            vi.advanceTimersByTime(1000);
+        });
+
+        expect(firebaseFirestore.setDoc).not.toHaveBeenCalled();
+        expect(offlineSync.queueMutation).not.toHaveBeenCalled();
+    });
+
+    it('loads cloud data when pro user and no offline queue exists', async () => {
+        (useSubscription as any).mockReturnValue({
+            user: { uid: 'pro-user' },
+            isPro: true,
+            loading: false
+        });
+
+        // Mock getDoc to return expenses
+        const mockExpenses = [{ id: 'mock-1', title: 'Cloud Expense', amount: 50, date: '2023-01-01', category: 'Food' }];
+        (firebaseFirestore.getDoc as any).mockResolvedValueOnce({
+            exists: () => true,
+            data: () => ({ expenses: mockExpenses })
+        });
+
+        const { result } = renderHook(() => useExpenses());
+
+        await act(async () => { await Promise.resolve(); });
+
+        expect(result.current.expenses).toEqual(mockExpenses);
+    });
+
+    it('does not load cloud data if there are items in the offline queue', async () => {
+        (useSubscription as any).mockReturnValue({
+            user: { uid: 'pro-user' },
+            isPro: true,
+            loading: false
+        });
+
+        (offlineSync.getQueueCount as any).mockResolvedValueOnce(1);
+
+        const { result } = renderHook(() => useExpenses());
+
+        await act(async () => { await Promise.resolve(); });
+
+        expect(firebaseFirestore.getDoc).not.toHaveBeenCalled();
+    });
+
+    it('handles errors when loading cloud data', async () => {
+        (useSubscription as any).mockReturnValue({
+            user: { uid: 'pro-user' },
+            isPro: true,
+            loading: false
+        });
+
+        (firebaseFirestore.getDoc as any).mockRejectedValueOnce(new Error('Cloud load failed'));
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        const { result } = renderHook(() => useExpenses());
+
+        await act(async () => { await Promise.resolve(); });
+
+        expect(consoleSpy).toHaveBeenCalledWith("Failed to load cloud expenses", expect.any(Error));
+    });
+
+    it('catches invalid JSON in localStorage gracefully', () => {
+        vi.spyOn(Storage.prototype, 'getItem').mockReturnValueOnce('{ invalid json');
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        const { result } = renderHook(() => useExpenses());
+
+        expect(result.current.expenses).toEqual([]);
+        expect(consoleSpy).toHaveBeenCalledWith('Failed to load initial expenses', expect.any(SyntaxError));
+    });
+
+    it('sets expenses from cloud if they exist on the user document', async () => {
+        (useSubscription as any).mockReturnValue({
+            user: { uid: 'pro-user' },
+            isPro: true,
+            loading: false
+        });
+
+        // Mock getDoc to return expenses
+        const mockExpenses = [{ id: 'mock-1', title: 'Cloud Expense', amount: 50, date: '2023-01-01', category: 'Food' }];
+        (firebaseFirestore.getDoc as any).mockResolvedValueOnce({
+            exists: () => true,
+            data: () => ({ expenses: mockExpenses })
+        });
+
+        const { result } = renderHook(() => useExpenses());
+
+        await act(async () => { await Promise.resolve(); });
+
+        expect(result.current.expenses).toEqual(mockExpenses);
+    });
+
+    it('does not set expenses if they do not exist on the user document', async () => {
+        (useSubscription as any).mockReturnValue({
+            user: { uid: 'pro-user' },
+            isPro: true,
+            loading: false
+        });
+
+        (firebaseFirestore.getDoc as any).mockResolvedValueOnce({
+            exists: () => true,
+            data: () => ({})
+        });
+
+        const { result } = renderHook(() => useExpenses());
+
+        await act(async () => { await Promise.resolve(); });
+
+        expect(result.current.expenses).toEqual([]);
+    });
+
+    it('does not set expenses if user document does not exist', async () => {
+        (useSubscription as any).mockReturnValue({
+            user: { uid: 'pro-user' },
+            isPro: true,
+            loading: false
+        });
+
+        (firebaseFirestore.getDoc as any).mockResolvedValueOnce({
+            exists: () => false
+        });
+
+        const { result } = renderHook(() => useExpenses());
+
+        await act(async () => { await Promise.resolve(); });
+
+        expect(result.current.expenses).toEqual([]);
+    });
+
+    it('does not load cloud data when pro user but no firebase user', async () => {
+        (useSubscription as any).mockReturnValue({
+            user: null,
+            isPro: true,
+            loading: false
+        });
+
+        const { result } = renderHook(() => useExpenses());
+        await act(async () => { await Promise.resolve(); });
+
+        expect(firebaseFirestore.getDoc).not.toHaveBeenCalled();
+        expect(offlineSync.queueMutation).not.toHaveBeenCalled();
+    });
+
+    it('catches trackEvent errors when cloud load fails gracefully', async () => {
+        (useSubscription as any).mockReturnValue({
+            user: { uid: 'pro-user' },
+            isPro: true,
+            loading: false
+        });
+
+        (firebaseFirestore.getDoc as any).mockRejectedValueOnce(new Error('Cloud load failed'));
+        // Mock trackEvent to throw
+        (trackEvent as any).mockImplementationOnce(() => { throw new Error('trackEvent error'); });
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        const { result } = renderHook(() => useExpenses());
+
+        await act(async () => { await Promise.resolve(); });
+
+        expect(result.current.expenses).toEqual([]);
+        expect(consoleSpy).toHaveBeenCalledWith('Failed to load cloud expenses', expect.any(Error));
     });
 });
