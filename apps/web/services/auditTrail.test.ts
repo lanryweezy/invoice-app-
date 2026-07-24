@@ -11,6 +11,25 @@ vi.mock('localforage', () => ({
   },
 }));
 
+// Mock crypto.getRandomValues
+if (!global.crypto) {
+    (global as any).crypto = {
+        getRandomValues: vi.fn((arr) => {
+            for (let i = 0; i < arr.length; i++) {
+                arr[i] = Math.floor(Math.random() * 256);
+            }
+            return arr;
+        }),
+    };
+} else {
+    vi.spyOn(crypto, 'getRandomValues').mockImplementation((arr: any) => {
+        for (let i = 0; i < arr.length; i++) {
+            arr[i] = Math.floor(Math.random() * 256);
+        }
+        return arr;
+    });
+}
+
 describe('auditTrail', () => {
   beforeEach(() => {
     vi.clearAllMocks();

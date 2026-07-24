@@ -34,3 +34,7 @@
 **Vulnerability:** Client's name (PII) was being sent to a third-party analytics service (`trackEvent('save_client', { client_name: client.name })`).
 **Learning:** Sending PII data to third-party analytics services without anonymization or hashing creates a privacy and data exposure risk.
 **Prevention:** Analytics events should be designed carefully to only send metadata, avoiding real names or any identifiers that can be traced back to individuals.
+## 2024-05-24 - Unsafe Random Number Generation
+**Vulnerability:** The `generateId` function in `apps/web/services/auditTrail.ts` used `Math.random()` to generate unique identifiers for audit logs. `Math.random()` is not cryptographically secure, which could allow an attacker to predict generated IDs.
+**Learning:** This vulnerability existed due to the use of a simple `Math.random()` function to generate random alphanumeric strings, which is a common but insecure pattern.
+**Prevention:** Always use `crypto.getRandomValues()` (Web Crypto API) or `crypto.randomUUID()` to generate identifiers for security-sensitive or globally unique items.
