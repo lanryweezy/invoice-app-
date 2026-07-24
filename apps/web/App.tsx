@@ -257,16 +257,15 @@ const App: React.FC = () => {
       if (path === '/support') return 'support';
       if (path.startsWith('/p/')) return 'publicProfile';
       if (path.startsWith('/templates/')) return 'templatePage';
-      if (path === '/blog') return 'blog';
+            if (path === '/branches') return 'branches';
+      if (path === '/accounting') return 'accounting';
+      if (path === '/recurring') return 'recurring';
+      if (path === '/receipts') return 'receipts';
       if (path === '/integrations') return 'integrations';
       if (path === '/cli') return 'cli';
 
       // Handle legacy /blog/:id routes by redirecting them or showing blogPost view
-      if (path.startsWith('/blog/')) {
-          return 'blogPost';
-      }
-
-      if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts' && path !== '/integrations' && path !== '/cli' && !path.startsWith('/p/') && !path.startsWith('/templates/')) {
+      if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts' && path !== '/integrations' && path !== '/cli' && path !== '/privacy' && path !== '/terms' && path !== '/support' && !path.startsWith('/p/') && !path.startsWith('/templates/')) {
           return 'blogPost';
       }
       return 'editor';
@@ -350,18 +349,32 @@ const App: React.FC = () => {
               path = window.location.pathname;
           }
           if (path === '/blog') {
-              setActiveView('blog');
+              window.location.href = '/blog';
           } else if (path === '/integrations') {
               setActiveView('integrations');
           } else if (path === '/cli') {
               setActiveView('cli');
+          } else if (path === '/branches') {
+              setActiveView('branches');
+          } else if (path === '/accounting') {
+              setActiveView('accounting');
+          } else if (path === '/recurring') {
+              setActiveView('recurring');
+          } else if (path === '/receipts') {
+              setActiveView('receipts');
+          } else if (path === '/privacy') {
+              setActiveView('privacy');
+          } else if (path === '/terms') {
+              setActiveView('terms');
+          } else if (path === '/support') {
+              setActiveView('support');
           } else if (path.startsWith('/p/')) {
               setPublicUsername(path.split('/')[2] || null);
               setActiveView('publicProfile');
           } else if (path.startsWith('/templates/')) {
               setActiveTemplateSlug(path.split('/')[2] || null);
               setActiveView('templatePage');
-          } else if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts' && path !== '/integrations' && path !== '/cli') {
+          } else if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts' && path !== '/integrations' && path !== '/cli' && path !== '/privacy' && path !== '/terms' && path !== '/support') {
               setActiveBlogPostSlug(path.substring(1));
               setActiveView('blogPost');
           } else {
@@ -678,8 +691,7 @@ const App: React.FC = () => {
              <button onClick={() => user ? setActiveView('recurring') : handleProFeatureClick('Recurring')} className={`text-xs font-medium transition-colors ${activeView === 'recurring' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Recurring</button>
              <button onClick={() => user ? setActiveView('receipts') : handleProFeatureClick('Receipts')} className={`text-xs font-medium transition-colors ${activeView === 'receipts' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Receipts</button>
              <button onClick={() => user ? setActiveView('integrations') : handleProFeatureClick('Integrations')} className={`text-xs font-medium transition-colors ${activeView === 'integrations' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Integrations</button>
-                 <button onClick={() => setIsAuthModalOpen(true)} className="text-xs font-bold text-slate-300 hover:text-white transition-colors">Login</button>
-             <button onClick={() => window.location.href = '/blog'} className={`text-xs font-medium transition-colors ${activeView === 'blog' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Blog</button>
+                 <a href="/blog" className={`text-xs font-medium transition-colors ${activeView === 'blog' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Blog</a>
              <div className="w-px h-4 bg-slate-700"></div>
              {!loading && (
                  user ? (
@@ -975,13 +987,13 @@ const App: React.FC = () => {
 
                    {/* Links */}
                    <div className="flex justify-center gap-6 text-xs font-bold text-slate-600">
-                       <button onClick={() => window.location.href = '/privacy'} className="hover:text-teal-600 transition-colors">Privacy</button>
+                       <a href="/privacy" onClick={(e) => { e.preventDefault(); setActiveView('privacy'); }} className="hover:text-teal-600 transition-colors">Privacy</a>
                        <span className="text-slate-300">•</span>
-                       <button onClick={() => window.location.href = '/terms'} className="hover:text-teal-600 transition-colors">Terms</button>
+                       <a href="/terms" onClick={(e) => { e.preventDefault(); setActiveView('terms'); }} className="hover:text-teal-600 transition-colors">Terms</a>
                        <span className="text-slate-300">•</span>
-                       <button onClick={() => window.location.href = '/blog'} className="hover:text-teal-600 transition-colors">Blog</button>
+                       <a href="/blog" className="hover:text-teal-600 transition-colors">Blog</a>
                        <span className="text-slate-300">•</span>
-                       <button onClick={() => window.location.href = '/support'} className="hover:text-teal-600 transition-colors">Support</button>
+                       <a href="/support" onClick={(e) => { e.preventDefault(); setActiveView('support'); }} className="hover:text-teal-600 transition-colors">Support</a>
                    </div>
 
                    {/* Copyright */}

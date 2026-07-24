@@ -7,30 +7,105 @@
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "X-XSS-Protection", "value": "1; mode=block" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
       ]
     }
   ],
   "rewrites": [
-    { "source": "/blog", "destination": "/blog/index.html" },
-    { "source": "/blog/:match*", "destination": "/blog/:match*" },
-    { "source": "/templates", "destination": "/templates/index.html" },
-    { "source": "/templates/:match*", "destination": "/templates/:match*" },
-    { "source": "/tools", "destination": "/tools/index.html" },
-    { "source": "/tools/:match*", "destination": "/tools/:match*" },
-    { "source": "/nrs-compliance-dossier", "destination": "/nrs-compliance-dossier/index.html" },
-    { "source": "/_astro/:match*", "destination": "/_astro/:match*" },
-    { "source": "/editor", "destination": "/index.html" },
-    { "source": "/branches", "destination": "/index.html" },
-    { "source": "/accounting", "destination": "/index.html" },
-    { "source": "/recurring", "destination": "/index.html" },
-    { "source": "/receipts", "destination": "/index.html" },
-    { "source": "/integrations", "destination": "/index.html" },
-    { "source": "/cli", "destination": "/index.html" },
-    { "source": "/p/:match*", "destination": "/index.html" }
+    {
+      "source": "/blog",
+      "destination": "/blog/index.html"
+    },
+    {
+      "source": "/blog/:match*",
+      "destination": "/blog/:match*"
+    },
+    {
+      "source": "/templates",
+      "destination": "/templates/index.html"
+    },
+    {
+      "source": "/templates/:match*",
+      "destination": "/templates/:match*"
+    },
+    {
+      "source": "/tools",
+      "destination": "/tools/index.html"
+    },
+    {
+      "source": "/tools/:match*",
+      "destination": "/tools/:match*"
+    },
+    {
+      "source": "/nrs-compliance-dossier",
+      "destination": "/nrs-compliance-dossier/index.html"
+    },
+    {
+      "source": "/_astro/:match*",
+      "destination": "/_astro/:match*"
+    },
+    {
+      "source": "/editor",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/branches",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/accounting",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/recurring",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/receipts",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/integrations",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/cli",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/p/:match*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/terms",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/support",
+      "destination": "/index.html"
+    }
   ]
 }

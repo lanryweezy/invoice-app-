@@ -72,19 +72,19 @@ const path = Astro.url.pathname;
             class={`text-xs font-medium transition-colors ${path.startsWith('/editor') ? 'text-white' : 'text-slate-400 hover:text-white'}`}
           >Invoice Editor</a>
           <a
-            href="/editor#branches"
+            href="/branches"
             class="text-xs font-medium text-slate-400 hover:text-white transition-colors"
           >Branches</a>
           <a
-            href="/editor#accounting"
+            href="/accounting"
             class="text-xs font-medium text-slate-400 hover:text-white transition-colors"
           >Accounting</a>
           <a
-            href="/editor#recurring"
+            href="/recurring"
             class="text-xs font-medium text-slate-400 hover:text-white transition-colors"
           >Recurring</a>
           <a
-            href="/editor#receipts"
+            href="/receipts"
             class="text-xs font-medium text-slate-400 hover:text-white transition-colors"
           >Receipts</a>
           <a
@@ -112,10 +112,10 @@ const path = Astro.url.pathname;
       <div id="mobile-menu" class="hidden sm:hidden bg-slate-900 border-t border-slate-800 px-4 pb-4">
         <nav class="flex flex-col gap-1 pt-2">
           <a href="/editor" class="text-sm font-medium text-slate-400 hover:text-white py-2 transition-colors">Invoice Editor</a>
-          <a href="/editor#branches" class="text-sm font-medium text-slate-400 hover:text-white py-2 transition-colors">Branches</a>
-          <a href="/editor#accounting" class="text-sm font-medium text-slate-400 hover:text-white py-2 transition-colors">Accounting</a>
-          <a href="/editor#recurring" class="text-sm font-medium text-slate-400 hover:text-white py-2 transition-colors">Recurring</a>
-          <a href="/editor#receipts" class="text-sm font-medium text-slate-400 hover:text-white py-2 transition-colors">Receipts</a>
+          <a href="/branches" class="text-sm font-medium text-slate-400 hover:text-white py-2 transition-colors">Branches</a>
+          <a href="/accounting" class="text-sm font-medium text-slate-400 hover:text-white py-2 transition-colors">Accounting</a>
+          <a href="/recurring" class="text-sm font-medium text-slate-400 hover:text-white py-2 transition-colors">Recurring</a>
+          <a href="/receipts" class="text-sm font-medium text-slate-400 hover:text-white py-2 transition-colors">Receipts</a>
           <a href="/blog" class="text-sm font-medium text-slate-400 hover:text-white py-2 transition-colors">Blog</a>
           <a href="/cli" class="text-sm font-medium text-slate-400 hover:text-white py-2 transition-colors">CLI</a>
           <div class="w-px h-4 bg-slate-700 my-1"></div>
