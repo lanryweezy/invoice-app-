@@ -1,3 +1,4 @@
+import { generateSecureId } from '../utils/crypto';
 import type { Invoice } from '../types';
 import { formatCurrency } from '../utils/formatters';
 
@@ -78,9 +79,7 @@ const paymentStatuses = new Map<string, NIBSSPaymentStatus>();
 function generateReference(): string {
   const timestamp = Date.now().toString(36).toUpperCase();
   // Security Fix: Use cryptographically secure random numbers for payment references
-  const array = new Uint8Array(4);
-  crypto.getRandomValues(array);
-  const random = Array.from(array, b => b.toString(16).padStart(2, '0')).join('').toUpperCase().substring(0, 6);
+  const random = generateSecureId(6);
   return `NIBSS-${timestamp}-${random}`;
 }
 
@@ -89,9 +88,7 @@ function generateReceiptNumber(): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   // Security Fix: Prevent predictable receipt numbers
-  const array = new Uint8Array(4);
-  crypto.getRandomValues(array);
-  const random = Array.from(array, b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+  const random = generateSecureId(8);
   return `RCP-NIBSS-${year}${month}-${random}`;
 }
 

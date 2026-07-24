@@ -1,11 +1,11 @@
 import type { Invoice } from '../types';
+import { generateSecureId } from './crypto';
 
 const STORAGE_KEY = 'invoiceapp_portal_links';
 
 export function generatePortalToken(): string {
-  const array = new Uint8Array(32);
-  crypto.getRandomValues(array);
-  return Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
+  // UUID without dashes is 32 chars
+  return generateSecureId(64).toLowerCase();
 }
 
 export function createPortalLink(invoice: Invoice): string {

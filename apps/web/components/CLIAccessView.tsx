@@ -3,15 +3,11 @@ import { useAuth } from '../context/AuthContext';
 import { db } from '../services/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
+import { generateSecureId } from '../utils/crypto';
+
 function generateToken(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let token = '';
-  const values = new Uint32Array(32);
-  crypto.getRandomValues(values);
-  for (let i = 0; i < 32; i++) {
-    token += chars[values[i] % chars.length];
-  }
-  return token;
+  // UUID provides 32 hex chars when dashes are removed
+  return generateSecureId(32).toLowerCase();
 }
 
 const CLI_COMMANDS = [
