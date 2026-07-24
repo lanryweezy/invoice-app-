@@ -4,7 +4,7 @@
 import { db } from './firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 
-const VAPID_PUBLIC_KEY = ''; // TODO: Generate at https://web.push-codelab.uk.fc
+const VAPID_PUBLIC_KEY = 'BAUEx1mLeML6y9WXuzC3roP8-vt8WBiuXZ3oZiXauGdQil_FIcohJh7nIXh9R66hEy90wDgat2Yd-1YVMEOAQPU';
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
