@@ -1,3 +1,4 @@
+vi.mock('firebase/analytics', () => ({ getAnalytics: vi.fn(), isSupported: vi.fn().mockResolvedValue(false), logEvent: vi.fn() }));
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';

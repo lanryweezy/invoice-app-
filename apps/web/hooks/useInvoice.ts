@@ -17,6 +17,20 @@ const DEFAULT_USER: AppUser = {
 };
 
 const getInitialInvoiceState = (): Invoice => {
+  if (typeof window !== 'undefined') {
+    try {
+      const draft = localStorage.getItem('invoiceDraft');
+      if (draft) {
+          const parsed = JSON.parse(draft);
+          if (parsed && typeof parsed === 'object' && parsed.invoiceNumber) {
+              return parsed;
+          }
+      }
+    } catch (e) {
+      console.error("Failed to load invoice draft", e);
+    }
+  }
+
   const today = new Date();
   const dueDate = new Date();
   dueDate.setDate(today.getDate() + 7); // Default 7 days due date is common for freelancers
@@ -148,6 +162,13 @@ const useLocalPersistence = (
   setRecurringInvoices: Dispatch<SetStateAction<Invoice[]>>
 ) => {
   useEffect(() => {
+    const timeoutId = setTimeout(() => {
+        localStorage.setItem('invoiceDraft', JSON.stringify(invoice));
+    }, 500);
+    return () => clearTimeout(timeoutId);
+  }, [invoice]);
+
+  useEffect(() => {
     localStorage.setItem('invoiceCurrency', invoice.currency);
   }, [invoice.currency]);
 
@@ -196,6 +217,10 @@ const useLocalPersistence = (
 };
 
 const useInvoiceMutations = (invoice: Invoice, setInvoice: Dispatch<SetStateAction<Invoice>>) => {
+  const resetInvoice = useCallback(() => {
+    localStorage.removeItem('invoiceDraft');
+    setInvoice(getInitialInvoiceState());
+  }, [setInvoice]);
   const updateInvoice = useCallback(<K extends keyof Invoice>(key: K, value: Invoice[K]) => {
     setInvoice(prev => ({ ...prev, [key]: value }));
   }, [setInvoice]);
@@ -253,7 +278,7 @@ const useInvoiceMutations = (invoice: Invoice, setInvoice: Dispatch<SetStateActi
     return { subtotal, discountAmount, tax: taxAmount, whtAmount, shipping: safeShipping, total: finalTotal };
   }, [invoice.lineItems, invoice.taxRate, invoice.whtRate, invoice.discountRate, invoice.shippingAmount, invoice.discountType]);
 
-  return { updateInvoice, addLineItem, removeLineItem, updateLineItem, calculateTotals };
+  return { updateInvoice, addLineItem, removeLineItem, updateLineItem, calculateTotals, resetInvoice };
 };
 
 const useEntityManagement = (

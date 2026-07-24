@@ -75,7 +75,8 @@ const App: React.FC = () => {
     recurringInvoices,
     saveRecurringInvoice,
     removeRecurringInvoice,
-    toggleRecurringActive
+    toggleRecurringActive,
+    resetInvoice
   } = useInvoice();
   const { expenses, addExpense, removeExpense } = useExpenses();
   const { receipts, addReceipt, removeReceipt } = useReceipts();
@@ -734,6 +735,7 @@ const App: React.FC = () => {
                         onConvertToInvoice={handleConvertToInvoice}
                         invoice={invoice}
                         isGeneratingPdf={isGeneratingPdf}
+                        onNewInvoice={resetInvoice}
                     />
                 </div>
             </div>
@@ -770,7 +772,8 @@ const App: React.FC = () => {
                             onConvertToInvoice={handleConvertToInvoice}
                             invoice={invoice}
                             isGeneratingPdf={isGeneratingPdf}
-                        />
+                        onNewInvoice={resetInvoice}
+                    />
                     </div>
                 </div>
 
