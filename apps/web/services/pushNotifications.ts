@@ -4,7 +4,7 @@
 import { db } from './firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 
-const VAPID_PUBLIC_KEY = 'BAUEx1mLeML6y9WXuzC3roP8-vt8WBiuXZ3oZiXauGdQil_FIcohJh7nIXh9R66hEy90wDgat2Yd-1YVMEOAQPU';
+const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || 'BOe02CglsI645kDwgg8MSk7Z842bivuhkkE2lKD5eATPUHf5tFfsXpwv4Ihe6iBZ4oQXuhHYnqxg_4EXp-uDNdY';
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
