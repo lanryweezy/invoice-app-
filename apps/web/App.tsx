@@ -1,3 +1,4 @@
+import { getDecodedPathname } from "./utils/routing";
 import React, { useState, useCallback, useMemo, useEffect, Suspense, useRef } from 'react';
 
 import { InvoiceForm } from './components/InvoiceForm';
@@ -129,7 +130,7 @@ const App: React.FC = () => {
       setIsAuthModalOpen(true);
 
       // Clean up the URL by removing the query param
-      const newUrl = window.location.pathname;
+      const newUrl = getDecodedPathname();
       window.history.replaceState({}, '', newUrl);
     }
   }, []);
@@ -247,11 +248,7 @@ const App: React.FC = () => {
   const [gatedFeature, setGatedFeature] = useState<'Branches' | 'Accounting' | 'Recurring' | 'Receipts' | 'Integrations' | null>(null);
   const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'integrations' | 'cli' | 'blog' | 'blogPost' | 'publicProfile' | 'templatePage' | 'privacy' | 'terms' | 'support'>(() => {
       let path;
-      try {
-          path = decodeURIComponent(window.location.pathname);
-      } catch (e) {
-          path = window.location.pathname; // Fallback if malformed URI
-      }
+      path = getDecodedPathname();
 
       if (path === '/privacy') return 'privacy';
       if (path === '/terms') return 'terms';
@@ -273,18 +270,13 @@ const App: React.FC = () => {
   });
 
   const [publicUsername, setPublicUsername] = useState<string | null>(() => {
-      let path = window.location.pathname;
+      let path = getDecodedPathname();
       if (path.startsWith('/p/')) return path.split('/')[2] || null;
       return null;
   });
 
   const [activeTemplateSlug, setActiveTemplateSlug] = useState<string | null>(() => {
-      let path;
-      try {
-          path = decodeURIComponent(window.location.pathname);
-      } catch (e) {
-          path = window.location.pathname;
-      }
+      let path = getDecodedPathname();
       if (path.startsWith('/templates/')) {
           return path.split('/')[2] || null;
       }
@@ -293,11 +285,7 @@ const App: React.FC = () => {
 
   const [activeBlogPostSlug, setActiveBlogPostSlug] = useState<string | null>(() => {
       let path;
-      try {
-          path = decodeURIComponent(window.location.pathname);
-      } catch (e) {
-          path = window.location.pathname; // Fallback if malformed URI
-      }
+      path = getDecodedPathname();
 
       // Support legacy paths
       if (path.startsWith('/blog/')) {
@@ -321,12 +309,7 @@ const App: React.FC = () => {
       else if (activeView === 'templatePage' && activeTemplateSlug !== null) path = `/templates/${encodeURIComponent(activeTemplateSlug)}`;
 
       // Update the URL without reloading the page
-      let currentDecodedPath;
-      try {
-          currentDecodedPath = decodeURIComponent(window.location.pathname);
-      } catch (e) {
-          currentDecodedPath = window.location.pathname;
-      }
+      let currentDecodedPath = getDecodedPathname();
 
       let targetDecodedPath;
       try {
@@ -343,12 +326,7 @@ const App: React.FC = () => {
   // Handle browser back/forward buttons
   useEffect(() => {
       const handlePopState = () => {
-          let path;
-          try {
-              path = decodeURIComponent(window.location.pathname);
-          } catch (e) {
-              path = window.location.pathname;
-          }
+          let path = getDecodedPathname();
           if (path === '/blog') {
               window.location.href = '/blog';
           } else if (path === '/integrations') {
