@@ -1,21 +1,8 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const crypto = require('crypto');
-const webPush = require('web-push');
 
 admin.initializeApp();
-
-// ============================================================
-// VAPID Configuration
-// ============================================================
-const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || 'BOe02CglsI645kDwgg8MSk7Z842bivuhkkE2lKD5eATPUHf5tFfsXpwv4Ihe6iBZ4oQXuhHYnqxg_4EXp-uDNdY';
-const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
-
-webPush.setVapidDetails(
-  'mailto:hello@invoiceapp.ng',
-  VAPID_PUBLIC_KEY,
-  VAPID_PRIVATE_KEY
-);
 
 // ============================================================
 // Paystack Webhook
@@ -43,32 +30,39 @@ exports.paystackWebhook = functions.runWith({ secrets: ["PAYSTACK_SECRET_KEY"] }
 });
 
 // ============================================================
-// Push Notification: Send to user
+// Push Notification: Send to user via FCM
 // ============================================================
 async function sendPushNotification(userId, title, body, url) {
   const db = admin.firestore();
-  const subRef = db.collection('users').doc(userId).collection('pushSubscriptions').doc('current');
+  const subRef = db.collection('users').doc(userId).collection('fcmTokens').doc('current');
   const snap = await subRef.get();
 
   if (!snap.exists) return false;
 
-  const subscription = snap.data().subscription;
-  const payload = JSON.stringify({
-    title,
-    body,
-    icon: '/favicon.svg',
-    badge: '/favicon.svg',
-    url: url || '/editor',
-    timestamp: Date.now(),
-  });
+  const token = snap.data().token;
+  if (!token) return false;
+
+  const message = {
+    token,
+    notification: { title, body },
+    webpush: {
+      notification: {
+        title,
+        body,
+        icon: '/favicon.svg',
+        badge: '/favicon.svg',
+        vibrate: [200, 100, 200],
+      },
+      fcmOptions: { link: url || '/editor' },
+    },
+  };
 
   try {
-    await webPush.sendNotification(subscription, payload);
+    await admin.messaging().send(message);
     return true;
   } catch (error) {
     console.error('Push notification failed:', error);
-    // If subscription is invalid, remove it
-    if (error.statusCode === 404 || error.statusCode === 410) {
+    if (error.code === 'messaging/registration-token-not-registered') {
       await subRef.delete();
     }
     return false;
@@ -102,7 +96,6 @@ exports.onInvoicePaid = functions.firestore
     const before = change.before.data();
     const after = change.after.data();
 
-    // Only notify when status changes to 'paid'
     if (before.status !== 'paid' && after.status === 'paid') {
       const amount = after.total || after.amount || 0;
       const currency = after.currency || 'NGN';
@@ -125,13 +118,11 @@ exports.checkOverdueInvoices = functions.pubsub
     const db = admin.firestore();
     const today = new Date().toISOString().split('T')[0];
 
-    // Get all users with push subscriptions
     const usersSnap = await db.collection('users').get();
 
     for (const userDoc of usersSnap.docs) {
       const uid = userDoc.id;
 
-      // Check for overdue invoices
       const invoicesSnap = await db.collection('users').doc(uid).collection('invoices')
         .where('status', 'in', ['sent', 'pending'])
         .where('dueDate', '<', today)
@@ -161,7 +152,7 @@ exports.checkOverdueInvoices = functions.pubsub
   });
 
 // ============================================================
-// HTTP: Send push notification (for testing/manual triggers)
+// HTTP: Send push notification (callable)
 // ============================================================
 exports.sendPushNotification = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
@@ -169,19 +160,28 @@ exports.sendPushNotification = functions.https.onCall(async (data, context) => {
   }
 
   const { userId, title, body, url } = data;
-
-  // Users can only send to themselves
   const targetUserId = userId || context.auth.uid;
 
   const success = await sendPushNotification(targetUserId, title, body, url);
-
   return { success };
 });
 
 // ============================================================
-// HTTP: Get VAPID public key (for client-side setup)
+// HTTP: Save FCM token (callable)
 // ============================================================
-exports.getVapidKey = functions.https.onRequest((req, res) => {
-  res.set('Access-Control-Allow-Origin', '*');
-  res.json({ publicKey: VAPID_PUBLIC_KEY });
+exports.saveFcmToken = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'Must be authenticated');
+  }
+
+  const { token } = data;
+  const uid = context.auth.uid;
+
+  await admin.firestore().collection('users').doc(uid).collection('fcmTokens').doc('current').set({
+    token,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    userAgent: data.userAgent || '',
+  });
+
+  return { success: true };
 });
