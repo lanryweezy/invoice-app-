@@ -1,3 +1,4 @@
+import { getDecodedPathname } from "./utils/routing";
 import React, { useState, useCallback, useMemo, useEffect, Suspense, useRef } from 'react';
 
 import { InvoiceForm } from './components/InvoiceForm';
@@ -130,7 +131,7 @@ const App: React.FC = () => {
       setIsAuthModalOpen(true);
 
       // Clean up the URL by removing the query param
-      const newUrl = window.location.pathname;
+      const newUrl = getDecodedPathname();
       window.history.replaceState({}, '', newUrl);
     }
   }, []);
@@ -269,7 +270,7 @@ const App: React.FC = () => {
   });
 
   const [publicUsername, setPublicUsername] = useState<string | null>(() => {
-      let path = window.location.pathname;
+      let path = getDecodedPathname();
       if (path.startsWith('/p/')) return path.split('/')[2] || null;
       return null;
   });
