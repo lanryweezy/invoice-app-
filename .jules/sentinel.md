@@ -38,3 +38,7 @@
 **Vulnerability:** The `generateId` function in `apps/web/services/auditTrail.ts` used `Math.random()` to generate unique identifiers for audit logs. `Math.random()` is not cryptographically secure, which could allow an attacker to predict generated IDs.
 **Learning:** This vulnerability existed due to the use of a simple `Math.random()` function to generate random alphanumeric strings, which is a common but insecure pattern.
 **Prevention:** Always use `crypto.getRandomValues()` (Web Crypto API) or `crypto.randomUUID()` to generate identifiers for security-sensitive or globally unique items.
+## 2024-05-24 - Duplicate Entropy Vulnerability
+**Vulnerability:** The `generateSecureId` function in `apps/web/utils/crypto.ts` used `uuid.repeat(...)` to generate strings longer than 32 characters, which duplicated entropy instead of generating new random bytes.
+**Learning:** This cap on entropy makes the ID predictable and susceptible to brute-forcing for lengths greater than 32 characters.
+**Prevention:** Always allocate a `Uint8Array` of size `Math.ceil(length / 2)` and call `crypto.getRandomValues()` instead of repeating generated strings to ensure true randomness for the entire length of the string.

@@ -1,6 +1,5 @@
 export function generateSecureId(length: number = 6): string {
-  // Using randomUUID for high entropy and cleaner implementation
-  // Repeat UUID to generate longer strings if requested length > 32
-  const uuid = crypto.randomUUID().replace(/-/g, '');
-  return uuid.repeat(Math.ceil(length / 32)).substring(0, length).toUpperCase();
+  const array = new Uint8Array(Math.ceil(length / 2));
+  crypto.getRandomValues(array);
+  return Array.from(array, b => b.toString(16).padStart(2, '0')).join('').toUpperCase().substring(0, length);
 }
