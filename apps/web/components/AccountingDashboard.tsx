@@ -94,13 +94,15 @@ function getMonthlyData(invoices: Invoice[], expenses: Expense[]) {
 
 function getAgedReceivables(invoices: Invoice[]) {
   const now = new Date();
+  const nowTime = now.getTime();
   const buckets = { current: 0, d1_30: 0, d31_60: 0, d61_90: 0, over90: 0 };
   const details: { client: string; amount: number; days: number; invoiceNumber: string; dueDate: string }[] = [];
 
   invoices.forEach(inv => {
     if (inv.status === 'Paid' || inv.status === 'Draft') return;
-    const due = new Date(inv.dueDate);
-    const days = Math.floor((now.getTime() - due.getTime()) / 86400000);
+    // ⚡ Bolt: Use Date.parse instead of new Date().getTime() in loops and hoist now.getTime()
+    const dueTime = Date.parse(inv.dueDate);
+    const days = Math.floor((nowTime - dueTime) / 86400000);
     const amount = inv.total || 0;
 
     if (days <= 0) buckets.current += amount;
