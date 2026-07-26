@@ -19,6 +19,7 @@ interface ActionButtonsProps {
 }
 
 export const ActionButtons: React.FC<ActionButtonsProps> = ({
+    onNewInvoice,
     onGenerateEmail,
     onDownloadPdf,
     isMobile = false,

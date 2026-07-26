@@ -38,6 +38,7 @@ import { IntegrationsView } from './components/IntegrationsView';
 import { CLIAccessView } from './components/CLIAccessView';
 import { SmtpSettingsModal } from './components/SmtpSettingsModal';
 import { flushQueue, getQueueCount } from './utils/offlineSync';
+import { getDecodedPathname } from './utils/routing';
 
 // NRS Compliance Components
 import { ComplianceDashboard } from './components/ComplianceDashboard';
@@ -247,8 +248,7 @@ const App: React.FC = () => {
   // Main view state
   const [gatedFeature, setGatedFeature] = useState<'Branches' | 'Accounting' | 'Recurring' | 'Receipts' | 'Integrations' | null>(null);
   const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'integrations' | 'cli' | 'blog' | 'blogPost' | 'publicProfile' | 'templatePage' | 'privacy' | 'terms' | 'support'>(() => {
-      let path;
-      path = getDecodedPathname();
+      let path = getDecodedPathname();
 
       if (path === '/privacy') return 'privacy';
       if (path === '/terms') return 'terms';
@@ -284,8 +284,7 @@ const App: React.FC = () => {
   });
 
   const [activeBlogPostSlug, setActiveBlogPostSlug] = useState<string | null>(() => {
-      let path;
-      path = getDecodedPathname();
+      let path = getDecodedPathname();
 
       // Support legacy paths
       if (path.startsWith('/blog/')) {

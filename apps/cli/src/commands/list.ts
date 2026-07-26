@@ -6,6 +6,68 @@ import { formatCurrency, formatDate } from '../utils/formatter';
 import { createSpinner, succeed, fail } from '../utils/spinner';
 import { Invoice } from '../types';
 
+/**
+ * 🔩 Hinge Extension Point: ListOutputStrategy
+ *
+ * Pressure: The `list` command had a growing `switch (options.format)` block
+ * that needed modification every time a new output format (table, json, csv) was added.
+ *
+ * Contract:
+ * - Implementors provide a function that takes an array of `Invoice` objects.
+ * - The strategy is responsible for formatting and logging the output to the console.
+ */
+export type ListOutputStrategy = (invoices: Invoice[]) => void;
+
+const outputStrategies = new Map<string, ListOutputStrategy>();
+
+export function registerOutputStrategy(format: string, strategy: ListOutputStrategy): void {
+  outputStrategies.set(format, strategy);
+}
+
+registerOutputStrategy('json', (invoices) => {
+  console.log(JSON.stringify(invoices, null, 2));
+});
+
+registerOutputStrategy('csv', (invoices) => {
+  const headers = ['Invoice #', 'Client', 'Total', 'Currency', 'Status', 'Due Date', 'Created'];
+  const rows = invoices.map((inv) => [
+    inv.invoiceNumber,
+    inv.client.name,
+    (inv.total || 0).toString(),
+    inv.currency,
+    inv.status,
+    inv.dueDate ? formatDate(inv.dueDate) : 'N/A',
+    formatDate(inv.createdAt || '')
+  ]);
+
+  console.log(headers.join(','));
+  rows.forEach((row) => console.log(row.join(',')));
+});
+
+registerOutputStrategy('table', (invoices) => {
+  console.log(chalk.bold('\nInvoice List'));
+  console.log('─'.repeat(80));
+  console.log(
+    chalk.cyan('Invoice #').padEnd(20) +
+    chalk.cyan('Client').padEnd(20) +
+    chalk.cyan('Total').padEnd(15) +
+    chalk.cyan('Status').padEnd(10) +
+    chalk.cyan('Due Date')
+  );
+  console.log('─'.repeat(80));
+
+  invoices.forEach((inv) => {
+    console.log(
+      inv.invoiceNumber.padEnd(20) +
+      inv.client.name.padEnd(20) +
+      formatCurrency(inv.total || 0, inv.currency).padEnd(15) +
+      inv.status.padEnd(10) +
+      (inv.dueDate ? formatDate(inv.dueDate) : 'N/A')
+    );
+  });
+  console.log('─'.repeat(80));
+});
+
 export default function registerListCommand(program: Command): void {
   program
     .command('list')
@@ -80,52 +142,8 @@ export default function registerListCommand(program: Command): void {
             return;
           }
 
-          switch (options.format) {
-            case 'json':
-              console.log(JSON.stringify(invoices, null, 2));
-              break;
-            
-            case 'csv':
-              const headers = ['Invoice #', 'Client', 'Total', 'Currency', 'Status', 'Due Date', 'Created'];
-              const rows = invoices.map((inv) => [
-                inv.invoiceNumber,
-                inv.client.name,
-                (inv.total || 0).toString(),
-                inv.currency,
-                inv.status,
-                inv.dueDate ? formatDate(inv.dueDate) : 'N/A',
-                formatDate(inv.createdAt || '')
-              ]);
-              
-              console.log(headers.join(','));
-              rows.forEach((row) => console.log(row.join(',')));
-              break;
-            
-            case 'table':
-            default:
-              console.log(chalk.bold('\nInvoice List'));
-              console.log('─'.repeat(80));
-              console.log(
-                chalk.cyan('Invoice #').padEnd(20) +
-                chalk.cyan('Client').padEnd(20) +
-                chalk.cyan('Total').padEnd(15) +
-                chalk.cyan('Status').padEnd(10) +
-                chalk.cyan('Due Date')
-              );
-              console.log('─'.repeat(80));
-              
-              invoices.forEach((inv) => {
-                console.log(
-                  inv.invoiceNumber.padEnd(20) +
-                  inv.client.name.padEnd(20) +
-                  formatCurrency(inv.total || 0, inv.currency).padEnd(15) +
-                  inv.status.padEnd(10) +
-                  (inv.dueDate ? formatDate(inv.dueDate) : 'N/A')
-                );
-              });
-              console.log('─'.repeat(80));
-              break;
-          }
+          const strategy = outputStrategies.get(options.format) || outputStrategies.get('table')!;
+          strategy(invoices);
 
           console.log(chalk.dim(`\n${invoices.length} invoice(s) found`));
           

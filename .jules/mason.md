@@ -4,3 +4,6 @@
 ## 2024-10-18 - Avoid repeated Intl.NumberFormat instantiation
 **Learning:** Found multiple instances of `new Intl.NumberFormat()` with hardcoded 'en-NG' locales across different modules (like `emailGenerator.ts` and `nibssIntegration.ts`), despite a centralized `formatCurrency` utility existing in `formatters.ts`.
 **Action:** Always import and use the shared `formatCurrency` function to centralize formatting logic, prevent duplicate caching overhead, and avoid inline configuration inconsistencies.
+## 2024-10-18 - Extracted duplicated decodeURIComponent to shared utility
+**Learning:** `decodeURIComponent(window.location.pathname)` wrapped in a try/catch block was duplicated across 5 different routing initializations and state update handlers in `App.tsx`, causing unnecessary bloat and potential inconsistencies if error handling needed to change.
+**Action:** Always extract repetitive safe-parsing boilerplate (like decoding URLs) into a dedicated utility function (e.g., `getDecodedPathname` in `utils/routing.ts`) to maintain a single source of truth and cleaner component logic.
