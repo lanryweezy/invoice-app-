@@ -1,22 +1,11 @@
 // Push Notification Service for InvoiceApp
-// Handles subscription, permission, and sending notifications
+// Uses Firebase Cloud Messaging (FCM) — no VAPID keys needed
 
 import { db } from './firebase';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
+import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 
-const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || 'BOe02CglsI645kDwgg8MSk7Z842bivuhkkE2lKD5eATPUHf5tFfsXpwv4Ihe6iBZ4oQXuhHYnqxg_4EXp-uDNdY';
-
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-  for (let i = 0; i < rawData.length; i++) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-}
-
+// Request notification permission and get FCM token
 export async function requestNotificationPermission(): Promise<NotificationPermission> {
   if (!('Notification' in window)) {
     console.warn('Notifications not supported');
@@ -25,52 +14,42 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
   return await Notification.requestPermission();
 }
 
+// Subscribe to push notifications via FCM
 export async function subscribeToPushNotifications(userId: string): Promise<boolean> {
   try {
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-      console.warn('Push notifications not supported');
-      return false;
-    }
-
     const permission = await requestNotificationPermission();
     if (permission !== 'granted') return false;
 
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+    const messaging = getMessaging();
+    const token = await getToken(messaging, {
+      vapidKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
     });
 
-    // Save subscription to Firestore
-    const subRef = doc(db, 'users', userId, 'pushSubscriptions', 'current');
-    await setDoc(subRef, {
-      subscription: JSON.parse(JSON.stringify(subscription)),
+    if (!token) return false;
+
+    // Save FCM token to Firestore
+    const tokenRef = doc(db, 'users', userId, 'fcmTokens', 'current');
+    await setDoc(tokenRef, {
+      token,
       createdAt: new Date().toISOString(),
       userAgent: navigator.userAgent,
     });
 
     return true;
   } catch (error) {
-    console.error('Failed to subscribe to push notifications:', error);
+    console.error('Failed to subscribe:', error);
     return false;
   }
 }
 
+// Unsubscribe from push notifications
 export async function unsubscribeFromPushNotifications(userId: string): Promise<boolean> {
   try {
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.getSubscription();
-    if (subscription) {
-      await subscription.unsubscribe();
-    }
-
-    const subRef = doc(db, 'users', userId, 'pushSubscriptions', 'current');
-    const snap = await getDoc(subRef);
+    const tokenRef = doc(db, 'users', userId, 'fcmTokens', 'current');
+    const snap = await getDoc(tokenRef);
     if (snap.exists()) {
-      const { deleteDoc } = await import('firebase/firestore');
-      await deleteDoc(subRef);
+      await deleteDoc(tokenRef);
     }
-
     return true;
   } catch (error) {
     console.error('Failed to unsubscribe:', error);
@@ -78,15 +57,26 @@ export async function unsubscribeFromPushNotifications(userId: string): Promise<
   }
 }
 
+// Check if user is subscribed
 export async function isPushNotificationSubscribed(): Promise<boolean> {
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return false;
   try {
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.getSubscription();
-    return subscription !== null;
+    const messaging = getMessaging();
+    const token = await getToken(messaging);
+    return !!token;
   } catch {
     return false;
   }
+}
+
+// Listen for foreground messages
+export function onForegroundMessage(callback: (payload: { title: string; body: string }) => void) {
+  const messaging = getMessaging();
+  return onMessage(messaging, (payload) => {
+    callback({
+      title: payload.notification?.title || '',
+      body: payload.notification?.body || '',
+    });
+  });
 }
 
 // Send local notification (for offline reminders)

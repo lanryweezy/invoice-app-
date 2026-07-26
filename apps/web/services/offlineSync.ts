@@ -32,7 +32,7 @@ function addToQueue(change: Omit<PendingChange, 'id' | 'timestamp' | 'synced'>) 
   const queue = getQueue();
   queue.push({
     ...change,
-    id: `offline_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+    id: `offline_${Date.now()}_${crypto.randomUUID().replace(/-/g, '')}`,
     timestamp: new Date().toISOString(),
     synced: false,
   });

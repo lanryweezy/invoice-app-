@@ -1,26 +1,44 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { generateSecureId } from './crypto';
 
 describe('crypto', () => {
-    describe('generateSecureId', () => {
-        it('generates a string of default length', () => {
-            const id = generateSecureId();
-            expect(id.length).toBe(6);
-        });
-
-        it('generates a string of requested length', () => {
-            const id = generateSecureId(10);
-            expect(id.length).toBe(10);
-        });
-
-        it('generates a string longer than 32 chars', () => {
-            const id = generateSecureId(50);
-            expect(id.length).toBe(50);
-        });
-
-        it('returns only uppercase letters and numbers', () => {
-             const id = generateSecureId(100);
-             expect(/^[A-Z0-9]+$/.test(id)).toBe(true);
-        });
+  describe('generateSecureId', () => {
+    beforeEach(() => {
+      vi.stubGlobal('crypto', {
+        getRandomValues: vi.fn((arr: Uint8Array) => {
+          for (let i = 0; i < arr.length; i++) {
+            arr[i] = i % 256;
+          }
+          return arr;
+        })
+      });
     });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it('generates a 6-character ID by default', () => {
+      const id = generateSecureId();
+      expect(id).toHaveLength(6);
+      expect(id).toBe('000102');
+    });
+
+    it('generates an ID of the requested length', () => {
+      const id = generateSecureId(12);
+      expect(id).toHaveLength(12);
+      expect(id).toBe('000102030405');
+    });
+
+    it('generates strings longer than 32 characters securely without repeating entropy', () => {
+      const id = generateSecureId(50);
+      expect(id).toHaveLength(50);
+      expect(id).toBe('000102030405060708090A0B0C0D0E0F101112131415161718');
+    });
+
+    it('returns uppercase strings', () => {
+      const id = generateSecureId(32);
+      expect(id).toBe('000102030405060708090A0B0C0D0E0F');
+    });
+  });
 });

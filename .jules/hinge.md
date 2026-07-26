@@ -13,3 +13,7 @@
 ## 2024-07-24 - Dynamic Regex Generation Requires Syntax Validation
 **Learning:** When creating an extension point that dynamically constructs a Regular Expression (like compiling a list of keywords into capture groups), the `type` or identifier provided by the implementor must be strictly validated. If a consumer registers a category with an invalid regex capture group name (e.g., using hyphens or spaces), the dynamic `new RegExp()` instantiation will throw a `SyntaxError` at runtime and crash the application.
 **Action:** Always add rigorous sanitization or validation (e.g., `/^[a-zA-Z_][a-zA-Z0-9_]*$/`) against implementor-provided keys if those keys are subsequently injected into compiled runtime constructs like regex patterns.
+
+## 2025-02-21 - Abstracting format outputs in CLI commands
+**Learning:** Hard-coded switch statements (e.g., \`switch (options.format)\`) that directly write to `console.log` for output formatting are a common extensibility bottleneck in CLI applications. A simple Registry and Strategy interface allows injecting new output modes without modifying the core command logic.
+**Action:** When a CLI command branches heavily on formatting (table vs json vs csv), proactively refactor to a registry of \`OutputStrategy\` handlers that take the command's dataset as input.
