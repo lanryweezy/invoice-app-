@@ -42,3 +42,4 @@
 ## 2024-07-23 - Testing expiration logic on pure dates
 **Learning:** In the NIBSS integration (`apps/web/services/nibssIntegration.ts`), the `isPaymentExpired` function evaluates expiration purely based on the `expiresAt` timestamp, ignoring the state of the `status` field.
 **Action:** When writing tests that verify cancellation logic (e.g., `cancelPaymentLink`), do not assert that `isPaymentExpired` becomes true unless mock timers (`vi.useFakeTimers()`) have been explicitly advanced past the expiration date.
+## 2024-05-18 - Avoid require() inside vitest tests\n**Learning:** Using `require()` dynamically inside tests within an ESM environment (like apps/web) will throw errors (`require is not defined`).\n**Action:** Use `await import()` inside `beforeEach` to dynamically load modules required for isolated module testing where `vi.mock` must intercept dependencies first.
