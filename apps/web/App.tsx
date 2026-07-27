@@ -310,12 +310,7 @@ const App: React.FC = () => {
       // Update the URL without reloading the page
       let currentDecodedPath = getDecodedPathname();
 
-      let targetDecodedPath;
-      try {
-          targetDecodedPath = decodeURIComponent(path);
-      } catch (e) {
-          targetDecodedPath = path;
-      }
+      let targetDecodedPath = getDecodedPathname(path);
 
       if (currentDecodedPath !== targetDecodedPath) {
           window.history.pushState(null, '', path);
