@@ -1,4 +1,3 @@
-import { getDecodedPathname } from "./utils/routing";
 import React, { useState, useCallback, useMemo, useEffect, Suspense, useRef } from 'react';
 
 import { InvoiceForm } from './components/InvoiceForm';
@@ -310,12 +309,7 @@ const App: React.FC = () => {
       // Update the URL without reloading the page
       let currentDecodedPath = getDecodedPathname();
 
-      let targetDecodedPath;
-      try {
-          targetDecodedPath = decodeURIComponent(path);
-      } catch (e) {
-          targetDecodedPath = path;
-      }
+      let targetDecodedPath = getDecodedPathname(path);
 
       if (currentDecodedPath !== targetDecodedPath) {
           window.history.pushState(null, '', path);
