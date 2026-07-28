@@ -99,8 +99,9 @@ export const SupportPage: React.FC = () => {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Name</label>
+                  <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-1 cursor-pointer">Name</label>
                   <input
+                    id="name"
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -110,8 +111,9 @@ export const SupportPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                  <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1 cursor-pointer">Email</label>
                   <input
+                    id="email"
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -121,8 +123,9 @@ export const SupportPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Subject</label>
+                  <label htmlFor="subject" className="block text-sm font-medium text-slate-700 mb-1 cursor-pointer">Subject</label>
                   <select
+                    id="subject"
                     value={formData.subject}
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
@@ -139,8 +142,9 @@ export const SupportPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Message</label>
+                  <label htmlFor="message" className="block text-sm font-medium text-slate-700 mb-1 cursor-pointer">Message</label>
                   <textarea
+                    id="message"
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent h-32 resize-none"
@@ -151,7 +155,7 @@ export const SupportPage: React.FC = () => {
 
                 <button
                   type="submit"
-                  className="w-full bg-teal-600 text-white py-3 rounded-lg font-medium hover:bg-teal-700 transition-colors"
+                  className="w-full bg-teal-600 text-white py-3 rounded-lg font-medium hover:bg-teal-700 transition-colors active:scale-[0.98]"
                 >
                   Send Message
                 </button>
