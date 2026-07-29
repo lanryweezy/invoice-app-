@@ -106,7 +106,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginWi
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1 cursor-pointer">Email</label>
               <input
                 id="email"
                 type="email"
@@ -120,7 +120,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginWi
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1 cursor-pointer">Password</label>
               <div className="relative">
                 <input
                   id="password"

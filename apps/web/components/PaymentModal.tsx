@@ -89,7 +89,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                 <form onSubmit={handleSubmit} className="px-5 py-4 space-y-3">
                     {/* Amount */}
                     <div>
-                        <label htmlFor="amountPaid" className="block text-xs font-semibold text-slate-700 mb-1">Amount Paid</label>
+                        <label htmlFor="amountPaid" className="block text-xs font-semibold text-slate-700 mb-1 cursor-pointer">Amount Paid</label>
                         <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">{invoice.currency}</span>
                             <input
@@ -162,7 +162,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                     {/* Date + Reference */}
                     <div className="grid grid-cols-2 gap-2">
                         <div>
-                            <label htmlFor="paymentDate" className="block text-[10px] font-bold text-slate-500 mb-1">Date</label>
+                            <label htmlFor="paymentDate" className="block text-[10px] font-bold text-slate-500 mb-1 cursor-pointer">Date</label>
                             <input
                                 id="paymentDate"
                                 type="date"
@@ -173,7 +173,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                             />
                         </div>
                         <div>
-                            <label htmlFor="txnRef" className="block text-[10px] font-bold text-slate-500 mb-1">Ref (optional)</label>
+                            <label htmlFor="txnRef" className="block text-[10px] font-bold text-slate-500 mb-1 cursor-pointer">Ref (optional)</label>
                             <input
                                 id="txnRef"
                                 type="text"
