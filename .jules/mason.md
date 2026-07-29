@@ -7,3 +7,6 @@
 ## 2024-10-18 - Extracted duplicated decodeURIComponent to shared utility
 **Learning:** `decodeURIComponent(window.location.pathname)` wrapped in a try/catch block was duplicated across 5 different routing initializations and state update handlers in `App.tsx`, causing unnecessary bloat and potential inconsistencies if error handling needed to change.
 **Action:** Always extract repetitive safe-parsing boilerplate (like decoding URLs) into a dedicated utility function (e.g., `getDecodedPathname` in `utils/routing.ts`) to maintain a single source of truth and cleaner component logic.
+## 2024-10-24 - Removed redundant offline sync module
+**Learning:** Found an unused and incomplete legacy offline sync module (`apps/web/services/offlineSync.ts`) that was superseded by a robust localforage-backed implementation (`apps/web/utils/offlineSync.ts`). The redundant file wasn't being imported anywhere, representing structural tech debt.
+**Action:** Remove dead code modules completely when a superior abstraction pattern is proven and actively used across the application to prevent confusion for future developers.
