@@ -38,7 +38,6 @@ import { IntegrationsView } from './components/IntegrationsView';
 import { CLIAccessView } from './components/CLIAccessView';
 import { SmtpSettingsModal } from './components/SmtpSettingsModal';
 import { flushQueue, getQueueCount } from './utils/offlineSync';
-import { getDecodedPathname } from './utils/routing';
 
 // NRS Compliance Components
 import { ComplianceDashboard } from './components/ComplianceDashboard';
@@ -310,12 +309,7 @@ const App: React.FC = () => {
       // Update the URL without reloading the page
       let currentDecodedPath = getDecodedPathname();
 
-      let targetDecodedPath;
-      try {
-          targetDecodedPath = decodeURIComponent(path);
-      } catch (e) {
-          targetDecodedPath = path;
-      }
+      let targetDecodedPath = getDecodedPathname(path);
 
       if (currentDecodedPath !== targetDecodedPath) {
           window.history.pushState(null, '', path);
