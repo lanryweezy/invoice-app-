@@ -18,3 +18,6 @@
 ## 2024-07-24 - Modal Context Switching
 **Learning:** Auth modals with hardcoded strings (e.g. exclusively "Login" text and titles) create friction when they actually support dual contexts (Login and Sign Up via logic paths). Users shouldn't have to close the modal to find a different entry point.
 **Action:** When a modal component has internal state for different contexts (like `isLogin`), ensure the header title, submit button, and a prominent toggle switch are dynamically linked to that state to provide seamless context switching.
+## 2026-07-31 - Added cursor-pointer to form labels
+**Learning:** Found that many `<label>` elements connected via `htmlFor` to input fields lacked a `cursor-pointer` class, which decreases visual affordance for users indicating they can click the text to focus the input.
+**Action:** Always add `cursor-pointer` to `htmlFor` labels in React/Tailwind forms to make the clickable hit area visually obvious.

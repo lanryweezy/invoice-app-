@@ -35,11 +35,11 @@ export const BranchesManager: React.FC<BranchesManagerProps> = ({ isPro = false,
           <form onSubmit={handleAdd} className="space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-inner">
              <h3 className="font-black text-slate-900 mb-4 uppercase tracking-widest text-xs">Add New Branch</h3>
              <div>
-                <label htmlFor="branch-name" className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Branch Name</label>
+                <label htmlFor="branch-name" className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider cursor-pointer">Branch Name</label>
                 <input id="branch-name" value={newBranch.name} onChange={e => setNewBranch({...newBranch, name: e.target.value})} className="w-full p-2.5 bg-white border border-slate-200 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition-all text-sm font-semibold" placeholder="e.g. Abuja Office" required />
              </div>
              <div>
-                <label htmlFor="branch-address" className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Address</label>
+                <label htmlFor="branch-address" className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider cursor-pointer">Address</label>
                 <textarea id="branch-address" rows={3} value={newBranch.address} onChange={e => setNewBranch({...newBranch, address: e.target.value})} className="w-full p-2.5 bg-white border border-slate-200 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition-all text-sm font-semibold resize-none" placeholder="Full address..." required />
              </div>
              <button type="submit" className="w-full py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-teal-700 active:scale-[0.98] transition-colors shadow-lg">Save Location</button>
