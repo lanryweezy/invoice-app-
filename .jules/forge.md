@@ -42,3 +42,7 @@
 ## 2024-07-23 - Testing expiration logic on pure dates
 **Learning:** In the NIBSS integration (`apps/web/services/nibssIntegration.ts`), the `isPaymentExpired` function evaluates expiration purely based on the `expiresAt` timestamp, ignoring the state of the `status` field.
 **Action:** When writing tests that verify cancellation logic (e.g., `cancelPaymentLink`), do not assert that `isPaymentExpired` becomes true unless mock timers (`vi.useFakeTimers()`) have been explicitly advanced past the expiration date.
+
+## 2023-10-27 - Mocking Browser Globals in Vitest (JSDOM)
+**Learning:** In Vitest's `jsdom` environment, `window` properties and `global` properties can sometimes get out of sync depending on how they are assigned or deleted.
+**Action:** When mocking browser globals like `Notification` for test files, always explicitly mock and restore both `global.Notification` and `window.Notification` in the `beforeEach` and `afterEach` blocks to prevent variable leakage and ensure perfectly clean test environments.
