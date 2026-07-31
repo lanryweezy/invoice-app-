@@ -14,3 +14,7 @@
 ## 2024-03-XX - Implement Value-Driven Feature Gating for Accounting
 **Learning:** Current "Pro feature" gates block users and create friction. Replacing them with in-app sales pages that focus on value, context, and emotion converts better.
 **Action:** Replace `handleProFeatureClick` modals with full-screen, value-driven feature landing pages.
+
+## 2024-06-25 - Vitest Mocking of window.location
+**Learning:** Testing code that uses `window.location` directly in Vitest/JSDOM requires carefully deleting and recreating the object since it is normally non-configurable in browser environments. Modifying it directly may cause JSDOM errors or test pollution.
+**Action:** Always save `originalLocation`, use `@ts-ignore` to `delete window.location`, assign a new object for testing, and restore the original in `afterEach`.
