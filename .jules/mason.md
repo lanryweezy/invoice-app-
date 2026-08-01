@@ -7,3 +7,6 @@
 ## 2024-10-18 - Extracted duplicated decodeURIComponent to shared utility
 **Learning:** `decodeURIComponent(window.location.pathname)` wrapped in a try/catch block was duplicated across 5 different routing initializations and state update handlers in `App.tsx`, causing unnecessary bloat and potential inconsistencies if error handling needed to change.
 **Action:** Always extract repetitive safe-parsing boilerplate (like decoding URLs) into a dedicated utility function (e.g., `getDecodedPathname` in `utils/routing.ts`) to maintain a single source of truth and cleaner component logic.
+## 2024-10-25 - Consolidated generateId logic
+**Learning:** Found an inline implementation of cryptographic ID generation in `auditTrail.ts` that exactly matched the existing shared utility `generateSecureId` in `utils/crypto.ts`.
+**Action:** Always verify if a utility exists for cryptographic string generation before rolling a custom one. Use `generateSecureId` to ensure safe, testable string generation with a single source of truth.
