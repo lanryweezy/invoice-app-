@@ -14,3 +14,7 @@
 ## 2024-03-XX - Implement Value-Driven Feature Gating for Accounting
 **Learning:** Current "Pro feature" gates block users and create friction. Replacing them with in-app sales pages that focus on value, context, and emotion converts better.
 **Action:** Replace `handleProFeatureClick` modals with full-screen, value-driven feature landing pages.
+
+## 2024-08-01 - URL Decoding Router Utility
+**Learning:** The routing utility `getDecodedPathname()` correctly falls back to the original pathname when `decodeURIComponent` throws a URIError (e.g. malformed URIs), but lacked any tests to prove this critical behavior.
+**Action:** Add explicit tests using the `@ts-ignore` window.location reassignment pattern to verify the routing fallback.
