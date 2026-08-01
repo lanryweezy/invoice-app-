@@ -18,3 +18,7 @@
 ## 2024-07-24 - Modal Context Switching
 **Learning:** Auth modals with hardcoded strings (e.g. exclusively "Login" text and titles) create friction when they actually support dual contexts (Login and Sign Up via logic paths). Users shouldn't have to close the modal to find a different entry point.
 **Action:** When a modal component has internal state for different contexts (like `isLogin`), ensure the header title, submit button, and a prominent toggle switch are dynamically linked to that state to provide seamless context switching.
+
+## 2025-07-28 - Form Labels and Tactile Feedback
+**Learning:** Support forms and other standard form implementations frequently miss the `cursor-pointer` on labels and tactile feedback on submit buttons, leading to a degraded UX compared to modern app standards.
+**Action:** Always ensure `cursor-pointer` is present on form labels and `active:scale-[0.98]` is on primary submit buttons for immediate tactile feedback.
