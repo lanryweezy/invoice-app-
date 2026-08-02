@@ -17,3 +17,7 @@
 ## 2025-02-21 - Abstracting format outputs in CLI commands
 **Learning:** Hard-coded switch statements (e.g., \`switch (options.format)\`) that directly write to `console.log` for output formatting are a common extensibility bottleneck in CLI applications. A simple Registry and Strategy interface allows injecting new output modes without modifying the core command logic.
 **Action:** When a CLI command branches heavily on formatting (table vs json vs csv), proactively refactor to a registry of \`OutputStrategy\` handlers that take the command's dataset as input.
+
+## 2025-02-12 - Incomplete Abstraction in Email Template Generation
+**Learning:** Extracting an extensibility point (like a Strategy) from a switch statement must encompass all related behavior relying on that switch variable. Initially, I only extracted the email `body` generation, leaving the `subject` generation untouched, which resulted in a fragmented extension point where custom templates couldn't define their own subjects.
+**Action:** When extracting a Strategy from a switch statement, always search the file for other usages of the switch variable (e.g., `template`) to ensure the extracted interface covers the entire bounded context of the operation (e.g., returning `{ subject, body }` instead of just a string).
