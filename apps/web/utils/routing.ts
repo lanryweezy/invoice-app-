@@ -1,3 +1,9 @@
+/**
+ * Safely decodes the current window pathname.
+ *
+ * Uses `decodeURIComponent` to parse the path, but gracefully falls back
+ * to the raw pathname if the URI is malformed to prevent routing crashes.
+ */
 export function getDecodedPathname(): string {
   try {
     return decodeURIComponent(window.location.pathname);

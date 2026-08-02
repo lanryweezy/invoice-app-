@@ -14,3 +14,11 @@
 ## 2024-03-XX - Implement Value-Driven Feature Gating for Accounting
 **Learning:** Current "Pro feature" gates block users and create friction. Replacing them with in-app sales pages that focus on value, context, and emotion converts better.
 **Action:** Replace `handleProFeatureClick` modals with full-screen, value-driven feature landing pages.
+
+## 2024-05-25 - Extracted and Documented Routing Utility with Test Coverage
+**Learning:** `getDecodedPathname` in `apps/web/utils/routing.ts` was an undocumented utility function without test coverage, handling malformed URIs.
+**Action:** Added proper JSDoc to explain *why* it gracefully falls back (to prevent routing crashes on malformed URIs) and added missing test coverage handling happy paths and error paths, conforming to Vitest setup best practices.
+
+## 2024-05-25 - Mocking window.location in JSDOM
+**Learning:** In Vitest environments using JSDOM like `apps/web`, attempting to mock `window.location` directly using `window.location = new URL(...)` will result in test failure, as `window.location` properties cannot be modified that way. It's necessary to clone the object and re-assign properties for successful test modification.
+**Action:** When mocking `window.location` properties without triggering JSDOM errors, store the original object, delete the global object (`// @ts-ignore \n delete window.location;`), reassign it with a cloned object in `beforeEach`, and restore it in `afterEach`.
