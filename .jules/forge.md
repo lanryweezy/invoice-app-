@@ -42,3 +42,6 @@
 ## 2024-07-23 - Testing expiration logic on pure dates
 **Learning:** In the NIBSS integration (`apps/web/services/nibssIntegration.ts`), the `isPaymentExpired` function evaluates expiration purely based on the `expiresAt` timestamp, ignoring the state of the `status` field.
 **Action:** When writing tests that verify cancellation logic (e.g., `cancelPaymentLink`), do not assert that `isPaymentExpired` becomes true unless mock timers (`vi.useFakeTimers()`) have been explicitly advanced past the expiration date.
+## 2024-08-02 - Testing sync hooks with debounce and retry
+**Learning:** Testing hooks that perform data sync using `setTimeout` (like `useExpenses`) require carefully orchestrating mock timers (`vi.advanceTimersByTime()`) and properly awaiting all internal promise resolutions to ensure side effects are actually registered before assertion. Additionally, testing catch blocks on side effects that shouldn't crash the hook (e.g. `trackEvent` failing on cloud load error) ensures comprehensive error path coverage without breaking functionality.
+**Action:** Always advance timers deliberately and `await Promise.resolve()` multiple times if necessary in tests that mock timers to allow React's batched hook effects and pending microtasks to fully resolve before running assertions.
