@@ -1,5 +1,6 @@
 import localforage from 'localforage';
 import type { Invoice } from '../types';
+import { generateSecureId } from '../utils/crypto';
 
 localforage.config({
   name: 'InvoiceApp',
@@ -30,9 +31,8 @@ export interface AuditFilters {
 }
 
 function generateId(): string {
-  const array = new Uint8Array(4);
-  crypto.getRandomValues(array);
-  const randomStr = Array.from(array, b => b.toString(16).padStart(2, '0')).join('').toUpperCase().substring(0, 6);
+  // 🏗️ Mason: Extracted to use shared generateSecureId utility to eliminate duplicate crypto handling logic
+  const randomStr = generateSecureId(6);
   return `AUD-${Date.now()}-${randomStr}`;
 }
 
