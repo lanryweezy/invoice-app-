@@ -58,8 +58,19 @@ export default function registerSendCommand(program: Command): void {
             },
           });
 
-          const emailBody = generateEmailBody(invoice, options.template, config);
-          const subject = options.subject || generateSubject(invoice, options.template);
+          const amount = formatCurrency(invoice.total || 0, invoice.currency);
+          const itemsList = invoice.lineItems
+            .map((item) => `- ${item.description}: ${formatCurrency(item.price * item.quantity, invoice.currency)}`)
+            .join('\n');
+          const bankDetails = config.bankName
+            ? `\nBank: ${config.bankName}\nAccount: ${config.bankAccount}\nSort Code: ${config.bankSortCode}`
+            : '';
+
+          const strategy = emailTemplateStrategies.get(options.template) || emailTemplateStrategies.get('formal')!;
+          const generated = strategy(invoice, config, { amount, itemsList, bankDetails });
+
+          const emailBody = generated.body;
+          const subject = options.subject || generated.subject;
 
           await transporter.sendMail({
             from: `"${config.businessName || 'InvoiceApp'}" <${config.smtp.user}>`,
@@ -90,51 +101,32 @@ export default function registerSendCommand(program: Command): void {
     });
 }
 
-function generateEmailBody(invoice: Invoice, template: string, config: any): string {
-  const amount = formatCurrency(invoice.total || 0, invoice.currency);
-  const itemsList = invoice.lineItems
-    .map((item) => `- ${item.description}: ${formatCurrency(item.price * item.quantity, invoice.currency)}`)
-    .join('\n');
+/**
+ * 🔩 Hinge Extension Point: EmailTemplateStrategy
+ *
+ * Pressure: The send command had a growing switch statement for templates and fragmented
+ * subject logic, meaning every new template required changes in multiple core places.
+ *
+ * Contract:
+ * - Implementors must provide a strategy function that takes `(invoice, config, helpers)`
+ *   and returns an object containing `{ subject, body }`.
+ * - The core handles SMTP transport, database updates, and helper formatting.
+ */
+export type EmailTemplateStrategy = (
+  invoice: Invoice,
+  config: any,
+  helpers: { amount: string; itemsList: string; bankDetails: string }
+) => { subject: string; body: string };
 
-  const bankDetails = config.bankName
-    ? `\nBank: ${config.bankName}\nAccount: ${config.bankAccount}\nSort Code: ${config.bankSortCode}`
-    : '';
+const emailTemplateStrategies = new Map<string, EmailTemplateStrategy>();
 
-  switch (template) {
-    case 'casual':
-      return `Hi ${invoice.client.name}! Here's your invoice ${invoice.invoiceNumber}:
+export function registerEmailTemplateStrategy(name: string, strategy: EmailTemplateStrategy) {
+  emailTemplateStrategies.set(name, strategy);
+}
 
-${itemsList}
-
-Total: ${amount}
-Due: ${formatDate(invoice.dueDate)}
-${bankDetails}
-
-Best regards,
-${config.businessName || 'InvoiceApp'}`;
-
-    case 'followup':
-      return `Hi ${invoice.client.name},
-
-This is a friendly reminder about invoice ${invoice.invoiceNumber} for ${amount} which was due on ${formatDate(invoice.dueDate)}.
-
-Please let us know if you have any questions.
-
-Best regards,
-${config.businessName || 'InvoiceApp'}`;
-
-    case 'overdue':
-      return `URGENT: Invoice ${invoice.invoiceNumber} for ${amount} is now past due. Please arrange immediate payment.
-
-${bankDetails}
-
-Contact us if you need to discuss payment arrangements.
-
-${config.businessName || 'InvoiceApp'}`;
-
-    case 'formal':
-    default:
-      return `Dear ${invoice.client.name},
+registerEmailTemplateStrategy('formal', (invoice, config, { amount, itemsList, bankDetails }) => ({
+  subject: `Invoice ${invoice.invoiceNumber}`,
+  body: `Dear ${invoice.client.name},
 
 Please find below the details for invoice ${invoice.invoiceNumber}:
 
@@ -148,12 +140,42 @@ Payment Details:${bankDetails}
 Thank you for your valued business.
 
 Best regards,
-${config.businessName || 'InvoiceApp'}`;
-  }
-}
+${config.businessName || 'InvoiceApp'}`,
+}));
 
-function generateSubject(invoice: Invoice, template: string): string {
-  const prefix = template === 'overdue' ? 'URGENT: ' : '';
-  const suffix = template === 'followup' ? ' - Payment Reminder' : '';
-  return `${prefix}Invoice ${invoice.invoiceNumber}${suffix}`;
-}
+registerEmailTemplateStrategy('casual', (invoice, config, { amount, itemsList, bankDetails }) => ({
+  subject: `Invoice ${invoice.invoiceNumber}`,
+  body: `Hi ${invoice.client.name}! Here's your invoice ${invoice.invoiceNumber}:
+
+${itemsList}
+
+Total: ${amount}
+Due: ${formatDate(invoice.dueDate)}
+${bankDetails}
+
+Best regards,
+${config.businessName || 'InvoiceApp'}`,
+}));
+
+registerEmailTemplateStrategy('followup', (invoice, config, { amount }) => ({
+  subject: `Invoice ${invoice.invoiceNumber} - Payment Reminder`,
+  body: `Hi ${invoice.client.name},
+
+This is a friendly reminder about invoice ${invoice.invoiceNumber} for ${amount} which was due on ${formatDate(invoice.dueDate)}.
+
+Please let us know if you have any questions.
+
+Best regards,
+${config.businessName || 'InvoiceApp'}`,
+}));
+
+registerEmailTemplateStrategy('overdue', (invoice, config, { amount, bankDetails }) => ({
+  subject: `URGENT: Invoice ${invoice.invoiceNumber}`,
+  body: `URGENT: Invoice ${invoice.invoiceNumber} for ${amount} is now past due. Please arrange immediate payment.
+
+${bankDetails}
+
+Contact us if you need to discuss payment arrangements.
+
+${config.businessName || 'InvoiceApp'}`,
+}));
