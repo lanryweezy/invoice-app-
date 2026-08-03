@@ -94,13 +94,13 @@ export default function registerExportCommand(program: Command) {
         });
 
         if (options.from) {
-          const fromDate = new Date(options.from);
-          invoices = invoices.filter((inv) => new Date(inv.issueDate) >= fromDate);
+          const fromTime = Date.parse(options.from);
+          invoices = invoices.filter((inv) => Date.parse(inv.issueDate) >= fromTime);
         }
         if (options.to) {
           const toDate = new Date(options.to);
           toDate.setHours(23, 59, 59, 999);
-          invoices = invoices.filter((inv) => new Date(inv.issueDate) <= toDate);
+          invoices = invoices.filter((inv) => Date.parse(inv.issueDate) <= toDate.getTime());
         }
         if (options.status) {
           invoices = invoices.filter(

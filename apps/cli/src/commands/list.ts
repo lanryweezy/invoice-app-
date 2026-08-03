@@ -98,16 +98,16 @@ export default function registerListCommand(program: Command): void {
           }
 
           if (options.from) {
-            const fromDate = new Date(options.from);
+            const fromDate = Date.parse(options.from);
             invoices = invoices.filter((inv) => 
-              new Date(inv.createdAt || '') >= fromDate
+              Date.parse(inv.createdAt || '') >= fromDate
             );
           }
 
           if (options.to) {
-            const toDate = new Date(options.to);
+            const toDate = Date.parse(options.to);
             invoices = invoices.filter((inv) => 
-              new Date(inv.createdAt || '') <= toDate
+              Date.parse(inv.createdAt || '') <= toDate
             );
           }
 
@@ -126,7 +126,7 @@ export default function registerListCommand(program: Command): void {
                 return a.status.localeCompare(b.status);
               case 'date':
               default:
-                return new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime();
+                return Date.parse(b.createdAt || '') - Date.parse(a.createdAt || '');
             }
           });
 

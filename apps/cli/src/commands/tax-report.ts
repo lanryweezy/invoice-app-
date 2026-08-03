@@ -71,8 +71,8 @@ export default function registerTaxReportCommand(program: Command) {
         const invoices: Invoice[] = [];
         snapshot.forEach((doc) => {
           const inv = { id: doc.id, ...doc.data() } as Invoice;
-          const issueDate = new Date(inv.issueDate);
-          if (issueDate >= startDate && issueDate <= endDate) {
+          const issueTime = Date.parse(inv.issueDate);
+          if (issueTime >= startDate.getTime() && issueTime <= endDate.getTime()) {
             invoices.push(inv);
           }
         });

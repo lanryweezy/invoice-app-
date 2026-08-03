@@ -70,3 +70,6 @@
 ## 2026-07-24 - [Date parsing inside array filters]
 **Learning:** Calling `new Date(string).getTime()` creates a new Date object allocation each time. When this happens repeatedly inside an array `.filter()` (like when processing hundreds of invoices), it causes significant garbage collection and execution overhead, blocking the main thread.
 **Action:** When filtering dates from strings in a loop, always use `Date.parse(string)` instead. It achieves the exact same numerical result (timestamp) but bypasses object instantiation, making it roughly ~40% faster for large datasets.
+## 2026-08-03 - Date parsing performance overhead
+**Learning:** Instantiating `new Date()` inside loops for string parsing is computationally expensive due to object allocation overhead. In Node.js environments processing large datasets, this slows down operations.
+**Action:** Always use `Date.parse(dateString)` which returns a timestamp directly instead of `new Date(dateString).getTime()` inside tight loops like `filter` and `sort`.
