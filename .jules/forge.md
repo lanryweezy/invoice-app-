@@ -42,3 +42,6 @@
 ## 2024-07-23 - Testing expiration logic on pure dates
 **Learning:** In the NIBSS integration (`apps/web/services/nibssIntegration.ts`), the `isPaymentExpired` function evaluates expiration purely based on the `expiresAt` timestamp, ignoring the state of the `status` field.
 **Action:** When writing tests that verify cancellation logic (e.g., `cancelPaymentLink`), do not assert that `isPaymentExpired` becomes true unless mock timers (`vi.useFakeTimers()`) have been explicitly advanced past the expiration date.
+## 2026-08-03 - Adding full coverage for push notifications
+**Learning:** The `apps/web/services/pushNotifications.ts` file provides vital user notification features via Firebase messaging, but a significant portion of it was originally missing test coverage. Thoroughly mocking `Notification` global object as well as managing firebase messaging token handling enables complete integration testing for push notifications.
+**Action:** When adding functionality tied to the DOM's `Notification` API, explicitly stub the global using `vi.stubGlobal('Notification', mock)` rather than assigning and deleting it directly in `beforeEach`/`afterEach` to ensure proper vitest environment isolation.
