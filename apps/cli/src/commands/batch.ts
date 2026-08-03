@@ -109,12 +109,18 @@ export default function registerBatchCommand(program: Command) {
           if (success) {
             sent++;
             if (inv.status === 'Overdue') {
-              await db
-                .collection('users')
-                .doc(uid)
-                .collection('invoices')
-                .doc(inv.id!)
-                .update({ status: 'Sent', updatedAt: new Date().toISOString() });
+              try {
+                await db
+                  .collection('users')
+                  .doc(uid)
+                  .collection('invoices')
+                  .doc(inv.id!)
+                  .update({ status: 'Sent', updatedAt: new Date().toISOString() });
+              } catch (updateError: any) {
+                // 🌱 Flora: Prevents a single database update failure (e.g. timeout, transient offline)
+                // from crashing the entire batch process and leaving subsequent invoices unsent.
+                console.warn(chalk.yellow(`\n⚠️ Failed to update status for ${inv.invoiceNumber}: ${updateError.message}`));
+              }
             }
           } else {
             failed++;

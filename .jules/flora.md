@@ -13,3 +13,6 @@
 ## 2024-07-20 - Swallowed Errors in Configuration Initialization
 **Learning:** When fetching configuration data asynchronously from the database during app initialization (e.g., `loadSmtp` in `App.tsx`), do not swallow failures with empty `catch` blocks. Instrument fetch operations with structured error logging (e.g., `trackEvent('smtp_settings_load_failed')`) defensively wrapped in a `try/catch` block to ensure silent fallbacks to default states remain visible in telemetry.
 **Action:** Always wrap async database or configuration fetches during initialization in `try/catch` blocks and explicitly track failures using analytics/logging before silently defaulting to unconfigured states.
+## 2026-07-28 - Single Document Update Failures in Batch Commands
+**Learning:** In bulk processing scripts (like `batch.ts`), performing asynchronous operations (such as `updateDoc`) inside a standard `for` loop without an inner `try/catch` block will cause the entire process to crash if a single document fails to update due to permissions, timeouts, or transient network errors.
+**Action:** Always wrap individual document updates or operations within loops in batch processors with a `try/catch` block. Log the failure as a warning and allow the process to continue gracefully to the next item to prevent partial data processing failures.
