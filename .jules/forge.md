@@ -42,3 +42,7 @@
 ## 2024-07-23 - Testing expiration logic on pure dates
 **Learning:** In the NIBSS integration (`apps/web/services/nibssIntegration.ts`), the `isPaymentExpired` function evaluates expiration purely based on the `expiresAt` timestamp, ignoring the state of the `status` field.
 **Action:** When writing tests that verify cancellation logic (e.g., `cancelPaymentLink`), do not assert that `isPaymentExpired` becomes true unless mock timers (`vi.useFakeTimers()`) have been explicitly advanced past the expiration date.
+
+## 2024-08-04 - Mocking Notification API alongside Firebase FCM
+**Learning:** Testing push notification subscription logic requires simultaneously mocking browser globals (`window.Notification`, including its static `requestPermission` method and properties like `permission`) and external Firebase modules (`getToken`, `getMessaging`, `doc`, `setDoc`). Because `window.Notification` behaves as both a constructor and an object with static methods, carefully backing up and replacing it with a `vi.fn()` casted as `any`, combined with strictly restoring it in `afterEach`, is crucial to avoid polluting other test suites that might check for its existence.
+**Action:** When testing browser Notification logic or permissions, fully mock the `Notification` object, assign `requestPermission` as a separate jest mock function, and ensure `window.Notification = global.Notification` alignment if testing `window` presence checks, followed by strict teardown.
