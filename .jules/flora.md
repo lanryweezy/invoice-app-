@@ -13,3 +13,7 @@
 ## 2024-07-20 - Swallowed Errors in Configuration Initialization
 **Learning:** When fetching configuration data asynchronously from the database during app initialization (e.g., `loadSmtp` in `App.tsx`), do not swallow failures with empty `catch` blocks. Instrument fetch operations with structured error logging (e.g., `trackEvent('smtp_settings_load_failed')`) defensively wrapped in a `try/catch` block to ensure silent fallbacks to default states remain visible in telemetry.
 **Action:** Always wrap async database or configuration fetches during initialization in `try/catch` blocks and explicitly track failures using analytics/logging before silently defaulting to unconfigured states.
+
+## 2026-08-04 - Add Error Boundary to CLI Batch Processing
+**Learning:** When performing bulk asynchronous operations like email sending or database updates in scripts (e.g., `apps/cli/src/commands/batch.ts`), a single unhandled exception (like a transient network timeout during an email dispatch or a firestore write) will crash the entire loop, leaving the remaining items unprocessed.
+**Action:** Wrap individual item updates in a `try/catch` block inside the batch processing loop. Count the failure and continue processing the rest of the batch.

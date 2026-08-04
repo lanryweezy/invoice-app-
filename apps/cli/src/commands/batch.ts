@@ -105,19 +105,25 @@ export default function registerBatchCommand(program: Command) {
           const inv = invoices[i];
           spinnerProgress.text = `[${i + 1}/${invoices.length}] Sending ${inv.invoiceNumber}...`;
 
-          const success = await sendInvoiceEmail(inv, template);
-          if (success) {
-            sent++;
-            if (inv.status === 'Overdue') {
-              await db
-                .collection('users')
-                .doc(uid)
-                .collection('invoices')
-                .doc(inv.id!)
-                .update({ status: 'Sent', updatedAt: new Date().toISOString() });
+          // 🌱 Flora: Wrap individual item updates in a try/catch block to prevent a single transient failure from crashing the entire batch process and leaving subsequent items unprocessed.
+          try {
+            const success = await sendInvoiceEmail(inv, template);
+            if (success) {
+              if (inv.status === 'Overdue') {
+                await db
+                  .collection('users')
+                  .doc(uid)
+                  .collection('invoices')
+                  .doc(inv.id!)
+                  .update({ status: 'Sent', updatedAt: new Date().toISOString() });
+              }
+              sent++;
+            } else {
+              failed++;
             }
-          } else {
+          } catch (error) {
             failed++;
+            console.error(chalk.red(`Failed to process invoice ${inv.invoiceNumber}:`), error);
           }
 
           // Rate limit: max 10 per minute
