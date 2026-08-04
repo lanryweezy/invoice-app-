@@ -44,7 +44,8 @@ async function sendInvoiceEmail(invoice: Invoice, template: string): Promise<boo
       text: buildEmailBody(invoice, template),
     });
     return true;
-  } catch {
+  } catch (error: any) {
+    console.error('Email send failed', { event: 'batch.email.failed', invoiceId: invoice.id, invoiceNumber: invoice.invoiceNumber, error: error?.message || String(error) });
     return false;
   }
 }
