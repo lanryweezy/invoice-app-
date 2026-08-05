@@ -7,3 +7,6 @@
 ## 2024-10-18 - Extracted duplicated decodeURIComponent to shared utility
 **Learning:** `decodeURIComponent(window.location.pathname)` wrapped in a try/catch block was duplicated across 5 different routing initializations and state update handlers in `App.tsx`, causing unnecessary bloat and potential inconsistencies if error handling needed to change.
 **Action:** Always extract repetitive safe-parsing boilerplate (like decoding URLs) into a dedicated utility function (e.g., `getDecodedPathname` in `utils/routing.ts`) to maintain a single source of truth and cleaner component logic.
+## 2026-08-05 - Avoid repeated inline toLocaleString formatting
+**Learning:** Found instances of inline `.toLocaleString()` with currency formatting configurations in `apps/cli/src/commands/batch.ts`, duplicating the logic already centralized in the `formatCurrency` utility.
+**Action:** Always import and use the shared `formatCurrency` utility (from `utils/formatter.ts`) for consistent currency string formatting and to prevent scattered inline formatting logic.

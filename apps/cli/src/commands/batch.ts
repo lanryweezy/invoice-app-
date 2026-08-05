@@ -5,20 +5,21 @@ import { ensureAuthenticated, getConfig } from '../lib/config';
 import { getDb } from '../lib/firebase-client';
 import { Invoice } from '../types';
 import { createSpinner, succeed, fail } from '../utils/spinner';
+import { formatCurrency } from '../utils/formatter';
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function buildEmailBody(invoice: Invoice, template: string): string {
-  const amount = (invoice.total || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 });
+  const amount = formatCurrency(invoice.total || 0, invoice.currency);
   switch (template) {
     case 'formal':
-      return `Dear ${invoice.client.name},\n\nPlease find attached invoice ${invoice.invoiceNumber} for ${invoice.currency} ${amount}.\n\nPayment is due by ${invoice.dueDate}.\n\nKindly remit payment to the bank details on the invoice.\n\nThank you.`;
+      return `Dear ${invoice.client.name},\n\nPlease find attached invoice ${invoice.invoiceNumber} for ${amount}.\n\nPayment is due by ${invoice.dueDate}.\n\nKindly remit payment to the bank details on the invoice.\n\nThank you.`;
     case 'overdue':
-      return `Dear ${invoice.client.name},\n\nThis is a reminder that invoice ${invoice.invoiceNumber} for ${invoice.currency} ${amount} is now overdue.\n\nPlease make payment as soon as possible to avoid further charges.\n\nThank you.`;
+      return `Dear ${invoice.client.name},\n\nThis is a reminder that invoice ${invoice.invoiceNumber} for ${amount} is now overdue.\n\nPlease make payment as soon as possible to avoid further charges.\n\nThank you.`;
     default:
-      return `Dear ${invoice.client.name},\n\nInvoice ${invoice.invoiceNumber} for ${invoice.currency} ${amount} is attached.\n\nDue date: ${invoice.dueDate}.\n\nThank you.`;
+      return `Dear ${invoice.client.name},\n\nInvoice ${invoice.invoiceNumber} for ${amount} is attached.\n\nDue date: ${invoice.dueDate}.\n\nThank you.`;
   }
 }
 
@@ -91,7 +92,7 @@ export default function registerBatchCommand(program: Command) {
         if (dryRun) {
           console.log(chalk.cyan('\nDry run - invoices that would be sent:'));
           invoices.forEach((inv, i) => {
-            console.log(`  ${i + 1}. ${inv.invoiceNumber} → ${inv.client.email} (${inv.currency} ${(inv.total || 0).toLocaleString()})`);
+            console.log(`  ${i + 1}. ${inv.invoiceNumber} → ${inv.client.email} (${formatCurrency(inv.total || 0, inv.currency)})`);
           });
           console.log(chalk.cyan(`\nTotal: ${invoices.length} invoice(s)`));
           return;
