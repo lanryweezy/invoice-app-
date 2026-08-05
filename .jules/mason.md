@@ -7,3 +7,6 @@
 ## 2024-10-18 - Extracted duplicated decodeURIComponent to shared utility
 **Learning:** `decodeURIComponent(window.location.pathname)` wrapped in a try/catch block was duplicated across 5 different routing initializations and state update handlers in `App.tsx`, causing unnecessary bloat and potential inconsistencies if error handling needed to change.
 **Action:** Always extract repetitive safe-parsing boilerplate (like decoding URLs) into a dedicated utility function (e.g., `getDecodedPathname` in `utils/routing.ts`) to maintain a single source of truth and cleaner component logic.
+## 2024-05-18 - Unified Path Decoding
+**Learning:** Found a pattern where `decodeURIComponent` was wrapped in a `try/catch` block manually in `App.tsx` despite the existence of a `getDecodedPathname` utility in `utils/routing.ts` that handled this safely. By adding an optional parameter to `getDecodedPathname` (defaulting to `window.location.pathname`), the duplicated logic could be removed safely.
+**Action:** Always check if an existing error-handling utility can be slightly extended (e.g., adding an optional parameter) before rewriting identical `try/catch` logic at call sites.

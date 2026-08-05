@@ -1,7 +1,7 @@
-export function getDecodedPathname(): string {
+export function getDecodedPathname(path: string = window.location.pathname): string {
   try {
-    return decodeURIComponent(window.location.pathname);
+    return decodeURIComponent(path);
   } catch (e) {
-    return window.location.pathname; // Fallback if malformed URI
+    return path; // Fallback if malformed URI
   }
 }
