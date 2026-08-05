@@ -42,3 +42,9 @@
 ## 2024-07-23 - Testing expiration logic on pure dates
 **Learning:** In the NIBSS integration (`apps/web/services/nibssIntegration.ts`), the `isPaymentExpired` function evaluates expiration purely based on the `expiresAt` timestamp, ignoring the state of the `status` field.
 **Action:** When writing tests that verify cancellation logic (e.g., `cancelPaymentLink`), do not assert that `isPaymentExpired` becomes true unless mock timers (`vi.useFakeTimers()`) have been explicitly advanced past the expiration date.
+## 2026-07-30 - Test Coverage for `pushNotifications.ts`
+**Learning:** The `pushNotifications.ts` service was completely missing test coverage, but contained critical functionality (requesting permission, subscribing/unsubscribing from FCM, checking status, listening for messages, and sending local notifications). It was important to mock the `firebase/firestore` and `firebase/messaging` modules and `window.Notification` API carefully using vitest to write robust tests without actual network or database dependencies.
+**Action:** Always write tests that mock out external service integrations (like Firebase and the browser Notification API) to ensure unit tests test our business logic, error handling, and component contract safely in isolation.
+## 2026-07-30 - Vitest Mock Reset Reliability
+**Learning:** When using vitest to mock global objects (like `window.Notification` or `navigator`) or environment variables across an entire describe block, calling `vi.restoreAllMocks()` and `vi.clearAllMocks()` is sometimes insufficient for un-stubbing values assigned via `vi.stubGlobal` and `vi.stubEnv`. This causes cross-test pollution where global variables leak into other test suites.
+**Action:** Always strictly pair `vi.stubGlobal` and `vi.stubEnv` with `vi.unstubAllGlobals()` and `vi.unstubAllEnvs()` in the `afterEach` block to guarantee true isolation.
