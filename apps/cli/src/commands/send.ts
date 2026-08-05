@@ -58,8 +58,8 @@ export default function registerSendCommand(program: Command): void {
             },
           });
 
-          const emailBody = generateEmailBody(invoice, options.template, config);
-          const subject = options.subject || generateSubject(invoice, options.template);
+          const { subject: generatedSubject, body: emailBody } = generateEmailContent(invoice, options.template, config);
+          const subject = options.subject || generatedSubject;
 
           await transporter.sendMail({
             from: `"${config.businessName || 'InvoiceApp'}" <${config.smtp.user}>`,
@@ -90,7 +90,25 @@ export default function registerSendCommand(program: Command): void {
     });
 }
 
-function generateEmailBody(invoice: Invoice, template: string, config: any): string {
+/**
+ * 🔩 Hinge Extension Point: EmailTemplateStrategy
+ *
+ * Pressure: The `send` command had a growing `switch (template)` block
+ * that needed modification every time a new email template was added.
+ *
+ * Contract:
+ * - Implementors provide a function taking an `Invoice` and config object.
+ * - The strategy is responsible for returning an object containing `subject` and `body` strings.
+ */
+export type EmailTemplateStrategy = (invoice: Invoice, config: any) => { subject: string; body: string };
+
+const emailTemplateStrategies = new Map<string, EmailTemplateStrategy>();
+
+export function registerEmailTemplateStrategy(name: string, strategy: EmailTemplateStrategy): void {
+  emailTemplateStrategies.set(name, strategy);
+}
+
+const getSharedVars = (invoice: Invoice, config: any) => {
   const amount = formatCurrency(invoice.total || 0, invoice.currency);
   const itemsList = invoice.lineItems
     .map((item) => `- ${item.description}: ${formatCurrency(item.price * item.quantity, invoice.currency)}`)
@@ -100,9 +118,14 @@ function generateEmailBody(invoice: Invoice, template: string, config: any): str
     ? `\nBank: ${config.bankName}\nAccount: ${config.bankAccount}\nSort Code: ${config.bankSortCode}`
     : '';
 
-  switch (template) {
-    case 'casual':
-      return `Hi ${invoice.client.name}! Here's your invoice ${invoice.invoiceNumber}:
+  return { amount, itemsList, bankDetails };
+};
+
+registerEmailTemplateStrategy('casual', (invoice, config) => {
+  const { amount, itemsList, bankDetails } = getSharedVars(invoice, config);
+  return {
+    subject: `Invoice ${invoice.invoiceNumber}`,
+    body: `Hi ${invoice.client.name}! Here's your invoice ${invoice.invoiceNumber}:
 
 ${itemsList}
 
@@ -111,30 +134,44 @@ Due: ${formatDate(invoice.dueDate)}
 ${bankDetails}
 
 Best regards,
-${config.businessName || 'InvoiceApp'}`;
+${config.businessName || 'InvoiceApp'}`
+  };
+});
 
-    case 'followup':
-      return `Hi ${invoice.client.name},
+registerEmailTemplateStrategy('followup', (invoice, config) => {
+  const { amount } = getSharedVars(invoice, config);
+  return {
+    subject: `Invoice ${invoice.invoiceNumber} - Payment Reminder`,
+    body: `Hi ${invoice.client.name},
 
 This is a friendly reminder about invoice ${invoice.invoiceNumber} for ${amount} which was due on ${formatDate(invoice.dueDate)}.
 
 Please let us know if you have any questions.
 
 Best regards,
-${config.businessName || 'InvoiceApp'}`;
+${config.businessName || 'InvoiceApp'}`
+  };
+});
 
-    case 'overdue':
-      return `URGENT: Invoice ${invoice.invoiceNumber} for ${amount} is now past due. Please arrange immediate payment.
+registerEmailTemplateStrategy('overdue', (invoice, config) => {
+  const { amount, bankDetails } = getSharedVars(invoice, config);
+  return {
+    subject: `URGENT: Invoice ${invoice.invoiceNumber}`,
+    body: `URGENT: Invoice ${invoice.invoiceNumber} for ${amount} is now past due. Please arrange immediate payment.
 
 ${bankDetails}
 
 Contact us if you need to discuss payment arrangements.
 
-${config.businessName || 'InvoiceApp'}`;
+${config.businessName || 'InvoiceApp'}`
+  };
+});
 
-    case 'formal':
-    default:
-      return `Dear ${invoice.client.name},
+registerEmailTemplateStrategy('formal', (invoice, config) => {
+  const { amount, itemsList, bankDetails } = getSharedVars(invoice, config);
+  return {
+    subject: `Invoice ${invoice.invoiceNumber}`,
+    body: `Dear ${invoice.client.name},
 
 Please find below the details for invoice ${invoice.invoiceNumber}:
 
@@ -148,12 +185,11 @@ Payment Details:${bankDetails}
 Thank you for your valued business.
 
 Best regards,
-${config.businessName || 'InvoiceApp'}`;
-  }
-}
+${config.businessName || 'InvoiceApp'}`
+  };
+});
 
-function generateSubject(invoice: Invoice, template: string): string {
-  const prefix = template === 'overdue' ? 'URGENT: ' : '';
-  const suffix = template === 'followup' ? ' - Payment Reminder' : '';
-  return `${prefix}Invoice ${invoice.invoiceNumber}${suffix}`;
+function generateEmailContent(invoice: Invoice, template: string, config: any): { subject: string; body: string } {
+  const strategy = emailTemplateStrategies.get(template) || emailTemplateStrategies.get('formal')!;
+  return strategy(invoice, config);
 }
