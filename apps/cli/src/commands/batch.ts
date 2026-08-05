@@ -113,14 +113,20 @@ export default function registerBatchCommand(program: Command) {
 
           const success = await sendInvoiceEmail(inv, template);
           if (success) {
-            sent++;
-            if (inv.status === 'Overdue') {
-              await db
-                .collection('users')
-                .doc(uid)
-                .collection('invoices')
-                .doc(inv.id!)
-                .update({ status: 'Sent', updatedAt: new Date().toISOString() });
+            try {
+              if (inv.status === 'Overdue') {
+                await db
+                  .collection('users')
+                  .doc(uid)
+                  .collection('invoices')
+                  .doc(inv.id!)
+                  .update({ status: 'Sent', updatedAt: new Date().toISOString() });
+              }
+              sent++;
+            } catch (err: any) {
+              // 🌱 Flora: Catch individual DB update failures to prevent a single transient error from crashing the entire batch loop
+              console.error('\nFailed to update invoice status', { invoiceId: inv.id, invoiceNumber: inv.invoiceNumber, error: err });
+              failed++;
             }
           } else {
             failed++;
