@@ -16,7 +16,7 @@ export interface Client {
   cacNumber?: string; // Corporate Affairs Commission Number
 }
 
-export type PaymentGateway = 'Paystack' | 'Flutterwave' | 'Monnify' | 'Kora' | 'Squad' | 'Interswitch' | 'OPay' | 'Fincra';
+export type PaymentGateway = 'Paystack' | 'Flutterwave' | 'Remita' | 'Monnify' | 'Kora' | 'Squad' | 'Interswitch' | 'OPay' | 'Fincra';
 
 export interface User {
   name: string;

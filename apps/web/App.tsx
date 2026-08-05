@@ -38,7 +38,6 @@ import { IntegrationsView } from './components/IntegrationsView';
 import { CLIAccessView } from './components/CLIAccessView';
 import { SmtpSettingsModal } from './components/SmtpSettingsModal';
 import { flushQueue, getQueueCount } from './utils/offlineSync';
-import { getDecodedPathname } from './utils/routing';
 
 // NRS Compliance Components
 import { ComplianceDashboard } from './components/ComplianceDashboard';
