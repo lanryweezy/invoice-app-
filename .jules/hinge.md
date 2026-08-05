@@ -17,3 +17,7 @@
 ## 2025-02-21 - Abstracting format outputs in CLI commands
 **Learning:** Hard-coded switch statements (e.g., \`switch (options.format)\`) that directly write to `console.log` for output formatting are a common extensibility bottleneck in CLI applications. A simple Registry and Strategy interface allows injecting new output modes without modifying the core command logic.
 **Action:** When a CLI command branches heavily on formatting (table vs json vs csv), proactively refactor to a registry of \`OutputStrategy\` handlers that take the command's dataset as input.
+
+## 2024-05-20 - Extract switch to Strategy Registry
+**Learning:** Hardcoded switch statements defining formats or templates (like PDF styles) force core function changes for any new addition.
+**Action:** Extract these to a `Strategy` registry (e.g., `PdfTemplateStrategy`) so that implementors can inject configuration without modifying the core behavior, while leaving the existing interface additive and backward-compatible.

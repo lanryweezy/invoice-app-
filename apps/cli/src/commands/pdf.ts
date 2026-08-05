@@ -23,49 +23,62 @@ interface TemplateStyles {
   footerColor: string;
 }
 
+/**
+ * 🔩 Hinge Extension Point: PdfTemplateStrategy
+ *
+ * Pressure: The PDF generation command had a hardcoded switch statement for styles, meaning any new template format required touching the core pdf generation logic.
+ * Contract: Implementors provide a style object conforming to TemplateStyles to define all necessary colors for the PDF document.
+ */
+export type PdfTemplateStrategy = () => TemplateStyles;
+
+const pdfTemplates = new Map<string, PdfTemplateStrategy>();
+
+export function registerPdfTemplate(name: string, strategy: PdfTemplateStrategy) {
+  pdfTemplates.set(name, strategy);
+}
+
+registerPdfTemplate('modern', () => ({
+  headerColor: '#2c3e50',
+  titleColor: '#2c3e50',
+  textColor: '#34495e',
+  sectionColor: '#2980b9',
+  totalColor: '#2980b9',
+  tableHeaderColor: '#2980b9',
+  tableHeaderText: '#ffffff',
+  tableRowEven: '#ecf0f1',
+  tableRowOdd: '#ffffff',
+  footerColor: '#7f8c8d',
+}));
+
+registerPdfTemplate('minimalist', () => ({
+  headerColor: '#333333',
+  titleColor: '#333333',
+  textColor: '#555555',
+  sectionColor: '#333333',
+  totalColor: '#333333',
+  tableHeaderColor: '#f5f5f5',
+  tableHeaderText: '#333333',
+  tableRowEven: '#ffffff',
+  tableRowOdd: '#fafafa',
+  footerColor: '#999999',
+}));
+
+registerPdfTemplate('formal', () => ({
+  headerColor: '#1a1a1a',
+  titleColor: '#1a1a1a',
+  textColor: '#333333',
+  sectionColor: '#1a1a1a',
+  totalColor: '#1a1a1a',
+  tableHeaderColor: '#1a1a1a',
+  tableHeaderText: '#ffffff',
+  tableRowEven: '#f9f9f9',
+  tableRowOdd: '#ffffff',
+  footerColor: '#666666',
+}));
+
 function getTemplateStyles(template: string): TemplateStyles {
-  switch (template) {
-    case 'modern':
-      return {
-        headerColor: '#2c3e50',
-        titleColor: '#2c3e50',
-        textColor: '#34495e',
-        sectionColor: '#2980b9',
-        totalColor: '#2980b9',
-        tableHeaderColor: '#2980b9',
-        tableHeaderText: '#ffffff',
-        tableRowEven: '#ecf0f1',
-        tableRowOdd: '#ffffff',
-        footerColor: '#7f8c8d',
-      };
-    case 'minimalist':
-      return {
-        headerColor: '#333333',
-        titleColor: '#333333',
-        textColor: '#555555',
-        sectionColor: '#333333',
-        totalColor: '#333333',
-        tableHeaderColor: '#f5f5f5',
-        tableHeaderText: '#333333',
-        tableRowEven: '#ffffff',
-        tableRowOdd: '#fafafa',
-        footerColor: '#999999',
-      };
-    case 'formal':
-    default:
-      return {
-        headerColor: '#1a1a1a',
-        titleColor: '#1a1a1a',
-        textColor: '#333333',
-        sectionColor: '#1a1a1a',
-        totalColor: '#1a1a1a',
-        tableHeaderColor: '#1a1a1a',
-        tableHeaderText: '#ffffff',
-        tableRowEven: '#f9f9f9',
-        tableRowOdd: '#ffffff',
-        footerColor: '#666666',
-      };
-  }
+  const strategy = pdfTemplates.get(template) || pdfTemplates.get('formal')!;
+  return strategy();
 }
 
 export default function registerPdfCommand(program: Command): void {
