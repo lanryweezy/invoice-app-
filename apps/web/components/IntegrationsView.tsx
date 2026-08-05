@@ -31,6 +31,13 @@ const AVAILABLE_INTEGRATIONS: Omit<Integration, 'connected'>[] = [
     icon: '🌍',
   },
   {
+    id: 'remita',
+    name: 'Remita',
+    description: 'Trusted by government and enterprises in Nigeria.',
+    category: 'payment',
+    icon: '🏛️',
+  },
+  {
     id: 'moniepoint',
     name: 'Moniepoint',
     description: 'Business banking & POS. Auto-match payments.',

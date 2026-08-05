@@ -131,6 +131,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                             {(showAllMethods ? [
                                 ...QUICK_METHODS,
                                 { value: 'Flutterwave', icon: '🌊', desc: 'Card / Bank' },
+                                { value: 'Remita', icon: '🏛️', desc: 'TSA / Corporate' },
                                 { value: 'Monnify', icon: '🔗', desc: 'Bank / Card' },
                                 { value: 'Kora', icon: '💳', desc: 'Bank transfer' },
                                 { value: 'Squad', icon: '⚡', desc: 'Instant pay' },

@@ -664,6 +664,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                                         <option value="" className="text-slate-900">Custom / Direct</option>
                                         <option value="Paystack" className="text-slate-900">Paystack</option>
                                         <option value="Flutterwave" className="text-slate-900">Flutterwave</option>
+                                        <option value="Remita" className="text-slate-900">Remita</option>
                                         <option value="Monnify" className="text-slate-900">Monnify</option>
                                         <option value="Kora" className="text-slate-900">Kora</option>
                                         <option value="Squad" className="text-slate-900">Squad</option>
