@@ -8,23 +8,55 @@ import { RecurringInvoice, RecurringFrequency } from '../types';
 import { formatCurrency, formatDate } from '../utils/formatter';
 import { createSpinner, succeed, fail } from '../utils/spinner';
 
-function calculateNextDueDate(startDate: string, interval: RecurringFrequency): string {
+/**
+ * 🔩 Hinge Extension Point: RecurrenceStrategy
+ *
+ * Pressure: The recurring command used a hard-coded switch statement for frequency
+ * ('weekly', 'monthly', 'quarterly', 'yearly'). Adding a new frequency (e.g., 'biweekly')
+ * required modifying the core calculation directly.
+ *
+ * Contract:
+ * - Implementors provide a function that takes a start date (string) and returns
+ *   the next due date (string in YYYY-MM-DD format).
+ */
+export type RecurrenceStrategy = (startDate: string) => string;
+
+const recurrenceStrategies = new Map<string, RecurrenceStrategy>();
+
+export function registerRecurrenceStrategy(frequency: string, strategy: RecurrenceStrategy): void {
+  recurrenceStrategies.set(frequency, strategy);
+}
+
+registerRecurrenceStrategy('weekly', (startDate) => {
   const date = new Date(startDate);
-  switch (interval) {
-    case 'weekly':
-      date.setDate(date.getDate() + 7);
-      break;
-    case 'monthly':
-      date.setMonth(date.getMonth() + 1);
-      break;
-    case 'quarterly':
-      date.setMonth(date.getMonth() + 3);
-      break;
-    case 'yearly':
-      date.setFullYear(date.getFullYear() + 1);
-      break;
-  }
+  date.setDate(date.getDate() + 7);
   return date.toISOString().split('T')[0];
+});
+
+registerRecurrenceStrategy('monthly', (startDate) => {
+  const date = new Date(startDate);
+  date.setMonth(date.getMonth() + 1);
+  return date.toISOString().split('T')[0];
+});
+
+registerRecurrenceStrategy('quarterly', (startDate) => {
+  const date = new Date(startDate);
+  date.setMonth(date.getMonth() + 3);
+  return date.toISOString().split('T')[0];
+});
+
+registerRecurrenceStrategy('yearly', (startDate) => {
+  const date = new Date(startDate);
+  date.setFullYear(date.getFullYear() + 1);
+  return date.toISOString().split('T')[0];
+});
+
+export function calculateNextDueDate(startDate: string, interval: RecurringFrequency | string): string {
+  const strategy = recurrenceStrategies.get(interval);
+  if (!strategy) {
+    throw new Error(`Unsupported recurrence interval: ${interval}`);
+  }
+  return strategy(startDate);
 }
 
 export default function registerRecurringCommands(program: Command) {
