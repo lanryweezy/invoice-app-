@@ -1183,8 +1183,8 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                     InvoiceApp.ng is an accredited Access Point Provider (APP). Real-time transmission ensures your invoices are recognized for tax deductions.
                 </p>
                 <div className="flex justify-center gap-4 pt-2">
-                    <a href="/nrs-compliance-dossier" target="_blank" className="text-[9px] font-bold text-teal-600 hover:text-teal-700 underline">Technical Dossier</a>
-                    <a href="/tools/nrs-readiness-assessment" target="_blank" className="text-[9px] font-bold text-teal-600 hover:text-teal-700 underline">Compliance Readiness Check</a>
+                    <a href="/nrs-compliance-dossier" target="_blank" rel="noopener noreferrer" className="text-[9px] font-bold text-teal-600 hover:text-teal-700 underline">Technical Dossier</a>
+                    <a href="/tools/nrs-readiness-assessment" target="_blank" rel="noopener noreferrer" className="text-[9px] font-bold text-teal-600 hover:text-teal-700 underline">Compliance Readiness Check</a>
                 </div>
             </div>
         </CollapsibleSection>
