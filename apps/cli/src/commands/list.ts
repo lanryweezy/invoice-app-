@@ -98,16 +98,18 @@ export default function registerListCommand(program: Command): void {
           }
 
           if (options.from) {
-            const fromDate = new Date(options.from);
+            const fromDate = Date.parse(options.from);
             invoices = invoices.filter((inv) => 
-              new Date(inv.createdAt || '') >= fromDate
+              // ⚡ Bolt: Parse target date outside loop and use Date.parse inside for O(1) allocation
+              Date.parse(inv.createdAt || '') >= fromDate
             );
           }
 
           if (options.to) {
-            const toDate = new Date(options.to);
+            const toDate = Date.parse(options.to);
             invoices = invoices.filter((inv) => 
-              new Date(inv.createdAt || '') <= toDate
+              // ⚡ Bolt: Parse target date outside loop and use Date.parse inside for O(1) allocation
+              Date.parse(inv.createdAt || '') <= toDate
             );
           }
 
