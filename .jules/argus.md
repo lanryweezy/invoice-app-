@@ -9,3 +9,6 @@
 ## 2026-07-22 - Swallowed invoice sequence generation errors
 **Learning:** `getCurrentSequence()` silently returned 0 on `localStorage.getItem` or JSON parsing errors. This caused all new invoices for affected users to reset to sequence 1 (e.g., `INV-2023-10-0001`), leading to duplicate invoice numbers without leaving any trace of why the sequence reset occurred.
 **Action:** Always capture and log exceptions explicitly in fallback logic for local storage reads to expose underlying initialization failures.
+## 2024-08-05 - Batch email sending silent failure
+**Learning:** The batch sending logic for invoices silently swallowed errors when sending an email failed, preventing any possibility to debug why it failed. Adding structured logs with invoice identifiers surfaces this without interrupting the batch.
+**Action:** Always add structured error logs inside `catch` blocks of individual background tasks/batch items to prevent silent failures.
