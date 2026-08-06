@@ -15,6 +15,7 @@ export interface Mutation {
   docId: string;
   data: any;
   timestamp: number;
+  attempts?: number;
 }
 
 /**
@@ -98,7 +99,16 @@ export const flushQueue = async (): Promise<boolean> => {
           docId: mutation.docId,
           error: err instanceof Error ? err.message : String(err)
         });
-        failedMutations.push(mutation); // Keep failed ones in the queue for next time
+
+        mutation.attempts = (mutation.attempts || 0) + 1;
+        if (mutation.attempts < 5) {
+          failedMutations.push(mutation); // Keep failed ones in the queue for next time
+        } else {
+          trackEvent('sync_item_dropped_max_retries', {
+            collection: mutation.collection,
+            docId: mutation.docId
+          });
+        }
       }
     }
 

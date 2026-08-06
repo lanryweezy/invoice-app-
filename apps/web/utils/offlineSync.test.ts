@@ -162,8 +162,33 @@ describe('offlineSync', () => {
       expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to sync 1', expect.any(Error));
 
       expect(localforage.setItem).toHaveBeenCalledWith('syncQueue', [
-        { id: '1', collection: 'invoices', docId: 'doc-1', data: { val: 1 }, timestamp: 100 }
+        { id: '1', collection: 'invoices', docId: 'doc-1', data: { val: 1 }, timestamp: 100, attempts: 1 }
       ]);
+    });
+
+    it('drops mutation and logs event after 5 failed attempts', async () => {
+      vi.mocked(localforage.getItem).mockResolvedValue([
+        { id: '1', collection: 'invoices', docId: 'doc-1', data: { val: 1 }, timestamp: 100, attempts: 4 }
+      ]);
+      vi.mocked(doc).mockImplementation((db, coll, id) => `${coll}/${id}` as any);
+
+      vi.mocked(setDoc).mockRejectedValueOnce(new Error('Persistent error'));
+
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      const result = await flushQueue();
+
+      // The flush queue should return true if ALL mutations in the newly calculated "failedMutations" array are 0.
+      // Since it dropped the only one, failedMutations is empty, meaning the queue flush is technically "complete"
+      expect(result).toBe(true);
+      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to sync 1', expect.any(Error));
+
+      // Should drop the item, leaving failedMutations empty in storage
+      expect(localforage.setItem).toHaveBeenCalledWith('syncQueue', []);
+      expect(trackEvent).toHaveBeenCalledWith('sync_item_dropped_max_retries', {
+        collection: 'invoices',
+        docId: 'doc-1'
+      });
     });
 
     it('handles non-Error rejections during sync and logs stringified error', async () => {
@@ -182,7 +207,7 @@ describe('offlineSync', () => {
       expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to sync 1', 'Network Failure String');
 
       expect(localforage.setItem).toHaveBeenCalledWith('syncQueue', [
-        { id: '1', collection: 'invoices', docId: 'doc-1', data: { val: 1 }, timestamp: 100 }
+        { id: '1', collection: 'invoices', docId: 'doc-1', data: { val: 1 }, timestamp: 100, attempts: 1 }
       ]);
     });
 
@@ -212,7 +237,7 @@ describe('offlineSync', () => {
 
       // Failed mutation is retained in the queue for retry
       expect(localforage.setItem).toHaveBeenCalledWith('syncQueue', [
-        { id: '1', collection: 'invoices', docId: 'doc-1', data: { val: 1 }, timestamp: 100 }
+        { id: '1', collection: 'invoices', docId: 'doc-1', data: { val: 1 }, timestamp: 100, attempts: 1 }
       ]);
     });
 
