@@ -68,11 +68,15 @@ export default function registerTaxReportCommand(program: Command) {
         const db = getDb();
         const snapshot = await db.collection('users').doc(uid).collection('invoices').get();
 
+        const startTimestamp = startDate.getTime();
+        const endTimestamp = endDate.getTime();
+
         const invoices: Invoice[] = [];
         snapshot.forEach((doc) => {
           const inv = { id: doc.id, ...doc.data() } as Invoice;
-          const issueDate = new Date(inv.issueDate);
-          if (issueDate >= startDate && issueDate <= endDate) {
+          // ⚡ Bolt: Use Date.parse instead of new Date() in the map/filter loop to prevent object allocation
+          const issueTimestamp = Date.parse(inv.issueDate);
+          if (issueTimestamp >= startTimestamp && issueTimestamp <= endTimestamp) {
             invoices.push(inv);
           }
         });

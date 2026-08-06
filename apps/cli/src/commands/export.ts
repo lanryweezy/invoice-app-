@@ -94,13 +94,16 @@ export default function registerExportCommand(program: Command) {
         });
 
         if (options.from) {
-          const fromDate = new Date(options.from);
-          invoices = invoices.filter((inv) => new Date(inv.issueDate) >= fromDate);
+          const fromDate = Date.parse(options.from);
+          // ⚡ Bolt: Use Date.parse in loop rather than new Date() for performance
+          invoices = invoices.filter((inv) => Date.parse(inv.issueDate) >= fromDate);
         }
         if (options.to) {
-          const toDate = new Date(options.to);
-          toDate.setHours(23, 59, 59, 999);
-          invoices = invoices.filter((inv) => new Date(inv.issueDate) <= toDate);
+          const toDateObj = new Date(options.to);
+          toDateObj.setHours(23, 59, 59, 999);
+          const toDate = toDateObj.getTime();
+          // ⚡ Bolt: Use Date.parse in loop rather than new Date() for performance
+          invoices = invoices.filter((inv) => Date.parse(inv.issueDate) <= toDate);
         }
         if (options.status) {
           invoices = invoices.filter(
