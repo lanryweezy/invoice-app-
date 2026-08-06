@@ -5,6 +5,7 @@ import { InvoiceForm } from './components/InvoiceForm';
 import { ActionButtons } from './components/ActionButtons';
 import { EmailModal } from './components/EmailModal';
 import { useInvoice } from './hooks/useInvoice';
+import { getTodayISODate } from './utils/date';
 import { generateEmailTemplate, type EmailTemplateType } from './utils/emailGenerator';
 import { generateSequentialInvoiceNumber } from './utils/invoiceSequence';
 import type { Invoice, TemplateId, Client } from './types';
@@ -861,7 +862,7 @@ const App: React.FC = () => {
                     onGenerateNext={(inv) => {
                         setInvoice({
                             ...inv,
-                            issueDate: new Date().toISOString().split('T')[0],
+                            issueDate: getTodayISODate(),
                             invoiceNumber: generateSequentialInvoiceNumber()
                         });
                         setActiveView('editor');

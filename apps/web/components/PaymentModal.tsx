@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { Invoice } from '../types';
+import { getTodayISODate } from '../utils/date';
 import { numberFormatter } from '../utils/formatters';
 
 interface PaymentModalProps {
@@ -22,7 +23,7 @@ const QUICK_METHODS = [
 export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSubmit, invoice, totalAmount }) => {
     const [paymentMethod, setPaymentMethod] = useState('Bank Transfer');
     const [transactionReference, setTransactionReference] = useState('');
-    const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
+    const [paymentDate, setPaymentDate] = useState(getTodayISODate());
     const [amountPaid, setAmountPaid] = useState(totalAmount);
     const [showAllMethods, setShowAllMethods] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -39,7 +40,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
             setAmountPaid(totalAmount);
             setPaymentMethod('Bank Transfer');
             setTransactionReference('');
-            setPaymentDate(new Date().toISOString().split('T')[0]);
+            setPaymentDate(getTodayISODate());
             setShowAllMethods(false);
             setLoading(false);
         }

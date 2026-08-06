@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import type { Invoice } from '../types';
+import { getTodayISODate } from '../utils/date';
 import {
   checkCompliance,
   getOverallComplianceStats,
@@ -94,7 +95,7 @@ export const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `compliance_report_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `compliance_report_${getTodayISODate()}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -107,7 +108,7 @@ export const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `compliance_report_${new Date().toISOString().split('T')[0]}.json`);
+    link.setAttribute('download', `compliance_report_${getTodayISODate()}.json`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
