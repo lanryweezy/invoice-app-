@@ -42,6 +42,9 @@ describe('pushNotifications', () => {
 
   describe('requestNotificationPermission', () => {
     it('returns denied if Notification is not in window', async () => {
+      // In JS DOM, Notification is part of the global window object.
+      // We can use vi.stubGlobal and set Notification to undefined to test the fallback.
+      // We also need to store and replace window since 'in window' check looks at properties
       const originalNotification = window.Notification;
       // @ts-ignore
       delete window.Notification;
@@ -56,27 +59,28 @@ describe('pushNotifications', () => {
     });
 
     it('requests permission if Notification is supported', async () => {
-      vi.stubGlobal('Notification', {
-        requestPermission: vi.fn().mockResolvedValue('granted'),
-      });
+      const mockNotification = vi.fn() as any;
+      mockNotification.requestPermission = vi.fn().mockResolvedValue('granted');
+      vi.stubGlobal('Notification', mockNotification);
 
       const result = await requestNotificationPermission();
       expect(result).toBe('granted');
-      expect(window.Notification.requestPermission).toHaveBeenCalled();
+      expect(mockNotification.requestPermission).toHaveBeenCalled();
     });
   });
 
   describe('subscribeToPushNotifications', () => {
+    let mockNotification: any;
+
     beforeEach(() => {
-      vi.stubGlobal('Notification', {
-        requestPermission: vi.fn().mockResolvedValue('granted'),
-      });
+      mockNotification = vi.fn() as any;
+      mockNotification.requestPermission = vi.fn().mockResolvedValue('granted');
+      vi.stubGlobal('Notification', mockNotification);
       vi.stubGlobal('navigator', { userAgent: 'test-agent' });
     });
 
     it('returns false if permission is denied', async () => {
-      // @ts-ignore
-      window.Notification.requestPermission.mockResolvedValue('denied');
+      mockNotification.requestPermission.mockResolvedValue('denied');
       const result = await subscribeToPushNotifications('user-1');
       expect(result).toBe(false);
     });
@@ -199,7 +203,7 @@ describe('pushNotifications', () => {
     let mockNotificationClass: any;
 
     beforeEach(() => {
-      mockNotificationClass = vi.fn();
+      mockNotificationClass = vi.fn() as any;
       mockNotificationClass.permission = 'granted';
       vi.stubGlobal('Notification', mockNotificationClass);
     });
