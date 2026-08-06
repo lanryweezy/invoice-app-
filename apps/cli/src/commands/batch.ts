@@ -4,22 +4,11 @@ import ora from 'ora';
 import { ensureAuthenticated, getConfig } from '../lib/config';
 import { getDb } from '../lib/firebase-client';
 import { Invoice } from '../types';
+import { generateEmailContent } from '../utils/email-templates';
 import { createSpinner, succeed, fail } from '../utils/spinner';
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function buildEmailBody(invoice: Invoice, template: string): string {
-  const amount = (invoice.total || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 });
-  switch (template) {
-    case 'formal':
-      return `Dear ${invoice.client.name},\n\nPlease find attached invoice ${invoice.invoiceNumber} for ${invoice.currency} ${amount}.\n\nPayment is due by ${invoice.dueDate}.\n\nKindly remit payment to the bank details on the invoice.\n\nThank you.`;
-    case 'overdue':
-      return `Dear ${invoice.client.name},\n\nThis is a reminder that invoice ${invoice.invoiceNumber} for ${invoice.currency} ${amount} is now overdue.\n\nPlease make payment as soon as possible to avoid further charges.\n\nThank you.`;
-    default:
-      return `Dear ${invoice.client.name},\n\nInvoice ${invoice.invoiceNumber} for ${invoice.currency} ${amount} is attached.\n\nDue date: ${invoice.dueDate}.\n\nThank you.`;
-  }
 }
 
 async function sendInvoiceEmail(invoice: Invoice, template: string): Promise<boolean> {
@@ -37,11 +26,13 @@ async function sendInvoiceEmail(invoice: Invoice, template: string): Promise<boo
       auth: { user: config.smtp.user, pass: config.smtp.pass },
     });
 
+    const { subject, body } = generateEmailContent(invoice, template, config);
+
     await transporter.sendMail({
       from: config.smtp.user,
       to: invoice.client.email,
-      subject: `Invoice ${invoice.invoiceNumber}`,
-      text: buildEmailBody(invoice, template),
+      subject,
+      text: body,
     });
     return true;
   } catch (error: any) {
