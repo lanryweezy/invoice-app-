@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import type { Expense, Invoice } from '../types';
+import { getTodayISODate } from '../utils/date';
 import { numberFormatter } from '../utils/formatters';
 
 const EXPENSE_CATEGORIES = [
@@ -227,7 +228,7 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
     const blob = new Blob([csvContent.join("\n")], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `invoiceapp_${type}_${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `invoiceapp_${type}_${getTodayISODate()}.csv`;
     link.click();
   };
 
@@ -261,7 +262,7 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
     const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `invoiceapp_pnl_${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `invoiceapp_pnl_${getTodayISODate()}.csv`;
     link.click();
   };
 
@@ -271,7 +272,7 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
     if (!isPro && expenses.length >= 5) { onUpgrade?.(); return; }
     setIsSubmitting(true);
     try {
-      await Promise.resolve(onAddExpense({ description: desc, amount: Number(amount), date: new Date().toISOString().split('T')[0], category, vendor }));
+      await Promise.resolve(onAddExpense({ description: desc, amount: Number(amount), date: getTodayISODate(), category, vendor }));
       setDesc(''); setAmount(''); setCategory(''); setVendor('');
     } finally {
       setIsSubmitting(false);

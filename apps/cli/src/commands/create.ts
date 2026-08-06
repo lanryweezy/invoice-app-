@@ -6,7 +6,7 @@ import { writeDoc, getDb } from '../lib/firebase-client';
 import { createSpinner, succeed, fail } from '../utils/spinner';
 import { createInvoice, CreateInvoiceData } from '../lib/invoice-builder';
 import { Invoice, LineItem } from '../types';
-import { formatCurrency } from '../utils/formatter';
+import { formatCurrency, getTodayISODate } from '../utils/formatter';
 
 export default function registerCreateCommand(program: Command): void {
   program
@@ -110,7 +110,7 @@ export default function registerCreateCommand(program: Command): void {
               address: '',
             },
             lineItems: items,
-            issueDate: new Date().toISOString().split('T')[0],
+            issueDate: getTodayISODate(),
             dueDate: options.dueDate,
             notes: options.notes || '',
             taxRate: parseFloat(options.taxRate),

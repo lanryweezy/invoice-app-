@@ -30,6 +30,10 @@ export function formatDateISO(date: string): string {
   return `${year}-${month}-${day}`;
 }
 
+export function getTodayISODate(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
 export function parseItemsString(items: string): { description: string; amount: number }[] {
   if (!items) return [];
   return items.split(',').map((item) => {
