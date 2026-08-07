@@ -1,4 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { trackEvent } from '../utils/analytics';
+
+vi.mock('../utils/analytics', () => ({
+  trackEvent: vi.fn(),
+}));
+
 import {
   requestNotificationPermission,
   subscribeToPushNotifications,
@@ -109,9 +115,19 @@ describe('pushNotifications', () => {
     });
 
     it('catches and returns false if an error is thrown', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       vi.mocked(getToken).mockRejectedValue(new Error('Network error'));
       const result = await subscribeToPushNotifications('user-1');
       expect(result).toBe(false);
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to subscribe to push notifications', {
+        event: 'push.subscribe.failed',
+        userId: 'user-1',
+        error: 'Network error',
+      });
+      expect(trackEvent).toHaveBeenCalledWith('push_notification_subscribe_failed', {
+        user_id: 'user-1',
+        error: 'Network error',
+      });
     });
   });
 
@@ -139,9 +155,19 @@ describe('pushNotifications', () => {
     });
 
     it('returns false if an error is thrown during unsubscription', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       vi.mocked(getDoc).mockRejectedValue(new Error('Network error'));
       const result = await unsubscribeFromPushNotifications('user-1');
       expect(result).toBe(false);
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to unsubscribe from push notifications', {
+        event: 'push.unsubscribe.failed',
+        userId: 'user-1',
+        error: 'Network error',
+      });
+      expect(trackEvent).toHaveBeenCalledWith('push_notification_unsubscribe_failed', {
+        user_id: 'user-1',
+        error: 'Network error',
+      });
     });
   });
 
