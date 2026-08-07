@@ -7,6 +7,16 @@ import { Client } from '../types';
 import { createClientTable, printTable } from '../utils/table';
 import { createSpinner, succeed, fail } from '../utils/spinner';
 
+async function findClientByName(uid: string, name: string): Promise<Client | undefined> {
+  const db = getDb();
+  const snapshot = await db.collection('users').doc(uid).collection('clients').get();
+  const clients: Client[] = [];
+  snapshot.forEach((doc) => {
+    clients.push({ id: doc.id, ...doc.data() } as Client);
+  });
+  return clients.find((c) => c.name.toLowerCase().includes(name.toLowerCase()));
+}
+
 export function registerClientCommands(program: Command): void {
   const client = program
     .command('client')
@@ -103,13 +113,7 @@ export function registerClientCommands(program: Command): void {
         const uid = config.userId!;
         const spinner = createSpinner('Searching for client...');
 
-        const db = getDb();
-        const snapshot = await db.collection('users').doc(uid).collection('clients').get();
-        const clients: Client[] = [];
-        snapshot.forEach((doc) => {
-          clients.push({ id: doc.id, ...doc.data() } as Client);
-        });
-        const found = clients.find((c) => c.name.toLowerCase().includes(name.toLowerCase()));
+        const found = await findClientByName(uid, name);
 
         if (!found) {
           fail(spinner, chalk.red(`No client found matching "${name}"`));
@@ -143,17 +147,9 @@ export function registerClientCommands(program: Command): void {
         const uid = config.userId!;
         const spinner = createSpinner('Searching for client...');
 
-        const db = getDb();
-        const snapshot = await db.collection('users').doc(uid).collection('clients').get();
-        const clients: Client[] = [];
-        const docIds: string[] = [];
-        snapshot.forEach((doc) => {
-          clients.push({ id: doc.id, ...doc.data() } as Client);
-          docIds.push(doc.id);
-        });
-        const idx = clients.findIndex((c) => c.name.toLowerCase().includes(name.toLowerCase()));
+        const found = await findClientByName(uid, name);
 
-        if (idx === -1) {
+        if (!found) {
           fail(spinner, chalk.red(`No client found matching "${name}"`));
           return;
         }
@@ -163,8 +159,9 @@ export function registerClientCommands(program: Command): void {
         if (options.phone) updates.phone = options.phone;
         if (options.address) updates.address = options.address;
 
-        await db.collection('users').doc(uid).collection('clients').doc(docIds[idx]).update(updates);
-        succeed(spinner, chalk.green(`✓ Client "${clients[idx].name}" updated successfully`));
+        const db = getDb();
+        await db.collection('users').doc(uid).collection('clients').doc(found.id!).update(updates);
+        succeed(spinner, chalk.green(`✓ Client "${found.name}" updated successfully`));
       } catch (error: any) {
         console.error(chalk.red('Failed to update client:'), error.message);
         process.exit(1);
@@ -180,17 +177,9 @@ export function registerClientCommands(program: Command): void {
         const uid = config.userId!;
         const spinner = createSpinner('Searching for client...');
 
-        const db = getDb();
-        const snapshot = await db.collection('users').doc(uid).collection('clients').get();
-        const clients: Client[] = [];
-        const docIds: string[] = [];
-        snapshot.forEach((doc) => {
-          clients.push({ id: doc.id, ...doc.data() } as Client);
-          docIds.push(doc.id);
-        });
-        const idx = clients.findIndex((c) => c.name.toLowerCase().includes(name.toLowerCase()));
+        const found = await findClientByName(uid, name);
 
-        if (idx === -1) {
+        if (!found) {
           fail(spinner, chalk.red(`No client found matching "${name}"`));
           return;
         }
@@ -199,7 +188,7 @@ export function registerClientCommands(program: Command): void {
           {
             type: 'confirm',
             name: 'confirm',
-            message: `Are you sure you want to delete "${clients[idx].name}"?`,
+            message: `Are you sure you want to delete "${found.name}"?`,
             default: false,
           },
         ]);
@@ -209,8 +198,9 @@ export function registerClientCommands(program: Command): void {
           return;
         }
 
-        await db.collection('users').doc(uid).collection('clients').doc(docIds[idx]).delete();
-        succeed(spinner, chalk.green(`✓ Client "${clients[idx].name}" deleted successfully`));
+        const db = getDb();
+        await db.collection('users').doc(uid).collection('clients').doc(found.id!).delete();
+        succeed(spinner, chalk.green(`✓ Client "${found.name}" deleted successfully`));
       } catch (error: any) {
         console.error(chalk.red('Failed to delete client:'), error.message);
         process.exit(1);
