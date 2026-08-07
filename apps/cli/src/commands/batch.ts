@@ -24,6 +24,9 @@ async function sendInvoiceEmail(invoice: Invoice, template: string): Promise<boo
       port: config.smtp.port || 587,
       secure: config.smtp.secure || false,
       auth: { user: config.smtp.user, pass: config.smtp.pass },
+      // 🌱 Flora: Add timeouts to prevent indefinite hangs if the external SMTP server is unresponsive
+      connectionTimeout: 10000,
+      socketTimeout: 15000,
     });
 
     const { subject, body } = generateEmailContent(invoice, template, config);
