@@ -42,7 +42,7 @@ export const BranchesManager: React.FC<BranchesManagerProps> = ({ isPro = false,
                 <label htmlFor="branch-address" className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider cursor-pointer">Address</label>
                 <textarea id="branch-address" rows={3} value={newBranch.address} onChange={e => setNewBranch({...newBranch, address: e.target.value})} className="w-full p-2.5 bg-white border border-slate-200 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition-all text-sm font-semibold resize-none" placeholder="Full address..." required />
              </div>
-             <button type="submit" className="w-full py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-teal-700 active:scale-[0.98] transition-colors shadow-lg">Save Location</button>
+             <button type="submit" className="w-full py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-teal-700 active:scale-[0.98] transition-colors shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2">Save Location</button>
           </form>
         </div>
 
@@ -78,7 +78,7 @@ export const BranchesManager: React.FC<BranchesManagerProps> = ({ isPro = false,
              {!isPro && (
                  <div className="p-5 bg-teal-50 border border-teal-100 rounded-2xl flex flex-col items-center justify-center text-center mt-4">
                      <p className="text-sm font-medium text-teal-800 mb-3">Growing fast? Add unlimited branches.</p>
-                     <button onClick={onUpgrade} className="px-4 py-2 bg-white text-teal-600 border border-teal-200 hover:bg-teal-50 font-bold rounded-lg text-xs transition-colors">
+                     <button onClick={onUpgrade} className="px-4 py-2 bg-white text-teal-600 border border-teal-200 hover:bg-teal-50 font-bold rounded-lg text-xs transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:scale-[0.98]">
                         Unlock Multiple Locations
                      </button>
                  </div>
