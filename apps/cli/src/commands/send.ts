@@ -56,6 +56,9 @@ export default function registerSendCommand(program: Command): void {
               user: config.smtp.user,
               pass: config.smtp.pass,
             },
+            // 🌱 Flora: Add timeouts to prevent indefinite hangs if the external SMTP server is unresponsive
+            connectionTimeout: 10000,
+            socketTimeout: 15000,
           });
 
           const { subject: generatedSubject, body: emailBody } = generateEmailContent(invoice, options.template, config);
