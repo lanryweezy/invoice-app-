@@ -107,7 +107,7 @@ export interface Invoice {
   proformaId?: string;
 }
 
-export type TemplateId = 'classic' | 'modern' | 'bold' | 'minimalist' | 'professional' | 'elegant' | 'tech';
+export type TemplateId = 'classic' | 'modern' | 'bold' | 'minimalist' | 'professional' | 'elegant' | 'tech' | (string & {});
 
 export interface ClientPortalLink {
   token: string;
