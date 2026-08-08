@@ -61,7 +61,12 @@ async function sendPushNotification(userId, title, body, url) {
     await admin.messaging().send(message);
     return true;
   } catch (error) {
-    console.error('Push notification failed:', error);
+    console.error('Push notification failed', {
+      event: 'push.send.failed',
+      userId,
+      errorCode: error.code,
+      errorMessage: error.message
+    });
     if (error.code === 'messaging/registration-token-not-registered') {
       await subRef.delete();
     }
