@@ -318,7 +318,7 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({ isOpen, on
                       placeholder="App password (not your regular password)" className="w-full rounded-lg border-slate-300 text-sm focus:border-teal-500 focus:ring-teal-500 pr-16" />
                     <button type="button" onClick={() => setShowPassword(!showPassword)}
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400 hover:text-slate-600 px-2 py-1">
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400 hover:text-slate-600 px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1 rounded">
                       {showPassword ? 'Hide' : 'Show'}
                     </button>
                   </div>
