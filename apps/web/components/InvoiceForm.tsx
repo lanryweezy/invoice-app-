@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import type { Invoice, LineItem, Currency, InvoiceStatus, Client } from '../types';
 import { getCurrencyFormatter } from '../utils/formatters';
+import { getAllPaymentMethods } from '../utils/paymentMethodRegistry';
 import { TrashIcon, PlusIcon, UploadIcon, ChevronDownIcon, ChevronUpIcon, EmptyBoxIcon, SaveIcon, UserIcon, MailIcon, MapPinIcon, BriefcaseIcon, BankIcon, HashIcon, WalletIcon, CalendarIcon, InfoIcon, SparklesIcon, ListIcon, PhoneIcon } from './Icons';
 
 interface InvoiceFormProps {
@@ -662,15 +663,11 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                                         className="bg-transparent border-b border-white/20 w-full text-white font-semibold focus:outline-none focus:border-teal-400 transition-colors py-1 text-sm appearance-none cursor-pointer"
                                     >
                                         <option value="" className="text-slate-900">Custom / Direct</option>
-                                        <option value="Paystack" className="text-slate-900">Paystack</option>
-                                        <option value="Flutterwave" className="text-slate-900">Flutterwave</option>
-                                        <option value="Remita" className="text-slate-900">Remita</option>
-                                        <option value="Monnify" className="text-slate-900">Monnify</option>
-                                        <option value="Kora" className="text-slate-900">Kora</option>
-                                        <option value="Squad" className="text-slate-900">Squad</option>
-                                        <option value="Interswitch" className="text-slate-900">Interswitch</option>
-                                        <option value="OPay" className="text-slate-900">OPay</option>
-                                        <option value="Fincra" className="text-slate-900">Fincra</option>
+                                        {getAllPaymentMethods().map((method) => (
+                                            <option key={method.value} value={method.value} className="text-slate-900">
+                                                {method.name}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
                                 <div>

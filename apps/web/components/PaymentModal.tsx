@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { Invoice } from '../types';
 import { getTodayISODate } from '../utils/date';
 import { numberFormatter } from '../utils/formatters';
+import { getAllPaymentMethods, getQuickPaymentMethods } from '../utils/paymentMethodRegistry';
 
 interface PaymentModalProps {
     isOpen: boolean;
@@ -10,15 +11,6 @@ interface PaymentModalProps {
     invoice: Invoice;
     totalAmount: number;
 }
-
-const QUICK_METHODS = [
-    { value: 'Bank Transfer', icon: '🏦', desc: 'Direct bank transfer' },
-    { value: 'Paystack', icon: '💳', desc: 'Card / USSD / Bank' },
-    { value: 'Flutterwave', icon: '🌊', desc: 'Card / Bank / Mobile' },
-    { value: 'Cash', icon: '💵', desc: 'Physical cash' },
-    { value: 'OPay', icon: '📱', desc: 'OPay wallet' },
-    { value: 'Other', icon: '📋', desc: 'Other method' },
-];
 
 export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSubmit, invoice, totalAmount }) => {
     const [paymentMethod, setPaymentMethod] = useState('Bank Transfer');
@@ -129,16 +121,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                     <div>
                         <label className="block text-xs font-semibold text-slate-700 mb-1">Payment Method</label>
                         <div className="grid grid-cols-3 gap-1.5">
-                            {(showAllMethods ? [
-                                ...QUICK_METHODS,
-                                { value: 'Flutterwave', icon: '🌊', desc: 'Card / Bank' },
-                                { value: 'Remita', icon: '🏛️', desc: 'TSA / Corporate' },
-                                { value: 'Monnify', icon: '🔗', desc: 'Bank / Card' },
-                                { value: 'Kora', icon: '💳', desc: 'Bank transfer' },
-                                { value: 'Squad', icon: '⚡', desc: 'Instant pay' },
-                                { value: 'Interswitch', icon: '🔄', desc: 'Card / Bank' },
-                                { value: 'Fincra', icon: '💰', desc: 'Business pay' },
-                            ] : QUICK_METHODS).map(m => (
+                            {(showAllMethods ? getAllPaymentMethods() : getQuickPaymentMethods()).map(m => (
                                 <button
                                     key={m.value}
                                     type="button"
