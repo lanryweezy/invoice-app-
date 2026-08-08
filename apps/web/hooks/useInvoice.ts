@@ -307,7 +307,8 @@ const useEntityManagement = (
         newClients.sort((a, b) => a.name.localeCompare(b.name));
 
         localStorage.setItem('invoiceSavedClients', JSON.stringify(newClients));
-        syncToCloud({ savedClients: newClients });
+        // 🌱 Flora: Catch floating promise rejections in state setters to prevent silent failures
+        syncToCloud({ savedClients: newClients }).catch(console.error);
         return newClients;
     });
     return true;
@@ -319,7 +320,7 @@ const useEntityManagement = (
         // For simplicity, we just add it to the list.
         const updated = [...prev, invoiceToSave];
         localStorage.setItem('invoiceRecurring', JSON.stringify(updated));
-        syncToCloud({ recurringInvoices: updated });
+        syncToCloud({ recurringInvoices: updated }).catch(console.error);
         return updated;
     });
   }, [syncToCloud, setRecurringInvoices]);
@@ -328,7 +329,7 @@ const useEntityManagement = (
       setRecurringInvoices(prev => {
           const updated = prev.filter((_, i) => i !== index);
           localStorage.setItem('invoiceRecurring', JSON.stringify(updated));
-          syncToCloud({ recurringInvoices: updated });
+          syncToCloud({ recurringInvoices: updated }).catch(console.error);
           return updated;
       });
   }, [syncToCloud, setRecurringInvoices]);
@@ -338,7 +339,7 @@ const useEntityManagement = (
           const updated = [...prev];
           updated[index] = { ...updated[index], recurringIsActive: isActive };
           localStorage.setItem('invoiceRecurring', JSON.stringify(updated));
-          syncToCloud({ recurringInvoices: updated });
+          syncToCloud({ recurringInvoices: updated }).catch(console.error);
           return updated;
       });
   }, [syncToCloud, setRecurringInvoices]);
@@ -361,7 +362,7 @@ const useEntityManagement = (
           newProfiles.sort((a, b) => a.name.localeCompare(b.name));
 
           localStorage.setItem('invoiceBusinessProfiles', JSON.stringify(newProfiles));
-          syncToCloud({ businessProfiles: newProfiles });
+          syncToCloud({ businessProfiles: newProfiles }).catch(console.error);
           return newProfiles;
       });
       return true;
@@ -371,7 +372,7 @@ const useEntityManagement = (
       setBusinessProfiles(prev => {
           const newProfiles = prev.filter(p => p.id !== id);
           localStorage.setItem('invoiceBusinessProfiles', JSON.stringify(newProfiles));
-          syncToCloud({ businessProfiles: newProfiles });
+          syncToCloud({ businessProfiles: newProfiles }).catch(console.error);
           return newProfiles;
       });
   }, [syncToCloud, setBusinessProfiles]);
@@ -389,7 +390,7 @@ const useEntityManagement = (
         }
 
         localStorage.setItem('invoiceHistory', JSON.stringify(newInvoices));
-        syncToCloud({ savedInvoices: newInvoices });
+        syncToCloud({ savedInvoices: newInvoices }).catch(console.error);
         return newInvoices;
     });
   }, [syncToCloud, setSavedInvoices]);
