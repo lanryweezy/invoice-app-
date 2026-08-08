@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../services/firebase';
 import { doc, onSnapshot, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
@@ -21,35 +21,35 @@ const AVAILABLE_INTEGRATIONS: Omit<Integration, 'connected'>[] = [
     name: 'Paystack',
     description: 'Accept card & bank transfers. Most popular in Nigeria.',
     category: 'payment',
-    icon: '💳',
+    icon: 'ðŸ’³',
   },
   {
     id: 'flutterwave',
     name: 'Flutterwave',
     description: 'Pan-African payment gateway. Multi-currency support.',
     category: 'payment',
-    icon: '🌍',
+    icon: 'ðŸŒ',
   },
   {
     id: 'remita',
     name: 'Remita',
     description: 'Trusted by government and enterprises in Nigeria.',
     category: 'payment',
-    icon: '🏛️',
+    icon: 'ðŸ›ï¸',
   },
   {
     id: 'moniepoint',
     name: 'Moniepoint',
     description: 'Business banking & POS. Auto-match payments.',
     category: 'payment',
-    icon: '🏦',
+    icon: 'ðŸ¦',
   },
   {
     id: 'opay',
     name: 'OPay',
     description: 'Mobile money & transfers. Huge user base.',
     category: 'payment',
-    icon: '📱',
+    icon: 'ðŸ“±',
   },
   // Payment - Global
   {
@@ -57,14 +57,14 @@ const AVAILABLE_INTEGRATIONS: Omit<Integration, 'connected'>[] = [
     name: 'Stripe',
     description: 'Global payment processing. Cards & wallets.',
     category: 'payment',
-    icon: '💰',
+    icon: 'ðŸ’°',
   },
   {
     id: 'paypal',
     name: 'PayPal',
     description: 'Global payments. Buyer protection included.',
     category: 'payment',
-    icon: '🅿️',
+    icon: 'ðŸ…¿ï¸',
   },
   // Accounting
   {
@@ -72,21 +72,21 @@ const AVAILABLE_INTEGRATIONS: Omit<Integration, 'connected'>[] = [
     name: 'QuickBooks',
     description: 'Sync invoices & payments automatically.',
     category: 'accounting',
-    icon: '📊',
+    icon: 'ðŸ“Š',
   },
   {
     id: 'xero',
     name: 'Xero',
     description: 'Cloud accounting. Real-time financial data.',
     category: 'accounting',
-    icon: '📈',
+    icon: 'ðŸ“ˆ',
   },
   {
     id: 'wave',
     name: 'Wave',
     description: 'Free accounting software. Perfect for startups.',
     category: 'accounting',
-    icon: '🌊',
+    icon: 'ðŸŒŠ',
   },
   // E-Commerce
   {
@@ -94,7 +94,7 @@ const AVAILABLE_INTEGRATIONS: Omit<Integration, 'connected'>[] = [
     name: 'Shopify',
     description: 'Auto-create invoices from store orders.',
     category: 'ecommerce',
-    icon: '🛒',
+    icon: 'ðŸ›’',
     ComingSoon: true,
   },
   {
@@ -102,7 +102,7 @@ const AVAILABLE_INTEGRATIONS: Omit<Integration, 'connected'>[] = [
     name: 'WooCommerce',
     description: 'WordPress e-commerce integration.',
     category: 'ecommerce',
-    icon: '🛍️',
+    icon: 'ðŸ›ï¸',
     ComingSoon: true,
   },
   // Productivity
@@ -111,21 +111,21 @@ const AVAILABLE_INTEGRATIONS: Omit<Integration, 'connected'>[] = [
     name: 'Zapier',
     description: 'Connect to 1000+ apps. Automate workflows.',
     category: 'productivity',
-    icon: '⚡',
+    icon: 'âš¡',
   },
   {
     id: 'google',
     name: 'Google Workspace',
     description: 'Sync contacts, drive, and calendar.',
     category: 'productivity',
-    icon: '📎',
+    icon: 'ðŸ“Ž',
   },
   {
     id: 'slack',
     name: 'Slack',
     description: 'Get invoice notifications in your workspace.',
     category: 'productivity',
-    icon: '💬',
+    icon: 'ðŸ’¬',
   },
 ];
 
@@ -212,7 +212,17 @@ export const IntegrationsView: React.FC<{ onUpgrade: () => void }> = ({ onUpgrad
     : integrations.filter(i => i.category === activeCategory);
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto relative ">
+           {!isPro && (
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-4 bg-white/40 backdrop-blur-[2px] rounded-2xl">
+                 <div className="bg-white p-6 rounded-xl shadow-lg border border-teal-100 text-center max-w-sm mx-auto">
+                    <p className="text-lg font-bold text-slate-900 mb-2">Connect InvoiceApp to the tools you already use</p>
+                    <p className="text-sm text-slate-500 mb-4">Your invoices shouldn’t live alone. Plug into your accounting, CRM, and payment tools so everything updates itself.</p>
+                    <button onClick={onUpgrade} type="button" className="px-4 py-3 bg-teal-600 text-white rounded-xl text-sm font-bold w-full hover:bg-teal-700 shadow-md mb-3">Unlock Integrations</button>
+                 </div>
+              </div>
+           )}
+           <div className={` ${!isPro ? 'pointer-events-none' : ''}`}>
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900 mb-2">Integrations</h1>
@@ -317,7 +327,7 @@ export const IntegrationsView: React.FC<{ onUpgrade: () => void }> = ({ onUpgrad
           We're constantly adding new integrations. Let us know what you need and we'll prioritize it.
         </p>
         <button className="text-sm font-medium text-teal-600 hover:text-teal-700">
-          Request Integration →
+          Request Integration â†’
         </button>
       </div>
 
@@ -325,7 +335,7 @@ export const IntegrationsView: React.FC<{ onUpgrade: () => void }> = ({ onUpgrad
         <PremiumGate
           isModal
           title="Connect InvoiceApp to the tools you already use."
-          subhead="Your invoices shouldn’t live alone. Plug into your accounting, CRM, and payment tools so everything updates itself."
+          subhead="Your invoices shouldnâ€™t live alone. Plug into your accounting, CRM, and payment tools so everything updates itself."
           bullets={[
             "Sync paid invoices to your accounting tool.",
             "Log payments in your CRM automatically.",
@@ -341,6 +351,8 @@ export const IntegrationsView: React.FC<{ onUpgrade: () => void }> = ({ onUpgrad
           onSecondaryClick={() => setShowGate(false)}
         />
       )}
+      </div>
     </div>
   );
 };
+

@@ -4,7 +4,7 @@ import { numberFormatter } from '../utils/formatters';
 import { PremiumGate } from './PremiumGate';
 
 /**
- * 🔩 Hinge Extension Point: RecurringFrequencyStrategy
+ * ðŸ”© Hinge Extension Point: RecurringFrequencyStrategy
  *
  * Pressure: The `RecurringManager` component had hardcoded maps for colors/labels,
  * and switch statements in `getNextDueDate` and `monthlyEstimate` that needed
@@ -108,14 +108,14 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
     return (
       <PremiumGate
         title="Turn your best clients into automatic monthly income."
-        subhead="Sleep knowing next month’s invoices are already scheduled."
+        subhead="Sleep knowing next monthâ€™s invoices are already scheduled."
         bullets={[
-          "Auto‑send on your chosen date",
+          "Autoâ€‘send on your chosen date",
           "No more forgetting renewals",
           "See predictable monthly revenue"
         ]}
         primaryCta="Unlock Recurring"
-        secondaryCta="Send a one‑time invoice"
+        secondaryCta="Send a oneâ€‘time invoice"
         onPrimaryClick={onUpgrade || (() => {})}
         onSecondaryClick={onGoToEditor || (() => {})}
       />
@@ -123,7 +123,23 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-6">
+    <div className="max-w-5xl mx-auto p-6 space-y-6 relative ">
+           {!isPro && (
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-4 bg-white/40 backdrop-blur-[2px] rounded-2xl">
+                 <div className="bg-white p-6 rounded-xl shadow-lg border border-teal-100 text-center max-w-sm mx-auto">
+                    <p className="text-lg font-bold text-slate-900 mb-2">Turn your best clients into automatic monthly income</p>
+                    <p className="text-sm text-slate-500 mb-4">Sleep knowing next month’s invoices are already scheduled.</p>
+                    <ul className="text-left text-sm text-slate-600 mb-6 space-y-2">
+                        <li className="flex items-center gap-2">? Auto-send on your chosen date</li>
+                        <li className="flex items-center gap-2">? No more forgetting renewals</li>
+                        <li className="flex items-center gap-2">? See predictable monthly revenue</li>
+                    </ul>
+                    <button onClick={onUpgrade} type="button" className="px-4 py-3 bg-teal-600 text-white rounded-xl text-sm font-bold w-full hover:bg-teal-700 shadow-md mb-3">Unlock Recurring</button>
+                    <button onClick={onGoToEditor} type="button" className="text-teal-600 text-xs font-bold hover:underline">Send a one-time invoice</button>
+                 </div>
+              </div>
+           )}
+           <div className={`space-y-6 ${!isPro ? 'pointer-events-none' : ''}`}>
       <div>
         <h2 className="text-2xl font-bold text-slate-900">Recurring Invoices</h2>
         <p className="text-slate-500 mt-1">Automate your billing. Set schedules and let the system generate invoices for you.</p>
@@ -138,7 +154,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
           </div>
           <div className="bg-white p-5 rounded-2xl border border-slate-200">
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Est. Monthly Revenue</p>
-            <p className="text-3xl font-black text-slate-900 mt-1">₦{numberFormatter.format(Math.round(stats.monthlyEstimate))}</p>
+            <p className="text-3xl font-black text-slate-900 mt-1">â‚¦{numberFormatter.format(Math.round(stats.monthlyEstimate))}</p>
             <p className="text-xs text-slate-500 mt-1">from recurring</p>
           </div>
           <div className="bg-white p-5 rounded-2xl border border-slate-200">
@@ -202,7 +218,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
                       </div>
                       <p className="text-sm text-slate-500 mt-0.5">
                         {inv.currency} {inv.total != null ? numberFormatter.format(inv.total) : '---'}
-                        <span className="mx-1.5 text-slate-300">·</span>
+                        <span className="mx-1.5 text-slate-300">Â·</span>
                         {inv.lineItems.length} item{inv.lineItems.length !== 1 ? 's' : ''}
                       </p>
                     </div>
@@ -240,6 +256,8 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
           })}
         </div>
       )}
+      </div>
     </div>
   );
 };
+

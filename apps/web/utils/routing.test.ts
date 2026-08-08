@@ -8,11 +8,11 @@ describe('getDecodedPathname', () => {
     originalLocation = window.location;
     // @ts-ignore - allowing modification for testing
     delete window.location;
-    window.location = { ...originalLocation };
+    window.location = { ...originalLocation } as any;
   });
 
   afterEach(() => {
-    window.location = originalLocation;
+    window.location = originalLocation as any;
     vi.restoreAllMocks();
   });
 

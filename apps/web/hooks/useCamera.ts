@@ -1,7 +1,7 @@
 // Camera Hook for Receipt Scanning
 // Uses the MediaDevices API for camera access
 
-import { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 
 interface UseCameraReturn {
   videoRef: React.RefObject<HTMLVideoElement | null>;

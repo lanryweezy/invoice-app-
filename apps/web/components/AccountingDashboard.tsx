@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import type { Expense, Invoice } from '../types';
 import { getTodayISODate } from '../utils/date';
 import { numberFormatter } from '../utils/formatters';
@@ -39,7 +39,7 @@ function filterByDateRange<T extends { date?: string; issueDate?: string }>(
     toTime.setHours(23, 59, 59);
     const toTimeValue = toTime.getTime();
     return items.filter(item => {
-      // ⚡ Bolt: Use Date.parse instead of new Date().getTime() in loops to avoid object allocation overhead (~40% faster)
+      // âš¡ Bolt: Use Date.parse instead of new Date().getTime() in loops to avoid object allocation overhead (~40% faster)
       const dateStr = item.date || item.issueDate;
       if (!dateStr) return false;
       const dTime = Date.parse(dateStr);
@@ -50,7 +50,7 @@ function filterByDateRange<T extends { date?: string; issueDate?: string }>(
   start.setHours(0, 0, 0, 0);
   const startTime = start.getTime();
   return items.filter(item => {
-    // ⚡ Bolt: Use Date.parse instead of new Date().getTime() in loops to avoid object allocation overhead (~40% faster)
+    // âš¡ Bolt: Use Date.parse instead of new Date().getTime() in loops to avoid object allocation overhead (~40% faster)
     const dateStr = item.date || item.issueDate;
     if (!dateStr) return false;
     const dTime = Date.parse(dateStr);
@@ -101,7 +101,7 @@ function getAgedReceivables(invoices: Invoice[]) {
 
   invoices.forEach(inv => {
     if (inv.status === 'Paid' || inv.status === 'Draft') return;
-    // ⚡ Bolt: Use Date.parse instead of new Date().getTime() in loops and hoist now.getTime()
+    // âš¡ Bolt: Use Date.parse instead of new Date().getTime() in loops and hoist now.getTime()
     const dueTime = Date.parse(inv.dueDate);
     const days = Math.floor((nowTime - dueTime) / 86400000);
     const amount = inv.total || 0;
@@ -156,9 +156,9 @@ function BarChart({ data, maxValue }: { data: { label: string; revenue: number; 
       {data.map((d, i) => (
         <div key={i} className="flex-1 flex flex-col items-center gap-0.5 h-full justify-end">
           <div className="w-full flex flex-col gap-0.5" style={{ height: `${Math.max((d.revenue * scale), 2)}%` }}>
-            <div className="w-full bg-teal-500 rounded-t-sm min-h-[2px]" title={`Revenue: ₦${numberFormatter.format(d.revenue)}`} />
+            <div className="w-full bg-teal-500 rounded-t-sm min-h-[2px]" title={`Revenue: â‚¦${numberFormatter.format(d.revenue)}`} />
             {d.expenses > 0 && (
-              <div className="w-full bg-red-400 rounded-b-sm min-h-[2px]" style={{ height: `${Math.min((d.expenses / (d.revenue || 1)) * 100, 100)}%` }} title={`Expenses: ₦${numberFormatter.format(d.expenses)}`} />
+              <div className="w-full bg-red-400 rounded-b-sm min-h-[2px]" style={{ height: `${Math.min((d.expenses / (d.revenue || 1)) * 100, 100)}%` }} title={`Expenses: â‚¦${numberFormatter.format(d.expenses)}`} />
             )}
           </div>
           <span className="text-[9px] text-slate-400 font-bold">{d.label}</span>
@@ -239,25 +239,25 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
       `Generated: ${new Date().toLocaleDateString('en-NG')}`,
       '',
       'REVENUE',
-      `  Total Revenue,₦${pnl.revenue}`,
+      `  Total Revenue,â‚¦${pnl.revenue}`,
       '',
       'COST OF SALES',
-      `  Cost of Sales,₦${pnl.costOfSales}`,
+      `  Cost of Sales,â‚¦${pnl.costOfSales}`,
       '',
-      'GROSS PROFIT,₦${pnl.grossProfit}',
+      'GROSS PROFIT,â‚¦${pnl.grossProfit}',
       '',
       'OPERATING EXPENSES',
-      ...Object.entries(pnl.expenseByCategory).map(([cat, amt]) => `  ${cat},₦${amt}`),
-      `  Total Expenses,₦${pnl.totalExpenses}`,
+      ...Object.entries(pnl.expenseByCategory).map(([cat, amt]) => `  ${cat},â‚¦${amt}`),
+      `  Total Expenses,â‚¦${pnl.totalExpenses}`,
       '',
-      'OPERATING PROFIT,₦${pnl.operatingProfit}',
+      'OPERATING PROFIT,â‚¦${pnl.operatingProfit}',
       '',
       'TAX SUMMARY',
-      `  VAT Collected (Output),₦${pnl.vatCollected}`,
-      `  WHT Suffered (Input Credit),₦${pnl.whtSuffered}`,
-      `  Net Tax Position,₦${pnl.netTax}`,
+      `  VAT Collected (Output),â‚¦${pnl.vatCollected}`,
+      `  WHT Suffered (Input Credit),â‚¦${pnl.whtSuffered}`,
+      `  Net Tax Position,â‚¦${pnl.netTax}`,
       '',
-      'NET PROFIT,₦${pnl.netProfit}',
+      'NET PROFIT,â‚¦${pnl.netProfit}',
     ];
     const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -324,36 +324,36 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
               className="px-2 py-1 border border-slate-300 rounded-lg text-xs focus:border-teal-500 outline-none" />
           </div>
         )}
-        <span className="text-[10px] text-slate-400 ml-auto">{rangeLabel} · {filteredInvoices.length} invoices · {filteredExpenses.length} expenses</span>
+        <span className="text-[10px] text-slate-400 ml-auto">{rangeLabel} Â· {filteredInvoices.length} invoices Â· {filteredExpenses.length} expenses</span>
       </div>
 
       {/* Key Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Revenue</p>
-          <p className="text-2xl font-black text-teal-600 mt-1">₦{numberFormatter.format(stats.revenue)}</p>
+          <p className="text-2xl font-black text-teal-600 mt-1">â‚¦{numberFormatter.format(stats.revenue)}</p>
           <p className="text-[10px] text-slate-500 mt-1">{filteredInvoices.length} invoices</p>
         </div>
         <div className="bg-white p-5 rounded-2xl border border-slate-200">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Expenses</p>
-          <p className="text-2xl font-black text-red-500 mt-1">₦{numberFormatter.format(totalExpenses)}</p>
+          <p className="text-2xl font-black text-red-500 mt-1">â‚¦{numberFormatter.format(totalExpenses)}</p>
           <p className="text-[10px] text-slate-500 mt-1">{filteredExpenses.length} entries</p>
         </div>
         <div className="bg-white p-5 rounded-2xl border border-slate-200">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Net Profit</p>
           <p className={`text-2xl font-black mt-1 ${stats.revenue - totalExpenses >= 0 ? 'text-slate-900' : 'text-red-600'}`}>
-            ₦{numberFormatter.format(stats.revenue - totalExpenses)}
+            â‚¦{numberFormatter.format(stats.revenue - totalExpenses)}
           </p>
           <p className="text-[10px] text-slate-500 mt-1">{stats.revenue > 0 ? Math.round(((stats.revenue - totalExpenses) / stats.revenue) * 100) : 0}% margin</p>
         </div>
         <div className="bg-white p-5 rounded-2xl border border-slate-200">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">VAT Collected</p>
-          <p className="text-2xl font-black text-blue-600 mt-1">₦{numberFormatter.format(stats.totalVat)}</p>
+          <p className="text-2xl font-black text-blue-600 mt-1">â‚¦{numberFormatter.format(stats.totalVat)}</p>
           <p className="text-[10px] text-slate-500 mt-1">Output VAT</p>
         </div>
         <div className="bg-white p-5 rounded-2xl border border-slate-200">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">WHT Suffered</p>
-          <p className="text-2xl font-black text-amber-600 mt-1">₦{numberFormatter.format(stats.totalWht)}</p>
+          <p className="text-2xl font-black text-amber-600 mt-1">â‚¦{numberFormatter.format(stats.totalWht)}</p>
           <p className="text-[10px] text-slate-500 mt-1">Tax credit</p>
         </div>
       </div>
@@ -424,15 +424,15 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
                   <div key={exp.id} className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-8 h-8 bg-slate-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs">{exp.category === 'Software' ? '💻' : exp.category === 'Marketing' ? '📢' : exp.category === 'Travel' ? '✈️' : '📋'}</span>
+                        <span className="text-xs">{exp.category === 'Software' ? 'ðŸ’»' : exp.category === 'Marketing' ? 'ðŸ“¢' : exp.category === 'Travel' ? 'âœˆï¸' : 'ðŸ“‹'}</span>
                       </div>
                       <div className="min-w-0">
                         <p className="font-bold text-slate-900 text-sm truncate">{exp.description}</p>
-                        <p className="text-[10px] text-slate-500">{exp.date} · {exp.category}{exp.vendor ? ` · ${exp.vendor}` : ''}</p>
+                        <p className="text-[10px] text-slate-500">{exp.date} Â· {exp.category}{exp.vendor ? ` Â· ${exp.vendor}` : ''}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <p className="font-bold text-red-600 text-sm">₦{numberFormatter.format(exp.amount)}</p>
+                      <p className="font-bold text-red-600 text-sm">â‚¦{numberFormatter.format(exp.amount)}</p>
                       <button onClick={() => {
                         if (confirm(`Delete "${exp.description}" expense?`)) {
                           onRemoveExpense(exp.id);
@@ -480,7 +480,7 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
                   {categoryBreakdown.map(([cat, total]) => (
                     <div key={cat} className="flex justify-between items-center text-sm">
                       <span className="text-slate-600">{cat}</span>
-                      <span className="font-bold text-slate-900">₦{numberFormatter.format(total)}</span>
+                      <span className="font-bold text-slate-900">â‚¦{numberFormatter.format(total)}</span>
                     </div>
                   ))}
                 </div>
@@ -510,10 +510,10 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
                 <div key={inv.invoiceNumber} className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
                   <div>
                     <p className="font-bold text-slate-900 text-sm">#{inv.invoiceNumber}</p>
-                    <p className="text-[10px] text-slate-500">{inv.client.name} · {inv.issueDate}</p>
+                    <p className="text-[10px] text-slate-500">{inv.client.name} Â· {inv.issueDate}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-teal-700 text-sm">₦{numberFormatter.format(inv.total || 0)}</p>
+                    <p className="font-bold text-teal-700 text-sm">â‚¦{numberFormatter.format(inv.total || 0)}</p>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                       inv.status === 'Paid' ? 'bg-teal-100 text-teal-700' :
                       inv.status === 'Overdue' ? 'bg-red-100 text-red-700' :
@@ -534,27 +534,27 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
             <div className="bg-white p-4 rounded-2xl border border-slate-200">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Current</p>
-              <p className="text-lg font-black text-teal-600 mt-1">₦{numberFormatter.format(receivables.buckets.current)}</p>
+              <p className="text-lg font-black text-teal-600 mt-1">â‚¦{numberFormatter.format(receivables.buckets.current)}</p>
               <p className="text-[10px] text-slate-500">Not yet due</p>
             </div>
             <div className="bg-white p-4 rounded-2xl border border-amber-200">
-              <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">1–30 Days</p>
-              <p className="text-lg font-black text-amber-600 mt-1">₦{numberFormatter.format(receivables.buckets.d1_30)}</p>
+              <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">1â€“30 Days</p>
+              <p className="text-lg font-black text-amber-600 mt-1">â‚¦{numberFormatter.format(receivables.buckets.d1_30)}</p>
               <p className="text-[10px] text-slate-500">Slightly overdue</p>
             </div>
             <div className="bg-white p-4 rounded-2xl border border-orange-200">
-              <p className="text-[10px] font-bold text-orange-500 uppercase tracking-wider">31–60 Days</p>
-              <p className="text-lg font-black text-orange-600 mt-1">₦{numberFormatter.format(receivables.buckets.d31_60)}</p>
+              <p className="text-[10px] font-bold text-orange-500 uppercase tracking-wider">31â€“60 Days</p>
+              <p className="text-lg font-black text-orange-600 mt-1">â‚¦{numberFormatter.format(receivables.buckets.d31_60)}</p>
               <p className="text-[10px] text-slate-500">Needs follow-up</p>
             </div>
             <div className="bg-white p-4 rounded-2xl border border-red-200">
-              <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider">61–90 Days</p>
-              <p className="text-lg font-black text-red-600 mt-1">₦{numberFormatter.format(receivables.buckets.d61_90)}</p>
+              <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider">61â€“90 Days</p>
+              <p className="text-lg font-black text-red-600 mt-1">â‚¦{numberFormatter.format(receivables.buckets.d61_90)}</p>
               <p className="text-[10px] text-slate-500">Seriously overdue</p>
             </div>
             <div className="bg-white p-4 rounded-2xl border border-red-300">
               <p className="text-[10px] font-bold text-red-700 uppercase tracking-wider">90+ Days</p>
-              <p className="text-lg font-black text-red-800 mt-1">₦{numberFormatter.format(receivables.buckets.over90)}</p>
+              <p className="text-lg font-black text-red-800 mt-1">â‚¦{numberFormatter.format(receivables.buckets.over90)}</p>
               <p className="text-[10px] text-slate-500">At risk of bad debt</p>
             </div>
           </div>
@@ -564,13 +564,13 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-slate-900">Outstanding Invoices</h3>
               <p className="text-xs text-slate-500">
-                Total: <span className="font-bold text-slate-900">₦{numberFormatter.format(
+                Total: <span className="font-bold text-slate-900">â‚¦{numberFormatter.format(
                   receivables.buckets.current + receivables.buckets.d1_30 + receivables.buckets.d31_60 + receivables.buckets.d61_90 + receivables.buckets.over90
                 )}</span>
               </p>
             </div>
             {receivables.details.length === 0 ? (
-              <p className="text-sm text-slate-400 italic py-8 text-center">No outstanding invoices — all paid!</p>
+              <p className="text-sm text-slate-400 italic py-8 text-center">No outstanding invoices â€” all paid!</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -599,7 +599,7 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
                             {item.days <= 0 ? `${Math.abs(item.days)}d early` : `${item.days}d`}
                           </span>
                         </td>
-                        <td className="py-3 text-right font-bold text-slate-900">₦{numberFormatter.format(item.amount)}</td>
+                        <td className="py-3 text-right font-bold text-slate-900">â‚¦{numberFormatter.format(item.amount)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -628,19 +628,19 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
               {/* Revenue */}
               <div className="flex justify-between items-center py-3 border-b border-slate-100">
                 <span className="text-sm font-semibold text-slate-700">Total Revenue</span>
-                <span className="text-sm font-bold text-teal-600">₦{numberFormatter.format(pnl.revenue)}</span>
+                <span className="text-sm font-bold text-teal-600">â‚¦{numberFormatter.format(pnl.revenue)}</span>
               </div>
 
               {/* Cost of Sales */}
               <div className="flex justify-between items-center py-3 border-b border-slate-100">
                 <span className="text-sm font-semibold text-slate-700">Cost of Sales</span>
-                <span className="text-sm font-bold text-red-500">₦{numberFormatter.format(pnl.costOfSales)}</span>
+                <span className="text-sm font-bold text-red-500">â‚¦{numberFormatter.format(pnl.costOfSales)}</span>
               </div>
 
               {/* Gross Profit */}
               <div className="flex justify-between items-center py-3 border-b-2 border-slate-300 bg-slate-50 -mx-3 px-3 rounded-lg">
                 <span className="text-sm font-black text-slate-900">Gross Profit</span>
-                <span className="text-sm font-black text-slate-900">₦{numberFormatter.format(pnl.grossProfit)}</span>
+                <span className="text-sm font-black text-slate-900">â‚¦{numberFormatter.format(pnl.grossProfit)}</span>
               </div>
 
               {/* Expenses */}
@@ -650,19 +650,19 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
               {Object.entries(pnl.expenseByCategory).map(([cat, amt]) => (
                 <div key={cat} className="flex justify-between items-center py-2 pl-4">
                   <span className="text-sm text-slate-600">{cat}</span>
-                  <span className="text-sm text-slate-700">₦{numberFormatter.format(amt as number)}</span>
+                  <span className="text-sm text-slate-700">â‚¦{numberFormatter.format(amt as number)}</span>
                 </div>
               ))}
               <div className="flex justify-between items-center py-3 border-b border-slate-100">
                 <span className="text-sm font-semibold text-slate-700">Total Expenses</span>
-                <span className="text-sm font-bold text-red-500">₦{numberFormatter.format(pnl.totalExpenses)}</span>
+                <span className="text-sm font-bold text-red-500">â‚¦{numberFormatter.format(pnl.totalExpenses)}</span>
               </div>
 
               {/* Operating Profit */}
               <div className="flex justify-between items-center py-3 border-b-2 border-slate-300 bg-slate-50 -mx-3 px-3 rounded-lg">
                 <span className="text-sm font-black text-slate-900">Operating Profit</span>
                 <span className={`text-sm font-black ${pnl.operatingProfit >= 0 ? 'text-teal-600' : 'text-red-600'}`}>
-                  ₦{numberFormatter.format(pnl.operatingProfit)}
+                  â‚¦{numberFormatter.format(pnl.operatingProfit)}
                 </span>
               </div>
 
@@ -672,23 +672,23 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
               </div>
               <div className="flex justify-between items-center py-2 pl-4">
                 <span className="text-sm text-slate-600">VAT Collected (Output)</span>
-                <span className="text-sm text-blue-600">₦{numberFormatter.format(pnl.vatCollected)}</span>
+                <span className="text-sm text-blue-600">â‚¦{numberFormatter.format(pnl.vatCollected)}</span>
               </div>
               <div className="flex justify-between items-center py-2 pl-4">
                 <span className="text-sm text-slate-600">WHT Suffered (Input Credit)</span>
-                <span className="text-sm text-amber-600">₦{numberFormatter.format(pnl.whtSuffered)}</span>
+                <span className="text-sm text-amber-600">â‚¦{numberFormatter.format(pnl.whtSuffered)}</span>
               </div>
               <div className="flex justify-between items-center py-3 border-b border-slate-100">
                 <span className="text-sm font-semibold text-slate-700">Net Tax Position</span>
                 <span className={`text-sm font-bold ${pnl.netTax >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-                  ₦{numberFormatter.format(pnl.netTax)}
+                  â‚¦{numberFormatter.format(pnl.netTax)}
                 </span>
               </div>
 
               {/* Net Profit */}
               <div className="flex justify-between items-center py-4 bg-slate-900 text-white -mx-3 px-3 rounded-xl mt-2">
                 <span className="text-sm font-black uppercase tracking-wider">Net Profit</span>
-                <span className="text-lg font-black">₦{numberFormatter.format(pnl.netProfit)}</span>
+                <span className="text-lg font-black">â‚¦{numberFormatter.format(pnl.netProfit)}</span>
               </div>
             </div>
           </div>
@@ -697,3 +697,5 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
     </div>
   );
 };
+
+

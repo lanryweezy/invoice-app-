@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import type { Receipt, TemplateId } from '../types';
 import { DownloadIcon, EyeIcon } from './Icons';
 import { numberFormatter } from '../utils/formatters';
@@ -9,11 +9,21 @@ interface ReceiptsManagerProps {
     onRemoveReceipt: (id: string) => void;
 }
 
-export const ReceiptsManager: React.FC<ReceiptsManagerProps> = ({ receipts, onViewReceipt, onRemoveReceipt }) => {
+export const ReceiptsManager: React.FC<ReceiptsManagerProps & { isPro?: boolean; onUpgrade?: () => void }> = ({ receipts, onViewReceipt, onRemoveReceipt, isPro, onUpgrade }) => {
 
 
     return (
-        <div className="p-8 bg-white rounded-xl shadow-sm border border-slate-200">
+        <div className="p-8 bg-white rounded-xl shadow-sm border border-slate-200 relative overflow-hidden ">
+           {!isPro && (
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-4 bg-white/40 backdrop-blur-[2px] rounded-2xl">
+                 <div className="bg-white p-6 rounded-xl shadow-lg border border-teal-100 text-center max-w-sm mx-auto">
+                    <p className="text-lg font-bold text-slate-900 mb-2">Professional Receipts</p>
+                    <p className="text-sm text-slate-500 mb-4">Automatically generate and send receipts when an invoice is marked as paid.</p>
+                    <button onClick={onUpgrade} type="button" className="px-4 py-3 bg-teal-600 text-white rounded-xl text-sm font-bold w-full hover:bg-teal-700 shadow-md">Unlock Pro</button>
+                 </div>
+              </div>
+           )}
+           <div className={` ${!isPro ? 'pointer-events-none' : ''}`}>
             <h2 className="text-2xl font-bold text-slate-900 mb-4">Receipts</h2>
             <p className="text-slate-500 mb-6">Manage your generated payment receipts. Receipts are automatically created when you mark an invoice as Paid.</p>
 
@@ -35,10 +45,10 @@ export const ReceiptsManager: React.FC<ReceiptsManagerProps> = ({ receipts, onVi
                                     <span className="px-2 py-0.5 text-xs font-medium bg-teal-100 text-teal-800 rounded-full">Paid</span>
                                 </div>
                                 <p className="text-sm text-slate-500">
-                                    Invoice: {receipt.invoiceNumber} • Client: {receipt.invoice?.client?.name || 'Unknown'}
+                                    Invoice: {receipt.invoiceNumber} â€¢ Client: {receipt.invoice?.client?.name || 'Unknown'}
                                 </p>
                                 <p className="text-sm text-slate-500 mt-1">
-                                    {receipt.paymentDate} • {receipt.paymentMethod} • {receipt.invoice?.currency} {numberFormatter.format(receipt.amountPaid)}
+                                    {receipt.paymentDate} â€¢ {receipt.paymentMethod} â€¢ {receipt.invoice?.currency} {numberFormatter.format(receipt.amountPaid)}
                                 </p>
                             </div>
                             <div className="flex items-center gap-3 mt-4 sm:mt-0">
@@ -67,6 +77,8 @@ export const ReceiptsManager: React.FC<ReceiptsManagerProps> = ({ receipts, onVi
                     ))}
                 </div>
             )}
-        </div>
-    );
+          </div>
+    </div>
+  );
 };
+

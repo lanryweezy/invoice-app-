@@ -275,7 +275,7 @@ describe('complianceTracker', () => {
     dueDate: '2024-01-31',
     currency: 'NGN',
     total: 161250,
-    status: 'pending',
+    status: 'Draft',
     taxRate: 7.5,
     tax: 11250,
     whtRate: 5,
@@ -297,9 +297,13 @@ describe('complianceTracker', () => {
       cacNumber: 'RC654321',
     },
     lineItems: [
-      { description: 'Service', quantity: 1, price: '150000', taxRate: 7.5 },
+      { id: '1', description: 'Service', quantity: 1, price: 150000 },
     ],
     notes: '',
+    terms: '',
+    discountRate: 0,
+    discountType: 'percentage',
+    shippingAmount: 0,
   };
 
   describe('checkCompliance', () => {

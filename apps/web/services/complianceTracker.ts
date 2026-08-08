@@ -1,4 +1,4 @@
-import type { Invoice } from '../types';
+﻿import type { Invoice } from '../types';
 
 export type ComplianceCategory = 'TIN' | 'CAC' | 'VAT' | 'WHT' | 'LineItems' | 'Totals' | 'Dates' | 'General';
 
@@ -534,7 +534,7 @@ export function getComplianceIssues(invoice: Invoice): ComplianceIssue[] {
 }
 
 /**
- * 🔩 Hinge Extension Point: ComplianceSuggestionStrategy
+ * ðŸ”© Hinge Extension Point: ComplianceSuggestionStrategy
  *
  * Pressure: The `suggestFixes` function had a growing `switch (issue.category)` block
  * that needed modification every time a new compliance category was added.
@@ -613,12 +613,46 @@ export function saveComplianceCheck(result: ComplianceCheckResult): void {
   );
 }
 
+export function calculateStatsFromResults(results: ComplianceCheckResult[]) {
+  const total = results.length;
+  if (total === 0) {
+    return {
+      averageScore: 0,
+      totalIssues: 0,
+      compliantCount: 0,
+      nonCompliantCount: 0,
+      categoryAverages: {} as Record<ComplianceCategory, number>,
+      results,
+    };
+  }
+
+  let totalScore = 0;
+  let totalIssues = 0;
+  let compliantCount = 0;
+
+  for (const r of results) {
+    totalScore += r.score;
+    totalIssues += r.issues.length;
+    if (r.score === 100) compliantCount++;
+  }
+
+  return {
+    averageScore: Math.round(totalScore / total),
+    totalIssues,
+    compliantCount,
+    nonCompliantCount: total - compliantCount,
+    categoryAverages: {} as Record<ComplianceCategory, number>, // Simplified for now
+    results,
+  };
+}
+
 export function getOverallComplianceStats(invoices: Invoice[]): {
   averageScore: number;
   totalIssues: number;
   compliantCount: number;
   nonCompliantCount: number;
   categoryAverages: Record<ComplianceCategory, number>;
+  results: ComplianceCheckResult[];
 } {
   return calculateStatsFromResults(invoices.map(checkCompliance));
 }
@@ -672,7 +706,7 @@ export function exportComplianceReportJSON(invoices: Invoice[]): string {
     };
   });
 
-  const { results: _, ...summaryStats } = stats;
+  const { results, ...summaryStats } = stats as any;
 
   return JSON.stringify(
     {
@@ -684,3 +718,4 @@ export function exportComplianceReportJSON(invoices: Invoice[]): string {
     2
   );
 }
+

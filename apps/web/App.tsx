@@ -1,4 +1,4 @@
-import { getDecodedPathname } from "./utils/routing";
+﻿import { getDecodedPathname } from "./utils/routing";
 import React, { useState, useCallback, useMemo, useEffect, Suspense, useRef } from 'react';
 
 import { InvoiceForm } from './components/InvoiceForm';
@@ -38,6 +38,7 @@ import { SupportPage } from './components/SupportPage';
 import { IntegrationsView } from './components/IntegrationsView';
 import { CLIAccessView } from './components/CLIAccessView';
 import { SmtpSettingsModal } from './components/SmtpSettingsModal';
+import { SidePanel } from './components/SidePanel';
 import { flushQueue, getQueueCount } from './utils/offlineSync';
 
 // NRS Compliance Components
@@ -247,6 +248,7 @@ const App: React.FC = () => {
 
   // Main view state
   const [gatedFeature, setGatedFeature] = useState<'Branches' | 'Accounting' | 'Recurring' | 'Receipts' | 'Integrations' | null>(null);
+  const [activePanel, setActivePanel] = useState<'branches' | 'accounting' | 'recurring' | 'receipts' | 'integrations' | null>(null);
   const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'integrations' | 'cli' | 'blog' | 'blogPost' | 'publicProfile' | 'templatePage' | 'privacy' | 'terms' | 'support'>(() => {
       let path = getDecodedPathname();
 
@@ -261,6 +263,7 @@ const App: React.FC = () => {
       if (path === '/receipts') return 'receipts';
       if (path === '/integrations') return 'integrations';
       if (path === '/cli') return 'cli';
+      if (path === '/blog') return 'blog';
 
       // Handle legacy /blog/:id routes by redirecting them or showing blogPost view
       if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts' && path !== '/integrations' && path !== '/cli' && path !== '/privacy' && path !== '/terms' && path !== '/support' && !path.startsWith('/p/') && !path.startsWith('/templates/')) {
@@ -366,7 +369,7 @@ const App: React.FC = () => {
     const updateScale = () => {
       if (!previewContainerRef.current) return;
       const containerWidth = previewContainerRef.current.offsetWidth;
-      // A4 width ≈ 794px at 96dpi
+      // A4 width ÃƒÂ¢Ã¢â‚¬Â°Ã‹â€  794px at 96dpi
       const a4Width = 794;
 
       const availableWidth = containerWidth - 32;
@@ -378,7 +381,7 @@ const App: React.FC = () => {
 
     const handleResize = () => {
       clearTimeout(timeoutId);
-      timeoutId = setTimeout(updateScale, 50); // ⚡ Bolt: Debounce resize event to prevent rapid re-renders
+      timeoutId = setTimeout(updateScale, 50); // ÃƒÂ¢Ã…Â¡Ã‚Â¡ Bolt: Debounce resize event to prevent rapid re-renders
     };
 
     timeoutId = setTimeout(updateScale, 10);
@@ -471,7 +474,7 @@ const App: React.FC = () => {
       }
   }, [isPro, savedClients, saveClient]);
 
-  // ⚡ Bolt: Memoize updateInvoice handler to prevent InvoiceForm from re-rendering on every App state change
+  // ÃƒÂ¢Ã…Â¡Ã‚Â¡ Bolt: Memoize updateInvoice handler to prevent InvoiceForm from re-rendering on every App state change
   const handleUpdateInvoice = useCallback((key: keyof Invoice, value: any) => {
       if (key === 'status' && value === 'Paid' && invoice.status !== 'Paid') {
           setIsPaymentModalOpen(true);
@@ -479,7 +482,7 @@ const App: React.FC = () => {
       updateInvoice(key, value);
   }, [invoice.status, updateInvoice]);
 
-  // ⚡ Bolt: Memoize saveBusinessProfile handler to prevent InvoiceForm from re-rendering on every App state change
+  // ÃƒÂ¢Ã…Â¡Ã‚Â¡ Bolt: Memoize saveBusinessProfile handler to prevent InvoiceForm from re-rendering on every App state change
   const handleSaveBusinessProfile = useCallback((profile: any) => {
       saveBusinessProfile(profile);
       showToast('Business profile saved!');
@@ -489,7 +492,7 @@ const App: React.FC = () => {
       if (!isPro) {
           setGatedFeature(featureName);
       } else {
-          setActiveView(featureName.toLowerCase() as 'branches' | 'accounting' | 'recurring' | 'receipts' | 'integrations');
+          setActivePanel(featureName.toLowerCase() as 'branches' | 'accounting' | 'recurring' | 'receipts' | 'integrations');
       }
   }, [isPro]);
 
@@ -658,13 +661,13 @@ const App: React.FC = () => {
             </div>
           </div>
           <div className="hidden sm:flex items-center gap-4">
-             <button onClick={() => setActiveView('editor')} className={`text-xs font-medium transition-colors ${activeView === 'editor' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Invoice Editor</button>
-             <button onClick={() => user ? setActiveView('branches') : handleProFeatureClick('Branches')} className={`text-xs font-medium transition-colors ${activeView === 'branches' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Branches</button>
-             <button onClick={() => user ? setActiveView('accounting') : handleProFeatureClick('Accounting')} className={`text-xs font-medium transition-colors ${activeView === 'accounting' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Accounting</button>
-             <button onClick={() => user ? setActiveView('recurring') : handleProFeatureClick('Recurring')} className={`text-xs font-medium transition-colors ${activeView === 'recurring' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Recurring</button>
-             <button onClick={() => user ? setActiveView('receipts') : handleProFeatureClick('Receipts')} className={`text-xs font-medium transition-colors ${activeView === 'receipts' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Receipts</button>
-             <button onClick={() => user ? setActiveView('integrations') : handleProFeatureClick('Integrations')} className={`text-xs font-medium transition-colors ${activeView === 'integrations' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Integrations</button>
-                 <a href="/blog" className={`text-xs font-medium transition-colors ${activeView === 'blog' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Blog</a>
+             <button onClick={() => { setActiveView('editor'); setActivePanel(null); }} className={`text-xs font-medium transition-colors ${activeView === 'editor' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Invoice Editor</button>
+             <button onClick={() => user ? setActivePanel('branches') : handleProFeatureClick('Branches')} className={`text-xs font-medium transition-colors ${activeView === 'branches' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Branches</button>
+             <button onClick={() => user ? setActivePanel('accounting') : handleProFeatureClick('Accounting')} className={`text-xs font-medium transition-colors ${activeView === 'accounting' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Accounting</button>
+             <button onClick={() => user ? setActivePanel('recurring') : handleProFeatureClick('Recurring')} className={`text-xs font-medium transition-colors ${activeView === 'recurring' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Recurring</button>
+             <button onClick={() => user ? setActivePanel('receipts') : handleProFeatureClick('Receipts')} className={`text-xs font-medium transition-colors ${activeView === 'receipts' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Receipts</button>
+             <button onClick={() => user ? setActivePanel('integrations') : handleProFeatureClick('Integrations')} className={`text-xs font-medium transition-colors ${activeView === 'integrations' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Integrations</button>
+                 <a href="/blog" onClick={(e) => { e.preventDefault(); setActiveView('blog'); setActivePanel(null); }} className={`text-xs font-medium transition-colors ${activeView === 'blog' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Blog</a>
              <div className="w-px h-4 bg-slate-700"></div>
              {!loading && (
                  user ? (
@@ -787,7 +790,7 @@ const App: React.FC = () => {
                   });
                   setIsPaymentModalOpen(false);
                   showToast('Receipt generated successfully');
-                  setActiveView('receipts');
+                  setActivePanel('receipts');
               }}
           />
       )}
@@ -812,7 +815,7 @@ const App: React.FC = () => {
                 "Unlock more power for your business."
               }
               subhead={
-                gatedFeature === 'Accounting' ? "See profit, track who owes you, and be ready for tax season – all from InvoiceApp." :
+                gatedFeature === 'Accounting' ? "See profit, track who owes you, and be ready for tax season ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ all from InvoiceApp." :
                 gatedFeature === 'Branches' ? "Manage multiple offices, track location-specific revenue, and organize your teams." :
                 `Upgrade to unlock ${gatedFeature} and streamline your workflow.`
               }
@@ -828,70 +831,10 @@ const App: React.FC = () => {
               onDismiss={() => {
                   setGatedFeature(null);
                   setActiveView('editor');
+                  setActivePanel(null);
               }}
             />
           </div>
-        ) : activeView === 'branches' ? (
-            <div className="p-4 sm:p-8 max-w-4xl mx-auto">
-                <BranchesManager
-                    isPro={isPro}
-                    onUpgrade={() => {
-                        setPricingModalContent({ title: 'Multi-Location Management', message: 'Upgrade to Pro to manage branches across Nigeria and track location-specific revenue.' });
-                        setIsPricingModalOpen(true);
-                    }}
-                />
-            </div>
-        ) : activeView === 'accounting' ? (
-            <div className="p-4 sm:p-8 max-w-6xl mx-auto">
-                <AccountingDashboard
-                    invoices={savedInvoices}
-                    expenses={expenses}
-                    onAddExpense={addExpense}
-                    onRemoveExpense={removeExpense}
-                    isPro={isPro}
-                    onUpgrade={() => {
-                        setPricingModalContent({ title: 'Unlock Full Financial History', message: 'Upgrade to Pro to see your full transaction history, download detailed audit logs, and export for NRS bulk filing.' });
-                        setIsPricingModalOpen(true);
-                    }}
-                />
-            </div>
-        ) : activeView === 'recurring' ? (
-            <div className="p-4 sm:p-8 max-w-4xl mx-auto">
-                <RecurringManager
-                    recurringInvoices={recurringInvoices}
-                    onGenerateNext={(inv) => {
-                        setInvoice({
-                            ...inv,
-                            issueDate: getTodayISODate(),
-                            invoiceNumber: generateSequentialInvoiceNumber()
-                        });
-                        setActiveView('editor');
-                        showToast('Recurring template loaded into editor', 'success');
-                    }}
-                    onRemove={removeRecurringInvoice}
-                    onToggleActive={toggleRecurringActive}
-                />
-            </div>
-        ) : activeView === 'receipts' ? (
-            <div className="p-4 sm:p-8 max-w-6xl mx-auto">
-                <ReceiptsManager
-                    receipts={receipts}
-                    onViewReceipt={setViewingReceipt}
-                    onRemoveReceipt={(id) => {
-                        removeReceipt(id);
-                        showToast('Receipt deleted');
-                    }}
-                />
-            </div>
-        ) : activeView === 'integrations' ? (
-            <div className="p-4 sm:p-8 max-w-6xl mx-auto">
-                <IntegrationsView
-                    onUpgrade={() => {
-                        setPricingModalContent({ title: 'Unlock Integrations', message: 'Upgrade to Pro to connect payment gateways, accounting software, and more.' });
-                        setIsPricingModalOpen(true);
-                    }}
-                />
-            </div>
         ) : activeView === 'cli' ? (
             <div className="p-4 sm:p-8">
                 <CLIAccessView />
@@ -905,7 +848,7 @@ const App: React.FC = () => {
         ) : activeView === 'publicProfile' && publicUsername !== null ? (
             <PublicProfile username={publicUsername} />
         ) : activeView === 'templatePage' && activeTemplateSlug !== null ? (
-            <TemplatePage slug={activeTemplateSlug} onGoHome={() => setActiveView('editor')} />
+            <TemplatePage slug={activeTemplateSlug} onGoHome={() => { setActiveView('editor'); setActivePanel(null); }} />
         ) : activeView === 'blog' || activeView === 'blogPost' ? (
             <div className="flex items-center justify-center h-full bg-slate-50">
                 <div className="text-center">
@@ -963,18 +906,18 @@ const App: React.FC = () => {
                    {/* Links */}
                    <div className="flex justify-center gap-6 text-xs font-bold text-slate-600">
                        <a href="/privacy" onClick={(e) => { e.preventDefault(); setActiveView('privacy'); }} className="hover:text-teal-600 transition-colors">Privacy</a>
-                       <span className="text-slate-300">•</span>
+                       <span className="text-slate-300">ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢</span>
                        <a href="/terms" onClick={(e) => { e.preventDefault(); setActiveView('terms'); }} className="hover:text-teal-600 transition-colors">Terms</a>
-                       <span className="text-slate-300">•</span>
+                       <span className="text-slate-300">ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢</span>
                        <a href="/blog" className="hover:text-teal-600 transition-colors">Blog</a>
-                       <span className="text-slate-300">•</span>
+                       <span className="text-slate-300">ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢</span>
                        <a href="/support" onClick={(e) => { e.preventDefault(); setActiveView('support'); }} className="hover:text-teal-600 transition-colors">Support</a>
                    </div>
 
                    {/* Copyright */}
                    <div className="pt-4 border-t border-slate-200/50 text-center">
                        <p className="text-[11px] text-slate-400 font-medium">
-                          © {new Date().getFullYear()} InvoiceApp.
+                          Ãƒâ€šÃ‚Â© {new Date().getFullYear()} InvoiceApp.
                        </p>
                    </div>
                </div>
@@ -1087,7 +1030,7 @@ const App: React.FC = () => {
         onSmtpSaved={(settings) => setSmtpSettings(settings)}
         onUpgrade={() => {
           setIsSmtpModalOpen(false);
-          setPricingModalContent({ title: 'Unlock Direct Email', message: 'Send invoices straight from your inbox to your clients — no copy-pasting needed.' });
+          setPricingModalContent({ title: 'Unlock Direct Email', message: 'Send invoices straight from your inbox to your clients ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â no copy-pasting needed.' });
           setIsPricingModalOpen(true);
         }}
       />
@@ -1123,6 +1066,7 @@ const App: React.FC = () => {
         logout={() => {
             logout();
             setActiveView('editor');
+            setActivePanel(null);
         }}
       />
 
@@ -1166,8 +1110,96 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
+
+      <SidePanel
+        isOpen={activePanel !== null}
+        onClose={() => setActivePanel(null)}
+        title={
+          activePanel === 'branches' ? 'Branches' :
+          activePanel === 'accounting' ? 'Accounting' :
+          activePanel === 'recurring' ? 'Recurring Invoices' :
+          activePanel === 'receipts' ? 'Receipts' :
+          activePanel === 'integrations' ? 'Integrations' : ''
+        }
+      >
+        {activePanel === 'branches' && (
+          <div className="p-4 sm:p-8">
+            <BranchesManager
+                isPro={isPro}
+                onUpgrade={() => {
+                    setPricingModalContent({ title: 'Multi-Location Management', message: 'Upgrade to Pro to manage branches across Nigeria and track location-specific revenue.' });
+                    setIsPricingModalOpen(true);
+                }}
+            />
+          </div>
+        )}
+        {activePanel === 'accounting' && (
+          <div className="p-4 sm:p-8">
+            <AccountingDashboard
+                invoices={savedInvoices}
+                expenses={expenses}
+                onAddExpense={addExpense}
+                onRemoveExpense={removeExpense}
+                isPro={isPro}
+                onUpgrade={() => {
+                    setPricingModalContent({ title: 'Unlock Full Financial History', message: 'Upgrade to Pro to see your full transaction history, download detailed audit logs, and export for NRS bulk filing.' });
+                    setIsPricingModalOpen(true);
+                }}
+            />
+          </div>
+        )}
+        {activePanel === 'recurring' && (
+          <div className="p-4 sm:p-8">
+            <RecurringManager
+                recurringInvoices={recurringInvoices}
+                onGenerateNext={(inv) => {
+                    setInvoice({
+                        ...inv,
+                        issueDate: new Date().toISOString().split('T')[0],
+                        invoiceNumber: generateSequentialInvoiceNumber()
+                    });
+                    setActivePanel(null);
+                    showToast('Recurring template loaded into editor', 'success');
+                }}
+                onRemove={removeRecurringInvoice}
+                onToggleActive={toggleRecurringActive}
+            />
+          </div>
+        )}
+        {activePanel === 'receipts' && (
+          <div className="p-4 sm:p-8">
+            <ReceiptsManager
+                receipts={receipts}
+                onViewReceipt={setViewingReceipt}
+                onRemoveReceipt={(id) => {
+                    removeReceipt(id);
+                    showToast('Receipt deleted');
+                }}
+                isPro={isPro}
+                onUpgrade={() => {
+                    setPricingModalContent({ title: 'Unlock Professional Receipts', message: 'Upgrade to Pro to automatically generate and manage receipts.' });
+                    setIsPricingModalOpen(true);
+                }}
+            />
+          </div>
+        )}
+        {activePanel === 'integrations' && (
+          <div className="p-4 sm:p-8">
+            <IntegrationsView
+                onUpgrade={() => {
+                    setPricingModalContent({ title: 'Unlock Integrations', message: 'Upgrade to Pro to connect payment gateways, accounting software, and more.' });
+                    setIsPricingModalOpen(true);
+                }}
+            />
+          </div>
+        )}
+      </SidePanel>
     </div>
   );
 };
 
 export default App;
+
+
+
+

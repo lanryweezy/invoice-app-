@@ -89,3 +89,4 @@ export const BranchesManager: React.FC<BranchesManagerProps> = ({ isPro = false,
     </div>
   );
 };
+
