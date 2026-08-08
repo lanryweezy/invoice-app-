@@ -45,7 +45,7 @@ export const ReceiptPreview: React.FC<ReceiptPreviewProps> = ({ receipt, templat
                         <button onClick={handleDownload} className="flex items-center gap-2 px-3 py-1.5 bg-teal-50 text-teal-700 hover:bg-teal-100 rounded-lg transition-colors text-sm font-semibold">
                             <DownloadIcon className="w-4 h-4" /> Download PDF
                         </button>
-                        <button onClick={() => window.location.href = `mailto:${invoice.client.email}?subject=Receipt ${receipt.id} from ${invoice.user.name}&body=Please find attached the receipt ${receipt.id} for invoice ${invoice.invoiceNumber}.`} className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg transition-colors text-sm font-semibold">
+                        <button onClick={() => window.location.href = `mailto:${invoice.client.email}?subject=${encodeURIComponent(`Receipt ${receipt.id} from ${invoice.user.name}`)}&body=${encodeURIComponent(`Please find attached the receipt ${receipt.id} for invoice ${invoice.invoiceNumber}.`)}`} className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg transition-colors text-sm font-semibold">
                             <MailIcon className="w-4 h-4" /> Email
                         </button>
                         <button onClick={onClose} aria-label="Close receipt preview" className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors">
