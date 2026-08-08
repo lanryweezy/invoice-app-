@@ -1,17 +1,17 @@
 import { Currency, Invoice } from '../types';
 
-export function formatNaira(amount: number): string {
-  return `₦${amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
+const currencyFormatters = new Map<string, Intl.NumberFormat>();
 
 export function formatCurrency(amount: number, currency: Currency): string {
-  const formatter = new Intl.NumberFormat('en-NG', {
-    style: 'currency',
-    currency: currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-  return formatter.format(amount);
+  if (!currencyFormatters.has(currency)) {
+    currencyFormatters.set(currency, new Intl.NumberFormat('en-NG', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }));
+  }
+  return currencyFormatters.get(currency)!.format(amount);
 }
 
 export function formatDate(date: string): string {
