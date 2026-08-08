@@ -4,3 +4,6 @@
 ## 2024-05-20 - Coverage Artifact Pollution
 **Learning:** Running `npx vitest run --coverage` generates a `coverage/` directory containing large HTML and JS artifacts. If `.gitignore` doesn't strictly exclude it, these files will end up staged for commit, polluting the repository and violating version control hygiene.
 **Action:** Always check `git status` after generating test coverage. If a `coverage/` directory is present and staged, run `git restore --staged <dir>` and `rm -rf <dir>` before requesting code review or submitting the patch.
+## 2026-08-08 - Testing API abstractions
+**Learning:** When adding tests for API wrapper layers (like `nrsApi`) that depend on an internal fetch abstraction (like `apiRequest`), it's better to mock the internal abstraction rather than `global.fetch` to isolate the specific logic mapping and ensure the test describes behavior cleanly.
+**Action:** Mock `apiConfig.apiRequest` using `vi.mock` when testing services that consume it.
