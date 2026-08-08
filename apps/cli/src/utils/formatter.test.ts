@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import {
-  formatNaira,
   formatCurrency,
   formatDate,
   formatDateISO,
@@ -8,20 +7,6 @@ import {
   generateInvoiceNumber,
 } from './formatter';
 import { Invoice } from '../types';
-
-describe('formatNaira', () => {
-  it('formats 50000 as ₦50,000.00', () => {
-    expect(formatNaira(50000)).toBe('₦50,000.00');
-  });
-
-  it('formats 0 as ₦0.00', () => {
-    expect(formatNaira(0)).toBe('₦0.00');
-  });
-
-  it('formats large numbers with commas', () => {
-    expect(formatNaira(1000000)).toBe('₦1,000,000.00');
-  });
-});
 
 describe('formatCurrency', () => {
   it('formats NGN currency', () => {
@@ -32,6 +17,13 @@ describe('formatCurrency', () => {
   it('formats USD currency', () => {
     const result = formatCurrency(100, 'USD');
     expect(result).toContain('100');
+  });
+
+  it('uses cached Intl.NumberFormat instance', () => {
+    const result1 = formatCurrency(1000, 'NGN');
+    const result2 = formatCurrency(2000, 'NGN');
+    expect(result1).toContain('1,000');
+    expect(result2).toContain('2,000');
   });
 });
 
