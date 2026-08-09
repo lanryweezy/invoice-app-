@@ -72,7 +72,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = React.memo(({ invoi
           {client.cacNumber && <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-2">CAC: {client.cacNumber}</p>}
           <div className="text-slate-700 text-sm space-y-1 font-medium">
              <p className="whitespace-pre-line">{client.address}</p>
-             <a href={`mailto:${client.email}`} className="text-teal-700 font-semibold hover:underline">{client.email}</a>
+             <a href={`mailto:${encodeURIComponent(client.email || '')}`} className="text-teal-700 font-semibold hover:underline">{client.email}</a>
           </div>
         </div>
         <div className={isCenterAligned ? 'order-1 flex justify-center gap-12' : 'grid grid-cols-2 gap-6'}>
