@@ -11,3 +11,6 @@
 ## 2024-05-19 - Duplicated unhandled exception catch blocks across CLI commands
 **Learning:** `catch (error: any) { fail(...); console.error(error.message); process.exit(1); }` is duplicated across many CLI commands (`create.ts`, `get.ts`, `list.ts`, `pdf.ts`, `send.ts`).
 **Action:** This could be abstracted but might be a bit larger/touch many files. Let's focus on `client.ts` first.
+## 2024-05-19 - Standardize array object pushing in validators
+**Learning:** In highly verbose validation functions (like `validateNRSCompliance` in `eInvoicing.ts`) that repeatedly push identical object shapes (`{ field, message, severity }`), extracting localized helper functions (`addError`/`addWarning`) drastically cuts down on duplication and improves readability without requiring changes to external caller interfaces.
+**Action:** When encountering large sequences of `errors.push()` or `warnings.push()` with complex object literals, wrap them in a simple closure to reduce visual noise and standardise the shape.
