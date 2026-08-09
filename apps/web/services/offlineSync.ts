@@ -2,19 +2,55 @@
 // Queues changes when offline, syncs when back online
 
 import { db } from './firebase';
-import { collection, addDoc, getDocs, deleteDoc, doc, writeBatch } from 'firebase/firestore';
+import { collection, addDoc, getDocs, deleteDoc, doc, writeBatch, type WriteBatch, type DocumentReference } from 'firebase/firestore';
 
 interface PendingChange {
   id: string;
   collection: string;
   docId: string;
-  type: 'create' | 'update' | 'delete';
+  type: 'create' | 'update' | 'delete' | (string & {});
   data?: unknown;
   timestamp: string;
   synced: boolean;
 }
 
 const QUEUE_KEY = 'invoiceapp_offline_queue';
+
+/**
+ * 🔩 Hinge Extension Point: SyncOperationStrategy
+ *
+ * Pressure: The `syncPendingChanges` function had a hardcoded `switch (change.type)` block.
+ * Adding new types of offline operations required modifying this core sync loop.
+ *
+ * Contract:
+ * - Implementors provide a function that takes a Firestore write batch, a document reference,
+ *   and optional data.
+ * - The strategy must apply its specific mutation (e.g. set, update, delete) to the batch.
+ * - Do NOT commit the batch; the core sync loop handles batch committing.
+ */
+export type SyncOperationStrategy = (batch: WriteBatch, docRef: DocumentReference, data?: unknown) => void;
+
+const syncStrategies = new Map<string, SyncOperationStrategy>();
+
+export function registerSyncStrategy(type: string, strategy: SyncOperationStrategy): void {
+  syncStrategies.set(type, strategy);
+}
+
+registerSyncStrategy('create', (batch, docRef, data) => {
+  if (data) {
+    batch.set(docRef, data, { merge: true });
+  }
+});
+
+registerSyncStrategy('update', (batch, docRef, data) => {
+  if (data) {
+    batch.set(docRef, data, { merge: true });
+  }
+});
+
+registerSyncStrategy('delete', (batch, docRef) => {
+  batch.delete(docRef);
+});
 
 function getQueue(): PendingChange[] {
   try {
@@ -68,18 +104,15 @@ export async function syncPendingChanges(userId: string): Promise<{ synced: numb
     for (const change of pending) {
       try {
         const docRef = doc(db, 'users', userId, change.collection, change.docId);
+        const strategy = syncStrategies.get(change.type);
 
-        switch (change.type) {
-          case 'create':
-          case 'update':
-            if (change.data) {
-              batch.set(docRef, change.data, { merge: true });
-            }
-            break;
-          case 'delete':
-            batch.delete(docRef);
-            break;
+        if (!strategy) {
+          console.warn(`Unknown sync operation type: ${change.type}`);
+          failed++;
+          continue;
         }
+
+        strategy(batch, docRef, change.data);
 
         change.synced = true;
         synced++;
