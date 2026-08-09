@@ -266,71 +266,74 @@ export function validateNRSCompliance(invoice: Invoice): NRSValidationResult {
   const errors: NRSValidationError[] = [];
   const warnings: NRSValidationError[] = [];
 
+  const addError = (field: string, message: string) => errors.push({ field, message, severity: 'error' });
+  const addWarning = (field: string, message: string) => warnings.push({ field, message, severity: 'warning' });
+
   if (!invoice.user.tin) {
-    errors.push({ field: 'supplier.tin', message: 'Supplier TIN is required for NRS compliance', severity: 'error' });
+    addError('supplier.tin', 'Supplier TIN is required for NRS compliance');
   } else if (!/^\d{10,14}$/.test(invoice.user.tin)) {
-    errors.push({ field: 'supplier.tin', message: 'Supplier TIN must be 10-14 digits', severity: 'error' });
+    addError('supplier.tin', 'Supplier TIN must be 10-14 digits');
   }
 
   if (!invoice.user.cacNumber) {
-    warnings.push({ field: 'supplier.cacNumber', message: 'Supplier CAC number recommended for NRS', severity: 'warning' });
+    addWarning('supplier.cacNumber', 'Supplier CAC number recommended for NRS');
   }
 
   if (!invoice.client.tin) {
-    errors.push({ field: 'customer.tin', message: 'Customer TIN is required for NRS compliance', severity: 'error' });
+    addError('customer.tin', 'Customer TIN is required for NRS compliance');
   } else if (!/^\d{10,14}$/.test(invoice.client.tin)) {
-    errors.push({ field: 'customer.tin', message: 'Customer TIN must be 10-14 digits', severity: 'error' });
+    addError('customer.tin', 'Customer TIN must be 10-14 digits');
   }
 
   if (!invoice.client.name) {
-    errors.push({ field: 'customer.name', message: 'Customer name is required', severity: 'error' });
+    addError('customer.name', 'Customer name is required');
   }
 
   if (!invoice.invoiceNumber) {
-    errors.push({ field: 'invoiceNumber', message: 'Invoice number is required', severity: 'error' });
+    addError('invoiceNumber', 'Invoice number is required');
   }
 
   if (!invoice.issueDate) {
-    errors.push({ field: 'issueDate', message: 'Issue date is required', severity: 'error' });
+    addError('issueDate', 'Issue date is required');
   }
 
   if (!invoice.dueDate) {
-    errors.push({ field: 'dueDate', message: 'Due date is required', severity: 'error' });
+    addError('dueDate', 'Due date is required');
   }
 
   if (!invoice.lineItems || invoice.lineItems.length === 0) {
-    errors.push({ field: 'lineItems', message: 'At least one line item is required', severity: 'error' });
+    addError('lineItems', 'At least one line item is required');
   }
 
   if (invoice.lineItems) {
     invoice.lineItems.forEach((item, idx) => {
       if (!item.description) {
-        errors.push({ field: `lineItems[${idx}].description`, message: 'Line item description is required', severity: 'error' });
+        addError(`lineItems[${idx}].description`, 'Line item description is required');
       }
       if (!item.quantity || item.quantity <= 0) {
-        errors.push({ field: `lineItems[${idx}].quantity`, message: 'Line item quantity must be positive', severity: 'error' });
+        addError(`lineItems[${idx}].quantity`, 'Line item quantity must be positive');
       }
       if (!item.price || item.price <= 0) {
-        errors.push({ field: `lineItems[${idx}].price`, message: 'Line item price must be positive', severity: 'error' });
+        addError(`lineItems[${idx}].price`, 'Line item price must be positive');
       }
     });
   }
 
   const totals = computeTotals(invoice);
   if (totals.totalAmount <= 0) {
-    errors.push({ field: 'total', message: 'Invoice total must be greater than zero', severity: 'error' });
+    addError('total', 'Invoice total must be greater than zero');
   }
 
   if (invoice.taxRate !== undefined && invoice.taxRate !== 7.5) {
-    warnings.push({ field: 'taxRate', message: 'VAT rate should be 7.5% per NRS guidelines', severity: 'warning' });
+    addWarning('taxRate', 'VAT rate should be 7.5% per NRS guidelines');
   }
 
   if (!invoice.user.name) {
-    errors.push({ field: 'supplier.name', message: 'Supplier name is required', severity: 'error' });
+    addError('supplier.name', 'Supplier name is required');
   }
 
   if (!invoice.user.address) {
-    warnings.push({ field: 'supplier.address', message: 'Supplier address recommended', severity: 'warning' });
+    addWarning('supplier.address', 'Supplier address recommended');
   }
 
   const compliant = errors.length === 0;
