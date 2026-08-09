@@ -5,3 +5,7 @@
 ## 2024-05-24 - Add structured context to push notification failures
 **Learning:** Unstructured string error logs in push notification failures (e.g., `console.error('Push notification failed:', error)`) omitted the `userId` context, making it impossible to trace which user missed a push notification or investigate token registration issues for a specific user in production.
 **Action:** Ensure `console.error` logs in background jobs and cloud functions use the structured log pattern `{ event, userId, errorCode, errorMessage }` to maintain queryability and context.
+
+## 2024-08-09 - Missing Observability in NIBSS Payment Integration
+**Learning:** The payment initiation and status check methods (`apps/web/services/nibssApi.ts`) were catching API and network errors, but only logging plain string errors without business context (like `invoiceId` or `transactionId`). Additionally, they were completely skipping analytics event tracking for failures in production.
+**Action:** Always ensure critical integration wrappers (like payment gateways) log structured metadata alongside errors and utilize existing application-wide telemetry (`trackEvent`) so operations have visibility. Wrap telemetry calls in empty `try...catch` blocks to protect business logic.

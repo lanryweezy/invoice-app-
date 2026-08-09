@@ -3,6 +3,7 @@
  */
 
 import { apiRequest } from './apiConfig';
+import { trackEvent } from '../utils/analytics';
 
 export interface PaymentRequest {
   amount: number;
@@ -62,7 +63,19 @@ export async function initiatePayment(payment: PaymentRequest): Promise<PaymentR
       status: 'pending',
     };
   } catch (error) {
-    console.error('Payment initiation failed:', error);
+    console.error('Payment initiation failed', {
+      event: 'payment.initiation.failed',
+      invoiceId: payment.invoiceId,
+      bankCode: payment.bankCode,
+      error: error instanceof Error ? error.message : String(error)
+    });
+    try {
+      trackEvent('payment_initiation_failed', {
+        invoice_id: payment.invoiceId,
+        bank_code: payment.bankCode,
+        error: error instanceof Error ? error.message : String(error)
+      });
+    } catch {}
     return {
       success: false,
       message: (error as Error).message,
@@ -74,7 +87,17 @@ export async function checkPaymentStatus(transactionId: string): Promise<any> {
   try {
     return await apiRequest(`/v1/payment/status/${transactionId}`);
   } catch (error) {
-    console.error('Status check failed:', error);
+    console.error('Payment status check failed', {
+      event: 'payment.status.check.failed',
+      transactionId,
+      error: error instanceof Error ? error.message : String(error)
+    });
+    try {
+      trackEvent('payment_status_check_failed', {
+        transaction_id: transactionId,
+        error: error instanceof Error ? error.message : String(error)
+      });
+    } catch {}
     return { status: 'unknown', message: 'Status check failed' };
   }
 }
