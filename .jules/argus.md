@@ -9,3 +9,7 @@
 ## 2024-08-09 - Missing Observability in NIBSS Payment Integration
 **Learning:** The payment initiation and status check methods (`apps/web/services/nibssApi.ts`) were catching API and network errors, but only logging plain string errors without business context (like `invoiceId` or `transactionId`). Additionally, they were completely skipping analytics event tracking for failures in production.
 **Action:** Always ensure critical integration wrappers (like payment gateways) log structured metadata alongside errors and utilize existing application-wide telemetry (`trackEvent`) so operations have visibility. Wrap telemetry calls in empty `try...catch` blocks to protect business logic.
+
+## 2024-08-10 - Masking TINs in Telemetry and Logs
+**Learning:** TINs (Tax Identification Numbers) are highly sensitive Personally Identifiable Information (PII) equivalent to a SSN for many businesses. When modifying `apps/web/services/nrsApi.ts`, logging the raw TIN in structured payloads (`console.error`) or passing it to external analytics (`trackEvent`) represents a major compliance and security risk.
+**Action:** Always safely mask sensitive IDs (e.g., `const maskedTin = tin ? \`***\${tin.slice(-4)}\` : 'unknown'`) or omit them completely when enriching logs to prevent data exposure.
