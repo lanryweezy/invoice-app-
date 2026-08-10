@@ -339,4 +339,142 @@ describe('complianceTracker', () => {
       expect(suggestions).toContain('Request customer TIN before issuing invoice');
     });
   });
+
+  describe('history and stats', () => {
+    let mockGetItem: any;
+    let mockSetItem: any;
+
+    beforeAll(() => {
+      mockGetItem = vi.spyOn(Storage.prototype, 'getItem');
+      mockSetItem = vi.spyOn(Storage.prototype, 'setItem');
+    });
+
+    beforeEach(() => {
+      mockGetItem.mockClear();
+      mockSetItem.mockClear();
+    });
+
+    afterAll(() => {
+      mockGetItem.mockRestore();
+      mockSetItem.mockRestore();
+    });
+
+    it('returns an empty array when history is not found in localStorage', async () => {
+      mockGetItem.mockReturnValue(null);
+      const { getComplianceHistory } = await import('./complianceTracker');
+      const history = getComplianceHistory('INV-999');
+      expect(history).toEqual([]);
+      expect(mockGetItem).toHaveBeenCalledWith('compliance_history_INV-999');
+    });
+
+    it('returns parsed history array when history exists in localStorage', async () => {
+      const storedData = [{ invoiceId: 'INV-999', score: 100, checkedAt: '2023-10-10T10:00:00.000Z', issueCount: 0 }];
+      mockGetItem.mockReturnValue(JSON.stringify(storedData));
+      const { getComplianceHistory } = await import('./complianceTracker');
+      const history = getComplianceHistory('INV-999');
+      expect(history).toEqual(storedData);
+    });
+
+    it('returns an empty array when history in localStorage is invalid JSON', async () => {
+      mockGetItem.mockReturnValue('invalid-json');
+      const { getComplianceHistory } = await import('./complianceTracker');
+      const history = getComplianceHistory('INV-999');
+      expect(history).toEqual([]);
+    });
+
+    it('saves compliance check result to localStorage when called', async () => {
+      mockGetItem.mockReturnValue(null);
+      const { saveComplianceCheck } = await import('./complianceTracker');
+      saveComplianceCheck({
+        invoiceId: 'INV-999',
+        score: 90,
+        issues: [{ id: '1' } as any],
+        checkedAt: '2023-10-10T10:00:00.000Z',
+        categoryScores: {} as any,
+        totalChecks: 10,
+        passedChecks: 9
+      });
+      expect(mockSetItem).toHaveBeenCalledWith(
+        'compliance_history_INV-999',
+        JSON.stringify([{ invoiceId: 'INV-999', score: 90, checkedAt: '2023-10-10T10:00:00.000Z', issueCount: 1 }])
+      );
+    });
+
+    it('caps compliance history at 50 entries when saving a new check', async () => {
+      const oldHistory = Array.from({ length: 50 }).map((_, i) => ({
+        invoiceId: 'INV-999', score: 100, checkedAt: `2023-10-01T10:00:${i.toString().padStart(2, '0')}.000Z`, issueCount: 0
+      }));
+      mockGetItem.mockReturnValue(JSON.stringify(oldHistory));
+      const { saveComplianceCheck } = await import('./complianceTracker');
+
+      saveComplianceCheck({
+        invoiceId: 'INV-999',
+        score: 80,
+        issues: [{ id: '1' } as any, { id: '2' } as any],
+        checkedAt: '2023-10-10T10:00:00.000Z',
+        categoryScores: {} as any,
+        totalChecks: 10,
+        passedChecks: 8
+      });
+
+      expect(mockSetItem).toHaveBeenCalled();
+      const savedCallArgs = mockSetItem.mock.calls[0];
+      expect(savedCallArgs[0]).toBe('compliance_history_INV-999');
+      const parsedSaved = JSON.parse(savedCallArgs[1]);
+
+      expect(parsedSaved.length).toBe(50);
+      expect(parsedSaved[49].score).toBe(80);
+      expect(parsedSaved[49].issueCount).toBe(2);
+      expect(parsedSaved[0].checkedAt).toBe('2023-10-01T10:00:01.000Z'); // The oldest one (00) was removed
+    });
+
+    it('calculates correct stats when given an empty results array', async () => {
+      const { calculateStatsFromResults } = await import('./complianceTracker');
+      const stats = calculateStatsFromResults([]);
+      expect(stats.averageScore).toBe(0);
+      expect(stats.totalIssues).toBe(0);
+      expect(stats.compliantCount).toBe(0);
+      expect(stats.nonCompliantCount).toBe(0);
+    });
+
+    it('calculates correct stats when given multiple compliance results', async () => {
+      const { calculateStatsFromResults } = await import('./complianceTracker');
+      const results = [
+        { invoiceId: '1', score: 100, issues: [], checkedAt: '', categoryScores: {} as any, totalChecks: 10, passedChecks: 10 },
+        { invoiceId: '2', score: 50, issues: [{ id: '1' } as any], checkedAt: '', categoryScores: {} as any, totalChecks: 10, passedChecks: 5 },
+        { invoiceId: '3', score: 100, issues: [], checkedAt: '', categoryScores: {} as any, totalChecks: 10, passedChecks: 10 },
+      ];
+
+      const stats = calculateStatsFromResults(results);
+
+      expect(stats.averageScore).toBe(83); // (100+50+100) / 3 = 250 / 3 = 83.33 -> 83
+      expect(stats.totalIssues).toBe(1);
+      expect(stats.compliantCount).toBe(2);
+      expect(stats.nonCompliantCount).toBe(1);
+    });
+
+    it('exports compliance report as CSV string when given invoices', async () => {
+      const { exportComplianceReport } = await import('./complianceTracker');
+      const report = exportComplianceReport([validInvoice]);
+      expect(report).toContain('Invoice Compliance Report');
+      expect(report).toContain('Total Invoices: 1');
+      expect(report).toContain('Average Score: 100%');
+      expect(report).toContain('Compliant: 1');
+      expect(report).toContain('Non-Compliant: 0');
+      expect(report).toContain('INV-001,100%,0');
+    });
+
+    it('exports compliance report as JSON string when given invoices', async () => {
+      const { exportComplianceReportJSON } = await import('./complianceTracker');
+      const jsonReport = exportComplianceReportJSON([validInvoice]);
+      const parsed = JSON.parse(jsonReport);
+
+      expect(parsed).toHaveProperty('generatedAt');
+      expect(parsed.summary.averageScore).toBe(100);
+      expect(parsed.summary.compliantCount).toBe(1);
+      expect(parsed.invoices).toHaveLength(1);
+      expect(parsed.invoices[0].invoiceNumber).toBe('INV-001');
+      expect(parsed.invoices[0].score).toBe(100);
+    });
+  });
 });
