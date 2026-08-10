@@ -59,7 +59,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           }
         };
         
-        checkUserRecord();
+        // 🌱 Flora: Catch floating promise rejections to prevent silent failures
+        checkUserRecord().catch(console.error);
 
         // The listener is now purely for syncing data
         unsubscribeSnapshot = onSnapshot(userRef, (userSnap) => {

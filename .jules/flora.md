@@ -9,3 +9,7 @@
 ## 2026-08-08 - Floating Promises in State Setters
 **Learning:** React state setter functions should ideally be pure, but existing codebase patterns invoke fire-and-forget asynchronous side effects (like `syncToCloud()`) directly inside `setState(prev => { ... })` callbacks. If these floating promises reject due to network issues or database errors, the rejections are unhandled and silently bypass standard React error boundaries.
 **Action:** When working with legacy code that triggers asynchronous side effects from synchronous callbacks, ensure every promise has at minimum a `.catch(console.error)` or dedicated error handler attached at the call site.
+
+## 2026-08-08 - Floating Promises inside async wrappers in Hooks
+**Learning:** Functions defined as `async` inside `useEffect` (like `checkUserRecord` running transactions) return Promises. Calling them synchronously (e.g., `checkUserRecord();`) creates a floating promise. While the internal logic may have a `try/catch`, from the perspective of the hook, the Promise itself can be rejected in extreme circumstances (e.g., memory exhaustion or async scheduler errors), leading to silent unhandled rejections that bypass React boundaries.
+**Action:** Always attach a `.catch(console.error)` when invoking `async` setup functions synchronously inside React hooks.
