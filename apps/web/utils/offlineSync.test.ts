@@ -94,6 +94,7 @@ describe('offlineSync', () => {
       await queueMutation('invoices', 'doc-1', {});
 
       expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to queue mutation', expect.any(Error));
+      consoleSpy.mockRestore();
     });
 
     it('handles non-Error exceptions and logs stringified error', async () => {
@@ -103,6 +104,7 @@ describe('offlineSync', () => {
       await queueMutation('invoices', 'doc-1', {});
 
       expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to queue mutation', 'String Error');
+      consoleSpy.mockRestore();
     });
   });
 
@@ -164,6 +166,7 @@ describe('offlineSync', () => {
       expect(localforage.setItem).toHaveBeenCalledWith('syncQueue', [
         { id: '1', collection: 'invoices', docId: 'doc-1', data: { val: 1 }, timestamp: 100, attempts: 1 }
       ]);
+      consoleSpy.mockRestore();
     });
 
     it('drops mutation and logs event after 5 failed attempts', async () => {
@@ -189,6 +192,7 @@ describe('offlineSync', () => {
         collection: 'invoices',
         docId: 'doc-1'
       });
+      consoleSpy.mockRestore();
     });
 
     it('handles non-Error rejections during sync and logs stringified error', async () => {
@@ -209,6 +213,7 @@ describe('offlineSync', () => {
       expect(localforage.setItem).toHaveBeenCalledWith('syncQueue', [
         { id: '1', collection: 'invoices', docId: 'doc-1', data: { val: 1 }, timestamp: 100, attempts: 1 }
       ]);
+      consoleSpy.mockRestore();
     });
 
     it('handles synchronous exceptions thrown by setDoc during flushQueue', async () => {
@@ -249,6 +254,7 @@ describe('offlineSync', () => {
 
       expect(result).toBe(false);
       expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Critical failure during flushQueue', expect.any(Error));
+      consoleSpy.mockRestore();
     });
 
     it('handles non-Error critical failure and logs stringified error', async () => {
@@ -259,6 +265,7 @@ describe('offlineSync', () => {
 
       expect(result).toBe(false);
       expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Critical failure during flushQueue', 'Fatal String Error');
+      consoleSpy.mockRestore();
     });
   });
 
@@ -287,6 +294,7 @@ describe('offlineSync', () => {
       expect(trackEvent).toHaveBeenCalledWith('sync_queue_count_failed', {
         error: 'DB Error'
       });
+      consoleSpy.mockRestore();
     });
   });
 });
