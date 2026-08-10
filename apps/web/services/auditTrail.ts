@@ -73,7 +73,8 @@ export async function getAuditTrail(invoiceId: string): Promise<AuditEntry[]> {
   const entries = await getAllEntries();
   return entries
     .filter((e) => e.invoiceId === invoiceId)
-    .sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp));
+    // ⚡ Bolt: Use string comparison for ISO date strings in sort to avoid O(N log N) Date.parse calls
+    .sort((a, b) => a.timestamp > b.timestamp ? -1 : (a.timestamp < b.timestamp ? 1 : 0));
 }
 
 export async function searchAuditTrail(filters: AuditFilters): Promise<AuditEntry[]> {
@@ -97,7 +98,8 @@ export async function searchAuditTrail(filters: AuditFilters): Promise<AuditEntr
       }
       return true;
     })
-    .sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp))
+    // ⚡ Bolt: Use string comparison for ISO date strings in sort to avoid O(N log N) Date.parse calls
+    .sort((a, b) => a.timestamp > b.timestamp ? -1 : (a.timestamp < b.timestamp ? 1 : 0))
     .slice(0, filters.limit ?? 500);
 }
 
