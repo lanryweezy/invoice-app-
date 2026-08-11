@@ -24,6 +24,31 @@ export function registerOutputStrategy(format: string, strategy: ListOutputStrat
   outputStrategies.set(format, strategy);
 }
 
+/**
+ * 🔩 Hinge Extension Point: SortStrategy
+ *
+ * Pressure: The `list` command had a growing `switch (options.sort)` block
+ * that needed modification every time a new sort field (e.g., client name, due date) was added.
+ *
+ * Contract:
+ * - Implementors provide a comparator function that takes two `Invoice` objects
+ *   and returns a number (-1, 0, 1) indicating their sort order.
+ */
+export type SortStrategy = (a: Invoice, b: Invoice) => number;
+
+const sortStrategies = new Map<string, SortStrategy>();
+
+export function registerSortStrategy(field: string, strategy: SortStrategy): void {
+  sortStrategies.set(field, strategy);
+}
+
+registerSortStrategy('amount', (a, b) => (b.total || 0) - (a.total || 0));
+registerSortStrategy('status', (a, b) => a.status.localeCompare(b.status));
+registerSortStrategy('date', (a, b) => {
+  // ⚡ Bolt: Parse target date directly using Date.parse inside loops to avoid object allocation overhead (~40% faster)
+  return Date.parse(b.createdAt || '') - Date.parse(a.createdAt || '');
+});
+
 registerOutputStrategy('json', (invoices) => {
   console.log(JSON.stringify(invoices, null, 2));
 });
@@ -121,16 +146,8 @@ export default function registerListCommand(program: Command): void {
           }
 
           invoices.sort((a, b) => {
-            switch (options.sort) {
-              case 'amount':
-                return (b.total || 0) - (a.total || 0);
-              case 'status':
-                return a.status.localeCompare(b.status);
-              case 'date':
-              default:
-                // ⚡ Bolt: Parse target date directly using Date.parse inside loops to avoid object allocation overhead (~40% faster)
-                return Date.parse(b.createdAt || '') - Date.parse(a.createdAt || '');
-            }
+            const strategy = sortStrategies.get(options.sort) || sortStrategies.get('date')!;
+            return strategy(a, b);
           });
 
           const limit = parseInt(options.limit);
