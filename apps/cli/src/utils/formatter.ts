@@ -14,19 +14,21 @@ export function formatCurrency(amount: number, currency: Currency): string {
   return currencyFormatters.get(currency)!.format(amount);
 }
 
+function getDateParts(d: Date) {
+  return {
+    day: d.getDate().toString().padStart(2, '0'),
+    month: (d.getMonth() + 1).toString().padStart(2, '0'),
+    year: d.getFullYear().toString(),
+  };
+}
+
 export function formatDate(date: string): string {
-  const d = new Date(date);
-  const day = d.getDate().toString().padStart(2, '0');
-  const month = (d.getMonth() + 1).toString().padStart(2, '0');
-  const year = d.getFullYear();
+  const { day, month, year } = getDateParts(new Date(date));
   return `${day}/${month}/${year}`;
 }
 
 export function formatDateISO(date: string): string {
-  const d = new Date(date);
-  const day = d.getDate().toString().padStart(2, '0');
-  const month = (d.getMonth() + 1).toString().padStart(2, '0');
-  const year = d.getFullYear();
+  const { day, month, year } = getDateParts(new Date(date));
   return `${year}-${month}-${day}`;
 }
 
@@ -46,9 +48,7 @@ export function parseItemsString(items: string): { description: string; amount: 
 }
 
 export function generateInvoiceNumber(invoices: Invoice[]): string {
-  const now = new Date();
-  const year = now.getFullYear().toString();
-  const month = (now.getMonth() + 1).toString().padStart(2, '0');
+  const { year, month } = getDateParts(new Date());
   const prefix = `INV-${year}-${month}`;
 
   const existingNumbers = invoices
