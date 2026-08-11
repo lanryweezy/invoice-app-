@@ -6,3 +6,7 @@
 
 **Learning:** When spying on global browser APIs like `Storage.prototype.getItem` and `Storage.prototype.setItem`, use `mockClear()` in `beforeEach` to reset call counts and `mockRestore()` in `afterAll` to clean up the spies entirely.
 **Action:** When testing modules that interact with `localStorage` or `sessionStorage`, ensure global spies are properly restored to prevent cross-test pollution. Use `vi.spyOn(Storage.prototype, 'getItem')` and restore it afterward.
+
+## 2024-08-11 - Testing Commander CLI with Inquirer
+**Learning:** When testing CLI commands that use inquirer for interactive prompts alongside commander, use vi.mock to mock inquirer and return the expected resolved values to simulate user input without halting the test.
+**Action:** For all future tests involving interactive CLI flows, mock inquirer.prompt and use .mockResolvedValueOnce() to provide sequence-specific answers.
