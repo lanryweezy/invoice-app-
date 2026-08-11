@@ -57,6 +57,7 @@
     "@types/node": "^22.0.0",
     "@types/nodemailer": "^6.4.0",
     "@types/pdfkit": "^0.17.6",
+    "@vitest/coverage-v8": "^4.1.10",
     "ts-node": "^10.9.0",
     "typescript": "~5.8.3",
     "vitest": "^4.1.10"
