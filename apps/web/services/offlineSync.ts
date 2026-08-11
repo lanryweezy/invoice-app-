@@ -3,6 +3,7 @@
 
 import { db } from './firebase';
 import { collection, addDoc, getDocs, deleteDoc, doc, writeBatch, type WriteBatch, type DocumentReference } from 'firebase/firestore';
+import { trackEvent } from '../utils/analytics';
 
 interface PendingChange {
   id: string;
@@ -116,7 +117,24 @@ export async function syncPendingChanges(userId: string): Promise<{ synced: numb
 
         change.synced = true;
         synced++;
-      } catch {
+      } catch (error) {
+        console.error('Failed to sync individual offline change', {
+          event: 'offline.sync.item.failed',
+          userId,
+          collection: change.collection,
+          docId: change.docId,
+          type: change.type,
+          error: error instanceof Error ? error.message : String(error)
+        });
+        try {
+          trackEvent('offline_sync_item_failed', {
+            user_id: userId,
+            collection: change.collection,
+            doc_id: change.docId,
+            type: change.type,
+            error: error instanceof Error ? error.message : String(error)
+          });
+        } catch {}
         failed++;
       }
     }
