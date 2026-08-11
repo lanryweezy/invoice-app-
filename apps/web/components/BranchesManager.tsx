@@ -68,7 +68,7 @@ export const BranchesManager: React.FC<BranchesManagerProps> = ({ isPro = false,
                         }}
                         aria-label={`Delete ${branch.name} branch`}
                         title={`Delete ${branch.name} branch`}
-                        className="p-2 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-500 focus:outline-none transition-colors opacity-0 group-hover:opacity-100"
+                        className="p-2 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-500 focus:outline-none transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 focus-visible:opacity-100"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
