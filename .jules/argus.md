@@ -13,3 +13,6 @@
 ## 2024-08-10 - Masking TINs in Telemetry and Logs
 **Learning:** TINs (Tax Identification Numbers) are highly sensitive Personally Identifiable Information (PII) equivalent to a SSN for many businesses. When modifying `apps/web/services/nrsApi.ts`, logging the raw TIN in structured payloads (`console.error`) or passing it to external analytics (`trackEvent`) represents a major compliance and security risk.
 **Action:** Always safely mask sensitive IDs (e.g., `const maskedTin = tin ? \`***\${tin.slice(-4)}\` : 'unknown'`) or omit them completely when enriching logs to prevent data exposure.
+## 2026-08-11 - Swallowed sync failures
+**Learning:** An empty catch block in the `offlineSync` service was swallowing granular sync errors and masking the reasons for failure, reducing visibility during offline operations.
+**Action:** Always include a `console.error` with structured contextual data (and consider attaching a `trackEvent` wrapped in a try/catch) inside catch blocks that process critical batch or synchronization operations.
