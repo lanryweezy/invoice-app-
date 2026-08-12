@@ -87,16 +87,32 @@ export default function registerGetCommand(program: Command): void {
     });
 }
 
+/**
+ * 🔩 Hinge Extension Point: StatusColorStrategy
+ *
+ * Pressure: The `getStatusColor` function had a growing `switch (status.toLowerCase())` block
+ * that needed modification every time a new invoice status was added.
+ *
+ * Contract:
+ * - Implementors provide a function that returns a colored string representation of the status bullet point (e.g. `chalk.green('● ')`).
+ */
+export type StatusColorStrategy = () => string;
+
+const statusColorStrategies = new Map<string, StatusColorStrategy>();
+
+export function registerStatusColorStrategy(status: string, strategy: StatusColorStrategy): void {
+  statusColorStrategies.set(status.toLowerCase(), strategy);
+}
+
+registerStatusColorStrategy('paid', () => chalk.green('● '));
+registerStatusColorStrategy('sent', () => chalk.blue('● '));
+registerStatusColorStrategy('overdue', () => chalk.red('● '));
+registerStatusColorStrategy('draft', () => chalk.gray('● '));
+
 function getStatusColor(status: string): string {
-  switch (status.toLowerCase()) {
-    case 'paid':
-      return chalk.green('● ');
-    case 'sent':
-      return chalk.blue('● ');
-    case 'overdue':
-      return chalk.red('● ');
-    case 'draft':
-    default:
-      return chalk.gray('● ');
+  const strategy = statusColorStrategies.get(status.toLowerCase());
+  if (strategy) {
+    return strategy();
   }
+  return chalk.gray('● ');
 }
