@@ -10,3 +10,7 @@
 ## 2024-08-11 - Testing Commander CLI with Inquirer
 **Learning:** When testing CLI commands that use inquirer for interactive prompts alongside commander, use vi.mock to mock inquirer and return the expected resolved values to simulate user input without halting the test.
 **Action:** For all future tests involving interactive CLI flows, mock inquirer.prompt and use .mockResolvedValueOnce() to provide sequence-specific answers.
+
+## 2024-08-12 - Added AbortController timeout coverage to exchangeRates
+**Learning:** We can simulate AbortController signal events during fetch mocks in Vitest by extracting the signal from fetch options and attaching an abort listener that throws an error, combined with `vi.runAllTimersAsync()` to fast-forward timeouts.
+**Action:** Added a specific mock implementation that accurately simulates fetch abort behaviour when testing timeout handlers, successfully achieving 100% code coverage on `exchangeRates.ts`.
