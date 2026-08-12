@@ -125,7 +125,7 @@ export function verifySignature(invoice: Invoice, signatureData: SignatureData):
   if (signatureData.payload.currency !== payload.currency) return false;
   if (signatureData.payload.hash !== payload.hash) return false;
 
-  const certAge = Date.now() - new Date(signatureData.timestamp).getTime();
+  const certAge = Date.now() - Date.parse(signatureData.timestamp);
   const MAX_CERT_AGE = 365 * 24 * 60 * 60 * 1000;
   if (certAge > MAX_CERT_AGE) return false;
 
@@ -133,7 +133,7 @@ export function verifySignature(invoice: Invoice, signatureData: SignatureData):
 }
 
 export function getSignatureInfo(signatureData: SignatureData): SignatureInfo {
-  const age = Date.now() - new Date(signatureData.timestamp).getTime();
+  const age = Date.now() - Date.parse(signatureData.timestamp);
   const MAX_CERT_AGE = 365 * 24 * 60 * 60 * 1000;
 
   return {
