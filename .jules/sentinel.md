@@ -11,3 +11,7 @@
 **Vulnerability:** Configuration directories and files were being created with default permissions (often `0644`/`0755` depending on umask). This allows other users on the same system to read sensitive data (like `userId`, tokens, or API keys) stored in `~/.invoiceapp/config.json`.
 **Learning:** Always enforce restrictive permissions when creating local storage for sensitive CLI tools.
 **Prevention:** Explicitly pass `{ mode: 0o700 }` to `fs.mkdirSync` and `{ encoding: 'utf-8', mode: 0o600 }` to `fs.writeFileSync`.
+## 2025-02-27 - Open Mail Relay Vulnerability
+**Vulnerability:** Open Mail Relay
+**Learning:** Vercel serverless functions in the `api/` directory (like `api/send-email.ts`) resolve their dependencies from the root `package.json`. Always ensure authentication checks are in place for sensitive endpoints.
+**Prevention:** Verify Firebase ID tokens passed in the `Authorization: Bearer <token>` header using `firebase-admin` before processing the request.
