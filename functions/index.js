@@ -15,7 +15,13 @@ exports.paystackWebhook = functions.runWith({ secrets: ["PAYSTACK_SECRET_KEY"] }
         return res.status(500).send('Configuration error');
     }
     const hash = crypto.createHmac('sha512', PAYSTACK_SECRET_KEY).update(req.rawBody).digest('hex');
-    if (hash !== req.headers['x-paystack-signature']) {
+    const signature = req.headers['x-paystack-signature'] || '';
+
+    const hashBuffer = Buffer.from(hash, 'hex');
+    const signatureBuffer = Buffer.from(signature, 'hex');
+
+    // Security enhancement: Prevent timing attacks when verifying signatures
+    if (hashBuffer.length !== signatureBuffer.length || !crypto.timingSafeEqual(hashBuffer, signatureBuffer)) {
         return res.status(401).send('Invalid signature');
     }
 
