@@ -101,33 +101,42 @@ export default function registerBatchCommand(program: Command) {
         let sent = 0;
         let failed = 0;
 
-        for (let i = 0; i < invoices.length; i++) {
-          const inv = invoices[i];
-          spinnerProgress.text = `[${i + 1}/${invoices.length}] Sending ${inv.invoiceNumber}...`;
+        const CHUNK_SIZE = 10;
+        for (let i = 0; i < invoices.length; i += CHUNK_SIZE) {
+          const chunk = invoices.slice(i, i + CHUNK_SIZE);
+          spinnerProgress.text = `[${Math.min(i + CHUNK_SIZE, invoices.length)}/${invoices.length}] Sending invoices...`;
 
-          const success = await sendInvoiceEmail(inv, template);
-          if (success) {
-            try {
-              if (inv.status === 'Overdue') {
-                await db
-                  .collection('users')
-                  .doc(uid)
-                  .collection('invoices')
-                  .doc(inv.id!)
-                  .update({ status: 'Sent', updatedAt: new Date().toISOString() });
+          const results = await Promise.all(
+            chunk.map(async (inv) => {
+              const success = await sendInvoiceEmail(inv, template);
+              if (success) {
+                try {
+                  if (inv.status === 'Overdue') {
+                    await db
+                      .collection('users')
+                      .doc(uid)
+                      .collection('invoices')
+                      .doc(inv.id!)
+                      .update({ status: 'Sent', updatedAt: new Date().toISOString() });
+                  }
+                  return true;
+                } catch (err: any) {
+                  // 🌱 Flora: Catch individual DB update failures to prevent a single transient error from crashing the entire batch loop
+                  console.error('\nFailed to update invoice status', { invoiceId: inv.id, invoiceNumber: inv.invoiceNumber, error: err });
+                  return false;
+                }
               }
-              sent++;
-            } catch (err: any) {
-              // 🌱 Flora: Catch individual DB update failures to prevent a single transient error from crashing the entire batch loop
-              console.error('\nFailed to update invoice status', { invoiceId: inv.id, invoiceNumber: inv.invoiceNumber, error: err });
-              failed++;
-            }
-          } else {
-            failed++;
-          }
+              return false;
+            })
+          );
+
+          results.forEach(res => {
+            if (res) sent++;
+            else failed++;
+          });
 
           // Rate limit: max 10 per minute
-          if ((i + 1) % 10 === 0 && i < invoices.length - 1) {
+          if (i + CHUNK_SIZE < invoices.length) {
             spinnerProgress.text = 'Rate limit pause (10/min)...';
             await sleep(60000);
           }
