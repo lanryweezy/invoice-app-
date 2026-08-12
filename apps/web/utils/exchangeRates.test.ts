@@ -99,7 +99,7 @@ describe('exchangeRates', () => {
 
     it('returns fallback values for missing currencies in API response', async () => {
       vi.mocked(localStorage.getItem).mockReturnValue(null);
-      const apiRates = { rates: { USD: 0.001 } }; // EUR and GBP missing
+      const apiRates = { rates: {} }; // USD, EUR and GBP missing
       vi.mocked(fetch).mockResolvedValue({
         ok: true,
         json: async () => apiRates
@@ -107,9 +107,41 @@ describe('exchangeRates', () => {
 
       const rates = await getExchangeRates();
 
-      expect(rates.USD).toBe(1000);
+      expect(rates.USD).toBe(1550); // Fallback
       expect(rates.EUR).toBe(1680); // Fallback
       expect(rates.GBP).toBe(1950); // Fallback
+    });
+
+    it('aborts fetch and returns fallback rates on timeout', async () => {
+      vi.mocked(localStorage.getItem).mockReturnValue(null);
+
+      // We simulate a fetch that listens to the abort signal and throws an error like fetch does
+      vi.mocked(fetch).mockImplementation((url, options) => {
+        return new Promise((resolve, reject) => {
+          if (options?.signal) {
+            options.signal.addEventListener('abort', () => {
+              reject(new Error('AbortError'));
+            });
+          }
+        });
+      });
+
+      // Start the fetch process
+      const ratesPromise = getExchangeRates();
+
+      // Fast-forward to trigger the setTimeout callback in getExchangeRates
+      await vi.runAllTimersAsync();
+
+      // Wait for our fetch mock's rejection to propagate and the fallback to be returned
+      const rates = await ratesPromise;
+
+      expect(rates.USD).toBe(1550);
+      expect(rates.NGN).toBe(1);
+
+      // Ensure fetch was called with a signal
+      expect(fetch).toHaveBeenCalledWith('https://api.exchangerate-api.com/v4/latest/NGN', expect.objectContaining({
+        signal: expect.any(AbortSignal)
+      }));
     });
 
     it('handles localStorage errors gracefully during read', async () => {
