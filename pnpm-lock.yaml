@@ -14,6 +14,9 @@ importers:
       commander:
         specifier: ^12.1.0
         version: 12.1.0
+      firebase-admin:
+        specifier: ^12.7.0
+        version: 12.7.0
     devDependencies:
       '@astrojs/check':
         specifier: ^0.9.9
