@@ -4,3 +4,6 @@
 ## 2024-12-05 - Lexicographical sorting of ISO date strings
 **Learning:** ISO date strings (`YYYY-MM-DDTHH:mm:ss.sssZ`) can be sorted lexicographically using native string comparison (`a > b`), which avoids the severe O(N log N) overhead of instantiating `Date.parse()` multiple times inside array `.sort()` comparators.
 **Action:** When sorting arrays of ISO date strings, always use string comparison (e.g. `(a, b) => a > b ? -1 : a < b ? 1 : 0`) instead of calling `Date.parse()` or `new Date().getTime()` on the values.
+## 2024-05-18 - Use Date.parse() instead of new Date().getTime() in digital signature validation
+**Learning:** `new Date()` incurs costly object allocation and garbage collection overhead, which can degrade performance in functions repeatedly validating signatures or mapping signature data. Using `Date.parse()` skips this allocation overhead and returns the timestamp directly.
+**Action:** Always prefer `Date.parse(dateString)` over `new Date(dateString).getTime()` when checking timestamps or calculating time differences.
