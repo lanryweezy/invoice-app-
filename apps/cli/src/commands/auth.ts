@@ -208,6 +208,12 @@ export function registerAuthCommands(program: Command): void {
         const config = getConfig() as any;
 
         const keys = key.split('.');
+
+        if (keys.some(k => ['__proto__', 'constructor', 'prototype'].includes(k))) {
+          console.error(chalk.red('Invalid configuration key.'));
+          process.exit(1);
+        }
+
         let current: any = config;
 
         for (let i = 0; i < keys.length - 1; i++) {

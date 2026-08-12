@@ -7,3 +7,8 @@
 **Vulnerability:** The Paystack webhook signature verification in `functions/index.js` used a standard string comparison (`!==`) to validate the HMAC signature against the `x-paystack-signature` header.
 **Learning:** Standard string equality checks evaluate characters sequentially and return `false` upon the first mismatch, allowing an attacker to theoretically deduce a valid signature by measuring verification response times.
 **Prevention:** Always use `crypto.timingSafeEqual()` for cryptographic comparisons (like HMAC signatures). Ensure inputs are cast to `Buffer` objects and verified to be of equal length *before* calling `timingSafeEqual()` to prevent application crashes.
+
+## 2026-08-12 - Prototype Pollution in CLI Config
+**Vulnerability:** The configuration 'set' command parsed dot-separated keys and recursively created objects without validating if the keys included prototype properties.
+**Learning:** Prototype pollution can occur in configuration systems when nested keys are generated based on unvalidated user input, potentially allowing attackers to override object properties application-wide.
+**Prevention:** Always validate and reject configuration keys containing `__proto__`, `constructor`, or `prototype` before performing nested object assignments based on user input.
