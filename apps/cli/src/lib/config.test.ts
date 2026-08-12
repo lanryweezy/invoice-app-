@@ -49,7 +49,7 @@ describe('config', () => {
   });
 
   describe('saveConfig', () => {
-    it('writes config to the correct path', async () => {
+    it('writes config to the correct path with secure permissions', async () => {
       mockFs.existsSync.mockReturnValue(false);
       mockFs.mkdirSync.mockImplementation(() => undefined as any);
       mockFs.writeFileSync.mockImplementation(() => undefined);
@@ -57,11 +57,14 @@ describe('config', () => {
       const { saveConfig } = await import('./config');
       saveConfig({ userId: '123', email: 'test@test.com' });
 
-      expect(mockFs.mkdirSync).toHaveBeenCalled();
+      expect(mockFs.mkdirSync).toHaveBeenCalledWith(
+        expect.stringContaining('.invoiceapp'),
+        { recursive: true, mode: 0o700 }
+      );
       expect(mockFs.writeFileSync).toHaveBeenCalledWith(
         expect.stringContaining('config.json'),
         expect.stringContaining('"userId": "123"'),
-        'utf-8'
+        { encoding: 'utf-8', mode: 0o600 }
       );
     });
   });

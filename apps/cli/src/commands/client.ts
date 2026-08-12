@@ -5,7 +5,7 @@ import { ensureAuthenticated } from '../lib/config';
 import { getDb } from '../lib/firebase-client';
 import { Client } from '../types';
 import { createClientTable, printTable } from '../utils/table';
-import { createSpinner, succeed, fail } from '../utils/spinner';
+import { createSpinner, succeed, fail, handleCliError } from '../utils/spinner';
 
 async function findClientByName(uid: string, name: string): Promise<Client | undefined> {
   const db = getDb();
@@ -70,8 +70,7 @@ export function registerClientCommands(program: Command): void {
 
         succeed(spinner, chalk.green(`✓ Client "${name}" added successfully (ID: ${docRef.id})`));
       } catch (error: any) {
-        console.error(chalk.red('Failed to add client:'), error.message);
-        process.exit(1);
+        handleCliError(error, 'Failed to add client:');
       }
     });
 
@@ -99,8 +98,7 @@ export function registerClientCommands(program: Command): void {
         succeed(spinner, chalk.green(`Found ${clients.length} client(s)`));
         printTable(createClientTable(clients));
       } catch (error: any) {
-        console.error(chalk.red('Failed to list clients:'), error.message);
-        process.exit(1);
+        handleCliError(error, 'Failed to list clients:');
       }
     });
 
@@ -130,8 +128,7 @@ export function registerClientCommands(program: Command): void {
         console.log(`  CAC:    ${found.cacNumber || 'N/A'}`);
         console.log(`  ID:     ${found.id}`);
       } catch (error: any) {
-        console.error(chalk.red('Failed to get client:'), error.message);
-        process.exit(1);
+        handleCliError(error, 'Failed to get client:');
       }
     });
 
@@ -163,8 +160,7 @@ export function registerClientCommands(program: Command): void {
         await db.collection('users').doc(uid).collection('clients').doc(found.id!).update(updates);
         succeed(spinner, chalk.green(`✓ Client "${found.name}" updated successfully`));
       } catch (error: any) {
-        console.error(chalk.red('Failed to update client:'), error.message);
-        process.exit(1);
+        handleCliError(error, 'Failed to update client:');
       }
     });
 
@@ -202,8 +198,7 @@ export function registerClientCommands(program: Command): void {
         await db.collection('users').doc(uid).collection('clients').doc(found.id!).delete();
         succeed(spinner, chalk.green(`✓ Client "${found.name}" deleted successfully`));
       } catch (error: any) {
-        console.error(chalk.red('Failed to delete client:'), error.message);
-        process.exit(1);
+        handleCliError(error, 'Failed to delete client:');
       }
     });
 }

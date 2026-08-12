@@ -100,7 +100,6 @@ export class NrsApiError extends Error {
 }
 
 function logApiCall(endpoint: string, method: string, duration: number, status: number): void {
-  console.log(`[NRS API] ${method} ${endpoint} - ${status} (${duration}ms)`);
   try {
     trackEvent('api_call', {
       endpoint: endpoint,

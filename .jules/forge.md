@@ -14,3 +14,16 @@
 
 **Learning:** When testing queues relying on `localStorage`, mocking `Storage.prototype.getItem` and `Storage.prototype.setItem` ensures predictable outcomes without test cross-pollution. Additionally, extracting queue operations into easily testable pure functions (`queueInvoiceChange` etc) enables comprehensive coverage for both normal offline changes and edge cases without executing complex Firebase mocks.
 **Action:** Added extensive tests covering previously untested functionality in `offlineSync.ts` such as specific collection queues, synced status clearing, pending changes count, and the standard sync strategies for 'create', 'update', and 'delete' offline events.
+## 2024-05-24 - Testing Firebase Initialization
+**Learning:** When mocking Firebase classes like `GoogleAuthProvider` in Vitest, they must be mocked as classes (e.g., `class {}`) rather than functions (`vi.fn()`) to avoid constructor errors upon initialization. Additionally, always read the target module to confirm its actual exports instead of relying on the issue description, which may omit critical information.
+**Action:** Created `apps/web/services/firebase.test.ts` to test initialization logic and safely mock Firebase dependencies.
+
+## 2024-08-12 - Added AbortController timeout coverage to exchangeRates
+**Learning:** We can simulate AbortController signal events during fetch mocks in Vitest by extracting the signal from fetch options and attaching an abort listener that throws an error, combined with `vi.runAllTimersAsync()` to fast-forward timeouts.
+**Action:** Added a specific mock implementation that accurately simulates fetch abort behaviour when testing timeout handlers, successfully achieving 100% code coverage on `exchangeRates.ts`.
+## 2026-08-12 - Concise API Testing
+**Learning:** When instructed to write API test files in under 50 lines, do not mock internal modules (like  or ). Instead, directly mock `global.fetch` and perform all assertions in a single concise test block to minimize boilerplate while covering all paths.
+**Action:** Created `apps/web/services/nibssApi.test.ts` in <30 lines by mocking `global.fetch`.
+## 2024-08-12 - Concise API Testing
+**Learning:** When instructed to write API test files in under 50 lines, do not mock internal modules (like `apiConfig.apiRequest` or `analytics`). Instead, directly mock `global.fetch` and perform all assertions in a single concise test block to minimize boilerplate while covering all paths.
+**Action:** Created `apps/web/services/nibssApi.test.ts` in <30 lines by mocking `global.fetch`.
