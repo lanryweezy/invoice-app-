@@ -7,3 +7,7 @@
 **Vulnerability:** The Paystack webhook signature verification in `functions/index.js` used a standard string comparison (`!==`) to validate the HMAC signature against the `x-paystack-signature` header.
 **Learning:** Standard string equality checks evaluate characters sequentially and return `false` upon the first mismatch, allowing an attacker to theoretically deduce a valid signature by measuring verification response times.
 **Prevention:** Always use `crypto.timingSafeEqual()` for cryptographic comparisons (like HMAC signatures). Ensure inputs are cast to `Buffer` objects and verified to be of equal length *before* calling `timingSafeEqual()` to prevent application crashes.
+## 2025-02-27 - Open Mail Relay Vulnerability
+**Vulnerability:** Open Mail Relay
+**Learning:** Vercel serverless functions in the `api/` directory (like `api/send-email.ts`) resolve their dependencies from the root `package.json`. Always ensure authentication checks are in place for sensitive endpoints.
+**Prevention:** Verify Firebase ID tokens passed in the `Authorization: Bearer <token>` header using `firebase-admin` before processing the request.
