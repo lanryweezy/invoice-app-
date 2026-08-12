@@ -16,3 +16,7 @@
 ## 2026-08-11 - Swallowed sync failures
 **Learning:** An empty catch block in the `offlineSync` service was swallowing granular sync errors and masking the reasons for failure, reducing visibility during offline operations.
 **Action:** Always include a `console.error` with structured contextual data (and consider attaching a `trackEvent` wrapped in a try/catch) inside catch blocks that process critical batch or synchronization operations.
+
+## 2024-10-24 - Structured logging in offline sync batch failures
+**Learning:** Batch sync operations were failing with an unstructured log (`console.error('Sync failed:', error)`), omitting the critical business context like `userId` and `pendingCount`. This made it impossible to trace offline failure trends by user or understand the scale of the dropped batches in production.
+**Action:** When catching errors during batch synchronization loops (like Firestore `batch.commit()`), use a structured `console.error` payload `{ event, userId, pendingCount, error }` and track an associated analytics event wrapped safely in a try/catch block.
