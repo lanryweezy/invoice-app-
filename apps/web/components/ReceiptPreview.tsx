@@ -42,13 +42,13 @@ export const ReceiptPreview: React.FC<ReceiptPreviewProps> = ({ receipt, templat
                 <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                     <h2 className="text-xl font-bold text-slate-900">Receipt {receipt.id}</h2>
                     <div className="flex items-center gap-2">
-                        <button onClick={handleDownload} className="flex items-center gap-2 px-3 py-1.5 bg-teal-50 text-teal-700 hover:bg-teal-100 rounded-lg transition-colors text-sm font-semibold">
+                        <button onClick={handleDownload} className="flex items-center gap-2 px-3 py-1.5 bg-teal-50 text-teal-700 hover:bg-teal-100 rounded-lg transition-colors text-sm font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1">
                             <DownloadIcon className="w-4 h-4" /> Download PDF
                         </button>
-                        <button onClick={() => window.location.href = `mailto:${encodeURIComponent(invoice.client.email)}?subject=${encodeURIComponent(`Receipt ${receipt.id} from ${invoice.user.name}`)}&body=${encodeURIComponent(`Please find attached the receipt ${receipt.id} for invoice ${invoice.invoiceNumber}.`)}`} className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg transition-colors text-sm font-semibold">
+                        <button onClick={() => window.location.href = `mailto:${encodeURIComponent(invoice.client.email)}?subject=${encodeURIComponent(`Receipt ${receipt.id} from ${invoice.user.name}`)}&body=${encodeURIComponent(`Please find attached the receipt ${receipt.id} for invoice ${invoice.invoiceNumber}.`)}`} className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg transition-colors text-sm font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
                             <MailIcon className="w-4 h-4" /> Email
                         </button>
-                        <button onClick={onClose} aria-label="Close receipt preview" className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors">
+                        <button onClick={onClose} aria-label="Close receipt preview" className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-1 rounded-lg">
                             <XIcon className="w-5 h-5" />
                         </button>
                     </div>

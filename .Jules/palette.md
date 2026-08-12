@@ -2,3 +2,6 @@
 ## 2024-08-10 - Uniform Keyboard Focus for Interactive Actions
 **Learning:** In standard action button lists, ensuring keyboard users receive clear and consistent focus feedback is critical, but hover/active states don't translate to keyboard navigation. Using `focus-visible` ensures that these accessibility improvements don't degrade the standard visual experience for mouse users.
 **Action:** When inspecting interactive components like dropdown menus, modals, or action bars, verify every clickable element has a `focus-visible` state. Standardize on the primary brand color (e.g., teal) for consistency, even if hover colors vary.
+## 2024-08-12 - Ensure Contextual Action Buttons in Panels Support Keyboard Focus
+**Learning:** Action buttons in secondary dialogs and panels (like receipt preview dialogs, and nested empty-state promotional buttons) often inherit default styles without explicit keyboard focus feedback. This severely impacts keyboard navigability for accessibility.
+**Action:** When working on modal or secondary panel action button rows, ensure `focus-visible:ring-2` and `focus-visible:ring-offset-*` classes (matching the brand colors contextually like teal or blue) are applied to make keyboard tabbing explicitly visible.
