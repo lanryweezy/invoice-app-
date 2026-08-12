@@ -10,3 +10,9 @@
 ## 2024-08-11 - Testing Commander CLI with Inquirer
 **Learning:** When testing CLI commands that use inquirer for interactive prompts alongside commander, use vi.mock to mock inquirer and return the expected resolved values to simulate user input without halting the test.
 **Action:** For all future tests involving interactive CLI flows, mock inquirer.prompt and use .mockResolvedValueOnce() to provide sequence-specific answers.
+## 2026-08-12 - Concise API Testing
+**Learning:** When instructed to write API test files in under 50 lines, do not mock internal modules (like  or ). Instead, directly mock `global.fetch` and perform all assertions in a single concise test block to minimize boilerplate while covering all paths.
+**Action:** Created `apps/web/services/nibssApi.test.ts` in <30 lines by mocking `global.fetch`.
+## 2024-08-12 - Concise API Testing
+**Learning:** When instructed to write API test files in under 50 lines, do not mock internal modules (like `apiConfig.apiRequest` or `analytics`). Instead, directly mock `global.fetch` and perform all assertions in a single concise test block to minimize boilerplate while covering all paths.
+**Action:** Created `apps/web/services/nibssApi.test.ts` in <30 lines by mocking `global.fetch`.
