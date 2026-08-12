@@ -19,7 +19,7 @@ export const ReceiptsManager: React.FC<ReceiptsManagerProps & { isPro?: boolean;
                  <div className="bg-white p-6 rounded-xl shadow-lg border border-teal-100 text-center max-w-sm mx-auto">
                     <p className="text-lg font-bold text-slate-900 mb-2">Professional Receipts</p>
                     <p className="text-sm text-slate-500 mb-4">Automatically generate and send receipts when an invoice is marked as paid.</p>
-                    <button onClick={onUpgrade} type="button" className="px-4 py-3 bg-teal-600 text-white rounded-xl text-sm font-bold w-full hover:bg-teal-700 shadow-md">Unlock Pro</button>
+                    <button onClick={onUpgrade} type="button" className="px-4 py-3 bg-teal-600 text-white rounded-xl text-sm font-bold w-full hover:bg-teal-700 shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2">Unlock Pro</button>
                  </div>
               </div>
            )}
@@ -54,7 +54,7 @@ export const ReceiptsManager: React.FC<ReceiptsManagerProps & { isPro?: boolean;
                             <div className="flex items-center gap-3 mt-4 sm:mt-0">
                                 <button
                                     onClick={() => onViewReceipt(receipt)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 hover:text-teal-600 transition-colors text-sm font-semibold"
+                                    className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 hover:text-teal-600 transition-colors text-sm font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1"
                                 >
                                     <EyeIcon className="w-4 h-4" /> View
                                 </button>
