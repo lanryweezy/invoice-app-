@@ -8,6 +8,79 @@ import { formatCurrency, formatDate } from '../utils/formatter';
 import { createSpinner, succeed, fail } from '../utils/spinner';
 import Table from 'cli-table3';
 
+/**
+ * 🔩 Hinge Extension Point: TaxReportOutputStrategy
+ *
+ * Pressure: The tax report command had a growing `if (options.format === 'csv') { ... } else if (options.format === 'json') { ... } else { ... }` block for formats. Adding new output formats required modifying the core reporting logic.
+ *
+ * Contract:
+ * - Implementors provide an `id` string (e.g. 'csv', 'json', 'table') and a `serialize` function.
+ * - `serialize` receives the formatted rows, totals, and currency, and returns a formatted string.
+ */
+export interface TaxReportOutputStrategy {
+  id: string;
+  serialize(
+    rows: any[],
+    totals: any,
+    currency: string
+  ): string;
+}
+
+const taxReportOutputStrategies = new Map<string, TaxReportOutputStrategy>();
+
+export function registerTaxReportOutputStrategy(strategy: TaxReportOutputStrategy) {
+  taxReportOutputStrategies.set(strategy.id, strategy);
+}
+
+registerTaxReportOutputStrategy({
+  id: 'csv',
+  serialize: (rows, totals) => {
+    const header = 'Invoice #,Client,Subtotal,VAT,WHT,Stamp Duty,Net,Date';
+    const lines = rows.map(
+      (r) => `"${r.number}","${r.client}",${r.subtotal},${r.vat},${r.wht},${r.stampDuty},${r.net},"${formatDate(r.date)}"`
+    );
+    lines.push('');
+    lines.push(`TOTALS,,,,,${totals.subtotal},${totals.vat},${totals.wht},${totals.stampDuty},${totals.net}`);
+    return [header, ...lines].join('\n');
+  },
+});
+
+registerTaxReportOutputStrategy({
+  id: 'json',
+  serialize: (rows, totals, currency) => {
+    return JSON.stringify({ invoices: rows, summary: totals, currency }, null, 2);
+  },
+});
+
+registerTaxReportOutputStrategy({
+  id: 'table',
+  serialize: (rows, totals, currency) => {
+    const table = new Table({
+      head: [
+        chalk.cyan('Invoice #'), chalk.cyan('Client'), chalk.cyan('Subtotal'),
+        chalk.cyan('VAT'), chalk.cyan('WHT'), chalk.cyan('Stamp Duty'),
+        chalk.cyan('Net'), chalk.cyan('Date'),
+      ],
+      style: { head: [], border: [] },
+    });
+    const cur = rows[0]?.currency || currency;
+    rows.forEach((r) => {
+      table.push([
+        r.number, r.client, formatCurrency(r.subtotal, cur as any),
+        formatCurrency(r.vat, cur as any), formatCurrency(r.wht, cur as any),
+        formatCurrency(r.stampDuty, cur as any), formatCurrency(r.net, cur as any),
+        formatDate(r.date),
+      ]);
+    });
+    table.push([
+      chalk.bold('TOTALS'), '', formatCurrency(totals.subtotal, cur as any),
+      formatCurrency(totals.vat, cur as any), formatCurrency(totals.wht, cur as any),
+      formatCurrency(totals.stampDuty, cur as any), formatCurrency(totals.net, cur as any), '',
+    ]);
+    return table.toString();
+  },
+});
+
 const MONTH_MAP: Record<string, number> = {
   january: 1, february: 2, march: 3, april: 4, may: 5, june: 6,
   july: 7, august: 8, september: 9, october: 10, november: 11, december: 12,
@@ -114,43 +187,8 @@ export default function registerTaxReportCommand(program: Command) {
 
         succeed(spinner, `Found ${invoices.length} invoice(s)`);
 
-        let output: string;
-
-        if (options.format === 'csv') {
-          const header = 'Invoice #,Client,Subtotal,VAT,WHT,Stamp Duty,Net,Date';
-          const lines = rows.map(
-            (r) => `"${r.number}","${r.client}",${r.subtotal},${r.vat},${r.wht},${r.stampDuty},${r.net},"${formatDate(r.date)}"`
-          );
-          lines.push('');
-          lines.push(`TOTALS,,,,,${totals.subtotal},${totals.vat},${totals.wht},${totals.stampDuty},${totals.net}`);
-          output = [header, ...lines].join('\n');
-        } else if (options.format === 'json') {
-          output = JSON.stringify({ invoices: rows, summary: totals, currency }, null, 2);
-        } else {
-          const table = new Table({
-            head: [
-              chalk.cyan('Invoice #'), chalk.cyan('Client'), chalk.cyan('Subtotal'),
-              chalk.cyan('VAT'), chalk.cyan('WHT'), chalk.cyan('Stamp Duty'),
-              chalk.cyan('Net'), chalk.cyan('Date'),
-            ],
-            style: { head: [], border: [] },
-          });
-          const cur = rows[0]?.currency || currency;
-          rows.forEach((r) => {
-            table.push([
-              r.number, r.client, formatCurrency(r.subtotal, cur as any),
-              formatCurrency(r.vat, cur as any), formatCurrency(r.wht, cur as any),
-              formatCurrency(r.stampDuty, cur as any), formatCurrency(r.net, cur as any),
-              formatDate(r.date),
-            ]);
-          });
-          table.push([
-            chalk.bold('TOTALS'), '', formatCurrency(totals.subtotal, cur as any),
-            formatCurrency(totals.vat, cur as any), formatCurrency(totals.wht, cur as any),
-            formatCurrency(totals.stampDuty, cur as any), formatCurrency(totals.net, cur as any), '',
-          ]);
-          output = table.toString();
-        }
+        const strategy = taxReportOutputStrategies.get(options.format) || taxReportOutputStrategies.get('table')!;
+        const output = strategy.serialize(rows, totals, currency as string);
 
         if (options.output) {
           fs.writeFileSync(options.output, output, 'utf-8');
