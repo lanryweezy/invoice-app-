@@ -192,8 +192,12 @@ const App: React.FC = () => {
     let interval: any;
     if (isOffline) {
        interval = setInterval(async () => {
-           const count = await getQueueCount();
-           setPendingSyncCount(count);
+           try {
+               const count = await getQueueCount();
+               setPendingSyncCount(count);
+           } catch (error) {
+               console.error('[App] Background sync count check failed:', error);
+           }
        }, 2000);
     }
 
