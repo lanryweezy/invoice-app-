@@ -11,7 +11,8 @@ export const useExpenses = () => {
             const stored = localStorage.getItem('invoiceExpenses');
             return stored ? JSON.parse(stored) : [];
         } catch (e) {
-            console.error('Failed to load initial expenses', e);
+            console.error('Failed to load initial expenses', { event: 'local_data_load_failed', error: e });
+            try { trackEvent('local_data_load_failed', { error: String(e) }); } catch {}
             return [];
         }
     });

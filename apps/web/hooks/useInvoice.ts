@@ -28,7 +28,8 @@ const getInitialInvoiceState = (): Invoice => {
           }
       }
     } catch (e) {
-      console.error("Failed to load invoice draft", e);
+      console.error("Failed to load invoice draft", { event: 'local_data_load_failed', error: e });
+      try { trackEvent('local_data_load_failed', { error: String(e) }); } catch {}
     }
   }
 
@@ -47,7 +48,8 @@ const getInitialInvoiceState = (): Invoice => {
         if (!savedUser.phoneNumber) savedUser.phoneNumber = '';
     }
   } catch (e) {
-    console.error("Failed to load saved user", e);
+    console.error("Failed to load saved user", { event: 'local_data_load_failed', error: e });
+    try { trackEvent('local_data_load_failed', { error: String(e) }); } catch {}
   }
 
   const generateRandomInvoiceNumber = () => {
@@ -209,7 +211,7 @@ const useLocalPersistence = (
             setRecurringInvoices(JSON.parse(storedRecurring));
         }
     } catch(e) {
-        console.error('Failed to load local data', e);
+        console.error('Failed to load local data', { event: 'local_data_load_failed', error: e });
         try { trackEvent('local_data_load_failed', { error: String(e) }); } catch {}
     }
   }, [setSavedClients, setBusinessProfiles, setRecurringInvoices]);

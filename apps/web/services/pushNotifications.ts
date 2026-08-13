@@ -89,7 +89,6 @@ export function sendLocalNotification(title: string, body: string, icon?: string
       body,
       icon: icon || '/favicon.svg',
       badge: '/favicon.svg',
-      vibrate: [200, 100, 200],
     });
   }
 }

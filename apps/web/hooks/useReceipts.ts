@@ -14,7 +14,10 @@ export const useReceipts = () => {
         try {
             const stored = localStorage.getItem('invoiceReceipts');
             if (stored) setReceipts(JSON.parse(stored));
-        } catch (e) { console.error('Failed to load receipts', e); }
+        } catch (e) {
+            console.error('Failed to load receipts', { event: 'local_data_load_failed', error: e });
+            try { trackEvent('local_data_load_failed', { error: String(e) }); } catch {}
+        }
     }, []);
 
     // Load from cloud if Pro
