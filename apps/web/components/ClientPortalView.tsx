@@ -46,10 +46,9 @@ export const ClientPortalView: React.FC<PortalProps> = ({ invoice, onConfirmPaym
   const handleDownloadPdf = async () => {
     const el = document.getElementById('portal-invoice-content');
     if (!el) return;
-    const html2canvas = (await import('html2canvas-pro')).default;
+    const { toJpeg } = await import('html-to-image');
     const { jsPDF } = await import('jspdf');
-    const canvas = await html2canvas(el, { scale: 2, useCORS: true, windowWidth: 800 });
-    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    const imgData = await toJpeg(el, { quality: 0.95, pixelRatio: 2 });
     const pdf = new jsPDF('p', 'mm', 'a4');
     pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
     pdf.save(`Invoice-${invoice.invoiceNumber}.pdf`);
