@@ -541,28 +541,10 @@ const App: React.FC = () => {
       showToast('Generating PDF...', 'success');
       trackEvent('download_pdf_start', { invoice_id: invoice.invoiceNumber });
 
-      const container = document.createElement('div');
-      container.style.position = 'absolute';
-      container.style.top = '-10000px';
-      container.style.left = '0';
-      container.style.width = '210mm';
-      container.style.minHeight = '297mm';
-      container.style.zIndex = '-1';
-      container.style.backgroundColor = '#ffffff';
-      document.body.appendChild(container);
-
-      const clone = sourceElement.cloneNode(true) as HTMLElement;
-      clone.style.transform = 'none';
-      clone.style.margin = '0';
-      clone.style.boxShadow = 'none';
-      clone.style.width = '100%';
-      clone.style.height = 'auto';
-      container.appendChild(clone);
-
       const { toJpeg } = await import('html-to-image');
       const { jsPDF } = await import('jspdf');
 
-      const imgData = await toJpeg(container, {
+      const imgData = await toJpeg(sourceElement, {
         quality: 0.95,
         pixelRatio: 2,
         backgroundColor: '#ffffff',
@@ -570,8 +552,6 @@ const App: React.FC = () => {
           transform: 'none',
         },
       });
-
-      document.body.removeChild(container);
 
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
