@@ -171,6 +171,12 @@ exports.sendPushNotification = functions.https.onCall(async (data, context) => {
   }
 
   const { userId, title, body, url } = data;
+
+  // Security Enhancement: Prevent IDOR by ensuring user can only send notifications to themselves
+  if (userId && userId !== context.auth.uid) {
+    throw new functions.https.HttpsError('permission-denied', 'Cannot send push notification to other users');
+  }
+
   const targetUserId = userId || context.auth.uid;
 
   const success = await sendPushNotification(targetUserId, title, body, url);
