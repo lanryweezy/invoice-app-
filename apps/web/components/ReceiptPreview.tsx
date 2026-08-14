@@ -20,14 +20,19 @@ export const ReceiptPreview: React.FC<ReceiptPreviewProps> = ({ receipt, templat
         if (!receiptRef.current) return;
 
         try {
-            const { default: html2canvas } = await import('html2canvas-pro');
+            const { toJpeg } = await import('html-to-image');
             const { jsPDF } = await import('jspdf');
 
-            const canvas = await html2canvas(receiptRef.current, { scale: 2, useCORS: true });
-            const imgData = canvas.toDataURL('image/jpeg', 1.0);
+            const imgData = await toJpeg(receiptRef.current, { quality: 1.0, pixelRatio: 2 });
+
+            // Get dimensions for aspect ratio
+            const img = new Image();
+            img.src = imgData;
+            await new Promise((resolve) => { img.onload = resolve; });
+
             const pdf = new jsPDF('p', 'mm', 'a4');
             const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            const pdfHeight = (img.height * pdfWidth) / img.width;
 
             pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
             pdf.save(`Receipt_${receipt.id}.pdf`);
