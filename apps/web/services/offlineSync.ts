@@ -144,7 +144,19 @@ export async function syncPendingChanges(userId: string): Promise<{ synced: numb
 
     return { synced, failed };
   } catch (error) {
-    console.error('Sync failed:', error);
+    console.error('Sync failed:', {
+      event: 'offline.sync.batch.failed',
+      userId,
+      pendingCount: pending.length,
+      error: error instanceof Error ? error.message : String(error)
+    });
+    try {
+      trackEvent('offline_sync_batch_failed', {
+        user_id: userId,
+        pending_count: pending.length,
+        error: error instanceof Error ? error.message : String(error)
+      });
+    } catch {}
     return { synced, failed: pending.length };
   }
 }
