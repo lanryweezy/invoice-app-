@@ -124,7 +124,7 @@ export async function syncPendingChanges(userId: string): Promise<{ synced: numb
           collection: change.collection,
           docId: change.docId,
           type: change.type,
-          error: error instanceof Error ? error.message : String(error)
+          error: getErrorMessage(error)
         });
         try {
           trackEvent('offline_sync_item_failed', {
@@ -132,7 +132,7 @@ export async function syncPendingChanges(userId: string): Promise<{ synced: numb
             collection: change.collection,
             doc_id: change.docId,
             type: change.type,
-            error: error instanceof Error ? error.message : String(error)
+            error: getErrorMessage(error)
           });
         } catch {}
         failed++;

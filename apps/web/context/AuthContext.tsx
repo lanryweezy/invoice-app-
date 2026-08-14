@@ -5,6 +5,7 @@ import {
   createUserWithEmailAndPassword, signInWithEmailAndPassword 
 } from '../services/firebase';
 import { onSnapshot, runTransaction } from 'firebase/firestore';
+import { getErrorMessage } from "../utils/error";
 import { trackEvent } from '../utils/analytics';
 import { generateSecureId } from '../utils/crypto';
 
@@ -178,7 +179,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     plan_type: planType,
                     ref: response.reference,
                     user_id: user.uid,
-                    error: error instanceof Error ? error.message : String(error)
+                    error: getErrorMessage(error)
                   });
                 } catch {}
                 resolve(false);

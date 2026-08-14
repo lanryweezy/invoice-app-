@@ -38,8 +38,8 @@ export async function subscribeToPushNotifications(userId: string): Promise<bool
 
     return true;
   } catch (error) {
-    console.error('Failed to subscribe to push notifications', { event: 'push.subscribe.failed', userId, error: error instanceof Error ? error.message : String(error) });
-    try { trackEvent('push_notification_subscribe_failed', { user_id: userId, error: error instanceof Error ? error.message : String(error) }); } catch {}
+    console.error('Failed to subscribe to push notifications', { event: 'push.subscribe.failed', userId, error: getErrorMessage(error) });
+    try { trackEvent('push_notification_subscribe_failed', { user_id: userId, error: getErrorMessage(error) }); } catch {}
     return false;
   }
 }
@@ -54,8 +54,8 @@ export async function unsubscribeFromPushNotifications(userId: string): Promise<
     }
     return true;
   } catch (error) {
-    console.error('Failed to unsubscribe from push notifications', { event: 'push.unsubscribe.failed', userId, error: error instanceof Error ? error.message : String(error) });
-    try { trackEvent('push_notification_unsubscribe_failed', { user_id: userId, error: error instanceof Error ? error.message : String(error) }); } catch {}
+    console.error('Failed to unsubscribe from push notifications', { event: 'push.unsubscribe.failed', userId, error: getErrorMessage(error) });
+    try { trackEvent('push_notification_unsubscribe_failed', { user_id: userId, error: getErrorMessage(error) }); } catch {}
     return false;
   }
 }

@@ -67,13 +67,13 @@ export async function initiatePayment(payment: PaymentRequest): Promise<PaymentR
       event: 'payment.initiation.failed',
       invoiceId: payment.invoiceId,
       bankCode: payment.bankCode,
-      error: error instanceof Error ? error.message : String(error)
+      error: getErrorMessage(error)
     });
     try {
       trackEvent('payment_initiation_failed', {
         invoice_id: payment.invoiceId,
         bank_code: payment.bankCode,
-        error: error instanceof Error ? error.message : String(error)
+        error: getErrorMessage(error)
       });
     } catch {}
     return {
@@ -90,12 +90,12 @@ export async function checkPaymentStatus(transactionId: string): Promise<any> {
     console.error('Payment status check failed', {
       event: 'payment.status.check.failed',
       transactionId,
-      error: error instanceof Error ? error.message : String(error)
+      error: getErrorMessage(error)
     });
     try {
       trackEvent('payment_status_check_failed', {
         transaction_id: transactionId,
-        error: error instanceof Error ? error.message : String(error)
+        error: getErrorMessage(error)
       });
     } catch {}
     return { status: 'unknown', message: 'Status check failed' };
