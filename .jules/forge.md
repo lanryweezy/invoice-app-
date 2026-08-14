@@ -27,3 +27,6 @@
 ## 2024-08-12 - Concise API Testing
 **Learning:** When instructed to write API test files in under 50 lines, do not mock internal modules (like `apiConfig.apiRequest` or `analytics`). Instead, directly mock `global.fetch` and perform all assertions in a single concise test block to minimize boilerplate while covering all paths.
 **Action:** Created `apps/web/services/nibssApi.test.ts` in <30 lines by mocking `global.fetch`.
+## 2026-08-14 - Add Tests for firebase-client.ts
+**Learning:** Ensure that testing wrappers like firebase client effectively isolate state between tests by using `vi.resetModules()` and dynamic imports. Setting up mocks properly is critical for wrapper libraries without doing network requests.
+**Action:** Created comprehensive Vitest suite for `apps/cli/src/lib/firebase-client.ts` ensuring full 100% test coverage including error paths, credential checking, and firestore method proxies.
