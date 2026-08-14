@@ -526,7 +526,8 @@ const App: React.FC = () => {
     if (!sourceElement && activeMobileTab === 'edit' && window.innerWidth < 768) {
          showToast('Switching to preview to generate PDF...', 'success');
          setActiveMobileTab('preview');
-         await new Promise(resolve => setTimeout(resolve, 500));
+         // Wait for React to render the DOM changes and layout to complete
+         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
          sourceElement = document.getElementById('invoice-preview-container');
     }
 
