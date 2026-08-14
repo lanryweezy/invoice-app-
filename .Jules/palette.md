@@ -5,3 +5,6 @@
 ## 2024-08-12 - Ensure Contextual Action Buttons in Panels Support Keyboard Focus
 **Learning:** Action buttons in secondary dialogs and panels (like receipt preview dialogs, and nested empty-state promotional buttons) often inherit default styles without explicit keyboard focus feedback. This severely impacts keyboard navigability for accessibility.
 **Action:** When working on modal or secondary panel action button rows, ensure `focus-visible:ring-2` and `focus-visible:ring-offset-*` classes (matching the brand colors contextually like teal or blue) are applied to make keyboard tabbing explicitly visible.
+## 2024-11-20 - Ensure Horizontal Scrollers Provide Focus Visibility
+**Learning:** Interactive elements within horizontal scrolling lists or custom tab groups (like template selectors) often rely solely on background color changes for their selected state. If they lack explicit `focus-visible` styles, keyboard users cannot distinguish which unselected tab is currently focused before activating it, severely degrading navigability.
+**Action:** When working on custom toggle buttons or tab groups within horizontal scroll containers, always ensure `focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-*` (e.g., `focus-visible:ring-teal-500`) are applied so the focused item is unambiguous during keyboard traversal.
