@@ -7,3 +7,7 @@
 ## 2026-08-08 - Testing API abstractions
 **Learning:** When adding tests for API wrapper layers (like `nrsApi`) that depend on an internal fetch abstraction (like `apiRequest`), it's better to mock the internal abstraction rather than `global.fetch` to isolate the specific logic mapping and ensure the test describes behavior cleanly.
 **Action:** Mock `apiConfig.apiRequest` using `vi.mock` when testing services that consume it.
+
+## 2025-02-14 - Clean Test Outputs
+**Learning:** Some test suites (like `exchangeRates.test.ts` and `invoiceSequence.test.ts`) test error boundaries/fallback logic and intentionally log to `console.error` and `console.warn`. This litters the console when running vitest.
+**Action:** When testing expected error paths, use `vi.spyOn(console, 'error').mockImplementation(() => {})` in the `beforeEach` hook to ensure clean vitest output without suppressing genuine unexpected failures in other tests.
