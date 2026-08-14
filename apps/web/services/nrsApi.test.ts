@@ -8,10 +8,15 @@ import {
   reportWHT
 } from './nrsApi';
 import * as apiConfig from './apiConfig';
+import * as analytics from '../utils/analytics';
 
 vi.mock('./apiConfig', () => ({
   apiRequest: vi.fn(),
   getApiConfig: vi.fn(),
+}));
+
+vi.mock('../utils/analytics', () => ({
+  trackEvent: vi.fn()
 }));
 
 describe('nrsApi', () => {
@@ -115,9 +120,22 @@ describe('nrsApi', () => {
       expect(apiConfig.apiRequest).toHaveBeenCalledWith('/v1/vat/report', 'POST', data);
     });
 
-    it('throws when API fails', async () => {
+    it('throws when API fails and logs error', async () => {
       vi.mocked(apiConfig.apiRequest).mockRejectedValue(new Error('API error'));
-      await expect(reportVAT({ period: '2023-01', totalSales: 100, totalVAT: 7.5, tin: '123' })).rejects.toThrow('API error');
+      const consoleSpy = vi.spyOn(console, 'error');
+
+      const data = { period: '2023-01', totalSales: 100, totalVAT: 7.5, tin: '123' };
+      await expect(reportVAT(data)).rejects.toThrow('API error');
+
+      expect(consoleSpy).toHaveBeenCalledWith('VAT report failed:', {
+        event: 'nrs.vat.report.failed',
+        period: '2023-01',
+        error: 'API error'
+      });
+      expect(analytics.trackEvent).toHaveBeenCalledWith('nrs_vat_report_failed', {
+        period: '2023-01',
+        error: 'API error'
+      });
     });
   });
 
@@ -130,9 +148,22 @@ describe('nrsApi', () => {
       expect(apiConfig.apiRequest).toHaveBeenCalledWith('/v1/wht/report', 'POST', data);
     });
 
-    it('throws when API fails', async () => {
+    it('throws when API fails and logs error', async () => {
       vi.mocked(apiConfig.apiRequest).mockRejectedValue(new Error('API error'));
-      await expect(reportWHT({ period: '2023-01', totalWHT: 5, tin: '123' })).rejects.toThrow('API error');
+      const consoleSpy = vi.spyOn(console, 'error');
+
+      const data = { period: '2023-01', totalWHT: 5, tin: '123' };
+      await expect(reportWHT(data)).rejects.toThrow('API error');
+
+      expect(consoleSpy).toHaveBeenCalledWith('WHT report failed:', {
+        event: 'nrs.wht.report.failed',
+        period: '2023-01',
+        error: 'API error'
+      });
+      expect(analytics.trackEvent).toHaveBeenCalledWith('nrs_wht_report_failed', {
+        period: '2023-01',
+        error: 'API error'
+      });
     });
   });
 });

@@ -27,6 +27,9 @@
 ## 2024-08-12 - Concise API Testing
 **Learning:** When instructed to write API test files in under 50 lines, do not mock internal modules (like `apiConfig.apiRequest` or `analytics`). Instead, directly mock `global.fetch` and perform all assertions in a single concise test block to minimize boilerplate while covering all paths.
 **Action:** Created `apps/web/services/nibssApi.test.ts` in <30 lines by mocking `global.fetch`.
+## 2024-05-18 - Missing error path test in nrsApi.ts VAT report failure
+**Learning:** Testing error paths that trigger side effects like logging (`console.error`) and analytics (`trackEvent`) is critical for resilience. In `nrsApi.ts`, while the happy path for `reportVAT` and `reportWHT` was tested, their respective catch blocks weren't. We must mock the external services (e.g. `vi.mock('../utils/analytics')`) and verify the exact arguments passed to them.
+**Action:** Added targeted unit tests asserting that `console.error` and `trackEvent` receive correctly formatted payloads when the API request (via `apiConfig.apiRequest`) rejects in both `reportVAT` and `reportWHT`.
 ## 2026-08-14 - Add Tests for firebase-client.ts
 **Learning:** Ensure that testing wrappers like firebase client effectively isolate state between tests by using `vi.resetModules()` and dynamic imports. Setting up mocks properly is critical for wrapper libraries without doing network requests.
 **Action:** Created comprehensive Vitest suite for `apps/cli/src/lib/firebase-client.ts` ensuring full 100% test coverage including error paths, credential checking, and firestore method proxies.
