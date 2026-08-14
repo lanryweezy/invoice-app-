@@ -85,7 +85,7 @@ export function registerWHTCategory(strategy: WHTCategoryStrategy): void {
  * Primarily intended for use in test environments to prevent state leakage.
  */
 export function resetWHTCategories(): void {
-  for (const key of Object.keys(WHT_RATES)) {
+  for (const key in WHT_RATES) {
     if (!['professional', 'contract', 'rent', 'dividend'].includes(key)) {
       delete WHT_RATES[key];
       delete WHT_KEYWORDS[key];
