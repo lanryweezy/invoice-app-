@@ -7,6 +7,7 @@ describe('invoiceSequence', () => {
       getItem: vi.fn(),
       setItem: vi.fn(),
     });
+    vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2024-05-15T12:00:00Z'));
   });

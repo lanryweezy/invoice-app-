@@ -13,6 +13,8 @@ describe('exchangeRates', () => {
       getItem: vi.fn(),
       setItem: vi.fn()
     });
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2024-01-01T12:00:00Z'));
   });
