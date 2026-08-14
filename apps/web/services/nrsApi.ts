@@ -53,9 +53,9 @@ export async function validateTIN(tin: string): Promise<TINValidationResult> {
     console.error('TIN validation failed:', {
       event: 'nrs.tin.validation.failed',
       tin: maskedTin,
-      error: error instanceof Error ? error.message : String(error)
+      error: getErrorMessage(error)
     });
-    try { trackEvent('nrs_tin_validation_failed', { tin: maskedTin, error: error instanceof Error ? error.message : String(error) }); } catch {}
+    try { trackEvent('nrs_tin_validation_failed', { tin: maskedTin, error: getErrorMessage(error) }); } catch {}
     return {
       valid: false,
       tin,
@@ -77,9 +77,9 @@ export async function submitInvoice(invoice: InvoiceSubmission): Promise<Invoice
     console.error('Invoice submission failed:', {
       event: 'nrs.invoice.submission.failed',
       invoiceNumber: invoice.invoiceNumber,
-      error: error instanceof Error ? error.message : String(error)
+      error: getErrorMessage(error)
     });
-    try { trackEvent('nrs_invoice_submission_failed', { invoice_number: invoice.invoiceNumber, error: error instanceof Error ? error.message : String(error) }); } catch {}
+    try { trackEvent('nrs_invoice_submission_failed', { invoice_number: invoice.invoiceNumber, error: getErrorMessage(error) }); } catch {}
     return {
       success: false,
       message: (error as Error).message,
@@ -94,9 +94,9 @@ export async function checkInvoiceStatus(nrsInvoiceId: string): Promise<any> {
     console.error('Status check failed:', {
       event: 'nrs.status.check.failed',
       nrsInvoiceId,
-      error: error instanceof Error ? error.message : String(error)
+      error: getErrorMessage(error)
     });
-    try { trackEvent('nrs_status_check_failed', { nrs_invoice_id: nrsInvoiceId, error: error instanceof Error ? error.message : String(error) }); } catch {}
+    try { trackEvent('nrs_status_check_failed', { nrs_invoice_id: nrsInvoiceId, error: getErrorMessage(error) }); } catch {}
     return { status: 'unknown', message: 'Status check failed' };
   }
 }
@@ -113,9 +113,9 @@ export async function generateQRCode(invoiceId: string): Promise<QRCodeResult> {
     console.error('QR generation failed:', {
       event: 'nrs.qr.generation.failed',
       invoiceId,
-      error: error instanceof Error ? error.message : String(error)
+      error: getErrorMessage(error)
     });
-    try { trackEvent('nrs_qr_generation_failed', { invoice_id: invoiceId, error: error instanceof Error ? error.message : String(error) }); } catch {}
+    try { trackEvent('nrs_qr_generation_failed', { invoice_id: invoiceId, error: getErrorMessage(error) }); } catch {}
     return {
       qrCodeUrl: '',
       verificationUrl: '',
@@ -136,9 +136,9 @@ export async function reportVAT(data: {
     console.error('VAT report failed:', {
       event: 'nrs.vat.report.failed',
       period: data.period,
-      error: error instanceof Error ? error.message : String(error)
+      error: getErrorMessage(error)
     });
-    try { trackEvent('nrs_vat_report_failed', { period: data.period, error: error instanceof Error ? error.message : String(error) }); } catch {}
+    try { trackEvent('nrs_vat_report_failed', { period: data.period, error: getErrorMessage(error) }); } catch {}
     throw error;
   }
 }
@@ -154,9 +154,9 @@ export async function reportWHT(data: {
     console.error('WHT report failed:', {
       event: 'nrs.wht.report.failed',
       period: data.period,
-      error: error instanceof Error ? error.message : String(error)
+      error: getErrorMessage(error)
     });
-    try { trackEvent('nrs_wht_report_failed', { period: data.period, error: error instanceof Error ? error.message : String(error) }); } catch {}
+    try { trackEvent('nrs_wht_report_failed', { period: data.period, error: getErrorMessage(error) }); } catch {}
     throw error;
   }
 }

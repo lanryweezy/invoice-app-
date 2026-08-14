@@ -50,7 +50,7 @@ export const queueMutation = async (collectionName: string, docId: string, data:
     trackEvent('sync_mutation_queue_failed', {
       collection: collectionName,
       docId,
-      error: error instanceof Error ? error.message : String(error)
+      error: getErrorMessage(error)
     });
   }
 };
@@ -124,7 +124,7 @@ export const flushQueue = async (): Promise<boolean> => {
   } catch (error) {
     console.error("[Offline Sync] Critical failure during flushQueue", error);
     trackEvent('sync_flush_critical_failure', {
-      error: error instanceof Error ? error.message : String(error)
+      error: getErrorMessage(error)
     });
     return false;
   }
