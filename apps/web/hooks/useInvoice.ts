@@ -109,7 +109,6 @@ const useCloudSync = (
                 const queueCount = await getQueueCount();
 
                 if (queueCount > 0) {
-                    console.log("[useInvoice] Offline queue is active. Skipping initial cloud fetch to preserve local state.");
                     return;
                 }
 
