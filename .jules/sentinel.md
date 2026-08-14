@@ -20,3 +20,7 @@
 **Vulnerability:** Open Mail Relay
 **Learning:** Vercel serverless functions in the `api/` directory (like `api/send-email.ts`) resolve their dependencies from the root `package.json`. Always ensure authentication checks are in place for sensitive endpoints.
 **Prevention:** Verify Firebase ID tokens passed in the `Authorization: Bearer <token>` header using `firebase-admin` before processing the request.
+## 2024-05-24 - High-Severity IDOR in Firebase Callable Functions
+**Vulnerability:** Insecure Direct Object Reference (IDOR) in `sendPushNotification` where clients could override the target `userId`.
+**Learning:** Even internal helper functions wrapped in authenticated Firebase `onCall` endpoints must strictly validate authorization. Passing arbitrary `userId`s from the client without verifying they match `context.auth.uid` allows attackers to send spoofed notifications to other users.
+**Prevention:** Always enforce `userId === context.auth.uid` for Firebase callable functions interacting with user-specific data unless admin privileges are intended. If `userId` is provided and mismatches, explicitly throw a `permission-denied` error using `functions.https.HttpsError`.

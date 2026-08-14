@@ -526,7 +526,8 @@ const App: React.FC = () => {
     if (!sourceElement && activeMobileTab === 'edit' && window.innerWidth < 768) {
          showToast('Switching to preview to generate PDF...', 'success');
          setActiveMobileTab('preview');
-         await new Promise(resolve => setTimeout(resolve, 500));
+         // Wait for React to render the DOM changes and layout to complete
+         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
          sourceElement = document.getElementById('invoice-preview-container');
     }
 
@@ -558,20 +559,20 @@ const App: React.FC = () => {
       clone.style.height = 'auto';
       container.appendChild(clone);
 
-      const { default: html2canvas } = await import('html2canvas-pro');
+      const { toJpeg } = await import('html-to-image');
       const { jsPDF } = await import('jspdf');
 
-      const canvas = await html2canvas(container, {
-        scale: 2,
-        useCORS: true,
+      const imgData = await toJpeg(container, {
+        quality: 0.95,
+        pixelRatio: 2,
         backgroundColor: '#ffffff',
-        logging: false,
-        windowWidth: 1200,
+        style: {
+          transform: 'none',
+        },
       });
 
       document.body.removeChild(container);
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.8);
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
