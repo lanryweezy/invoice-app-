@@ -97,5 +97,23 @@ describe('apiConfig', () => {
         expect(apiError.message).toBe('Bad request data');
       }
     });
+
+    it('throws NrsApiError with fallback message when response is not ok and JSON parsing fails', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+        json: vi.fn().mockRejectedValue(new Error('Invalid JSON')),
+      });
+
+      try {
+        await apiRequest('/test-endpoint');
+        expect.fail('Should have thrown an error');
+      } catch (error) {
+        expect(error).toBeInstanceOf(NrsApiError);
+        const apiError = error as NrsApiError;
+        expect(apiError.statusCode).toBe(500);
+        expect(apiError.message).toBe('Request failed');
+      }
+    });
   });
 });
