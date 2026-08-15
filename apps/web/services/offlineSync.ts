@@ -4,6 +4,7 @@
 import { db } from './firebase';
 import { collection, addDoc, getDocs, deleteDoc, doc, writeBatch, type WriteBatch, type DocumentReference } from 'firebase/firestore';
 import { trackEvent } from '../utils/analytics';
+import { getErrorMessage } from '../utils/error';
 
 interface PendingChange {
   id: string;
@@ -148,13 +149,13 @@ export async function syncPendingChanges(userId: string): Promise<{ synced: numb
       event: 'offline.sync.batch.failed',
       userId,
       pendingCount: pending.length,
-      error: error instanceof Error ? error.message : String(error)
+      error: getErrorMessage(error)
     });
     try {
       trackEvent('offline_sync_batch_failed', {
         user_id: userId,
         pending_count: pending.length,
-        error: error instanceof Error ? error.message : String(error)
+        error: getErrorMessage(error)
       });
     } catch {}
     return { synced, failed: pending.length };
