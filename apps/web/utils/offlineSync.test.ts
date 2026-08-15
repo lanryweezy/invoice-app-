@@ -89,11 +89,14 @@ describe('offlineSync', () => {
 
     it('handles exceptions and logs error', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      vi.mocked(localforage.getItem).mockRejectedValue(new Error('DB Error'));
+      vi.mocked(localforage.setItem).mockRejectedValueOnce(new Error('DB Error'));
 
       await queueMutation('invoices', 'doc-1', {});
 
-      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to queue mutation', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to queue mutation', expect.objectContaining({
+        event: 'offline.sync.queue_mutation.failed',
+        error: 'DB Error'
+      }));
       consoleSpy.mockRestore();
     });
 
@@ -103,7 +106,10 @@ describe('offlineSync', () => {
 
       await queueMutation('invoices', 'doc-1', {});
 
-      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to queue mutation', 'String Error');
+      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to queue mutation', expect.objectContaining({
+        event: 'offline.sync.queue_mutation.failed',
+        error: 'String Error'
+      }));
       consoleSpy.mockRestore();
     });
   });
@@ -161,7 +167,10 @@ describe('offlineSync', () => {
       const result = await flushQueue();
 
       expect(result).toBe(false);
-      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to sync 1', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to sync 1', expect.objectContaining({
+        event: 'offline.sync.flush_item.failed',
+        error: 'Network error'
+      }));
 
       expect(localforage.setItem).toHaveBeenCalledWith('syncQueue', [
         { id: '1', collection: 'invoices', docId: 'doc-1', data: { val: 1 }, timestamp: 100, attempts: 1 }
@@ -184,7 +193,10 @@ describe('offlineSync', () => {
       // The flush queue should return true if ALL mutations in the newly calculated "failedMutations" array are 0.
       // Since it dropped the only one, failedMutations is empty, meaning the queue flush is technically "complete"
       expect(result).toBe(true);
-      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to sync 1', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to sync 1', expect.objectContaining({
+        event: 'offline.sync.flush_item.failed',
+        error: 'Persistent error'
+      }));
 
       // Should drop the item, leaving failedMutations empty in storage
       expect(localforage.setItem).toHaveBeenCalledWith('syncQueue', []);
@@ -208,7 +220,10 @@ describe('offlineSync', () => {
       const result = await flushQueue();
 
       expect(result).toBe(false);
-      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to sync 1', 'Network Failure String');
+      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to sync 1', expect.objectContaining({
+        event: 'offline.sync.flush_item.failed',
+        error: 'Network Failure String'
+      }));
 
       expect(localforage.setItem).toHaveBeenCalledWith('syncQueue', [
         { id: '1', collection: 'invoices', docId: 'doc-1', data: { val: 1 }, timestamp: 100, attempts: 1 }
@@ -232,7 +247,10 @@ describe('offlineSync', () => {
       const result = await flushQueue();
 
       expect(result).toBe(false);
-      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to sync 1', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to sync 1', expect.objectContaining({
+        event: 'offline.sync.flush_item.failed',
+        error: 'Synchronous setDoc error'
+      }));
 
       expect(trackEvent).toHaveBeenCalledWith('sync_item_failed', {
         collection: 'invoices',
@@ -253,7 +271,10 @@ describe('offlineSync', () => {
       const result = await flushQueue();
 
       expect(result).toBe(false);
-      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Critical failure during flushQueue', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Critical failure during flushQueue', expect.objectContaining({
+        event: 'offline.sync.flush_queue.critical_failure',
+        error: 'Fatal read error'
+      }));
       consoleSpy.mockRestore();
     });
 
@@ -264,7 +285,10 @@ describe('offlineSync', () => {
       const result = await flushQueue();
 
       expect(result).toBe(false);
-      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Critical failure during flushQueue', 'Fatal String Error');
+      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Critical failure during flushQueue', expect.objectContaining({
+        event: 'offline.sync.flush_queue.critical_failure',
+        error: 'Fatal String Error'
+      }));
       consoleSpy.mockRestore();
     });
   });
@@ -290,7 +314,10 @@ describe('offlineSync', () => {
       vi.mocked(localforage.getItem).mockRejectedValue(new Error('DB Error'));
       const count = await getQueueCount();
       expect(count).toBe(0);
-      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to get queue count', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to get queue count', expect.objectContaining({
+        event: 'offline.sync.queue_count.failed',
+        error: 'DB Error'
+      }));
       expect(trackEvent).toHaveBeenCalledWith('sync_queue_count_failed', {
         error: 'DB Error'
       });

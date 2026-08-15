@@ -1,6 +1,7 @@
 import localforage from 'localforage';
 import { db, doc, setDoc } from '../services/firebase';
 import { trackEvent } from './analytics';
+import { getErrorMessage } from './error';
 
 // Configure the IndexedDB store
 localforage.config({
@@ -46,7 +47,12 @@ export const queueMutation = async (collectionName: string, docId: string, data:
     await localforage.setItem('syncQueue', queue);
     trackEvent('sync_mutation_queued', { collection: collectionName, docId });
   } catch (error) {
-    console.error("[Offline Sync] Failed to queue mutation", error);
+    console.error("[Offline Sync] Failed to queue mutation", {
+      event: 'offline.sync.queue_mutation.failed',
+      collection: collectionName,
+      docId,
+      error: getErrorMessage(error)
+    });
     trackEvent('sync_mutation_queue_failed', {
       collection: collectionName,
       docId,
@@ -93,7 +99,12 @@ export const flushQueue = async (): Promise<boolean> => {
       const mutation = queue[i];
       if (result.status === 'rejected') {
         const err = result.reason;
-        console.error(`[Offline Sync] Failed to sync ${mutation.id}`, err);
+        console.error(`[Offline Sync] Failed to sync ${mutation.id}`, {
+          event: 'offline.sync.flush_item.failed',
+          collection: mutation.collection,
+          docId: mutation.docId,
+          error: getErrorMessage(err)
+        });
         trackEvent('sync_item_failed', {
           collection: mutation.collection,
           docId: mutation.docId,
@@ -122,7 +133,10 @@ export const flushQueue = async (): Promise<boolean> => {
     return failedMutations.length === 0;
 
   } catch (error) {
-    console.error("[Offline Sync] Critical failure during flushQueue", error);
+    console.error("[Offline Sync] Critical failure during flushQueue", {
+      event: 'offline.sync.flush_queue.critical_failure',
+      error: getErrorMessage(error)
+    });
     trackEvent('sync_flush_critical_failure', {
       error: getErrorMessage(error)
     });
@@ -138,7 +152,10 @@ export const getQueueCount = async (): Promise<number> => {
     const queue = await localforage.getItem<Mutation[]>('syncQueue');
     return queue ? queue.length : 0;
   } catch (e) {
-    console.error("[Offline Sync] Failed to get queue count", e);
+    console.error("[Offline Sync] Failed to get queue count", {
+      event: 'offline.sync.queue_count.failed',
+      error: getErrorMessage(e)
+    });
     trackEvent('sync_queue_count_failed', {
       error: e instanceof Error ? e.message : String(e)
     });
