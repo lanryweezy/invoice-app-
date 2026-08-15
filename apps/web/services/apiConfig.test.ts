@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { apiRequest, NrsApiError, getHeaders, setApiKey, setTin, setSandbox } from './apiConfig';
+import { apiRequest, NrsApiError, getHeaders, setApiKey, setTin, setSandbox, getApiConfig } from './apiConfig';
 
 vi.mock('../utils/analytics', () => ({
   trackEvent: vi.fn(),
@@ -14,6 +14,28 @@ describe('apiConfig', () => {
 
   afterEach(() => {
     global.fetch = originalFetch;
+  });
+
+  describe('setters and getters', () => {
+    it('sets api key', () => {
+      setApiKey('test-api-key');
+      expect(getApiConfig().apiKey).toBe('test-api-key');
+    });
+
+    it('sets tin', () => {
+      setTin('12345678');
+      expect(getApiConfig().tin).toBe('12345678');
+    });
+
+    it('sets sandbox', () => {
+      setSandbox(false);
+      expect(getApiConfig().sandbox).toBe(false);
+      expect(getApiConfig().baseUrl).toBe('https://api.nrs.gov.ng');
+
+      setSandbox(true);
+      expect(getApiConfig().sandbox).toBe(true);
+      expect(getApiConfig().baseUrl).toBe('https://sandbox.nrs.gov.ng');
+    });
   });
 
   describe('getHeaders', () => {
@@ -95,6 +117,38 @@ describe('apiConfig', () => {
         const apiError = error as NrsApiError;
         expect(apiError.statusCode).toBe(400);
         expect(apiError.message).toBe('Bad request data');
+      }
+    });
+
+    it('throws NrsApiError with default error message when response json fails', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+        json: vi.fn().mockRejectedValue(new Error('Invalid JSON')),
+      });
+
+      try {
+        await apiRequest('/test-endpoint');
+        expect.fail('Should have thrown an error');
+      } catch (error) {
+        expect(error).toBeInstanceOf(NrsApiError);
+        const apiError = error as NrsApiError;
+        expect(apiError.statusCode).toBe(500);
+        expect(apiError.message).toBe('Request failed');
+      }
+    });
+
+    it('maps an ordinary error to a NrsApiError with status 0', async () => {
+      global.fetch = vi.fn().mockRejectedValue(new Error('Network failure'));
+
+      try {
+        await apiRequest('/test-endpoint');
+        expect.fail('Should have thrown an error');
+      } catch (error) {
+        expect(error).toBeInstanceOf(NrsApiError);
+        const apiError = error as NrsApiError;
+        expect(apiError.statusCode).toBe(0);
+        expect(apiError.message).toBe('Network failure');
       }
     });
   });
