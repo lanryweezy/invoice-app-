@@ -35,13 +35,15 @@ export const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose, title, ch
       <div 
         className="relative w-full max-w-4xl bg-slate-50 h-full shadow-2xl flex flex-col animate-slide-in-right"
         role="dialog"
+        aria-labelledby="side-panel-title"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white">
-          <h2 className="text-xl font-bold text-slate-900">{title}</h2>
+          <h2 id="side-panel-title" className="text-xl font-bold text-slate-900">{title}</h2>
           <button 
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            aria-label="Close panel"
+            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
