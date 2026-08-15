@@ -185,7 +185,6 @@ export function registerSyncListeners(userId: string) {
   });
 
   window.addEventListener('offline', () => {
-    console.log('Gone offline — changes will be queued');
     const event = new CustomEvent('pwa-offline');
     window.dispatchEvent(event);
   });
