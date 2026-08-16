@@ -25,18 +25,33 @@ describe('spinner utils', () => {
   });
 
   describe('handleCliError', () => {
-    it('should log the error and exit the process', () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      const processExitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {}) as any);
+    let consoleErrorSpy: any;
+    let processExitSpy: any;
 
+    beforeEach(() => {
+      consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      processExitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {}) as any);
+    });
+
+    afterEach(() => {
+      consoleErrorSpy.mockRestore();
+      processExitSpy.mockRestore();
+    });
+
+    it('should log the error and exit the process', () => {
       const error = new Error('Something went wrong');
       handleCliError(error, 'Test Error Message');
 
       expect(consoleErrorSpy).toHaveBeenCalledWith('Test Error Message', 'Something went wrong');
       expect(processExitSpy).toHaveBeenCalledWith(1);
+    });
 
-      consoleErrorSpy.mockRestore();
-      processExitSpy.mockRestore();
+    it('should handle non-Error objects', () => {
+      const error = { message: 'A weird error' };
+      handleCliError(error, 'Another Error');
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Another Error', 'A weird error');
+      expect(processExitSpy).toHaveBeenCalledWith(1);
     });
   });
 
