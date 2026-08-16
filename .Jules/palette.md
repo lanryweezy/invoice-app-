@@ -8,3 +8,6 @@
 ## 2024-11-20 - Ensure Horizontal Scrollers Provide Focus Visibility
 **Learning:** Interactive elements within horizontal scrolling lists or custom tab groups (like template selectors) often rely solely on background color changes for their selected state. If they lack explicit `focus-visible` styles, keyboard users cannot distinguish which unselected tab is currently focused before activating it, severely degrading navigability.
 **Action:** When working on custom toggle buttons or tab groups within horizontal scroll containers, always ensure `focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-*` (e.g., `focus-visible:ring-teal-500`) are applied so the focused item is unambiguous during keyboard traversal.
+## 2024-08-16 - Add Focus Visibility and ARIA labels to Modal Overlays
+**Learning:** Modal overlays like `ReceiptScanner` that take over the full viewport often have bespoke icon buttons (like "capture photo") and top-bar actions that completely lack explicit keyboard focus tracking and screen reader descriptions.
+**Action:** When adding modals or reviewing overlay UI, always ensure functional icon buttons have dynamic `aria-label`s based on their state, and that all actions have explicitly defined `focus-visible:ring-*` classes rather than relying on default browser styling, which often fails in custom styled backdrops.
