@@ -54,11 +54,14 @@ const getInitialInvoiceState = (): Invoice => {
     const year = new Date().getFullYear();
     // Security Fix: Use cryptographically secure random numbers for invoice references
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    const array = new Uint8Array(5);
-    crypto.getRandomValues(array);
-    const randomChars = Array.from(array)
-      .map((x) => charset[x % charset.length])
-      .join('');
+    let randomChars = '';
+    while (randomChars.length < 5) {
+      const array = new Uint8Array(1);
+      crypto.getRandomValues(array);
+      if (array[0] < 252) { // 252 is the highest multiple of 36 less than 256
+        randomChars += charset[array[0] % charset.length];
+      }
+    }
     return `INV-${year}-${randomChars}`;
   };
 
