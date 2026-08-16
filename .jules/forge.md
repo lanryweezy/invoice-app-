@@ -1,3 +1,9 @@
+## 2024-05-14 - Test Refactoring & Robustness for CLI Error Handling
+**Learning:** Moving process and console spies (e.g. `process.exit`, `console.error`) to `beforeEach` and explicitly restoring them in `afterEach` prevents spy leakage and avoids test suite crashes when testing fatal error handlers. We also need to test non-Error objects to ensure the error handling logic is robust against stringified objects or weird errors.
+**Action:** Refactored `apps/cli/src/utils/spinner.test.ts` to manage console and process spies using setup/teardown blocks and added test coverage for non-Error object inputs.
+## 2024-05-14 - Test Refactoring & Robustness for CLI Error Handling
+**Learning:** Moving process and console spies (e.g. `process.exit`, `console.error`) to `beforeEach` and explicitly restoring them in `afterEach` prevents spy leakage and avoids test suite crashes when testing fatal error handlers. We also need to test non-Error objects to ensure the error handling logic is robust against stringified objects or weird errors.
+**Action:** Refactored `apps/cli/src/utils/spinner.test.ts` to manage console and process spies using setup/teardown blocks and added test coverage for non-Error object inputs.
 ## YYYY-MM-DD - [Testing the browser Notification API]
 **Learning:** Testing logic that accesses browser APIs like `Notification` must account for environments where it is missing, such as headless or CI environments. Using a `typeof Notification !== 'undefined'` guard makes the code resilient, and `vi.stubGlobal('Notification', undefined)` allows testing this fallback without reference errors.
 **Action:** Guarded `Notification` usage and added tests validating the error-free bypass when the API is unsupported.
