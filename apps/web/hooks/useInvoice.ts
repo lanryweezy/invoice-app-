@@ -4,7 +4,6 @@ import { useSubscription } from './useSubscription';
 import { db, doc, setDoc, getDoc } from '../services/firebase';
 import { queueMutation } from '../utils/offlineSync';
 import { trackEvent } from '../utils/analytics';
-import { generateSecureId } from '../utils/crypto';
 
 const DEFAULT_USER: AppUser = {
   name: '',
@@ -54,7 +53,12 @@ const getInitialInvoiceState = (): Invoice => {
     // Generates a string like "INV-2026-X8B9Q"
     const year = new Date().getFullYear();
     // Security Fix: Use cryptographically secure random numbers for invoice references
-    const randomChars = generateSecureId(5);
+    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const array = new Uint8Array(5);
+    crypto.getRandomValues(array);
+    const randomChars = Array.from(array)
+      .map((x) => charset[x % charset.length])
+      .join('');
     return `INV-${year}-${randomChars}`;
   };
 
