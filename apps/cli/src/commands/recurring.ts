@@ -6,7 +6,7 @@ import { ensureAuthenticated } from '../lib/config';
 import { getDb } from '../lib/firebase-client';
 import { RecurringInvoice, RecurringFrequency } from '../types';
 import { formatCurrency, formatDate } from '../utils/formatter';
-import { createSpinner, succeed, fail } from '../utils/spinner';
+import { createSpinner, succeed, fail, handleCliError } from '../utils/spinner';
 
 /**
  * 🔩 Hinge Extension Point: RecurrenceStrategy
@@ -124,8 +124,7 @@ export default function registerRecurringCommands(program: Command) {
           chalk.green(`✓ Recurring invoice created (ID: ${docRef.id}, next due: ${nextDueDate})`)
         );
       } catch (error: any) {
-        console.error(chalk.red('Failed to create recurring invoice:'), error.message);
-        process.exit(1);
+        handleCliError(error, 'Failed to create recurring invoice:');
       }
     });
 
@@ -172,8 +171,7 @@ export default function registerRecurringCommands(program: Command) {
         });
         console.log(table.toString());
       } catch (error: any) {
-        console.error(chalk.red('Failed to list recurring invoices:'), error.message);
-        process.exit(1);
+        handleCliError(error, 'Failed to list recurring invoices:');
       }
     });
 
@@ -193,8 +191,7 @@ export default function registerRecurringCommands(program: Command) {
 
         succeed(spinner, chalk.green(`✓ Recurring invoice paused`));
       } catch (error: any) {
-        console.error(chalk.red('Failed to pause recurring invoice:'), error.message);
-        process.exit(1);
+        handleCliError(error, 'Failed to pause recurring invoice:');
       }
     });
 
@@ -214,8 +211,7 @@ export default function registerRecurringCommands(program: Command) {
 
         succeed(spinner, chalk.green(`✓ Recurring invoice resumed`));
       } catch (error: any) {
-        console.error(chalk.red('Failed to resume recurring invoice:'), error.message);
-        process.exit(1);
+        handleCliError(error, 'Failed to resume recurring invoice:');
       }
     });
 
@@ -247,8 +243,7 @@ export default function registerRecurringCommands(program: Command) {
 
         succeed(spinner, chalk.green(`✓ Recurring invoice deleted`));
       } catch (error: any) {
-        console.error(chalk.red('Failed to delete recurring invoice:'), error.message);
-        process.exit(1);
+        handleCliError(error, 'Failed to delete recurring invoice:');
       }
     });
 }
