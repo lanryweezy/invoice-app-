@@ -151,9 +151,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             amount: amount * 100,
             currency: 'NGN',
             // Security Fix: Use cryptographically secure random numbers for references
-            ref: (() => {
-              return 'INV-' + Date.now() + '-' + generateSecureId(3);
-            })(),
+            ref: 'INV-' + Date.now() + '-' + generateSecureId(16),
             metadata: {
               custom_fields: [
                 { display_name: "User ID", variable_name: "user_id", value: user.uid },
