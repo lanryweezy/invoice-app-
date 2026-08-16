@@ -13,3 +13,7 @@
 ## 2026-08-08 - Floating Promises inside async wrappers in Hooks
 **Learning:** Functions defined as `async` inside `useEffect` (like `checkUserRecord` running transactions) return Promises. Calling them synchronously (e.g., `checkUserRecord();`) creates a floating promise. While the internal logic may have a `try/catch`, from the perspective of the hook, the Promise itself can be rejected in extreme circumstances (e.g., memory exhaustion or async scheduler errors), leading to silent unhandled rejections that bypass React boundaries.
 **Action:** Always attach a `.catch(console.error)` when invoking `async` setup functions synchronously inside React hooks.
+
+## 2026-08-08 - Floating Promises in Event Listeners
+**Learning:** Floating promises inside native DOM event listeners (like `window.addEventListener('online', async () => {...})`) are unhandled if they reject. If the underlying logic (e.g., offline sync) fails unexpectedly, the rejection silently crashes the background process without triggering error boundaries or telemetry.
+**Action:** When adding async logic directly to event listeners, ensure the floating promise is caught, for example by refactoring to `promise.then().catch()`.

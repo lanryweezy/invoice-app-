@@ -173,13 +173,15 @@ export function clearSyncedChanges() {
 
 // Register online/offline listeners
 export function registerSyncListeners(userId: string) {
-  window.addEventListener('online', async () => {
-    const result = await syncPendingChanges(userId);
-    if (result.synced > 0) {
-      // Show toast notification
-      const event = new CustomEvent('pwa-sync', { detail: result });
-      window.dispatchEvent(event);
-    }
+  window.addEventListener('online', () => {
+    // 🌱 Flora: Catch floating promise rejections in event listener to prevent silent failures
+    syncPendingChanges(userId).then((result) => {
+      if (result.synced > 0) {
+        // Show toast notification
+        const event = new CustomEvent('pwa-sync', { detail: result });
+        window.dispatchEvent(event);
+      }
+    }).catch(console.error);
   });
 
   window.addEventListener('offline', () => {
