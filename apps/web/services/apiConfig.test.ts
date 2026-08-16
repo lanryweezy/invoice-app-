@@ -120,7 +120,7 @@ describe('apiConfig', () => {
       }
     });
 
-    it('throws NrsApiError with default error message when response json fails', async () => {
+    it('throws NrsApiError with fallback message when response is not ok and JSON parsing fails', async () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: false,
         status: 500,

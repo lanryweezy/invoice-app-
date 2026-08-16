@@ -1,3 +1,6 @@
+## 2026-08-15 - Testing gap for fallback error parser
+**Learning:** Verified the `catch()` handler on `response.json()` in API utilities functions correctly.
+**Action:** Added a unit test validating fallback to `'Request failed'` if the server responds with a 500 status but malformed JSON.
 ## 2024-08-06 - Test file creation
 
 **Learning:** When using `as any` in mock data inside vitest, while it circumvents TypeScript's stringent checks on big interfaces, it is completely acceptable within tests here because it safely mimics complex objects (like invoices) without needing full instantiations, a common strategy applied across the repo.
