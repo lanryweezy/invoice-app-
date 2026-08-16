@@ -1,3 +1,6 @@
+## YYYY-MM-DD - [Testing the browser Notification API]
+**Learning:** Testing logic that accesses browser APIs like `Notification` must account for environments where it is missing, such as headless or CI environments. Using a `typeof Notification !== 'undefined'` guard makes the code resilient, and `vi.stubGlobal('Notification', undefined)` allows testing this fallback without reference errors.
+**Action:** Guarded `Notification` usage and added tests validating the error-free bypass when the API is unsupported.
 ## 2025-01-20 - Fix missing error formatter mock in pushNotifications.test.ts
 **Learning:** `pushNotifications.ts` recently started using `getErrorMessage` to properly format caught errors before tracking or logging them, but the testing suite `pushNotifications.test.ts` was never updated to provide a mock implementation for it. Because of this, testing error branches resulted in an unhandled ReferenceError.
 
