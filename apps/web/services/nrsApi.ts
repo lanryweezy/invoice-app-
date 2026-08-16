@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/error';
 /**
  * NRS API Client
  */
