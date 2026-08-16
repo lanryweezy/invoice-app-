@@ -66,6 +66,10 @@ function saveQueue(queue: PendingChange[]) {
   localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
 }
 
+function getPendingChanges(): PendingChange[] {
+  return getQueue().filter((c) => !c.synced);
+}
+
 function addToQueue(change: Omit<PendingChange, 'id' | 'timestamp' | 'synced'>) {
   const queue = getQueue();
   queue.push({
@@ -93,7 +97,7 @@ export async function syncPendingChanges(userId: string): Promise<{ synced: numb
   if (!navigator.onLine) return { synced: 0, failed: 0 };
 
   const queue = getQueue();
-  const pending = queue.filter((c) => !c.synced);
+  const pending = getPendingChanges();
 
   if (pending.length === 0) return { synced: 0, failed: 0 };
 
@@ -163,11 +167,11 @@ export async function syncPendingChanges(userId: string): Promise<{ synced: numb
 }
 
 export function getPendingChangesCount(): number {
-  return getQueue().filter((c) => !c.synced).length;
+  return getPendingChanges().length;
 }
 
 export function clearSyncedChanges() {
-  const queue = getQueue().filter((c) => !c.synced);
+  const queue = getPendingChanges();
   saveQueue(queue);
 }
 
