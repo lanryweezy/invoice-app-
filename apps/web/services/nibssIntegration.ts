@@ -80,7 +80,7 @@ const paymentStatuses = new Map<string, NIBSSPaymentStatus>();
 function generateReference(): string {
   const timestamp = Date.now().toString(36).toUpperCase();
   // Security Fix: Use cryptographically secure random numbers for payment references
-  const random = generateSecureId(6);
+  const random = crypto.randomBytes(3).toString('hex').toUpperCase();
   return `NIBSS-${timestamp}-${random}`;
 }
 
