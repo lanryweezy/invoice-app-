@@ -10,3 +10,9 @@
 **Detection gap:** The application lacks comprehensive automated visual regression testing configured for interactive states (focus/hover). Playwright is installed but primarily used for functional flows.
 **Prevention:** Implement Playwright snapshot testing across minimum viable viewports (375px, 768px, 1280px) and explicitly trigger interactive states via `page.keyboard.press('Tab')` (as opposed to just `.focus()`) before snapshotting.
 **Cascade risk:** Any new component built without a strict design system review is at risk of omitting critical interactive states, as there is no automated check to enforce them.
+## 2026-08-16 — State Regression: FeatureGate.tsx missing focus rings
+**Regression:** Focus-visible rings are completely missing from the primary interactive buttons ("Unlock Feature" and "Maybe later"). Keyboard users tabbing through the interface see no visual indicator of which button is currently focused.
+**Root cause:** The standard Tailwind utility classes for accessibility (`focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2`) were omitted from the button elements during the implementation of the `FeatureGate` component in `apps/web/components/FeatureGate.tsx`.
+**Detection gap:** Playwright is installed but only configured for functional assertions, not visual regression snapshots that check interactive states.
+**Prevention:** Implement Playwright snapshot testing across minimum viable viewports (375px, 768px, 1280px) and explicitly trigger interactive states via `page.keyboard.press('Tab')` before snapshotting.
+**Cascade risk:** Any new component built without a strict design system review is at risk of omitting critical interactive states, as there is no automated check to enforce them.
