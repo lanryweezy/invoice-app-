@@ -1,8 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { trackEvent } from '../utils/analytics';
+import { getErrorMessage } from '../utils/error';
 
 vi.mock('../utils/analytics', () => ({
   trackEvent: vi.fn(),
+}));
+
+vi.mock('../utils/error', () => ({
+  getErrorMessage: vi.fn((err) => String(err)),
 }));
 
 import {
@@ -122,11 +127,11 @@ describe('pushNotifications', () => {
       expect(consoleSpy).toHaveBeenCalledWith('Failed to subscribe to push notifications', {
         event: 'push.subscribe.failed',
         userId: 'user-1',
-        error: 'Network error',
+        error: 'Error: Network error',
       });
       expect(trackEvent).toHaveBeenCalledWith('push_notification_subscribe_failed', {
         user_id: 'user-1',
-        error: 'Network error',
+        error: 'Error: Network error',
       });
     });
   });
@@ -162,11 +167,11 @@ describe('pushNotifications', () => {
       expect(consoleSpy).toHaveBeenCalledWith('Failed to unsubscribe from push notifications', {
         event: 'push.unsubscribe.failed',
         userId: 'user-1',
-        error: 'Network error',
+        error: 'Error: Network error',
       });
       expect(trackEvent).toHaveBeenCalledWith('push_notification_unsubscribe_failed', {
         user_id: 'user-1',
-        error: 'Network error',
+        error: 'Error: Network error',
       });
     });
   });

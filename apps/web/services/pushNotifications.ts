@@ -5,6 +5,7 @@ import { db } from './firebase';
 import { doc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { trackEvent } from '../utils/analytics';
+import { getErrorMessage } from '../utils/error';
 
 // Request notification permission and get FCM token
 export async function requestNotificationPermission(): Promise<NotificationPermission> {

@@ -4,6 +4,7 @@
 
 import { apiRequest, getApiConfig } from './apiConfig';
 import { trackEvent } from '../utils/analytics';
+import { getErrorMessage } from '../utils/error';
 
 export interface TINValidationResult {
   valid: boolean;
