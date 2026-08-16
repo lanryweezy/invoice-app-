@@ -4,6 +4,7 @@ import ora from 'ora';
 
 vi.mock('chalk', () => ({
   default: {
+    cyan: vi.fn((str) => str),
     red: vi.fn((str) => str),
   },
 }));
@@ -20,8 +21,18 @@ vi.mock('ora', () => {
 });
 
 describe('spinner utils', () => {
+  let consoleErrorSpy: any;
+  let processExitSpy: any;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    processExitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {}) as any);
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
+    processExitSpy.mockRestore();
   });
 
   describe('handleCliError', () => {
