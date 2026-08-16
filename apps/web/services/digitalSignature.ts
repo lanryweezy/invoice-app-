@@ -1,4 +1,5 @@
-import type { Invoice } from '../types';
+import { generateSecureId } from "../utils/crypto";
+import type { Invoice } from "../types";
 
 export interface SignaturePayload {
   invoiceNumber: string;
@@ -39,25 +40,25 @@ export interface Certificate {
   algorithm: string;
 }
 
-const SIGNATURE_ALGORITHM = 'SHA-256 with RSA';
+const SIGNATURE_ALGORITHM = "SHA-256 with RSA";
 
 function computeInvoiceHash(invoice: Invoice): string {
   const payload = [
     invoice.invoiceNumber,
     invoice.issueDate,
-    invoice.user.tin || '',
-    invoice.client.tin || '',
+    invoice.user.tin || "",
+    invoice.client.tin || "",
     invoice.client.name,
     String(invoice.total || 0),
     invoice.currency,
-  ].join('|');
+  ].join("|");
 
   let hash = 0;
   for (let i = 0; i < payload.length; i++) {
     const char = payload.charCodeAt(i);
     hash = ((hash << 5) - hash + char) | 0;
   }
-  return Math.abs(hash).toString(16).padStart(8, '0');
+  return Math.abs(hash).toString(16).padStart(8, "0");
 }
 
 function computeSignatureHash(data: string): string {
@@ -75,20 +76,23 @@ function computeSignatureHash(data: string): string {
   h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507);
   h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
 
-  return ((h2 >>> 0).toString(16).padStart(8, '0') +
-    (h1 >>> 0).toString(16).padStart(8, '0')).slice(0, 32);
+  return (
+    (h2 >>> 0).toString(16).padStart(8, "0") +
+    (h1 >>> 0).toString(16).padStart(8, "0")
+  ).slice(0, 32);
 }
 
 function generateKeyId(): string {
   // Security Fix: Use cryptographically secure random numbers for Key IDs
-  return `SIG-${crypto.randomUUID()}`;
+  const randomStr = generateSecureId(6);
+  return `SIG-${Date.now()}-${randomStr}`;
 }
 
 function buildSignaturePayload(invoice: Invoice): SignaturePayload {
   return {
     invoiceNumber: invoice.invoiceNumber,
     issuerName: invoice.user.name,
-    issuerTIN: invoice.user.tin ?? '',
+    issuerTIN: invoice.user.tin ?? "",
     totalAmount: invoice.total ?? 0,
     currency: invoice.currency,
     issueDate: invoice.issueDate,
@@ -97,10 +101,13 @@ function buildSignaturePayload(invoice: Invoice): SignaturePayload {
   };
 }
 
-export function signInvoice(invoice: Invoice, privateKey?: string): SignatureData {
+export function signInvoice(
+  invoice: Invoice,
+  privateKey?: string,
+): SignatureData {
   const payload = buildSignaturePayload(invoice);
   const payloadString = JSON.stringify(payload);
-  const key = privateKey ?? 'default-signing-key';
+  const key = privateKey ?? "default-signing-key";
 
   const signatureInput = payloadString + key + payload.timestamp;
   const signature = computeSignatureHash(signatureInput);
@@ -114,10 +121,14 @@ export function signInvoice(invoice: Invoice, privateKey?: string): SignatureDat
   };
 }
 
-export function verifySignature(invoice: Invoice, signatureData: SignatureData): boolean {
+export function verifySignature(
+  invoice: Invoice,
+  signatureData: SignatureData,
+): boolean {
   const payload = buildSignaturePayload(invoice);
 
-  if (signatureData.payload.invoiceNumber !== payload.invoiceNumber) return false;
+  if (signatureData.payload.invoiceNumber !== payload.invoiceNumber)
+    return false;
   if (signatureData.payload.issuerName !== payload.issuerName) return false;
   if (signatureData.payload.totalAmount !== payload.totalAmount) return false;
   if (signatureData.payload.currency !== payload.currency) return false;
@@ -160,21 +171,21 @@ export function generateCertificate(business: {
     id: certId,
     businessName: business.name,
     tin: business.tin,
-    cacNumber: business.cacNumber ?? '',
+    cacNumber: business.cacNumber ?? "",
     issuedAt: now.toISOString(),
     expiresAt: expiresAt.toISOString(),
-    publicKey: computeSignatureHash(certPayload + 'public-key'),
+    publicKey: computeSignatureHash(certPayload + "public-key"),
     algorithm: SIGNATURE_ALGORITHM,
   };
 }
 
 export function signInvoiceWithCertificate(
   invoice: Invoice,
-  certificate: Certificate
+  certificate: Certificate,
 ): SignatureData {
   const now = new Date();
   if (new Date(certificate.expiresAt) < now) {
-    throw new Error('Certificate has expired');
+    throw new Error("Certificate has expired");
   }
 
   const payload = buildSignaturePayload(invoice);
@@ -197,19 +208,19 @@ export function validateCertificate(certificate: Certificate): {
   const now = new Date();
 
   if (!certificate.id || !certificate.businessName || !certificate.tin) {
-    return { valid: false, reason: 'Certificate missing required fields' };
+    return { valid: false, reason: "Certificate missing required fields" };
   }
 
   if (new Date(certificate.issuedAt) > now) {
-    return { valid: false, reason: 'Certificate not yet valid' };
+    return { valid: false, reason: "Certificate not yet valid" };
   }
 
   if (new Date(certificate.expiresAt) < now) {
-    return { valid: false, reason: 'Certificate has expired' };
+    return { valid: false, reason: "Certificate has expired" };
   }
 
   if (!certificate.publicKey) {
-    return { valid: false, reason: 'Certificate missing public key' };
+    return { valid: false, reason: "Certificate missing public key" };
   }
 
   return { valid: true };
