@@ -241,6 +241,7 @@ describe('pushNotifications', () => {
 
     it('creates a Notification if permission is granted', () => {
       sendLocalNotification('Test Title', 'Test Body', '/custom-icon.png');
+      expect(mockNotificationClass).toHaveBeenCalledTimes(1);
       expect(mockNotificationClass).toHaveBeenCalledWith('Test Title', {
         body: 'Test Body',
         icon: '/custom-icon.png',
@@ -251,6 +252,7 @@ describe('pushNotifications', () => {
 
     it('uses default icon if not provided', () => {
       sendLocalNotification('Test Title', 'Test Body');
+      expect(mockNotificationClass).toHaveBeenCalledTimes(1);
       expect(mockNotificationClass).toHaveBeenCalledWith('Test Title', {
         body: 'Test Body',
         icon: '/favicon.svg',
@@ -263,6 +265,18 @@ describe('pushNotifications', () => {
       mockNotificationClass.permission = 'denied';
       sendLocalNotification('Test Title', 'Test Body');
       expect(mockNotificationClass).not.toHaveBeenCalled();
+    });
+
+    it('does not throw an error and fails gracefully if Notification is not in window', () => {
+      const originalNotification = window.Notification;
+      // @ts-ignore
+      delete window.Notification;
+
+      expect(() => sendLocalNotification('Test Title', 'Test Body')).not.toThrow();
+
+      if (originalNotification) {
+        window.Notification = originalNotification;
+      }
     });
   });
 });

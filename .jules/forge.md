@@ -47,3 +47,6 @@
 ## 2024-08-15 - Missing error path test in apiConfig.ts JSON parsing failure
 **Learning:** We can simulate JSON parsing failure by mocking the response to not be ok, and then the json() function throwing an error, to ensure the catch block handles the error and throws a NrsApiError with a default message.
 **Action:** Added targeted unit tests asserting that the catch block throws NrsApiError with a default message when the JSON parsing fails.
+## 2026-08-16 - Prevent ReferenceError on missing Notification API in sendLocalNotification
+**Learning:** Functions that interact with the global `Notification` object, like `sendLocalNotification`, must first verify that `'Notification' in window`. Without this check, accessing `Notification.permission` on browsers that don't support it (e.g. some mobile browsers or environments) will result in an unhandled `ReferenceError`.
+**Action:** Added `'Notification' in window` check to `sendLocalNotification` to fail gracefully and added a unit test by mocking `delete window.Notification` to assert that no error is thrown in unsupported environments.
