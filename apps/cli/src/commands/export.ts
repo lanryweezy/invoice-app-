@@ -5,7 +5,7 @@ import { ensureAuthenticated } from '../lib/config';
 import { getDb } from '../lib/firebase-client';
 import { Invoice, InvoiceStatus } from '../types';
 import { formatDate } from '../utils/formatter';
-import { createSpinner, succeed, fail } from '../utils/spinner';
+import { createSpinner, succeed, fail, handleCliError } from '../utils/spinner';
 
 
 export interface ExportData {
@@ -152,8 +152,7 @@ export default function registerExportCommand(program: Command) {
         fs.writeFileSync(options.output, output, 'utf-8');
         succeed(spinner, chalk.green(`✓ Exported ${invoices.length} invoice(s) to ${options.output}`));
       } catch (error: any) {
-        console.error(chalk.red('Failed to export invoices:'), error.message);
-        process.exit(1);
+        handleCliError(error, 'Failed to export invoices:');
       }
     });
 }
