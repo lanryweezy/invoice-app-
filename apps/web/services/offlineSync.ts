@@ -2,7 +2,7 @@
 // Queues changes when offline, syncs when back online
 
 import { db } from './firebase';
-import { collection, addDoc, getDocs, deleteDoc, doc, writeBatch, type WriteBatch, type DocumentReference } from 'firebase/firestore';
+import { doc, writeBatch, type WriteBatch, type DocumentReference } from 'firebase/firestore';
 import { trackEvent } from '../utils/analytics';
 import { getErrorMessage } from '../utils/error';
 
