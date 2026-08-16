@@ -34,7 +34,7 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onCapture, onClo
     <div className="fixed inset-0 z-50 bg-slate-900 flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between p-4 bg-slate-800">
-        <button onClick={onClose} className="text-white text-sm font-medium">
+        <button onClick={onClose} className="text-white text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800 rounded px-2 py-1">
           Cancel
         </button>
         <h2 className="text-white font-bold">Scan Receipt</h2>
@@ -53,7 +53,7 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onCapture, onClo
             <p className="text-slate-400 text-sm mb-4">{error}</p>
             <button
               onClick={startCamera}
-              className="px-6 py-2 bg-teal-600 text-white rounded-xl font-medium"
+              className="px-6 py-2 bg-teal-600 text-white rounded-xl font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
             >
               Try Again
             </button>
@@ -83,13 +83,13 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onCapture, onClo
           <>
             <button
               onClick={handleRetake}
-              className="px-6 py-3 bg-slate-700 text-white font-bold rounded-xl"
+              className="px-6 py-3 bg-slate-700 text-white font-bold rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800"
             >
               Retake
             </button>
             <button
               onClick={handleConfirm}
-              className="px-6 py-3 bg-teal-600 text-white font-bold rounded-xl"
+              className="px-6 py-3 bg-teal-600 text-white font-bold rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800"
             >
               Use Photo
             </button>
@@ -97,7 +97,8 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onCapture, onClo
         ) : (
           <button
             onClick={isStreaming ? handleCapture : startCamera}
-            className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg"
+            className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-teal-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800"
+            aria-label={isStreaming ? "Capture photo" : "Start camera"}
           >
             <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center">
               <svg className="w-8 h-8 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">

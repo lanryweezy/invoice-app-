@@ -174,10 +174,8 @@ export function clearSyncedChanges() {
 // Register online/offline listeners
 export function registerSyncListeners(userId: string) {
   window.addEventListener('online', async () => {
-    console.log('Back online — syncing changes...');
     const result = await syncPendingChanges(userId);
     if (result.synced > 0) {
-      console.log(`Synced ${result.synced} changes`);
       // Show toast notification
       const event = new CustomEvent('pwa-sync', { detail: result });
       window.dispatchEvent(event);
@@ -185,7 +183,6 @@ export function registerSyncListeners(userId: string) {
   });
 
   window.addEventListener('offline', () => {
-    console.log('Gone offline — changes will be queued');
     const event = new CustomEvent('pwa-offline');
     window.dispatchEvent(event);
   });

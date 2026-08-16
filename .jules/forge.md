@@ -1,3 +1,10 @@
+## 2025-01-20 - Fix missing error formatter mock in pushNotifications.test.ts
+**Learning:** `pushNotifications.ts` recently started using `getErrorMessage` to properly format caught errors before tracking or logging them, but the testing suite `pushNotifications.test.ts` was never updated to provide a mock implementation for it. Because of this, testing error branches resulted in an unhandled ReferenceError.
+
+**Action:** Added mock implementation of `getErrorMessage` which resolves ReferenceError and allows testing error handling branches for full code coverage in `pushNotifications.ts`
+## 2026-08-15 - Testing gap for fallback error parser
+**Learning:** Verified the `catch()` handler on `response.json()` in API utilities functions correctly.
+**Action:** Added a unit test validating fallback to `'Request failed'` if the server responds with a 500 status but malformed JSON.
 ## 2024-08-06 - Test file creation
 
 **Learning:** When using `as any` in mock data inside vitest, while it circumvents TypeScript's stringent checks on big interfaces, it is completely acceptable within tests here because it safely mimics complex objects (like invoices) without needing full instantiations, a common strategy applied across the repo.
@@ -36,3 +43,7 @@
 ## 2023-10-26 - Add Spinner Tests
 **Learning:** Adding unit tests for console utilities like `ora` and `chalk` requires careful mocking to ensure process state (like `process.exit`) and console output can be asserted without terminating the test runner or cluttering the output.
 **Action:** Implemented a full test suite for `apps/cli/src/utils/spinner.ts` mocking `ora`, `chalk`, `console.error`, and `process.exit`.
+
+## 2024-08-15 - Missing error path test in apiConfig.ts JSON parsing failure
+**Learning:** We can simulate JSON parsing failure by mocking the response to not be ok, and then the json() function throwing an error, to ensure the catch block handles the error and throws a NrsApiError with a default message.
+**Action:** Added targeted unit tests asserting that the catch block throws NrsApiError with a default message when the JSON parsing fails.

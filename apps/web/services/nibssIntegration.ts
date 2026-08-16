@@ -1,6 +1,7 @@
 import { generateSecureId } from '../utils/crypto';
 import type { Invoice } from '../types';
 import { formatCurrency } from '../utils/formatters';
+import * as crypto from 'crypto';
 
 export type BankCode = '044' | '014' | '023' | '011' | '057' | '033' | '030' | '032' | '050' | '035';
 
@@ -88,7 +89,7 @@ function generateReceiptNumber(): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   // Security Fix: Prevent predictable receipt numbers
-  const random = generateSecureId(8);
+  const random = crypto.randomBytes(4).toString('hex').toUpperCase();
   return `RCP-NIBSS-${year}${month}-${random}`;
 }
 
