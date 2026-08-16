@@ -40,6 +40,9 @@
 ## 2026-08-14 - Add Tests for firebase-client.ts
 **Learning:** Ensure that testing wrappers like firebase client effectively isolate state between tests by using `vi.resetModules()` and dynamic imports. Setting up mocks properly is critical for wrapper libraries without doing network requests.
 **Action:** Created comprehensive Vitest suite for `apps/cli/src/lib/firebase-client.ts` ensuring full 100% test coverage including error paths, credential checking, and firestore method proxies.
+## 2023-10-26 - Add Spinner Tests
+**Learning:** Adding unit tests for console utilities like `ora` and `chalk` requires careful mocking to ensure process state (like `process.exit`) and console output can be asserted without terminating the test runner or cluttering the output.
+**Action:** Implemented a full test suite for `apps/cli/src/utils/spinner.ts` mocking `ora`, `chalk`, `console.error`, and `process.exit`.
 
 ## 2024-08-15 - Missing error path test in apiConfig.ts JSON parsing failure
 **Learning:** We can simulate JSON parsing failure by mocking the response to not be ok, and then the json() function throwing an error, to ensure the catch block handles the error and throws a NrsApiError with a default message.
