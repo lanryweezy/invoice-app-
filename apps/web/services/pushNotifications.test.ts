@@ -264,5 +264,19 @@ describe('pushNotifications', () => {
       sendLocalNotification('Test Title', 'Test Body');
       expect(mockNotificationClass).not.toHaveBeenCalled();
     });
+
+    it('does not throw an error if Notification is not supported', () => {
+      const originalNotification = window.Notification;
+      // @ts-ignore
+      delete window.Notification;
+      // Remove global Notification for this test
+      vi.stubGlobal('Notification', undefined);
+
+      expect(() => sendLocalNotification('Test', 'Body')).not.toThrow();
+
+      if (originalNotification) {
+        window.Notification = originalNotification;
+      }
+    });
   });
 });
