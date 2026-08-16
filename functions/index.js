@@ -129,33 +129,37 @@ exports.checkOverdueInvoices = functions.pubsub
     const db = admin.firestore();
     const today = new Date().toISOString().split('T')[0];
 
-    const usersSnap = await db.collection('users').get();
+    const invoicesSnap = await db.collectionGroup('invoices')
+      .where('status', 'in', ['sent', 'pending'])
+      .where('dueDate', '<', today)
+      .get();
 
-    for (const userDoc of usersSnap.docs) {
-      const uid = userDoc.id;
+    if (invoicesSnap.empty) return;
 
-      const invoicesSnap = await db.collection('users').doc(uid).collection('invoices')
-        .where('status', 'in', ['sent', 'pending'])
-        .where('dueDate', '<', today)
-        .get();
+    const overdueByUser = {};
 
-      if (invoicesSnap.empty) continue;
+    invoicesSnap.forEach((doc) => {
+      const inv = doc.data();
+      const uid = doc.ref.parent.parent.id;
 
-      let totalOverdue = 0;
-      let overdueCount = 0;
+      if (!overdueByUser[uid]) {
+        overdueByUser[uid] = {
+          count: 0,
+          total: 0,
+          currency: inv.currency || 'NGN'
+        };
+      }
 
-      invoicesSnap.forEach((doc) => {
-        const inv = doc.data();
-        totalOverdue += inv.total || inv.amount || 0;
-        overdueCount++;
-      });
+      overdueByUser[uid].count++;
+      overdueByUser[uid].total += (inv.total || inv.amount || 0);
+    });
 
-      if (overdueCount > 0) {
-        const currency = invoicesSnap.docs[0]?.data()?.currency || 'NGN';
+    for (const [uid, stats] of Object.entries(overdueByUser)) {
+      if (stats.count > 0) {
         await sendPushNotification(
           uid,
-          `⚠️ ${overdueCount} Overdue Invoice${overdueCount > 1 ? 's' : ''}`,
-          `You have ${overdueCount} overdue invoice${overdueCount > 1 ? 's' : ''} totaling ${currency} ${totalOverdue.toLocaleString()}. Send reminders now!`,
+          `⚠️ ${stats.count} Overdue Invoice${stats.count > 1 ? 's' : ''}`,
+          `You have ${stats.count} overdue invoice${stats.count > 1 ? 's' : ''} totaling ${stats.currency} ${stats.total.toLocaleString()}. Send reminders now!`,
           '/editor'
         );
       }

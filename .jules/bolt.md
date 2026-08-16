@@ -7,3 +7,6 @@
 ## 2024-05-18 - Use Date.parse() instead of new Date().getTime() in digital signature validation
 **Learning:** `new Date()` incurs costly object allocation and garbage collection overhead, which can degrade performance in functions repeatedly validating signatures or mapping signature data. Using `Date.parse()` skips this allocation overhead and returns the timestamp directly.
 **Action:** Always prefer `Date.parse(dateString)` over `new Date(dateString).getTime()` when checking timestamps or calculating time differences.
+## 2026-08-16 - Replace N+1 queries with Collection Group Queries in Firestore Cloud Functions
+**Learning:** Querying a subcollection across multiple parents using a for-loop (N+1 query pattern) is extremely inefficient and scales poorly as the number of parent documents grows. This causes excessive read operations and very high latency.
+**Action:** Use Firestore `collectionGroup()` queries when searching for documents in a subcollection across all parent documents (e.g., getting all overdue invoices across all users), then aggregate the data in memory. This reduces the time complexity and network overhead dramatically. Always ensure proper composite indexes are configured in `firestore.indexes.json` for collectionGroup queries to work.
