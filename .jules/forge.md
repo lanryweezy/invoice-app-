@@ -47,3 +47,7 @@
 ## 2024-08-15 - Missing error path test in apiConfig.ts JSON parsing failure
 **Learning:** We can simulate JSON parsing failure by mocking the response to not be ok, and then the json() function throwing an error, to ensure the catch block handles the error and throws a NrsApiError with a default message.
 **Action:** Added targeted unit tests asserting that the catch block throws NrsApiError with a default message when the JSON parsing fails.
+
+## 2026-08-16 - Improve handleCliError tests and mock patterns
+**Learning:** For test setups that use `console.error` spies and `process.exit` mocks to test error paths in CLI tools, it is best to place these spies in `beforeEach` and restore them in `afterEach`. This ensures that they are active for all tests in the block (including any new edge cases, such as handling errors without a `.message` property), keeping tests DRY and consistently preventing error logs from polluting test output.
+**Action:** Refactored `handleCliError` tests to initialize and restore console and process spies in the `describe` block's setup/teardown phases, and added a test case to cover non-Error objects.

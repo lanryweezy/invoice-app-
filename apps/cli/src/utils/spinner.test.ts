@@ -4,6 +4,7 @@ import ora from 'ora';
 
 vi.mock('chalk', () => ({
   default: {
+    cyan: vi.fn((str) => str),
     red: vi.fn((str) => str),
   },
 }));
@@ -20,23 +21,35 @@ vi.mock('ora', () => {
 });
 
 describe('spinner utils', () => {
+  let consoleErrorSpy: any;
+  let processExitSpy: any;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    processExitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {}) as any);
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
+    processExitSpy.mockRestore();
   });
 
   describe('handleCliError', () => {
     it('should log the error and exit the process', () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      const processExitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {}) as any);
-
       const error = new Error('Something went wrong');
       handleCliError(error, 'Test Error Message');
 
       expect(consoleErrorSpy).toHaveBeenCalledWith('Test Error Message', 'Something went wrong');
       expect(processExitSpy).toHaveBeenCalledWith(1);
+    });
 
-      consoleErrorSpy.mockRestore();
-      processExitSpy.mockRestore();
+    it('should handle errors without a message property', () => {
+      const error = { code: 'UNKNOWN_ERROR' };
+      handleCliError(error, 'Test Error Message');
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Test Error Message', undefined);
+      expect(processExitSpy).toHaveBeenCalledWith(1);
     });
   });
 
