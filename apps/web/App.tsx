@@ -40,6 +40,7 @@ import { CLIAccessView } from './components/CLIAccessView';
 import { SmtpSettingsModal } from './components/SmtpSettingsModal';
 import { SidePanel } from './components/SidePanel';
 import { flushQueue, getQueueCount } from './utils/offlineSync';
+import { getProFeatureContent } from './services/proFeatureRegistry';
 
 // NRS Compliance Components
 import { ComplianceDashboard } from './components/ComplianceDashboard';
@@ -794,21 +795,9 @@ const App: React.FC = () => {
           <div className="p-4 sm:p-8 max-w-6xl mx-auto">
             <FeatureGate
               featureName={gatedFeature}
-              headline={
-                gatedFeature === 'Accounting' ? "You've done the hard work. Let's show you the numbers." :
-                gatedFeature === 'Branches' ? "Grow beyond one location." :
-                "Unlock more power for your business."
-              }
-              subhead={
-                gatedFeature === 'Accounting' ? "See profit, track who owes you, and be ready for tax season ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ all from InvoiceApp." :
-                gatedFeature === 'Branches' ? "Manage multiple offices, track location-specific revenue, and organize your teams." :
-                `Upgrade to unlock ${gatedFeature} and streamline your workflow.`
-              }
-              bullets={
-                gatedFeature === 'Accounting' ? ["See who hasn't paid", "Know your monthly profit", "Export for your accountant"] :
-                gatedFeature === 'Branches' ? ["Add unlimited locations", "Set location-specific addresses", "Filter reports by branch"] :
-                ["Unlimited clients and invoices", "Cloud sync across devices", "Priority support"]
-              }
+              headline={getProFeatureContent(gatedFeature).headline}
+              subhead={getProFeatureContent(gatedFeature).subhead}
+              bullets={getProFeatureContent(gatedFeature).bullets}
               onUpgrade={() => {
                   setPricingModalContent({ title: `Unlock ${gatedFeature}`, message: `Upgrade to Pro to unlock ${gatedFeature} and much more.` });
                   setIsPricingModalOpen(true);
