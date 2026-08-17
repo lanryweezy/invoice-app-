@@ -12,6 +12,7 @@ describe('Rev360Api', () => {
   beforeEach(() => {
     api = new Rev360Api();
     global.fetch = vi.fn();
+    vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.useFakeTimers();
   });
 
