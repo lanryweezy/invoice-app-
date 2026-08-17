@@ -17,3 +17,7 @@
 ## 2026-08-08 - Floating Promises in Event Listeners
 **Learning:** Floating promises inside native DOM event listeners (like `window.addEventListener('online', async () => {...})`) are unhandled if they reject. If the underlying logic (e.g., offline sync) fails unexpectedly, the rejection silently crashes the background process without triggering error boundaries or telemetry.
 **Action:** When adding async logic directly to event listeners, ensure the floating promise is caught, for example by refactoring to `promise.then().catch()`.
+
+## 2026-08-08 - Floating Promises in Async Event Listeners & Effects
+**Learning:** Attaching an `async` function directly as a DOM event listener (e.g. `window.addEventListener('online', async () => {...})`) or calling an `async` function implicitly synchronously (e.g. `startupSync()`) inside a `useEffect` hook creates a floating promise. If the async logic throws an error or the returned promise rejects before it is awaited, the rejection falls entirely outside of React's error boundaries or standard try/catch structures, leading to a silent unhandled rejection that bypasses crash reporting telemetry and halts the background process.
+**Action:** Always rewrite `async` DOM event listeners to be synchronous wrappers that internally invoke the asynchronous behavior and append `.catch(console.error)` (e.g., `flushQueue().then(...).catch(...)`). Similarly, ensure any `async` functions executed within `useEffect` are invoked with a `.catch()` if they are not explicitly awaited.
