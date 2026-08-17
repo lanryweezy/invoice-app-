@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, User, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 
 const firebaseConfig = {
@@ -19,5 +19,5 @@ const db = getFirestore(app);
 const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 const googleProvider = new GoogleAuthProvider();
 
-export { auth, db, analytics, googleProvider, signInWithPopup, signOut, onAuthStateChanged, doc, getDoc, setDoc, createUserWithEmailAndPassword, signInWithEmailAndPassword };
+export { auth, db, analytics, googleProvider, signInWithPopup, signOut, onAuthStateChanged, doc, getDoc, setDoc, collection, getDocs, deleteDoc, createUserWithEmailAndPassword, signInWithEmailAndPassword };
 export type { User };

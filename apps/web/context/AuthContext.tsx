@@ -153,6 +153,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             // Security Fix: Use cryptographically secure random numbers for references
             ref: 'INV-' + Date.now() + '-' + generateSecureId(16),
             metadata: {
+              // Top-level uid/plan are what the Paystack webhook reads to identify the user.
+              uid: user.uid,
+              plan: planType,
               custom_fields: [
                 { display_name: "User ID", variable_name: "user_id", value: user.uid },
                 { display_name: "Plan", variable_name: "plan", value: planType },

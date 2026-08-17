@@ -12,8 +12,11 @@ localforage.config({
 
 export interface Mutation {
   id: string;
-  collection: string;
-  docId: string;
+  // Legacy two-segment addressing (collection + docId).
+  collection?: string;
+  docId?: string;
+  // Full document path (supports subcollections, e.g. `users/{uid}/invoices/{id}`).
+  path?: string;
   data: any;
   timestamp: number;
   attempts?: number;
@@ -62,6 +65,40 @@ export const queueMutation = async (collectionName: string, docId: string, data:
 };
 
 /**
+ * Queues a mutation addressed by a full document path (supports subcollections).
+ * Pending mutations for the same path are merged to avoid redundant writes.
+ */
+export const queuePathMutation = async (path: string, data: any) => {
+  try {
+    const queue = (await localforage.getItem<Mutation[]>('syncQueue')) || [];
+
+    const existingIndex = queue.findIndex(m => m.path === path);
+
+    if (existingIndex >= 0) {
+      queue[existingIndex].data = { ...queue[existingIndex].data, ...data };
+      queue[existingIndex].timestamp = Date.now();
+    } else {
+      queue.push({
+        id: crypto.randomUUID(),
+        path,
+        data,
+        timestamp: Date.now()
+      });
+    }
+
+    await localforage.setItem('syncQueue', queue);
+    trackEvent('sync_mutation_queued', { path });
+  } catch (error) {
+    console.error("[Offline Sync] Failed to queue path mutation", {
+      event: 'offline.sync.queue_path_mutation.failed',
+      path,
+      error: getErrorMessage(error)
+    });
+    trackEvent('sync_mutation_queue_failed', { path, error: getErrorMessage(error) });
+  }
+};
+
+/**
  * Attempts to flush all queued mutations to Firestore.
  * Returns true if the queue was fully flushed, false if errors occurred or if offline.
  */
@@ -87,10 +124,12 @@ export const flushQueue = async (): Promise<boolean> => {
     // Process concurrently since queueMutation guarantees unique docIds per collection in the queue
     const results = await Promise.allSettled(
       queue.map(async (mutation) => {
-        const docRef = doc(db, mutation.collection, mutation.docId);
+        const docRef = mutation.path
+          ? doc(db, mutation.path)
+          : doc(db, mutation.collection as string, mutation.docId as string);
         // Using merge: true as this is primarily used for partial updates (e.g. { invoiceUser: ... })
         await setDoc(docRef, mutation.data, { merge: true });
-        trackEvent('sync_item_success', { collection: mutation.collection, docId: mutation.docId });
+        trackEvent('sync_item_success', { path: mutation.path, collection: mutation.collection, docId: mutation.docId });
       })
     );
 
