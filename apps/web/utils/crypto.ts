@@ -1,5 +1,12 @@
 export function generateSecureId(length: number = 6): string {
-  const array = new Uint8Array(Math.ceil(length / 2));
+  const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const array = new Uint8Array(length);
   crypto.getRandomValues(array);
-  return Array.from(array, b => b.toString(16).padStart(2, '0')).join('').toUpperCase().substring(0, length);
+
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += charset[array[i] % charset.length];
+  }
+
+  return result;
 }
