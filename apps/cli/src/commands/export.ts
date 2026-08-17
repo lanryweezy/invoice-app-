@@ -93,34 +93,37 @@ export default function registerExportCommand(program: Command) {
           invoices.push({ id: doc.id, ...doc.data() } as Invoice);
         });
 
+        let fromDate: number | null = null;
         if (options.from) {
-          const fromDate = Date.parse(options.from);
-          // ⚡ Bolt: Use Date.parse in loop rather than new Date() for performance
-          invoices = invoices.filter((inv) => Date.parse(inv.issueDate) >= fromDate);
+          fromDate = Date.parse(options.from);
         }
+        let toDate: number | null = null;
         if (options.to) {
           const toDateObj = new Date(options.to);
           toDateObj.setHours(23, 59, 59, 999);
-          const toDate = toDateObj.getTime();
-          // ⚡ Bolt: Use Date.parse in loop rather than new Date() for performance
-          invoices = invoices.filter((inv) => Date.parse(inv.issueDate) <= toDate);
+          toDate = toDateObj.getTime();
         }
-        if (options.status) {
-          invoices = invoices.filter(
-            (inv) => inv.status.toLowerCase() === options.status.toLowerCase()
-          );
-        }
-        if (options.client) {
-          invoices = invoices.filter((inv) =>
-            inv.client.name.toLowerCase().includes(options.client.toLowerCase())
-          );
-        }
-        if (options.minAmount) {
-          invoices = invoices.filter((inv) => (inv.total || 0) >= parseFloat(options.minAmount));
-        }
-        if (options.maxAmount) {
-          invoices = invoices.filter((inv) => (inv.total || 0) <= parseFloat(options.maxAmount));
-        }
+
+        const filterStatus = options.status ? options.status.toLowerCase() : null;
+        const filterClient = options.client ? options.client.toLowerCase() : null;
+        const minAmount = options.minAmount ? parseFloat(options.minAmount) : null;
+        const maxAmount = options.maxAmount ? parseFloat(options.maxAmount) : null;
+
+        // ⚡ Bolt: Combine multiple filter conditions into a single pass to avoid multiple array allocations and O(N * num_filters) iterations
+        invoices = invoices.filter((inv) => {
+          if (fromDate || toDate) {
+            const issueDate = Date.parse(inv.issueDate);
+            if (fromDate && issueDate < fromDate) return false;
+            if (toDate && issueDate > toDate) return false;
+          }
+          if (filterStatus && inv.status.toLowerCase() !== filterStatus) return false;
+          if (filterClient && !inv.client.name.toLowerCase().includes(filterClient)) return false;
+          const total = inv.total || 0;
+          if (minAmount !== null && total < minAmount) return false;
+          if (maxAmount !== null && total > maxAmount) return false;
+
+          return true;
+        });
 
         if (invoices.length === 0) {
           fail(spinner, chalk.yellow('No invoices match the specified filters'));
