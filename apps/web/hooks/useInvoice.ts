@@ -3,7 +3,9 @@ import type { Invoice, LineItem, Currency, InvoiceStatus, User as AppUser, Clien
 import { useSubscription } from './useSubscription';
 import { db, doc, setDoc, getDoc } from '../services/firebase';
 import { queueMutation } from '../utils/offlineSync';
+import { generateSecureId } from '../utils/crypto';
 import { trackEvent } from '../utils/analytics';
+import { generateSecureId } from '../utils/crypto';
 
 const DEFAULT_USER: AppUser = {
   name: '',
@@ -53,15 +55,7 @@ const getInitialInvoiceState = (): Invoice => {
     // Generates a string like "INV-2026-X8B9Q"
     const year = new Date().getFullYear();
     // Security Fix: Use cryptographically secure random numbers for invoice references
-    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let randomChars = '';
-    while (randomChars.length < 5) {
-      const array = new Uint8Array(1);
-      crypto.getRandomValues(array);
-      if (array[0] < 252) { // 252 is the highest multiple of 36 less than 256
-        randomChars += charset[array[0] % charset.length];
-      }
-    }
+    const randomChars = generateSecureId(5);
     return `INV-${year}-${randomChars}`;
   };
 

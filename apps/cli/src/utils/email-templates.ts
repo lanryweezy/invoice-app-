@@ -1,4 +1,4 @@
-import { Invoice } from '../types';
+import { Invoice, AppConfig } from '../types';
 import { formatCurrency, formatDate } from './formatter';
 
 /**
@@ -11,7 +11,7 @@ import { formatCurrency, formatDate } from './formatter';
  * - Implementors provide a function taking an `Invoice` and config object.
  * - The strategy is responsible for returning an object containing `subject` and `body` strings.
  */
-export type EmailTemplateStrategy = (invoice: Invoice, config: any) => { subject: string; body: string };
+export type EmailTemplateStrategy = (invoice: Invoice, config: AppConfig) => { subject: string; body: string };
 
 export const emailTemplateStrategies = new Map<string, EmailTemplateStrategy>();
 
@@ -19,7 +19,7 @@ export function registerEmailTemplateStrategy(name: string, strategy: EmailTempl
   emailTemplateStrategies.set(name, strategy);
 }
 
-const getSharedVars = (invoice: Invoice, config: any) => {
+const getSharedVars = (invoice: Invoice, config: AppConfig) => {
   const amount = formatCurrency(invoice.total || 0, invoice.currency);
   const itemsList = invoice.lineItems
     .map((item) => `- ${item.description}: ${formatCurrency(item.price * item.quantity, invoice.currency)}`)
@@ -100,7 +100,7 @@ ${config.businessName || 'InvoiceApp'}`
   };
 });
 
-export function generateEmailContent(invoice: Invoice, template: string, config: any): { subject: string; body: string } {
+export function generateEmailContent(invoice: Invoice, template: string, config: AppConfig): { subject: string; body: string } {
   const strategy = emailTemplateStrategies.get(template) || emailTemplateStrategies.get('formal')!;
   return strategy(invoice, config);
 }

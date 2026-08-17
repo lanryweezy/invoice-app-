@@ -11,3 +11,6 @@
 ## 2024-08-16 - Add Focus Visibility and ARIA labels to Modal Overlays
 **Learning:** Modal overlays like `ReceiptScanner` that take over the full viewport often have bespoke icon buttons (like "capture photo") and top-bar actions that completely lack explicit keyboard focus tracking and screen reader descriptions.
 **Action:** When adding modals or reviewing overlay UI, always ensure functional icon buttons have dynamic `aria-label`s based on their state, and that all actions have explicitly defined `focus-visible:ring-*` classes rather than relying on default browser styling, which often fails in custom styled backdrops.
+## 2024-08-17 - Added dynamic ARIA roles for Toast Notifications
+**Learning:** Screen readers need context on whether a dynamically injected notification (like a Toast) requires immediate interruption (`role="alert"`, `aria-live="assertive"`) such as an error, or polite announcement without breaking flow (`role="status"`, `aria-live="polite"`) such as a success message. Previously the `Toast.tsx` component lacked any of these.
+**Action:** When creating or modifying dynamic notification components, map visual indicators (e.g., success vs error styling) to standard ARIA announcement rules to preserve equitable context for non-visual users.
