@@ -5,6 +5,7 @@ import { db, doc, setDoc, getDoc } from '../services/firebase';
 import { queueMutation } from '../utils/offlineSync';
 import { generateSecureId } from '../utils/crypto';
 import { trackEvent } from '../utils/analytics';
+import { generateSecureId } from '../utils/crypto';
 
 const DEFAULT_USER: AppUser = {
   name: '',
