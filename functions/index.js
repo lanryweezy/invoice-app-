@@ -9,6 +9,40 @@ admin.initializeApp();
 // ============================================================
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 
+// Resolve the Firebase uid from a Paystack event payload.
+// Prefers the top-level metadata.uid, falling back to the custom_fields array.
+function resolveUid(data) {
+    const meta = (data && data.metadata) || {};
+    if (meta.uid) return meta.uid;
+    const fields = Array.isArray(meta.custom_fields) ? meta.custom_fields : [];
+    const field = fields.find(f => f && (f.variable_name === 'uid' || f.variable_name === 'user_id'));
+    return field ? field.value : null;
+}
+
+// Reverse-lookup a uid from a Paystack customer code (used by refund/cancellation events
+// that don't carry our metadata).
+async function uidFromCustomer(db, data) {
+    const code = data && data.customer && data.customer.customer_code;
+    if (!code) return null;
+    const snap = await db.collection('paystackCustomers').doc(code).get();
+    return snap.exists ? snap.data().uid : null;
+}
+
+// Independently confirm a transaction with Paystack's API — never trust the webhook body alone.
+async function verifyTransaction(reference) {
+    try {
+        const resp = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`, {
+            headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` },
+        });
+        if (!resp.ok) return null;
+        const json = await resp.json();
+        return json && json.status ? json.data : null;
+    } catch (err) {
+        console.error('Paystack verify call failed', { reference, error: err.message });
+        return null;
+    }
+}
+
 exports.paystackWebhook = functions.runWith({ secrets: ["PAYSTACK_SECRET_KEY"] }).https.onRequest(async (req, res) => {
     if (!PAYSTACK_SECRET_KEY) {
         console.error("PAYSTACK_SECRET_KEY not set");
@@ -26,13 +60,82 @@ exports.paystackWebhook = functions.runWith({ secrets: ["PAYSTACK_SECRET_KEY"] }
     }
 
     const event = req.body;
-    if (event.event === 'charge.success') {
-        const uid = event.data.metadata.uid;
-        await admin.firestore().collection('users').doc(uid).set({ plan: 'pro' }, { merge: true });
-        return res.status(200).send('OK');
+    const data = event.data || {};
+    const reference = data.reference ? String(data.reference) : (data.id ? String(data.id) : null);
+    const db = admin.firestore();
+
+    // Idempotency: skip events we've already fully processed (handles Paystack retries/replays).
+    const dedupeRef = reference
+        ? db.collection('processedWebhooks').doc(`${event.event}_${reference}`.replace(/[/]/g, '_'))
+        : null;
+    if (dedupeRef) {
+        const seen = await dedupeRef.get();
+        if (seen.exists) {
+            return res.status(200).send('Duplicate ignored');
+        }
     }
 
-    res.status(200).send('Event ignored');
+    try {
+        switch (event.event) {
+            case 'charge.success': {
+                const uid = resolveUid(data);
+                if (!uid) {
+                    console.error('charge.success missing uid', { reference });
+                    return res.status(200).send('No uid');
+                }
+                // Re-verify against Paystack before granting Pro.
+                const verified = await verifyTransaction(reference);
+                if (!verified || verified.status !== 'success') {
+                    console.error('Transaction verification failed', { reference });
+                    return res.status(200).send('Unverified');
+                }
+                const customerCode = data.customer && data.customer.customer_code;
+                await db.collection('users').doc(uid).set({
+                    plan: 'pro',
+                    paystackRef: reference,
+                    paystackCustomerCode: customerCode || null,
+                }, { merge: true });
+                // Store the reverse mapping so future refund/cancellation events can find this user.
+                if (customerCode) {
+                    await db.collection('paystackCustomers').doc(customerCode).set({ uid }, { merge: true });
+                }
+                break;
+            }
+            case 'charge.refunded':
+            case 'refund.processed': {
+                const uid = resolveUid(data) || await uidFromCustomer(db, data);
+                if (uid) {
+                    await db.collection('users').doc(uid).set({ plan: 'free' }, { merge: true });
+                }
+                break;
+            }
+            case 'subscription.disable':
+            case 'subscription.not_renew':
+            case 'invoice.payment_failed': {
+                const uid = await uidFromCustomer(db, data);
+                if (uid) {
+                    await db.collection('users').doc(uid).set({ plan: 'free' }, { merge: true });
+                }
+                break;
+            }
+            default:
+                return res.status(200).send('Event ignored');
+        }
+
+        // Mark processed only after successful handling so genuine failures can be retried by Paystack.
+        if (dedupeRef) {
+            await dedupeRef.set({
+                event: event.event,
+                reference,
+                processedAt: admin.firestore.FieldValue.serverTimestamp(),
+            });
+        }
+        return res.status(200).send('OK');
+    } catch (err) {
+        console.error('Webhook processing error', { event: event.event, reference, error: err.message });
+        // Return 5xx (no dedupe write) so Paystack retries delivery.
+        return res.status(500).send('Processing error');
+    }
 });
 
 // ============================================================

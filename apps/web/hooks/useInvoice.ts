@@ -1,11 +1,10 @@
 import { useState, useCallback, useEffect, Dispatch, SetStateAction } from 'react';
 import type { Invoice, LineItem, Currency, InvoiceStatus, User as AppUser, Client, BusinessProfile } from '../types';
 import { useSubscription } from './useSubscription';
-import { db, doc, setDoc, getDoc } from '../services/firebase';
-import { queueMutation } from '../utils/offlineSync';
+import { db, doc, setDoc, getDoc, collection, getDocs } from '../services/firebase';
+import { queueMutation, queuePathMutation } from '../utils/offlineSync';
 import { generateSecureId } from '../utils/crypto';
 import { trackEvent } from '../utils/analytics';
-import { generateSecureId } from '../utils/crypto';
 
 const DEFAULT_USER: AppUser = {
   name: '',
@@ -93,6 +92,13 @@ type SyncToCloudFn = (data: Partial<{
     currentInvoice: Invoice
 }>) => Promise<void>;
 
+// Firestore document IDs can't contain '/'; derive a safe, stable id from the invoice number.
+const invoiceDocId = (inv: Invoice): string =>
+  String(inv.invoiceNumber || '').trim().replace(/[/\\]/g, '_') || crypto.randomUUID();
+
+// Firestore rejects `undefined` values; strip them (and non-serializable fields) before writing.
+const stripUndefined = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
+
 const useCloudSync = (
   isPro: boolean,
   firebaseUser: any,
@@ -101,7 +107,7 @@ const useCloudSync = (
   setSavedInvoices: Dispatch<SetStateAction<Invoice[]>>,
   setSavedClients: Dispatch<SetStateAction<Client[]>>,
   setBusinessProfiles: Dispatch<SetStateAction<BusinessProfile[]>>
-): SyncToCloudFn => {
+): { syncToCloud: SyncToCloudFn; syncInvoiceDoc: (inv: Invoice) => Promise<void> } => {
   useEffect(() => {
     if (isPro && firebaseUser) {
         const loadCloudData = async () => {
@@ -120,9 +126,26 @@ const useCloudSync = (
                     const data = userSnap.data();
                     if (data.recurringInvoices) setRecurringInvoices(data.recurringInvoices);
                     if (data.currentInvoice) setInvoice(data.currentInvoice);
-                    if (data.savedInvoices) setSavedInvoices(data.savedInvoices);
                     if (data.savedClients) setSavedClients(data.savedClients);
                     if (data.businessProfiles) setBusinessProfiles(data.businessProfiles);
+                }
+
+                // Invoices now live in a per-user subcollection (one doc each) to avoid
+                // whole-array clobbering, stay under the 1MB doc limit, and trigger Cloud Functions.
+                const invoicesSnap = await getDocs(collection(db, 'users', firebaseUser.uid, 'invoices'));
+                if (!invoicesSnap.empty) {
+                    const invoices = invoicesSnap.docs.map(d => d.data() as Invoice);
+                    invoices.sort((a, b) => (b.issueDate || '').localeCompare(a.issueDate || ''));
+                    setSavedInvoices(invoices);
+                } else if (userSnap.exists() && Array.isArray(userSnap.data().savedInvoices)) {
+                    // Backward compatibility: migrate legacy array into the subcollection.
+                    const legacy = userSnap.data().savedInvoices as Invoice[];
+                    setSavedInvoices(legacy);
+                    await Promise.all(
+                        legacy.map(inv =>
+                            setDoc(doc(db, `users/${firebaseUser.uid}/invoices/${invoiceDocId(inv)}`), stripUndefined(inv), { merge: true })
+                        )
+                    );
                 }
             } catch (error) {
                 console.error("Failed to load cloud data", error);
@@ -150,7 +173,27 @@ const useCloudSync = (
       }
   }, [isPro, firebaseUser]);
 
-  return syncToCloud;
+  // Writes a single invoice to its own subcollection document instead of a shared array,
+  // so concurrent devices/offline flushes can no longer overwrite each other's history.
+  const syncInvoiceDoc = useCallback(async (inv: Invoice) => {
+      if (!(isPro && firebaseUser)) return;
+      const path = `users/${firebaseUser.uid}/invoices/${invoiceDocId(inv)}`;
+      const payload = stripUndefined(inv);
+
+      if (!navigator.onLine) {
+          await queuePathMutation(path, payload);
+          return;
+      }
+
+      try {
+          await setDoc(doc(db, path), payload, { merge: true });
+      } catch (error) {
+          console.error("Failed to sync invoice, queueing locally instead", error);
+          await queuePathMutation(path, payload);
+      }
+  }, [isPro, firebaseUser]);
+
+  return { syncToCloud, syncInvoiceDoc };
 };
 
 const useLocalPersistence = (
@@ -282,6 +325,7 @@ const useInvoiceMutations = (invoice: Invoice, setInvoice: Dispatch<SetStateActi
 
 const useEntityManagement = (
   syncToCloud: SyncToCloudFn,
+  syncInvoiceDoc: (inv: Invoice) => Promise<void>,
   setSavedClients: Dispatch<SetStateAction<Client[]>>,
   setBusinessProfiles: Dispatch<SetStateAction<BusinessProfile[]>>,
   setRecurringInvoices: Dispatch<SetStateAction<Invoice[]>>,
@@ -390,10 +434,12 @@ const useEntityManagement = (
         }
 
         localStorage.setItem('invoiceHistory', JSON.stringify(newInvoices));
-        syncToCloud({ savedInvoices: newInvoices }).catch(console.error);
         return newInvoices;
     });
-  }, [syncToCloud, setSavedInvoices]);
+    // Sync only the changed invoice to its own subcollection doc — never the whole array —
+    // so a second device or a delayed offline flush can't clobber other invoices.
+    syncInvoiceDoc(inv).catch(console.error);
+  }, [syncInvoiceDoc, setSavedInvoices]);
 
   return {
     saveClient,
@@ -414,10 +460,10 @@ export const useInvoice = () => {
   const [recurringInvoices, setRecurringInvoices] = useState<Invoice[]>([]);
   const { user: firebaseUser, isPro } = useSubscription();
 
-  const syncToCloud = useCloudSync(isPro, firebaseUser, setInvoice, setRecurringInvoices, setSavedInvoices, setSavedClients, setBusinessProfiles);
+  const { syncToCloud, syncInvoiceDoc } = useCloudSync(isPro, firebaseUser, setInvoice, setRecurringInvoices, setSavedInvoices, setSavedClients, setBusinessProfiles);
   useLocalPersistence(invoice, syncToCloud, setSavedClients, setBusinessProfiles, setRecurringInvoices);
   const mutations = useInvoiceMutations(invoice, setInvoice);
-  const entities = useEntityManagement(syncToCloud, setSavedClients, setBusinessProfiles, setRecurringInvoices, setSavedInvoices);
+  const entities = useEntityManagement(syncToCloud, syncInvoiceDoc, setSavedClients, setBusinessProfiles, setRecurringInvoices, setSavedInvoices);
 
   return {
     invoice,
