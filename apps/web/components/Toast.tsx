@@ -19,7 +19,11 @@ export const Toast: React.FC<ToastProps> = ({ message, isVisible, onClose, type 
   if (!isVisible) return null;
 
   return (
-    <div className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 animate-fadeIn border ${type === 'success' ? 'bg-slate-900 text-white border-slate-700' : 'bg-red-500 text-white border-red-600'}`}>
+    <div
+      className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 animate-fadeIn border ${type === 'success' ? 'bg-slate-900 text-white border-slate-700' : 'bg-red-500 text-white border-red-600'}`}
+      role={type === 'error' ? 'alert' : 'status'}
+      aria-live={type === 'error' ? 'assertive' : 'polite'}
+    >
       {type === 'success' && (
         <div className="bg-teal-500/20 p-1 rounded-full">
             <svg className="w-4 h-4 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
