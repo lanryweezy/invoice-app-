@@ -1,1 +1,4 @@
 ## 2024-08-14 - Use shared `handleCliError` to catch fatal errors in CLI\n**Learning:** The CLI command handlers frequently duplicated `catch (error) { console.error(...); process.exit(1); }`. The codebase already has a centralized `handleCliError` utility in `apps/cli/src/utils/spinner.ts`.\n**Action:** Use the existing `handleCliError` utility for consistent formatting and reduced duplication.
+## 2024-08-17 - Centralize error message extraction
+**Learning:** I found multiple places duplicating `e instanceof Error ? e.message : String(e)` directly inline. The codebase provides a centralized `getErrorMessage` utility in `apps/web/utils/error.ts` to standardize parsing unknown errors.
+**Action:** Always import and use `getErrorMessage` rather than writing inline `instanceof Error` checks to ensure consistent logging across the app.
