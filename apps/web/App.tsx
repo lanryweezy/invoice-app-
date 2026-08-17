@@ -169,16 +169,19 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const handleOnline = async () => {
+    const handleOnline = () => {
       setIsOffline(false);
       showToast('Back online! Syncing data...', 'success');
-      const success = await flushQueue();
-      if (success) {
-        setPendingSyncCount(0);
-        showToast('All changes synced to cloud.', 'success');
-      } else {
-        showToast('Some changes could not be synced. Will retry later.', 'error');
-      }
+
+      // 🌱 Flora: Catch floating promise rejections in event listener to prevent silent failures
+      flushQueue().then((success) => {
+        if (success) {
+          setPendingSyncCount(0);
+          showToast('All changes synced to cloud.', 'success');
+        } else {
+          showToast('Some changes could not be synced. Will retry later.', 'error');
+        }
+      }).catch(console.error);
     };
 
     const handleOffline = () => {
@@ -224,7 +227,8 @@ const App: React.FC = () => {
          }
       }
     };
-    startupSync();
+    // 🌱 Flora: Catch floating promise rejections on initial sync to prevent silent failures
+    startupSync().catch(console.error);
   }, [showToast]);
 
   const handleConvertToInvoice = useCallback(() => {
