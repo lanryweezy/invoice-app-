@@ -6,7 +6,7 @@ import { db } from './firebase';
 import { doc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { trackEvent } from '../utils/analytics';
-import { getErrorMessage } from '../utils/error';
+import { getErrorMessage as getErrorMsg } from '../utils/error';
 
 // Request notification permission and get FCM token
 export async function requestNotificationPermission(): Promise<NotificationPermission> {
@@ -40,8 +40,8 @@ export async function subscribeToPushNotifications(userId: string): Promise<bool
 
     return true;
   } catch (error) {
-    console.error('Failed to subscribe to push notifications', { event: 'push.subscribe.failed', userId, error: getErrorMessage(error) });
-    try { trackEvent('push_notification_subscribe_failed', { user_id: userId, error: getErrorMessage(error) }); } catch {}
+    console.error('Failed to subscribe to push notifications', { event: 'push.subscribe.failed', userId, error: getErrorMsg(error) });
+    try { trackEvent('push_notification_subscribe_failed', { user_id: userId, error: getErrorMsg(error) }); } catch {}
     return false;
   }
 }
@@ -56,8 +56,8 @@ export async function unsubscribeFromPushNotifications(userId: string): Promise<
     }
     return true;
   } catch (error) {
-    console.error('Failed to unsubscribe from push notifications', { event: 'push.unsubscribe.failed', userId, error: getErrorMessage(error) });
-    try { trackEvent('push_notification_unsubscribe_failed', { user_id: userId, error: getErrorMessage(error) }); } catch {}
+    console.error('Failed to unsubscribe from push notifications', { event: 'push.unsubscribe.failed', userId, error: getErrorMsg(error) });
+    try { trackEvent('push_notification_unsubscribe_failed', { user_id: userId, error: getErrorMsg(error) }); } catch {}
     return false;
   }
 }

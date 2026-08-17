@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { trackEvent } from '../utils/analytics';
+import { getErrorMessage } from '../utils/error';
 
 interface PricingModalProps {
   isOpen: boolean;
@@ -51,7 +52,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
       }
     } catch (e) {
       console.error('Upgrade error:', e);
-      const msg = e instanceof Error ? e.message : String(e);
+      const msg = getErrorMessage(e);
       if (msg.includes('Paystack') || msg.includes('paystack')) {
         setError('Payment system failed to load. Please refresh and try again.');
       } else {

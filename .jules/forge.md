@@ -1,3 +1,12 @@
+## 2024-05-14 - Test Refactoring & Robustness for CLI Error Handling
+**Learning:** Moving process and console spies (e.g. `process.exit`, `console.error`) to `beforeEach` and explicitly restoring them in `afterEach` prevents spy leakage and avoids test suite crashes when testing fatal error handlers. We also need to test non-Error objects to ensure the error handling logic is robust against stringified objects or weird errors.
+**Action:** Refactored `apps/cli/src/utils/spinner.test.ts` to manage console and process spies using setup/teardown blocks and added test coverage for non-Error object inputs.
+## 2024-05-14 - Test Refactoring & Robustness for CLI Error Handling
+**Learning:** Moving process and console spies (e.g. `process.exit`, `console.error`) to `beforeEach` and explicitly restoring them in `afterEach` prevents spy leakage and avoids test suite crashes when testing fatal error handlers. We also need to test non-Error objects to ensure the error handling logic is robust against stringified objects or weird errors.
+**Action:** Refactored `apps/cli/src/utils/spinner.test.ts` to manage console and process spies using setup/teardown blocks and added test coverage for non-Error object inputs.
+## YYYY-MM-DD - [Testing the browser Notification API]
+**Learning:** Testing logic that accesses browser APIs like `Notification` must account for environments where it is missing, such as headless or CI environments. Using a `typeof Notification !== 'undefined'` guard makes the code resilient, and `vi.stubGlobal('Notification', undefined)` allows testing this fallback without reference errors.
+**Action:** Guarded `Notification` usage and added tests validating the error-free bypass when the API is unsupported.
 ## 2025-01-20 - Fix missing error formatter mock in pushNotifications.test.ts
 **Learning:** `pushNotifications.ts` recently started using `getErrorMessage` to properly format caught errors before tracking or logging them, but the testing suite `pushNotifications.test.ts` was never updated to provide a mock implementation for it. Because of this, testing error branches resulted in an unhandled ReferenceError.
 
@@ -50,3 +59,7 @@
 ## 2026-08-16 - Prevent ReferenceError on missing Notification API in sendLocalNotification
 **Learning:** Functions that interact with the global `Notification` object, like `sendLocalNotification`, must first verify that `'Notification' in window`. Without this check, accessing `Notification.permission` on browsers that don't support it (e.g. some mobile browsers or environments) will result in an unhandled `ReferenceError`.
 **Action:** Added `'Notification' in window` check to `sendLocalNotification` to fail gracefully and added a unit test by mocking `delete window.Notification` to assert that no error is thrown in unsupported environments.
+
+## 2026-08-16 - Improve handleCliError tests and mock patterns
+**Learning:** For test setups that use `console.error` spies and `process.exit` mocks to test error paths in CLI tools, it is best to place these spies in `beforeEach` and restore them in `afterEach`. This ensures that they are active for all tests in the block (including any new edge cases, such as handling errors without a `.message` property), keeping tests DRY and consistently preventing error logs from polluting test output.
+**Action:** Refactored `handleCliError` tests to initialize and restore console and process spies in the `describe` block's setup/teardown phases, and added a test case to cover non-Error objects.

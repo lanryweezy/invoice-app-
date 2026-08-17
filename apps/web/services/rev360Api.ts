@@ -4,6 +4,7 @@
 
 import { apiRequest } from './apiConfig';
 import { trackEvent } from '../utils/analytics';
+import { getErrorMessage } from '../utils/error';
 
 export interface Rev360Credentials {
   clientId: string;
@@ -86,6 +87,10 @@ export class Rev360Api {
       this.tokenExpiry = Date.now() + (data.expires_in * 1000);
       return { success: true, accessToken: data.access_token, expiresIn: data.expires_in };
     } catch (error) {
+      console.error('Rev360 authentication failed', {
+        event: 'rev360.authenticate.failed',
+        error: getErrorMessage(error)
+      });
       return { success: false, message: (error as Error).message };
     }
   }
@@ -106,6 +111,10 @@ export class Rev360Api {
       });
       return await response.json();
     } catch (error) {
+      console.error('Rev360 invoice registration failed', {
+        event: 'rev360.registerInvoice.failed',
+        error: getErrorMessage(error)
+      });
       return { success: false, message: (error as Error).message };
     }
   }
@@ -119,6 +128,11 @@ export class Rev360Api {
       });
       return await response.json();
     } catch (error) {
+      console.error('Rev360 VAT return filing failed', {
+        event: 'rev360.fileVATReturn.failed',
+        period: vatReturn.period,
+        error: getErrorMessage(error)
+      });
       return { success: false, message: (error as Error).message };
     }
   }
@@ -132,6 +146,10 @@ export class Rev360Api {
       });
       return await response.json();
     } catch (error) {
+      console.error('Rev360 WHT certificate generation failed', {
+        event: 'rev360.generateWHTCertificate.failed',
+        error: getErrorMessage(error)
+      });
       return { success: false, message: (error as Error).message };
     }
   }
@@ -143,6 +161,12 @@ export class Rev360Api {
       });
       return await response.json();
     } catch (error) {
+      const maskedTin = tin ? `***${tin.slice(-4)}` : 'unknown';
+      console.error('Rev360 compliance check failed', {
+        event: 'rev360.checkCompliance.failed',
+        tin: maskedTin,
+        error: getErrorMessage(error)
+      });
       return { status: 'unknown', message: 'Compliance check failed' };
     }
   }

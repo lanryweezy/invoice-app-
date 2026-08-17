@@ -108,7 +108,7 @@ export const flushQueue = async (): Promise<boolean> => {
         trackEvent('sync_item_failed', {
           collection: mutation.collection,
           docId: mutation.docId,
-          error: err instanceof Error ? err.message : String(err)
+          error: getErrorMessage(err)
         });
 
         mutation.attempts = (mutation.attempts || 0) + 1;
@@ -157,7 +157,7 @@ export const getQueueCount = async (): Promise<number> => {
       error: getErrorMessage(e)
     });
     trackEvent('sync_queue_count_failed', {
-      error: e instanceof Error ? e.message : String(e)
+      error: getErrorMessage(e)
     });
     return 0;
   }
