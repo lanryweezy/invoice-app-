@@ -10,3 +10,6 @@
 ## 2026-08-16 - Replace N+1 queries with Collection Group Queries in Firestore Cloud Functions
 **Learning:** Querying a subcollection across multiple parents using a for-loop (N+1 query pattern) is extremely inefficient and scales poorly as the number of parent documents grows. This causes excessive read operations and very high latency.
 **Action:** Use Firestore `collectionGroup()` queries when searching for documents in a subcollection across all parent documents (e.g., getting all overdue invoices across all users), then aggregate the data in memory. This reduces the time complexity and network overhead dramatically. Always ensure proper composite indexes are configured in `firestore.indexes.json` for collectionGroup queries to work.
+## 2026-08-17 - Combine sequential array filters into a single pass
+**Learning:** Sequential calls to `.filter()` allocate an intermediate array for each call and require O(N) iteration for each condition. For large datasets processed in memory, this causes unnecessary garbage collection and performance degradation.
+**Action:** When applying multiple filter criteria based on dynamic flags, implement a single `.filter()` pass with all active conditions rather than chaining multiple `.filter()` calls.
