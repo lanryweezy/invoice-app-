@@ -1,0 +1,1 @@
+This is an empty commit to submit the task. The requested code health issue (leftover console.log in apps/web/services/offlineSync.ts) was already fixed in the current main branch by a previous agent.
