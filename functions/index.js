@@ -154,15 +154,21 @@ exports.checkOverdueInvoices = functions.pubsub
       overdueByUser[uid].total += (inv.total || inv.amount || 0);
     });
 
-    for (const [uid, stats] of Object.entries(overdueByUser)) {
-      if (stats.count > 0) {
-        await sendPushNotification(
-          uid,
-          `⚠️ ${stats.count} Overdue Invoice${stats.count > 1 ? 's' : ''}`,
-          `You have ${stats.count} overdue invoice${stats.count > 1 ? 's' : ''} totaling ${stats.currency} ${stats.total.toLocaleString()}. Send reminders now!`,
-          '/editor'
-        );
-      }
+    const entries = Object.entries(overdueByUser);
+    const chunkSize = 10;
+
+    for (let i = 0; i < entries.length; i += chunkSize) {
+      const chunk = entries.slice(i, i + chunkSize);
+      await Promise.all(chunk.map(async ([uid, stats]) => {
+        if (stats.count > 0) {
+          await sendPushNotification(
+            uid,
+            `⚠️ ${stats.count} Overdue Invoice${stats.count > 1 ? 's' : ''}`,
+            `You have ${stats.count} overdue invoice${stats.count > 1 ? 's' : ''} totaling ${stats.currency} ${stats.total.toLocaleString()}. Send reminders now!`,
+            '/editor'
+          );
+        }
+      }));
     }
   });
 
