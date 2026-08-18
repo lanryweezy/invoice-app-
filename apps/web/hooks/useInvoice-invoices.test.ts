@@ -13,6 +13,8 @@ vi.mock('../services/firebase', () => ({
   doc: vi.fn(() => 'mock-doc-ref'),
   setDoc: vi.fn(),
   getDoc: vi.fn().mockResolvedValue({ exists: () => false }),
+  getDocs: vi.fn().mockResolvedValue({ empty: true, docs: [] }),
+  collection: vi.fn(() => 'mock-collection-ref'),
 }));
 
 vi.mock('../utils/offlineSync', () => ({
@@ -66,7 +68,12 @@ describe('useInvoice - Invoices', () => {
 
     expect(setDoc).toHaveBeenCalledWith(
       'mock-doc-ref',
-      { savedInvoices: [invoice2, invoice1] },
+      invoice1,
+      { merge: true }
+    );
+    expect(setDoc).toHaveBeenLastCalledWith(
+      'mock-doc-ref',
+      invoice2,
       { merge: true }
     );
   });
@@ -104,7 +111,7 @@ describe('useInvoice - Invoices', () => {
 
     expect(setDoc).toHaveBeenLastCalledWith(
       'mock-doc-ref',
-      { savedInvoices: [secondInvoice, updatedInvoice] },
+      updatedInvoice,
       { merge: true }
     );
   });

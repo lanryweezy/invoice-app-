@@ -12,6 +12,8 @@ vi.mock('../services/firebase', () => ({
   doc: vi.fn(() => 'mock-doc-ref'),
   setDoc: vi.fn(),
   getDoc: vi.fn().mockResolvedValue({ exists: () => false }),
+  getDocs: vi.fn().mockResolvedValue({ empty: true, docs: [] }),
+  collection: vi.fn(() => 'mock-collection-ref'),
 }));
 
 vi.mock('../utils/offlineSync', () => ({
