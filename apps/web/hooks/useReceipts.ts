@@ -4,6 +4,7 @@ import { useSubscription } from './useSubscription';
 import { db, doc, setDoc, getDoc } from '../services/firebase';
 import { trackEvent } from '../utils/analytics';
 import { queueMutation } from '../utils/offlineSync';
+import { getErrorMessage } from '../utils/error';
 
 export const useReceipts = () => {
     const [receipts, setReceipts] = useState<Receipt[]>([]);
@@ -14,7 +15,7 @@ export const useReceipts = () => {
         try {
             const stored = localStorage.getItem('invoiceReceipts');
             if (stored) setReceipts(JSON.parse(stored));
-        } catch (e) { console.error('Failed to load receipts', e); }
+        } catch (e) { console.error('Failed to load receipts', { event: 'receipts.load.local.failed', error: getErrorMessage(e) }); }
     }, []);
 
     // Load from cloud if Pro
@@ -31,7 +32,7 @@ export const useReceipts = () => {
                         }
                     }
                 } catch (error) {
-                    console.error("Failed to load cloud receipts", error);
+                    console.error("Failed to load cloud receipts", { event: 'receipts.load.cloud.failed', userId: firebaseUser.uid, error: getErrorMessage(error) });
                     try { trackEvent('cloud_data_load_failed', { collection: 'users', doc_id: firebaseUser.uid, error: String(error) }); } catch {}
                 }
             };
@@ -50,7 +51,7 @@ export const useReceipts = () => {
                 const userRef = doc(db, 'users', firebaseUser.uid);
                 await setDoc(userRef, { receipts: newReceipts }, { merge: true });
             } catch (error) {
-                console.error("Failed to sync receipts", error);
+                console.error("Failed to sync receipts", { event: 'receipts.sync.cloud.failed', userId: firebaseUser.uid, error: getErrorMessage(error) });
                 try { trackEvent('cloud_data_sync_failed', { collection: 'users', doc_id: firebaseUser.uid, error: String(error) }); } catch {}
             }
         }
@@ -63,7 +64,7 @@ export const useReceipts = () => {
             const id = `RCP-${year}-${String(count).padStart(3, '0')}`;
             const updated = [...prev, { ...receipt, id }];
             localStorage.setItem('invoiceReceipts', JSON.stringify(updated));
-            syncToCloud(updated).catch(console.error);
+            syncToCloud(updated).catch(e => console.error('Failed to trigger background sync', { event: 'receipts.sync.trigger.failed', error: getErrorMessage(e) }));
             return updated;
         });
     }, [syncToCloud]);
@@ -72,7 +73,7 @@ export const useReceipts = () => {
         setReceipts(prev => {
             const updated = prev.filter(r => r.id !== id);
             localStorage.setItem('invoiceReceipts', JSON.stringify(updated));
-            syncToCloud(updated).catch(console.error);
+            syncToCloud(updated).catch(e => console.error('Failed to trigger background sync', { event: 'receipts.sync.trigger.failed', error: getErrorMessage(e) }));
             return updated;
         });
     }, [syncToCloud]);
