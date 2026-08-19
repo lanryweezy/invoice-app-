@@ -1,3 +1,4 @@
+﻿import { Tooltip, InfoIcon } from './Tooltip';
 import React, { useState, useEffect } from "react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db, auth } from "../services/firebase";
@@ -32,57 +33,57 @@ interface Preset {
 const PRESETS: Preset[] = [
   {
     name: "Gmail",
-    icon: "✉️",
+    icon: "âœ‰ï¸",
     host: "smtp.gmail.com",
     port: "587",
     helpUrl: "https://myaccount.google.com/apppasswords",
     instructions: [
-      "Go to myaccount.google.com → Security",
+      "Go to myaccount.google.com â†’ Security",
       "Enable 2-Step Verification (required)",
-      'Search "App Passwords" → Generate one for "Mail"',
+      'Search "App Passwords" â†’ Generate one for "Mail"',
       "Copy the 16-character password below",
     ],
   },
   {
     name: "Outlook / 365",
-    icon: "📨",
+    icon: "ðŸ“¨",
     host: "smtp.office365.com",
     port: "587",
     helpUrl: "https://support.microsoft.com/en-us/office",
     instructions: [
       "Use your regular Outlook email and password",
       "If 2FA is enabled, generate an App Password",
-      "Go to account.microsoft.com → Security → App Passwords",
+      "Go to account.microsoft.com â†’ Security â†’ App Passwords",
     ],
   },
   {
     name: "Yahoo",
-    icon: "📬",
+    icon: "ðŸ“¬",
     host: "smtp.mail.yahoo.com",
     port: "587",
     helpUrl:
       "https://help.yahoo.com/kb/generate-manage-app-passwords-sln15241.html",
     instructions: [
-      "Go to Account Security → App Passwords",
+      "Go to Account Security â†’ App Passwords",
       'Generate a new app password for "Mail"',
       "Copy and paste it below (not your regular password)",
     ],
   },
   {
     name: "Zoho",
-    icon: "📮",
+    icon: "ðŸ“®",
     host: "smtp.zoho.com",
     port: "587",
     helpUrl: "https://www.zoho.com/mail/help/smtp-authentication.html",
     instructions: [
-      "Go to Zoho Mail → Settings → Mail Accounts",
+      "Go to Zoho Mail â†’ Settings â†’ Mail Accounts",
       "Enable SMTP Access",
       "Use your Zoho email and a dedicated SMTP password",
     ],
   },
   {
     name: "Custom",
-    icon: "⚙️",
+    icon: "âš™ï¸",
     host: "",
     port: "587",
     helpUrl: "",
@@ -212,7 +213,7 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({
     setTesting(true);
     setMessage(null);
 
-    // 🌱 Flora: Wraps native fetch with AbortController to prevent indefinite UI hangs if the external SMTP server is unresponsive
+    // ðŸŒ± Flora: Wraps native fetch with AbortController to prevent indefinite UI hangs if the external SMTP server is unresponsive
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
     try {
@@ -225,7 +226,7 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({
         },
         body: JSON.stringify({
           to: smtp.fromEmail || smtp.user,
-          subject: "InvoiceApp — Test Email",
+          subject: "InvoiceApp â€” Test Email",
           text: "Your email is configured correctly! You can now send invoices directly from InvoiceApp.",
         }),
         signal: controller.signal,
@@ -340,13 +341,13 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({
             {!isPro ? (
               <div className="text-center py-4">
                 <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
-                  📧
+                  ðŸ“§
                 </div>
                 <h4 className="text-lg font-bold text-slate-900 mb-2">
                   Direct Email Sending
                 </h4>
                 <p className="text-sm text-slate-500 mb-6 max-w-sm mx-auto">
-                  Send invoices straight from your inbox to your client — no
+                  Send invoices straight from your inbox to your client â€” no
                   copy-pasting needed. A Pro feature.
                 </p>
                 <button
@@ -404,7 +405,7 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({
                         rel="noopener noreferrer"
                         className="inline-block mt-2 text-xs font-bold text-blue-600 hover:text-blue-800 underline"
                       >
-                        Open help page →
+                        Open help page â†’
                       </a>
                     )}
                   </div>
@@ -413,9 +414,7 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({
                 {/* Form */}
                 <div className="grid grid-cols-3 gap-3">
                   <div className="col-span-2">
-                    <label className="block text-xs font-bold text-slate-500 mb-1">
-                      SMTP Server
-                    </label>
+                    <div className="flex items-center gap-1.5 mb-1"><label className="block text-xs font-bold text-slate-500">SMTP Server</label><Tooltip content="The address of your mail server, e.g., smtp.gmail.com or smtp.sendgrid.net"><InfoIcon /></Tooltip></div>
                     <input
                       type="text"
                       value={smtp.host}
@@ -427,9 +426,7 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">
-                      Port
-                    </label>
+                    <div className="flex items-center gap-1.5 mb-1"><label className="block text-xs font-bold text-slate-500">Port</label><Tooltip content="Usually 587 for TLS, or 465 for SSL."><InfoIcon /></Tooltip></div>
                     <input
                       type="text"
                       value={smtp.port}
@@ -500,9 +497,7 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">
-                      From Email
-                    </label>
+                    <div className="flex items-center gap-1.5 mb-1"><label className="block text-xs font-bold text-slate-500">From Email</label><Tooltip content="The email address your clients will see as the sender."><InfoIcon /></Tooltip></div>
                     <input
                       type="email"
                       value={smtp.fromEmail}
@@ -522,7 +517,7 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({
                   }}
                   className="text-xs font-medium text-slate-500 hover:text-slate-700"
                 >
-                  ← Choose a different provider
+                  â† Choose a different provider
                 </button>
 
                 {message && (
@@ -543,7 +538,7 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({
                 disabled={testing}
                 className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 transition-colors disabled:opacity-50"
               >
-                {testing ? "Sending..." : "📧 Send Test"}
+                {testing ? "Sending..." : "ðŸ“§ Send Test"}
               </button>
               <div className="flex-1" />
               {hasExisting && (
@@ -569,3 +564,4 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({
     </div>
   );
 };
+

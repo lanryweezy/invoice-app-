@@ -1,4 +1,7 @@
 ﻿import { getDecodedPathname } from "./utils/routing";
+import { toast } from 'sonner';
+import { IdleLockScreen } from './components/IdleLockScreen';
+import { useLocation, useNavigate, Routes, Route, Navigate, useSearchParams } from 'react-router-dom';
 import React, { useState, useCallback, useMemo, useEffect, Suspense, useRef } from 'react';
 
 import { InvoiceForm } from './components/InvoiceForm';
@@ -11,13 +14,12 @@ import { generateSequentialInvoiceNumber } from './utils/invoiceSequence';
 import type { Invoice, TemplateId, Client } from './types';
 import { TemplateSelector } from './components/TemplateSelector';
 import { EditIcon, EyeIcon } from './components/Icons';
-import { Toast } from './components/Toast';
+
 import { trackEvent, collectSessionDetails } from './utils/analytics';
 import { Helmet } from 'react-helmet-async';
 import { useSubscription } from './hooks/useSubscription';
 import { PricingModal } from './components/PricingModal';
 import { SettingsModal } from './components/SettingsModal';
-import { BranchesManager } from './components/BranchesManager';
 import { AccountingDashboard } from './components/AccountingDashboard';
 import { RecurringManager } from './components/RecurringManager';
 import { useExpenses } from './hooks/useExpenses';
@@ -39,7 +41,6 @@ import { IntegrationsView } from './components/IntegrationsView';
 import { CLIAccessView } from './components/CLIAccessView';
 import { SmtpSettingsModal } from './components/SmtpSettingsModal';
 import { SidePanel } from './components/SidePanel';
-import { flushQueue, getQueueCount } from './utils/offlineSync';
 import { getProFeatureContent } from './services/proFeatureRegistry';
 
 // NRS Compliance Components
@@ -118,8 +119,12 @@ const App: React.FC = () => {
     isVisible: false
   });
 
-  const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
-      setToast({ message, isVisible: true, type });
+    const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
+      if (type === 'error') {
+          toast.error(message);
+      } else {
+          toast.success(message);
+      }
   }, []);
 
   // Offline Sync State
@@ -172,16 +177,6 @@ const App: React.FC = () => {
     const handleOnline = () => {
       setIsOffline(false);
       showToast('Back online! Syncing data...', 'success');
-
-      // 🌱 Flora: Catch floating promise rejections in event listener to prevent silent failures
-      flushQueue().then((success) => {
-        if (success) {
-          setPendingSyncCount(0);
-          showToast('All changes synced to cloud.', 'success');
-        } else {
-          showToast('Some changes could not be synced. Will retry later.', 'error');
-        }
-      }).catch(console.error);
     };
 
     const handleOffline = () => {
@@ -192,45 +187,11 @@ const App: React.FC = () => {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Periodically check queue count if offline
-    let interval: any;
-    if (isOffline) {
-       interval = setInterval(async () => {
-           try {
-               const count = await getQueueCount();
-               setPendingSyncCount(count);
-           } catch (error) {
-               console.error('[App] Background sync count check failed:', error);
-           }
-       }, 2000);
-    }
-
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
-      if (interval) clearInterval(interval);
     };
-  }, [isOffline]);
-
-  // Initial Sync on Startup
-  useEffect(() => {
-    const startupSync = async () => {
-      if (navigator.onLine) {
-         const count = await getQueueCount();
-         if (count > 0) {
-            showToast('Syncing pending changes from previous session...', 'success');
-            const success = await flushQueue();
-            if (success) {
-               setPendingSyncCount(0);
-               showToast('Startup sync complete.', 'success');
-            }
-         }
-      }
-    };
-    // 🌱 Flora: Catch floating promise rejections on initial sync to prevent silent failures
-    startupSync().catch(console.error);
-  }, [showToast]);
-
+  }, []);
   const handleConvertToInvoice = useCallback(() => {
     if (!invoice || (invoice.documentType !== 'Pro-forma' && invoice.documentType !== 'Quote')) return;
     const newInvoiceNumber = generateSequentialInvoiceNumber();
@@ -257,7 +218,24 @@ const App: React.FC = () => {
 
   // Main view state
   const [gatedFeature, setGatedFeature] = useState<'Branches' | 'Accounting' | 'Recurring' | 'Receipts' | 'Integrations' | null>(null);
-  const [activePanel, setActivePanel] = useState<'branches' | 'accounting' | 'recurring' | 'receipts' | 'integrations' | null>(null);
+    const [searchParams, setSearchParams] = useSearchParams();
+  const activePanel = searchParams.get('panel') as 'branches' | 'accounting' | 'recurring' | 'receipts' | 'integrations' | null;
+
+  const setActivePanel = useCallback((panel: string | null) => {
+    if (panel === null) {
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            next.delete('panel');
+            return next;
+        });
+    } else {
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            next.set('panel', panel);
+            return next;
+        });
+    }
+  }, [setSearchParams]);
   const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'integrations' | 'cli' | 'blog' | 'blogPost' | 'publicProfile' | 'templatePage' | 'privacy' | 'terms' | 'support'>(() => {
       let path = getDecodedPathname();
 
@@ -378,7 +356,7 @@ const App: React.FC = () => {
     const updateScale = () => {
       if (!previewContainerRef.current) return;
       const containerWidth = previewContainerRef.current.offsetWidth;
-      // A4 width ÃƒÂ¢Ã¢â‚¬Â°Ã‹â€  794px at 96dpi
+      // A4 width ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â  794px at 96dpi
       const a4Width = 794;
 
       const availableWidth = containerWidth - 32;
@@ -390,7 +368,7 @@ const App: React.FC = () => {
 
     const handleResize = () => {
       clearTimeout(timeoutId);
-      timeoutId = setTimeout(updateScale, 50); // ÃƒÂ¢Ã…Â¡Ã‚Â¡ Bolt: Debounce resize event to prevent rapid re-renders
+      timeoutId = setTimeout(updateScale, 50); // ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ Bolt: Debounce resize event to prevent rapid re-renders
     };
 
     timeoutId = setTimeout(updateScale, 10);
@@ -483,7 +461,7 @@ const App: React.FC = () => {
       }
   }, [isPro, savedClients, saveClient]);
 
-  // ÃƒÂ¢Ã…Â¡Ã‚Â¡ Bolt: Memoize updateInvoice handler to prevent InvoiceForm from re-rendering on every App state change
+  // ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ Bolt: Memoize updateInvoice handler to prevent InvoiceForm from re-rendering on every App state change
   const handleUpdateInvoice = useCallback((key: keyof Invoice, value: any) => {
       if (key === 'status' && value === 'Paid' && invoice.status !== 'Paid') {
           setIsPaymentModalOpen(true);
@@ -491,7 +469,7 @@ const App: React.FC = () => {
       updateInvoice(key, value);
   }, [invoice.status, updateInvoice]);
 
-  // ÃƒÂ¢Ã…Â¡Ã‚Â¡ Bolt: Memoize saveBusinessProfile handler to prevent InvoiceForm from re-rendering on every App state change
+  // ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ Bolt: Memoize saveBusinessProfile handler to prevent InvoiceForm from re-rendering on every App state change
   const handleSaveBusinessProfile = useCallback((profile: any) => {
       saveBusinessProfile(profile);
       showToast('Business profile saved!');
@@ -586,7 +564,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-slate-50 text-slate-800 font-sans overflow-hidden selection:bg-teal-100 selection:text-teal-900">
+    <IdleLockScreen timeoutMinutes={15}>
+      <div className="h-screen flex flex-col bg-slate-50 text-slate-800 font-sans overflow-hidden selection:bg-teal-100 selection:text-teal-900">
       <CommandPaletteProvider
         onNavigate={(view) => {
           if (view === 'blog') {
@@ -621,13 +600,6 @@ const App: React.FC = () => {
         <meta name="twitter:image" content="https://www.invoiceapp.ng/og-image.jpg" />
       </Helmet>
 
-      <Toast
-        message={toast.message}
-        isVisible={toast.isVisible}
-        onClose={() => setToast(prev => ({ ...prev, isVisible: false }))}
-        type={toast.type}
-      />
-
       {/* Main Header - Fixed height, Dark Theme */}
       <header className="flex-none bg-slate-900 border-b border-slate-800 z-50 text-white">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -652,7 +624,7 @@ const App: React.FC = () => {
           </div>
           <div className="hidden sm:flex items-center gap-4">
              <button onClick={() => { setActiveView('editor'); setActivePanel(null); }} className={`text-xs font-medium transition-colors ${activeView === 'editor' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Invoice Editor</button>
-             <button onClick={() => user ? setActivePanel('branches') : handleProFeatureClick('Branches')} className={`text-xs font-medium transition-colors ${activeView === 'branches' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Branches</button>
+             
              <button onClick={() => user ? setActivePanel('accounting') : handleProFeatureClick('Accounting')} className={`text-xs font-medium transition-colors ${activeView === 'accounting' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Accounting</button>
              <button onClick={() => user ? setActivePanel('recurring') : handleProFeatureClick('Recurring')} className={`text-xs font-medium transition-colors ${activeView === 'recurring' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Recurring</button>
              <button onClick={() => user ? setActivePanel('receipts') : handleProFeatureClick('Receipts')} className={`text-xs font-medium transition-colors ${activeView === 'receipts' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Receipts</button>
@@ -884,18 +856,18 @@ const App: React.FC = () => {
                    {/* Links */}
                    <div className="flex justify-center gap-6 text-xs font-bold text-slate-600">
                        <a href="/privacy" onClick={(e) => { e.preventDefault(); setActiveView('privacy'); }} className="hover:text-teal-600 transition-colors">Privacy</a>
-                       <span className="text-slate-300">ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢</span>
+                       <span className="text-slate-300">ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢</span>
                        <a href="/terms" onClick={(e) => { e.preventDefault(); setActiveView('terms'); }} className="hover:text-teal-600 transition-colors">Terms</a>
-                       <span className="text-slate-300">ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢</span>
+                       <span className="text-slate-300">ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢</span>
                        <a href="/blog" className="hover:text-teal-600 transition-colors">Blog</a>
-                       <span className="text-slate-300">ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢</span>
+                       <span className="text-slate-300">ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢</span>
                        <a href="/support" onClick={(e) => { e.preventDefault(); setActiveView('support'); }} className="hover:text-teal-600 transition-colors">Support</a>
                    </div>
 
                    {/* Copyright */}
                    <div className="pt-4 border-t border-slate-200/50 text-center">
                        <p className="text-[11px] text-slate-400 font-medium">
-                          Ãƒâ€šÃ‚Â© {new Date().getFullYear()} InvoiceApp.
+                          ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â© {new Date().getFullYear()} InvoiceApp.
                        </p>
                    </div>
                </div>
@@ -1008,7 +980,7 @@ const App: React.FC = () => {
         onSmtpSaved={(settings) => setSmtpSettings(settings)}
         onUpgrade={() => {
           setIsSmtpModalOpen(false);
-          setPricingModalContent({ title: 'Unlock Direct Email', message: 'Send invoices straight from your inbox to your clients ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â no copy-pasting needed.' });
+          setPricingModalContent({ title: 'Unlock Direct Email', message: 'Send invoices straight from your inbox to your clients ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â no copy-pasting needed.' });
           setIsPricingModalOpen(true);
         }}
       />
@@ -1100,17 +1072,7 @@ const App: React.FC = () => {
           activePanel === 'integrations' ? 'Integrations' : ''
         }
       >
-        {activePanel === 'branches' && (
-          <div className="p-4 sm:p-8">
-            <BranchesManager
-                isPro={isPro}
-                onUpgrade={() => {
-                    setPricingModalContent({ title: 'Multi-Location Management', message: 'Upgrade to Pro to manage branches across Nigeria and track location-specific revenue.' });
-                    setIsPricingModalOpen(true);
-                }}
-            />
-          </div>
-        )}
+        
         {activePanel === 'accounting' && (
           <div className="p-4 sm:p-8">
             <AccountingDashboard
@@ -1172,11 +1134,22 @@ const App: React.FC = () => {
           </div>
         )}
       </SidePanel>
-    </div>
+      </div>
+    </IdleLockScreen>
   );
 };
 
 export default App;
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,9 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import type { Receipt } from '../types';
 import { useSubscription } from './useSubscription';
 import { db, doc, setDoc, getDoc } from '../services/firebase';
 import { trackEvent } from '../utils/analytics';
-import { queueMutation } from '../utils/offlineSync';
 
 export const useReceipts = () => {
     const [receipts, setReceipts] = useState<Receipt[]>([]);
@@ -39,16 +38,11 @@ export const useReceipts = () => {
         }
     }, [isPro, firebaseUser]);
 
-    const syncToCloud = useCallback(async (newReceipts: Receipt[]) => {
+        const syncToCloud = useCallback(async (newReceipts: Receipt[]) => {
         if (isPro && firebaseUser) {
-            if (!navigator.onLine) {
-                await queueMutation('users', firebaseUser.uid, { receipts: newReceipts });
-                return;
-            }
-
             try {
                 const userRef = doc(db, 'users', firebaseUser.uid);
-                await setDoc(userRef, { receipts: newReceipts }, { merge: true });
+                setDoc(userRef, { receipts: newReceipts }, { merge: true }).catch(e => console.error("Receipts sync failed", e));
             } catch (error) {
                 console.error("Failed to sync receipts", error);
                 try { trackEvent('cloud_data_sync_failed', { collection: 'users', doc_id: firebaseUser.uid, error: String(error) }); } catch {}
@@ -79,3 +73,4 @@ export const useReceipts = () => {
 
     return { receipts, addReceipt, removeReceipt };
 };
+

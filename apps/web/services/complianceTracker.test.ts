@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from 'vitest';
 import {
   checkCompliance,
   getComplianceScore,
@@ -478,3 +478,5 @@ describe('complianceTracker', () => {
     });
   });
 });
+
+

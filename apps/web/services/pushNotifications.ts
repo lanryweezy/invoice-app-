@@ -1,6 +1,6 @@
-import { getErrorMessage } from '../utils/error';
+﻿import { getErrorMessage } from '../utils/error';
 // Push Notification Service for InvoiceApp
-// Uses Firebase Cloud Messaging (FCM) — no VAPID keys needed
+// Uses Firebase Cloud Messaging (FCM) â€” no VAPID keys needed
 
 import { db } from './firebase';
 import { doc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
@@ -92,7 +92,7 @@ export function sendLocalNotification(title: string, body: string, icon?: string
       body,
       icon: icon || '/favicon.svg',
       badge: '/favicon.svg',
-      vibrate: [200, 100, 200],
     });
   }
 }
+

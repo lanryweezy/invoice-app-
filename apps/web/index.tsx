@@ -4,6 +4,8 @@ import * as Sentry from '@sentry/react';
 import { registerSW } from 'virtual:pwa-register';
 import { HelmetProvider } from 'react-helmet-async';
 import { Analytics } from '@vercel/analytics/react';
+import { BrowserRouter } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import { AuthProvider } from './context/AuthContext';
 import App from './App';
 import './src/index.css';
@@ -33,10 +35,13 @@ root.render(
   <React.StrictMode>
     <Sentry.ErrorBoundary fallback={<div className="p-8 text-center"><h2 className="text-xl font-bold text-slate-900 mb-2">Something went wrong</h2><p className="text-slate-500">Please refresh the page. If this keeps happening, contact support.</p></div>}>
       <HelmetProvider>
-        <AuthProvider>
-          <App />
-          <Analytics />
-        </AuthProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <App />
+            <Toaster richColors position="bottom-center" theme="light" />
+            <Analytics />
+          </AuthProvider>
+        </BrowserRouter>
       </HelmetProvider>
     </Sentry.ErrorBoundary>
   </React.StrictMode>

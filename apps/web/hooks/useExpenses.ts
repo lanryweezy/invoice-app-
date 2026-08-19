@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+﻿import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Expense } from '../types';
 import { useSubscription } from './useSubscription';
 import { db, doc, setDoc, getDoc } from '../services/firebase';
-import { queueMutation } from '../utils/offlineSync';
 import { trackEvent } from '../utils/analytics';
 
 export const useExpenses = () => {
@@ -24,13 +23,7 @@ export const useExpenses = () => {
         if (isPro && firebaseUser) {
             const loadCloudData = async () => {
                 try {
-                    // Check offline queue first to prevent clobbering newer local data
-                    const { getQueueCount } = await import('../utils/offlineSync');
-                    const queueCount = await getQueueCount();
-
-                    if (queueCount > 0) {
-                        return;
-                    }
+                    
 
                     const userRef = doc(db, 'users', firebaseUser.uid);
                     const userSnap = await getDoc(userRef);
@@ -53,22 +46,16 @@ export const useExpenses = () => {
         }
     }, [isPro, firebaseUser]);
 
-    const syncToCloud = useCallback(async (newExpenses: Expense[]) => {
-        if (isPro && firebaseUser) {
-            if (!navigator.onLine) {
-                await queueMutation('users', firebaseUser.uid, { expenses: newExpenses });
-                return;
-            }
-
-            try {
-                const userRef = doc(db, 'users', firebaseUser.uid);
-                await setDoc(userRef, { expenses: newExpenses }, { merge: true });
-            } catch (error) {
-                console.error("Failed to sync expenses, queueing locally instead", error);
-                await queueMutation('users', firebaseUser.uid, { expenses: newExpenses });
-            }
-        }
-    }, [isPro, firebaseUser]);
+      const syncToCloud = useCallback(async (newExpenses: Expense[]) => {
+      if (isPro && firebaseUser) {
+          try {
+              const userRef = doc(db, 'users', firebaseUser.uid);
+              setDoc(userRef, { expenses: newExpenses }, { merge: true }).catch(e => console.error("Expense sync failed", e));
+          } catch (error) {
+              console.error("Failed to sync expenses", error);
+          }
+      }
+  }, [isPro, firebaseUser]);
 
     // Immediate local persistence
     useEffect(() => {
@@ -81,7 +68,7 @@ export const useExpenses = () => {
         if (!isCloudLoaded.current) return;
 
         const timeoutId = setTimeout(() => {
-            // 🌱 Flora: Catch floating promise rejections inside setTimeout to prevent silent failures
+            // ðŸŒ± Flora: Catch floating promise rejections inside setTimeout to prevent silent failures
             // bypassing standard React error boundaries.
             syncToCloud(expenses).catch(console.error);
         }, 1000);
@@ -99,3 +86,4 @@ export const useExpenses = () => {
 
     return { expenses, addExpense, removeExpense };
 };
+

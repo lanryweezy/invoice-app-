@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { Receipt, TemplateId } from '../types';
 import { DownloadIcon, EyeIcon } from './Icons';
 import { numberFormatter } from '../utils/formatters';
@@ -28,12 +28,29 @@ export const ReceiptsManager: React.FC<ReceiptsManagerProps & { isPro?: boolean;
             <p className="text-slate-500 mb-6">Manage your generated payment receipts. Receipts are automatically created when you mark an invoice as Paid.</p>
 
             {receipts.length === 0 ? (
-                <div className="bg-slate-50 border border-dashed border-slate-300 rounded-xl p-8 text-center">
-                    <svg className="w-12 h-12 text-slate-400 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <h3 className="text-lg font-bold text-slate-700 mb-1">No receipts yet</h3>
-                    <p className="text-sm text-slate-500 mb-4">Mark an invoice as Paid to generate a receipt.</p>
+                <div className="bg-gradient-to-b from-slate-50 to-white border border-dashed border-slate-200 rounded-2xl p-12 text-center flex flex-col items-center shadow-sm">
+                    <div className="w-20 h-20 bg-teal-50 rounded-full flex items-center justify-center mb-6 relative">
+                        <div className="absolute inset-0 bg-teal-100 rounded-full animate-ping opacity-20"></div>
+                        <svg className="w-10 h-10 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-sm border border-slate-100">
+                             <svg className="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 className="text-xl font-extrabold text-slate-800 mb-2">No receipts generated yet</h3>
+                    <p className="text-slate-500 mb-8 max-w-sm text-center leading-relaxed">
+                        Receipts provide proof of payment for your clients. They are automatically generated when you mark an invoice as Paid.
+                    </p>
+                    <button 
+                        onClick={() => window.location.href = '/'}
+                        className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-slate-900/20 hover:bg-slate-800 hover:-translate-y-0.5 transition-all focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 flex items-center gap-2"
+                    >
+                        Create your first receipt
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                    </button>
                 </div>
             ) : (
                 <div className="space-y-4">

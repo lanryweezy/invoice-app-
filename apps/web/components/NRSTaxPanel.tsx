@@ -1,3 +1,4 @@
+﻿import { Tooltip, InfoIcon } from './Tooltip';
 
 import React, { useMemo, useCallback } from 'react';
 import type { Invoice, LineItem } from '../types';
@@ -127,7 +128,7 @@ const NRSTaxPanel: React.FC<NRSTaxPanelProps> = React.memo(({ invoice, updateInv
 
           <div className="bg-slate-800 rounded-lg p-4 space-y-3">
             <div>
-              <label className="text-[10px] text-slate-400 uppercase tracking-wider font-bold block mb-1.5">WHT Category</label>
+              <div className="flex items-center gap-1.5 mb-1.5"><label className="text-[10px] text-slate-400 uppercase tracking-wider font-bold block mb-0">WHT Category</label><Tooltip content="Select the applicable service category. Different services have different standard WHT rates in Nigeria."><InfoIcon /></Tooltip></div>
               <select
                 value={WHT_TYPES.find(w => w.rate === invoice.whtRate)?.label || 'None'}
                 onChange={handleWhtChange}
@@ -258,3 +259,4 @@ const NRSTaxPanel: React.FC<NRSTaxPanelProps> = React.memo(({ invoice, updateInv
 });
 
 export default NRSTaxPanel;
+

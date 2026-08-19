@@ -1,8 +1,7 @@
-import { useState, useCallback, useEffect, Dispatch, SetStateAction } from 'react';
+﻿import { useState, useCallback, useEffect, Dispatch, SetStateAction } from 'react';
 import type { Invoice, LineItem, Currency, InvoiceStatus, User as AppUser, Client, BusinessProfile } from '../types';
 import { useSubscription } from './useSubscription';
 import { db, doc, setDoc, getDoc, collection, getDocs } from '../services/firebase';
-import { queueMutation, queuePathMutation } from '../utils/offlineSync';
 import { generateSecureId } from '../utils/crypto';
 import { trackEvent } from '../utils/analytics';
 
@@ -112,12 +111,7 @@ const useCloudSync = (
     if (isPro && firebaseUser) {
         const loadCloudData = async () => {
             try {
-                const { getQueueCount } = await import('../utils/offlineSync');
-                const queueCount = await getQueueCount();
-
-                if (queueCount > 0) {
-                    return;
-                }
+                
 
                 const userRef = doc(db, 'users', firebaseUser.uid);
                 const userSnap = await getDoc(userRef);
@@ -158,17 +152,11 @@ const useCloudSync = (
 
   const syncToCloud = useCallback(async (data: Parameters<SyncToCloudFn>[0]) => {
       if (isPro && firebaseUser) {
-          if (!navigator.onLine) {
-              await queueMutation('users', firebaseUser.uid, data);
-              return;
-          }
-
           try {
               const userRef = doc(db, 'users', firebaseUser.uid);
-              await setDoc(userRef, data, { merge: true });
+              setDoc(userRef, data, { merge: true }).catch(e => console.error("Cloud sync failed", e));
           } catch (error) {
-              console.error("Failed to sync to cloud, queueing locally instead", error);
-              await queueMutation('users', firebaseUser.uid, data);
+              console.error("Failed to sync to cloud", error);
           }
       }
   }, [isPro, firebaseUser]);
@@ -180,16 +168,10 @@ const useCloudSync = (
       const path = `users/${firebaseUser.uid}/invoices/${invoiceDocId(inv)}`;
       const payload = stripUndefined(inv);
 
-      if (!navigator.onLine) {
-          await queuePathMutation(path, payload);
-          return;
-      }
-
       try {
-          await setDoc(doc(db, path), payload, { merge: true });
+          setDoc(doc(db, path), payload, { merge: true }).catch(e => console.error("Invoice sync failed", e));
       } catch (error) {
-          console.error("Failed to sync invoice, queueing locally instead", error);
-          await queuePathMutation(path, payload);
+          console.error("Failed to sync invoice", error);
       }
   }, [isPro, firebaseUser]);
 
@@ -221,7 +203,7 @@ const useLocalPersistence = (
   useEffect(() => {
     const timeoutId = setTimeout(() => {
         localStorage.setItem('invoiceUser', JSON.stringify(invoice.user));
-        // 🌱 Flora: Catch floating promise rejections inside setTimeout to prevent silent failures
+        // Ã°Å¸Å’Â± Flora: Catch floating promise rejections inside setTimeout to prevent silent failures
         // bypassing standard React error boundaries.
         syncToCloud({ invoiceUser: invoice.user }).catch(console.error);
     }, 500);
@@ -230,7 +212,7 @@ const useLocalPersistence = (
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-        // 🌱 Flora: Catch floating promise rejections inside setTimeout to prevent silent failures
+        // Ã°Å¸Å’Â± Flora: Catch floating promise rejections inside setTimeout to prevent silent failures
         // bypassing standard React error boundaries.
         syncToCloud({ currentInvoice: invoice }).catch(console.error);
     }, 1500);
@@ -351,7 +333,7 @@ const useEntityManagement = (
         newClients.sort((a, b) => a.name.localeCompare(b.name));
 
         localStorage.setItem('invoiceSavedClients', JSON.stringify(newClients));
-        // 🌱 Flora: Catch floating promise rejections in state setters to prevent silent failures
+        // Ã°Å¸Å’Â± Flora: Catch floating promise rejections in state setters to prevent silent failures
         syncToCloud({ savedClients: newClients }).catch(console.error);
         return newClients;
     });
@@ -436,7 +418,7 @@ const useEntityManagement = (
         localStorage.setItem('invoiceHistory', JSON.stringify(newInvoices));
         return newInvoices;
     });
-    // Sync only the changed invoice to its own subcollection doc — never the whole array —
+    // Sync only the changed invoice to its own subcollection doc Ã¢â‚¬â€ never the whole array Ã¢â‚¬â€
     // so a second device or a delayed offline flush can't clobber other invoices.
     syncInvoiceDoc(inv).catch(console.error);
   }, [syncInvoiceDoc, setSavedInvoices]);
@@ -454,7 +436,14 @@ const useEntityManagement = (
 
 export const useInvoice = () => {
   const [invoice, setInvoice] = useState<Invoice>(getInitialInvoiceState());
-  const [savedInvoices, setSavedInvoices] = useState<Invoice[]>([]);
+    const [savedInvoices, setSavedInvoices] = useState<Invoice[]>(() => {
+    try {
+      const stored = localStorage.getItem('invoiceHistory');
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      return [];
+    }
+  });
   const [savedClients, setSavedClients] = useState<Client[]>([]);
   const [businessProfiles, setBusinessProfiles] = useState<BusinessProfile[]>([]);
   const [recurringInvoices, setRecurringInvoices] = useState<Invoice[]>([]);
@@ -476,3 +465,6 @@ export const useInvoice = () => {
     ...entities
   };
 };
+
+
+

@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { Expense, Invoice } from '../types';
 import { getTodayISODate } from '../utils/date';
 import { numberFormatter } from '../utils/formatters';
@@ -417,7 +417,16 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
           <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200">
             <h3 className="font-bold text-slate-900 mb-4">Recent Expenses</h3>
             {visibleExpenses.length === 0 ? (
-              <p className="text-sm text-slate-400 italic py-8 text-center">No expenses logged yet.</p>
+              <div className="flex flex-col items-center justify-center py-10 text-center px-4 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4 relative">
+                   <div className="absolute inset-0 bg-blue-100 rounded-full animate-ping opacity-20"></div>
+                   <svg className="w-8 h-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                   </svg>
+                </div>
+                <h4 className="text-slate-800 font-bold mb-1">No expenses found</h4>
+                <p className="text-sm text-slate-500 max-w-xs">Track your business spending by logging your first expense using the form above.</p>
+              </div>
             ) : (
               <div className="space-y-2 max-h-[400px] overflow-y-auto">
                 {visibleExpenses.map(exp => (
@@ -503,7 +512,17 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
           )}
           <h3 className="font-bold text-slate-900 mb-4">Invoice History</h3>
           {visibleInvoices.length === 0 ? (
-            <p className="text-sm text-slate-400 italic py-8 text-center">No invoices yet.</p>
+            <div className="flex flex-col items-center justify-center py-10 text-center px-4 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+              <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center mb-4 relative">
+                 <div className="absolute inset-0 bg-teal-100 rounded-full animate-ping opacity-20"></div>
+                 <svg className="w-8 h-8 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                 </svg>
+              </div>
+              <h4 className="text-slate-800 font-bold mb-1">No invoices yet</h4>
+              <p className="text-sm text-slate-500 max-w-xs">Create your first invoice in the editor to see your earnings history here.</p>
+              <button onClick={() => window.location.href = '/'} className="mt-4 px-4 py-2 bg-white border border-slate-200 shadow-sm rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors">Go to Editor</button>
+            </div>
           ) : (
             <div className="space-y-2">
               {visibleInvoices.map(inv => (
@@ -564,13 +583,21 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-slate-900">Outstanding Invoices</h3>
               <p className="text-xs text-slate-500">
-                Total: <span className="font-bold text-slate-900">â‚¦{numberFormatter.format(
+                Total: <span className="font-bold text-slate-900">₦{numberFormatter.format(
                   receivables.buckets.current + receivables.buckets.d1_30 + receivables.buckets.d31_60 + receivables.buckets.d61_90 + receivables.buckets.over90
                 )}</span>
               </p>
             </div>
             {receivables.details.length === 0 ? (
-              <p className="text-sm text-slate-400 italic py-8 text-center">No outstanding invoices â€” all paid!</p>
+              <div className="flex flex-col items-center justify-center py-10 text-center px-4 bg-emerald-50/50 rounded-xl border border-dashed border-emerald-200">
+                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
+                   <svg className="w-8 h-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
+                   </svg>
+                </div>
+                <h4 className="text-slate-800 font-bold mb-1">All caught up!</h4>
+                <p className="text-sm text-slate-500 max-w-xs">No outstanding invoices. Your clients have paid everything on time.</p>
+              </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">

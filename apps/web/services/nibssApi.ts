@@ -1,3 +1,4 @@
+﻿import { getErrorMessage } from '../utils/error';
 /**
  * NIBSS Payment API Client
  */
@@ -159,10 +160,11 @@ Bank Transfer Details:
 Bank: ${bankName}
 Account Number: ${accountNumber}
 Account Name: [Business Name]
-Amount: ₦${amount.toLocaleString()}
+Amount: â‚¦${amount.toLocaleString()}
 Description: ${description}
 Date: ${new Date().toLocaleDateString('en-NG')}
 ---------------------
 Please use your invoice number as reference.
   `.trim();
 }
+
