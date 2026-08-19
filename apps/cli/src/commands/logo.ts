@@ -7,7 +7,7 @@ import sharp from 'sharp';
 import { ensureAuthenticated } from '../lib/config';
 import { getDb, admin } from '../lib/firebase-client';
 import { Logo } from '../types';
-import { createSpinner, succeed, fail } from '../utils/spinner';
+import { createSpinner, succeed, fail, handleCliError } from '../utils/spinner';
 import Table from 'cli-table3';
 
 const ALLOWED_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.svg'];
@@ -111,8 +111,7 @@ export default function registerLogoCommands(program: Command) {
           console.log(chalk.yellow('  Set as default logo (first upload)'));
         }
       } catch (error: any) {
-        console.error(chalk.red('Failed to upload logo:'), error.message);
-        process.exit(1);
+        handleCliError(error, 'Failed to upload logo:');
       }
     });
 
@@ -144,8 +143,7 @@ export default function registerLogoCommands(program: Command) {
         });
         console.log(table.toString());
       } catch (error: any) {
-        console.error(chalk.red('Failed to list logos:'), error.message);
-        process.exit(1);
+        handleCliError(error, 'Failed to list logos:');
       }
     });
 
@@ -175,8 +173,7 @@ export default function registerLogoCommands(program: Command) {
 
         succeed(spinner, chalk.green(`✓ "${found.name}" set as default logo`));
       } catch (error: any) {
-        console.error(chalk.red('Failed to set default logo:'), error.message);
-        process.exit(1);
+        handleCliError(error, 'Failed to set default logo:');
       }
     });
 
@@ -225,8 +222,7 @@ export default function registerLogoCommands(program: Command) {
 
         succeed(spinner, chalk.green(`✓ Logo "${found.name}" removed successfully`));
       } catch (error: any) {
-        console.error(chalk.red('Failed to remove logo:'), error.message);
-        process.exit(1);
+        handleCliError(error, 'Failed to remove logo:');
       }
     });
 
@@ -251,8 +247,7 @@ export default function registerLogoCommands(program: Command) {
         console.log(chalk.cyan(`Default logo: ${defaultLogo.name}`));
         console.log(defaultLogo.url);
       } catch (error: any) {
-        console.error(chalk.red('Failed to preview logo:'), error.message);
-        process.exit(1);
+        handleCliError(error, 'Failed to preview logo:');
       }
     });
 }
