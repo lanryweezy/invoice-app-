@@ -50,7 +50,7 @@ export const useExpenses = () => {
       if (isPro && firebaseUser) {
           try {
               const userRef = doc(db, 'users', firebaseUser.uid);
-              setDoc(userRef, { expenses: newExpenses }, { merge: true }).catch(e => console.error("Expense sync failed", e));
+              await setDoc(userRef, { expenses: newExpenses }, { merge: true });
           } catch (error) {
               console.error("Failed to sync expenses", error);
           }
@@ -86,4 +86,5 @@ export const useExpenses = () => {
 
     return { expenses, addExpense, removeExpense };
 };
+
 

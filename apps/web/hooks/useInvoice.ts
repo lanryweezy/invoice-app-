@@ -154,7 +154,7 @@ const useCloudSync = (
       if (isPro && firebaseUser) {
           try {
               const userRef = doc(db, 'users', firebaseUser.uid);
-              setDoc(userRef, data, { merge: true }).catch(e => console.error("Cloud sync failed", e));
+              await setDoc(userRef, data, { merge: true });
           } catch (error) {
               console.error("Failed to sync to cloud", error);
           }
@@ -169,7 +169,7 @@ const useCloudSync = (
       const payload = stripUndefined(inv);
 
       try {
-          setDoc(doc(db, path), payload, { merge: true }).catch(e => console.error("Invoice sync failed", e));
+          await setDoc(doc(db, path), payload, { merge: true });
       } catch (error) {
           console.error("Failed to sync invoice", error);
       }
@@ -465,6 +465,8 @@ export const useInvoice = () => {
     ...entities
   };
 };
+
+
 
 
 

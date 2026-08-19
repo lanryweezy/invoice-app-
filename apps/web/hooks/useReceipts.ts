@@ -43,7 +43,7 @@ export const useReceipts = () => {
         if (isPro && firebaseUser) {
             try {
                 const userRef = doc(db, 'users', firebaseUser.uid);
-                setDoc(userRef, { receipts: newReceipts }, { merge: true }).catch(e => console.error("Receipts sync failed", e));
+                await setDoc(userRef, { receipts: newReceipts }, { merge: true });
             } catch (error) {
                 console.error("Failed to sync receipts", { event: 'receipts.sync.cloud.failed', userId: firebaseUser.uid, error: getErrorMessage(error) });
                 try { trackEvent('cloud_data_sync_failed', { collection: 'users', doc_id: firebaseUser.uid, error: String(error) }); } catch {}
@@ -74,5 +74,6 @@ export const useReceipts = () => {
 
     return { receipts, addReceipt, removeReceipt };
 };
+
 
 
