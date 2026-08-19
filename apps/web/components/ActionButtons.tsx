@@ -113,15 +113,18 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
                   className="p-1.5 text-slate-600 hover:text-blue-500 bg-slate-100 hover:bg-blue-50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   title="Share options"
                   aria-label="Share options"
+                  aria-haspopup="menu"
+                  aria-expanded={isShareOpen}
                   onClick={() => setIsShareOpen(!isShareOpen)}
               >
                   <ShareIcon className="w-4 h-4" />
               </button>
 
               {isShareOpen && (
-                <div className="absolute top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg flex flex-col p-1 gap-1 z-50 min-w-[max-content]">
+                <div className="absolute top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg flex flex-col p-1 gap-1 z-50 min-w-[max-content]" role="menu">
                   {invoice && (
                     <button
+                      role="menuitem"
                       onClick={handleShareLink}
                       className="flex items-center gap-2 p-1.5 text-slate-600 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors text-xs whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
                       title={linkCopied ? 'Link copied!' : 'Copy shareable link'}
@@ -135,6 +138,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
                     </button>
                   )}
                   <button
+                      role="menuitem"
                       onClick={onGenerateEmail}
                       className="flex items-center gap-2 p-1.5 text-slate-600 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors text-xs whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
                   >
@@ -142,6 +146,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
                       Email
                   </button>
                   <button
+                      role="menuitem"
                       onClick={handleWhatsAppShare}
                       className="flex items-center gap-2 p-1.5 text-slate-600 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors text-xs whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
                   >
@@ -149,6 +154,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
                       WhatsApp
                   </button>
                   <button
+                      role="menuitem"
                       onClick={handleXShare}
                       className="flex items-center gap-2 p-1.5 text-slate-600 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-colors text-xs whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
                   >
@@ -207,15 +213,18 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
           className="w-full inline-flex items-center justify-center px-3 py-1.5 border border-slate-200 text-xs font-bold rounded-lg text-slate-600 bg-white hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           title="Share options"
           aria-label="Share options"
+          aria-haspopup="menu"
+          aria-expanded={isShareOpen}
         >
           <ShareIcon className="w-3.5 h-3.5 mr-1.5 text-blue-500" />
           Share
         </button>
 
         {isShareOpen && (
-          <div className="absolute top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg flex flex-col p-1 gap-1 z-50 min-w-[max-content] right-0 lg:left-0 lg:right-auto">
+          <div className="absolute top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg flex flex-col p-1 gap-1 z-50 min-w-[max-content] right-0 lg:left-0 lg:right-auto" role="menu">
             {invoice && (
               <button
+                role="menuitem"
                 onClick={handleShareLink}
                 className="flex items-center gap-2 px-3 py-2 text-slate-600 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors text-xs font-medium whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
                 title={linkCopied ? 'Link copied!' : 'Copy shareable link'}
@@ -229,6 +238,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
               </button>
             )}
             <button
+              role="menuitem"
               onClick={onGenerateEmail}
               className="flex items-center gap-2 px-3 py-2 text-slate-600 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors text-xs font-medium whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
             >
@@ -236,6 +246,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
               Email
             </button>
             <button
+              role="menuitem"
               onClick={handleWhatsAppShare}
               className="flex items-center gap-2 px-3 py-2 text-slate-600 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors text-xs font-medium whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
             >
@@ -243,6 +254,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
               WhatsApp
             </button>
             <button
+              role="menuitem"
               onClick={handleXShare}
               className="flex items-center gap-2 px-3 py-2 text-slate-600 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-colors text-xs font-medium whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
             >
