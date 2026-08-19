@@ -118,34 +118,25 @@ export default function registerListCommand(program: Command): void {
 
           let invoices: Invoice[] = snapshot.docs.map((doc) => doc.data() as Invoice);
 
-          if (options.status) {
-            invoices = invoices.filter((inv) => 
-              inv.status.toLowerCase() === options.status.toLowerCase()
-            );
-          }
+          // ⚡ Bolt: Combine multiple sequential filter criteria into a single pass to avoid O(N) iterations and redundant intermediate array allocations.
+          const statusFilter = options.status !== undefined ? options.status.toLowerCase() : undefined;
+          const fromDate = options.from !== undefined ? Date.parse(options.from) : undefined;
+          const toDate = options.to !== undefined ? Date.parse(options.to) : undefined;
+          const clientSearch = options.client !== undefined ? options.client.toLowerCase() : undefined;
 
-          if (options.from) {
-            const fromDate = Date.parse(options.from);
-            invoices = invoices.filter((inv) => 
-              // ⚡ Bolt: Parse target date outside loop and use Date.parse inside for O(1) allocation
-              Date.parse(inv.createdAt || '') >= fromDate
-            );
-          }
+          invoices = invoices.filter((inv) => {
+            if (statusFilter !== undefined && inv.status.toLowerCase() !== statusFilter) return false;
 
-          if (options.to) {
-            const toDate = Date.parse(options.to);
-            invoices = invoices.filter((inv) => 
-              // ⚡ Bolt: Parse target date outside loop and use Date.parse inside for O(1) allocation
-              Date.parse(inv.createdAt || '') <= toDate
-            );
-          }
+            if (fromDate !== undefined || toDate !== undefined) {
+              const invDate = Date.parse(inv.createdAt || '');
+              if (fromDate !== undefined && (isNaN(invDate) || invDate < fromDate)) return false;
+              if (toDate !== undefined && (isNaN(invDate) || invDate > toDate)) return false;
+            }
 
-          if (options.client) {
-            const clientSearch = options.client.toLowerCase();
-            invoices = invoices.filter((inv) => 
-              inv.client.name.toLowerCase().includes(clientSearch)
-            );
-          }
+            if (clientSearch !== undefined && !inv.client.name.toLowerCase().includes(clientSearch)) return false;
+
+            return true;
+          });
 
           invoices.sort((a, b) => {
             const strategy = sortStrategies.get(options.sort) || sortStrategies.get('date')!;
