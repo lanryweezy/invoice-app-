@@ -141,11 +141,21 @@ const useCloudSync = (
                     // Backward compatibility: migrate legacy array into the subcollection.
                     const legacy = userSnap.data().savedInvoices as Invoice[];
                     setSavedInvoices(legacy);
-                    await Promise.all(
+                    // 🌱 Flora: Replace Promise.all with Promise.allSettled when migrating legacy invoices
+                    // to prevent a single unhandled rejection (e.g. from an invalid document) from killing
+                    // the entire batch.
+                    const results = await Promise.allSettled(
                         legacy.map(inv =>
                             setDoc(doc(db, `users/${firebaseUser.uid}/invoices/${invoiceDocId(inv)}`), stripUndefined(inv), { merge: true })
                         )
                     );
+
+                    results.forEach((result, index) => {
+                        if (result.status === 'rejected') {
+                            const inv = legacy[index];
+                            console.error('Failed to migrate legacy invoice', { invoiceId: inv.id, invoiceNumber: inv.invoiceNumber, error: result.reason });
+                        }
+                    });
                 }
             } catch (error) {
                 console.error("Failed to load cloud data", error);
