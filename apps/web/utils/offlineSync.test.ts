@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { queueMutation, flushQueue, getQueueCount, Mutation } from './offlineSync';
+import { queueMutation, queuePathMutation, flushQueue, getQueueCount, Mutation } from './offlineSync';
 import localforage from 'localforage';
 import { doc, setDoc } from '../services/firebase';
 import { trackEvent } from './analytics';
@@ -44,6 +44,71 @@ describe('offlineSync', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
+  });
+
+  describe('queuePathMutation', () => {
+    it('appends a new mutation when none exists for the path', async () => {
+      vi.mocked(localforage.getItem).mockResolvedValue(null);
+
+      await queuePathMutation('users/user1/invoices/inv1', { amount: 100 });
+
+      expect(localforage.setItem).toHaveBeenCalledWith('syncQueue', [
+        {
+          id: 'mock-uuid-1234',
+          path: 'users/user1/invoices/inv1',
+          data: { amount: 100 },
+          timestamp: 1000
+        }
+      ]);
+    });
+
+    it('merges data into an existing mutation for the same path', async () => {
+      vi.mocked(localforage.getItem).mockResolvedValue([
+        {
+          id: 'old-uuid',
+          path: 'users/user1/invoices/inv1',
+          data: { amount: 100, currency: 'USD' },
+          timestamp: 500
+        }
+      ]);
+
+      await queuePathMutation('users/user1/invoices/inv1', { amount: 200, status: 'paid' });
+
+      expect(localforage.setItem).toHaveBeenCalledWith('syncQueue', [
+        {
+          id: 'old-uuid',
+          path: 'users/user1/invoices/inv1',
+          data: { amount: 200, currency: 'USD', status: 'paid' },
+          timestamp: 1000
+        }
+      ]);
+    });
+
+    it('handles exceptions and logs error', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.mocked(localforage.setItem).mockRejectedValueOnce(new Error('DB Error'));
+
+      await queuePathMutation('users/user1/invoices/inv1', {});
+
+      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to queue path mutation', expect.objectContaining({
+        event: 'offline.sync.queue_path_mutation.failed',
+        error: 'DB Error'
+      }));
+      consoleSpy.mockRestore();
+    });
+
+    it('handles non-Error exceptions and logs stringified error', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.mocked(localforage.getItem).mockRejectedValue('String Error');
+
+      await queuePathMutation('users/user1/invoices/inv1', {});
+
+      expect(consoleSpy).toHaveBeenCalledWith('[Offline Sync] Failed to queue path mutation', expect.objectContaining({
+        event: 'offline.sync.queue_path_mutation.failed',
+        error: 'String Error'
+      }));
+      consoleSpy.mockRestore();
+    });
   });
 
   describe('queueMutation', () => {
