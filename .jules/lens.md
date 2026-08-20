@@ -22,3 +22,9 @@
 **Detection gap:** The component was visually reviewed using a mouse, which triggered standard `hover:` states, but keyboard navigation (tabbing) was not tested before the component was merged. Automated tests lack visual interaction testing.
 **Prevention:** Interactive elements should be audited via keyboard navigation during PR review, and `focus-visible` utilities should be enforced via a linting rule or a centralized button component to avoid missing them in isolated ad-hoc implementations.
 **Cascade risk:** Any future components that recreate button styles inline rather than using a standardized `Button` component run the risk of dropping crucial accessibility state classes.
+## 2026-08-20 — State Regression: FeatureGate.tsx buttons missing focus rings
+**Regression:** Focus-visible rings are missing from the primary and secondary action buttons in the new FeatureGate component, making them inaccessible for keyboard navigation.
+**Root cause:** A new component (`FeatureGate.tsx`) was introduced in a recent refactor without carrying over the standard `focus-visible` token classes (e.g. `focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2`) used throughout the rest of the application.
+**Detection gap:** The component was visually reviewed using a mouse, which triggered standard `hover:` states, but keyboard navigation (tabbing) was not tested before the component was merged. Automated tests lack visual interaction testing.
+**Prevention:** Interactive elements should be audited via keyboard navigation during PR review, and `focus-visible` utilities should be enforced via a linting rule or a centralized button component to avoid missing them in isolated ad-hoc implementations.
+**Cascade risk:** Any future components that recreate button styles inline rather than using a standardized `Button` component run the risk of dropping crucial accessibility state classes.
