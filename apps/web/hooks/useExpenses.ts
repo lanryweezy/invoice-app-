@@ -4,6 +4,7 @@ import { useSubscription } from './useSubscription';
 import { db, doc, setDoc, getDoc } from '../services/firebase';
 import { queueMutation } from '../utils/offlineSync';
 import { trackEvent } from '../utils/analytics';
+import { getErrorMessage } from '../utils/error';
 
 export const useExpenses = () => {
     const [expenses, setExpenses] = useState<Expense[]>(() => {
@@ -11,7 +12,8 @@ export const useExpenses = () => {
             const stored = localStorage.getItem('invoiceExpenses');
             return stored ? JSON.parse(stored) : [];
         } catch (e) {
-            console.error('Failed to load initial expenses', e);
+            console.error('Failed to load initial expenses', { event: 'expenses.load.local.failed', error: getErrorMessage(e) });
+            try { trackEvent('expenses_load_local_failed', { error: getErrorMessage(e) }); } catch {}
             return [];
         }
     });
