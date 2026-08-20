@@ -11,3 +11,6 @@
 ## 2025-02-14 - Clean Test Outputs
 **Learning:** Some test suites (like `exchangeRates.test.ts` and `invoiceSequence.test.ts`) test error boundaries/fallback logic and intentionally log to `console.error` and `console.warn`. This litters the console when running vitest.
 **Action:** When testing expected error paths, use `vi.spyOn(console, 'error').mockImplementation(() => {})` in the `beforeEach` hook to ensure clean vitest output without suppressing genuine unexpected failures in other tests.
+## 2025-02-14 - Test isolation for storage
+**Learning:** Added test coverage for `queuePathMutation` in `apps/web/utils/offlineSync.test.ts`.
+**Action:** When working on storage-related services in apps/web, always use `vi.mocked` against localforage functions and ensure proper setup of state to prevent tests from leaking.
