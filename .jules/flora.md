@@ -24,3 +24,6 @@
 ## 2025-02-14 - Promise.all within Map loops
 **Learning:** Using `Promise.all` directly inside a legacy invoice migration loop can result in an entire batch failure if a single document write fails due to invalid data or transient network issues.
 **Action:** Replace `Promise.all` with `Promise.allSettled` when mapping array elements to asynchronous operations where partial success is acceptable. Ensure you explicitly iterate through the `results` array to log or handle the rejected promises individually.
+## 2026-08-09 - Missing Node.js Fetch Timeout
+**Learning:** Node.js `fetch` (as of Node 18) does not have a default timeout. When making external API calls in cloud functions (like verifying webhooks against external gateways such as Paystack), if the external API hangs indefinitely, the cloud function will remain blocked until it hits its global execution timeout. This can lead to connection exhaustion and excessive serverless billing.
+**Action:** Always attach an `AbortController` and `setTimeout` (e.g., 10000ms) to the `signal` option of `fetch` calls, and handle the resulting `AbortError` in the catch block to provide a safe fallback or gracefully degrade the operation without hanging the process.
