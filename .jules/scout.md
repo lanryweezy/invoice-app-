@@ -14,3 +14,6 @@
 ## 2025-02-14 - Test isolation for storage
 **Learning:** Added test coverage for `queuePathMutation` in `apps/web/utils/offlineSync.test.ts`.
 **Action:** When working on storage-related services in apps/web, always use `vi.mocked` against localforage functions and ensure proper setup of state to prevent tests from leaking.
+## 2026-08-21 - Cleaning Test Noise from Intentional Errors
+**Learning:** In the CLI configuration tests, testing invalid JSON parsing intentionally triggered `console.error('Error reading config:', error)`. This kind of intentional error logging pollutes test output, which makes test suites harder to read.
+**Action:** Mock the `console.error` explicitly for tests that intentionally trigger fallback logic by using `const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});` and ensuring we call `consoleSpy.mockRestore();` after the assertion.
