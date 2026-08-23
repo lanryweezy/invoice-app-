@@ -39,12 +39,15 @@ describe('config', () => {
     });
 
     it('returns empty object on parse error', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       mockFs.existsSync.mockReturnValue(true);
       mockFs.readFileSync.mockReturnValue('not json');
 
       const { getConfig } = await import('./config');
       const config = getConfig();
       expect(config).toEqual({});
+
+      consoleSpy.mockRestore();
     });
   });
 
@@ -84,6 +87,45 @@ describe('config', () => {
       const { ensureAuthenticated } = await import('./config');
       const config = ensureAuthenticated();
       expect(config.userId).toBe('123');
+    });
+  });
+
+  describe('getApiKey', () => {
+    let originalEnv: NodeJS.ProcessEnv;
+
+    beforeEach(() => {
+      originalEnv = process.env;
+    });
+
+    afterEach(() => {
+      process.env = originalEnv;
+    });
+
+    it('returns FIREBASE_API_KEY from environment variables if set', async () => {
+      process.env = { ...originalEnv, FIREBASE_API_KEY: 'env-api-key' };
+      const { getApiKey } = await import('./config');
+      expect(getApiKey()).toBe('env-api-key');
+    });
+
+    it('returns idToken from config if FIREBASE_API_KEY is not set', async () => {
+      process.env = { ...originalEnv };
+      delete process.env.FIREBASE_API_KEY;
+
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(JSON.stringify({ idToken: 'config-id-token' }));
+
+      const { getApiKey } = await import('./config');
+      expect(getApiKey()).toBe('config-id-token');
+    });
+
+    it('returns undefined if neither environment variable nor config has a key', async () => {
+      process.env = { ...originalEnv };
+      delete process.env.FIREBASE_API_KEY;
+
+      mockFs.existsSync.mockReturnValue(false);
+
+      const { getApiKey } = await import('./config');
+      expect(getApiKey()).toBeUndefined();
     });
   });
 });
