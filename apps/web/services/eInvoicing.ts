@@ -1,4 +1,5 @@
 import type { Invoice, User, Client, LineItem } from '../types';
+import { computeInvoiceHash } from '../utils/crypto';
 
 export interface NRSValidationError {
   field: string;
@@ -84,26 +85,6 @@ const VAT_RATE = 0.075;
 const NRS_VERSION = '1.0.0';
 const GENERATOR_VERSION = '1.0.0';
 
-function computeInvoiceHash(invoice: Invoice): string {
-  const payload = [
-    invoice.invoiceNumber,
-    invoice.issueDate,
-    invoice.dueDate,
-    invoice.user.tin || '',
-    invoice.client.tin || '',
-    invoice.client.name,
-    String(invoice.total || 0),
-    invoice.currency,
-  ].join('|');
-
-  let hash = 0;
-  for (let i = 0; i < payload.length; i++) {
-    const char = payload.charCodeAt(i);
-    hash = ((hash << 5) - hash + char) | 0;
-  }
-  return Math.abs(hash).toString(16).padStart(8, '0');
-}
-
 function calculateVATAmount(subtotal: number, lineItems: LineItem[]): number {
   const vatable = lineItems
     .filter((item) => (item.taxCategory ?? 'Standard') === 'Standard')
@@ -156,7 +137,7 @@ function computeTotals(invoice: Invoice) {
 
 export function generateNRSJSON(invoice: Invoice): NRSInvoiceJSON {
   const totals = computeTotals(invoice);
-  const hash = computeInvoiceHash(invoice);
+  const hash = computeInvoiceHash(invoice, true);
 
   return {
     version: NRS_VERSION,
@@ -343,7 +324,7 @@ export function validateNRSCompliance(invoice: Invoice): NRSValidationResult {
     compliant,
     errors,
     warnings,
-    invoiceHash: computeInvoiceHash(invoice),
+    invoiceHash: computeInvoiceHash(invoice, true),
     timestamp: new Date().toISOString(),
   };
 }
@@ -414,7 +395,7 @@ export function generateNRSInvoiceData(invoice: Invoice) {
     nrsJSON: generateNRSJSON(invoice),
     nrsXML: generateNRSXML(invoice),
     validation: validateNRSCompliance(invoice),
-    hash: computeInvoiceHash(invoice),
+    hash: computeInvoiceHash(invoice, true),
     timestamp: new Date().toISOString(),
   };
 }

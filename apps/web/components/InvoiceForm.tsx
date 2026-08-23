@@ -161,7 +161,7 @@ const CollapsibleSection: React.FC<{ title: string; children: React.ReactNode; d
             <button 
                 onClick={() => setIsOpen(!isOpen)}
                 aria-expanded={isOpen}
-                className={`w-full flex items-center justify-between p-4 transition-colors text-left group ${highlight ? 'bg-gradient-to-r from-teal-50 to-white' : 'bg-white hover:bg-slate-50'}`}
+                className={`w-full flex items-center justify-between p-4 transition-colors text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-500 ${highlight ? 'bg-gradient-to-r from-teal-50 to-white' : 'bg-white hover:bg-slate-50'}`}
             >
                 <div className="flex items-center gap-3">
                     {icon && <div className={`p-1.5 rounded-lg ${highlight ? 'bg-teal-100 text-teal-700' : 'bg-slate-100 text-slate-500 group-hover:text-slate-700'}`}>{icon}</div>}

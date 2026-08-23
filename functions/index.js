@@ -30,16 +30,23 @@ async function uidFromCustomer(db, data) {
 
 // Independently confirm a transaction with Paystack's API — never trust the webhook body alone.
 async function verifyTransaction(reference) {
+    // 🌱 Flora: Add timeout to prevent the external Paystack API call from hanging indefinitely
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+
     try {
         const resp = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`, {
             headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` },
+            signal: controller.signal,
         });
+        clearTimeout(timeout);
         if (!resp.ok) return null;
         const json = await resp.json();
         return json && json.status ? json.data : null;
     } catch (err) {
+        clearTimeout(timeout);
         console.error('Paystack verify call failed', { reference, error: err.message });
-        return null;
+        return null; // Safe fallback: returns null, allowing the webhook to either retry or fail safely
     }
 }
 

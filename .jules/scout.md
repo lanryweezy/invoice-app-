@@ -17,3 +17,6 @@
 ## 2026-08-21 - Cleaning Test Noise from Intentional Errors
 **Learning:** In the CLI configuration tests, testing invalid JSON parsing intentionally triggered `console.error('Error reading config:', error)`. This kind of intentional error logging pollutes test output, which makes test suites harder to read.
 **Action:** Mock the `console.error` explicitly for tests that intentionally trigger fallback logic by using `const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});` and ensuring we call `consoleSpy.mockRestore();` after the assertion.
+## 2025-02-14 - Test Commands for CLI Workspace
+**Learning:** The `apps/cli` workspace lacks a standard `test` script in its `package.json`. Running `pnpm --filter "./apps/cli" test` fails.
+**Action:** When adding tests in `apps/cli`, run tests directly using vitest, e.g., `cd apps/cli && npx vitest run src/utils`.

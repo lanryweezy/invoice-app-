@@ -1,10 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   formatCurrency,
   formatDate,
   formatDateISO,
   parseItemsString,
   generateInvoiceNumber,
+  getTodayISODate,
 } from './formatter';
 import { Invoice } from '../types';
 
@@ -40,6 +41,21 @@ describe('formatDate', () => {
 describe('formatDateISO', () => {
   it('formats date string to YYYY-MM-DD', () => {
     expect(formatDateISO('2026-07-15')).toBe('2026-07-15');
+  });
+});
+
+describe('getTodayISODate', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+  });
+
+  it('returns today as ISO date string', () => {
+    vi.setSystemTime(new Date('2024-05-15T12:30:45Z'));
+    expect(getTodayISODate()).toBe('2024-05-15');
   });
 });
 
