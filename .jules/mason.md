@@ -2,3 +2,6 @@
 ## 2024-08-17 - Centralize error message extraction
 **Learning:** I found multiple places duplicating `e instanceof Error ? e.message : String(e)` directly inline. The codebase provides a centralized `getErrorMessage` utility in `apps/web/utils/error.ts` to standardize parsing unknown errors.
 **Action:** Always import and use `getErrorMessage` rather than writing inline `instanceof Error` checks to ensure consistent logging across the app.
+## $(date +%Y-%m-%d) - Extracted duplicated computeInvoiceHash
+**Learning:** Found an almost identical `computeInvoiceHash` function duplicated in both `digitalSignature.ts` and `eInvoicing.ts`. The only difference was that `eInvoicing.ts` added the `dueDate` to the payload.
+**Action:** Consolidated them into a shared utility function in `apps/web/utils/crypto.ts` utilizing an optional `includeDueDate` flag to preserve behavior. This pattern of extracting slightly diverging logic into parameterized shared utilities prevents drift.
