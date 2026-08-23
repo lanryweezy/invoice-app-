@@ -106,7 +106,8 @@ export default function registerBatchCommand(program: Command) {
           const chunk = invoices.slice(i, i + CHUNK_SIZE);
           spinnerProgress.text = `[${Math.min(i + CHUNK_SIZE, invoices.length)}/${invoices.length}] Sending invoices...`;
 
-          const results = await Promise.all(
+          // 🌱 Flora: Replace Promise.all with Promise.allSettled to prevent partial failures from rejecting the entire batch
+          const results = await Promise.allSettled(
             chunk.map(async (inv) => {
               const success = await sendInvoiceEmail(inv, template);
               if (success) {
@@ -131,8 +132,13 @@ export default function registerBatchCommand(program: Command) {
           );
 
           results.forEach(res => {
-            if (res) sent++;
-            else failed++;
+            if (res.status === 'fulfilled') {
+              if (res.value) sent++;
+              else failed++;
+            } else if (res.status === 'rejected') {
+              console.error('\nFailed to process invoice in batch', { error: res.reason });
+              failed++;
+            }
           });
 
           // Rate limit: max 10 per minute
