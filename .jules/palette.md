@@ -5,3 +5,7 @@
 ## 2024-08-15 - ARIA and Focus Visibility on Icon-Only Dialog Actions
 **Learning:** Icon-only close buttons in dialog panels often lack descriptive `aria-label`s and proper focus indicators, hindering screen reader users and keyboard navigation. Using `aria-labelledby` on the dialog container linked to the header's `id` significantly improves context for screen readers.
 **Action:** When implementing or updating modal/dialog components, always verify the dialog container has `aria-labelledby`, and ensure icon-only buttons have descriptive `aria-label`s along with explicit `focus-visible` styles using the design system's focus utility classes.
+
+## 2025-03-05 - Focus Visible for Collapsible Sections
+**Learning:** Collapsible accordion buttons that control layout elements (like `<CollapsibleSection>` in InvoiceForm) frequently lack keyboard focus indicators (`focus-visible`) despite being primary interactive targets. Standard Tailwind pseudo-classes like `hover:bg-slate-50` exist, but keyboard navigation (Tab) relies heavily on `focus-visible` styles to be accessible.
+**Action:** When adding or auditing complex interactive components (like custom accordions or side-panels), always ensure the root interactive element (usually `<button>`) explicitly includes `focus:outline-none focus-visible:ring-2` (and optionally `focus-visible:ring-inset` if `overflow-hidden` is applied on the parent) to maintain keyboard accessibility parity with mouse interactions.

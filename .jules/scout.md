@@ -14,3 +14,6 @@
 ## 2025-02-14 - Test isolation for storage
 **Learning:** Added test coverage for `queuePathMutation` in `apps/web/utils/offlineSync.test.ts`.
 **Action:** When working on storage-related services in apps/web, always use `vi.mocked` against localforage functions and ensure proper setup of state to prevent tests from leaking.
+## 2025-02-14 - Test Commands for CLI Workspace
+**Learning:** The `apps/cli` workspace lacks a standard `test` script in its `package.json`. Running `pnpm --filter "./apps/cli" test` fails.
+**Action:** When adding tests in `apps/cli`, run tests directly using vitest, e.g., `cd apps/cli && npx vitest run src/utils`.

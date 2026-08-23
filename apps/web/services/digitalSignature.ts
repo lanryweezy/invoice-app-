@@ -1,4 +1,4 @@
-import { generateSecureId } from "../utils/crypto";
+import { generateSecureId, computeInvoiceHash } from "../utils/crypto";
 import type { Invoice } from "../types";
 
 export interface SignaturePayload {
@@ -41,25 +41,6 @@ export interface Certificate {
 }
 
 const SIGNATURE_ALGORITHM = "SHA-256 with RSA";
-
-function computeInvoiceHash(invoice: Invoice): string {
-  const payload = [
-    invoice.invoiceNumber,
-    invoice.issueDate,
-    invoice.user.tin || "",
-    invoice.client.tin || "",
-    invoice.client.name,
-    String(invoice.total || 0),
-    invoice.currency,
-  ].join("|");
-
-  let hash = 0;
-  for (let i = 0; i < payload.length; i++) {
-    const char = payload.charCodeAt(i);
-    hash = ((hash << 5) - hash + char) | 0;
-  }
-  return Math.abs(hash).toString(16).padStart(8, "0");
-}
 
 function computeSignatureHash(data: string): string {
   let h1 = 0xdeadbeef;
