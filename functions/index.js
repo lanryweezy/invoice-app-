@@ -270,7 +270,8 @@ exports.checkOverdueInvoices = functions.pubsub
     for (let i = 0; i < entries.length; i += chunkSize) {
       const chunk = entries.slice(i, i + chunkSize);
 
-      await Promise.all(
+      // 🌱 Flora: Replace Promise.all with Promise.allSettled so a single failure doesn't drop the rest of the chunk
+      const results = await Promise.allSettled(
         chunk.map(async ([uid, stats]) => {
           if (stats.count > 0) {
             await sendPushNotification(
@@ -282,6 +283,12 @@ exports.checkOverdueInvoices = functions.pubsub
           }
         })
       );
+
+      results.forEach(result => {
+        if (result.status === 'rejected') {
+          console.error('Push notification failed for overdue invoice chunk', result.reason);
+        }
+      });
 
       // Rate-limiting pause between chunks
       if (i + chunkSize < entries.length) {
