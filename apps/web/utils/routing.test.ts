@@ -16,7 +16,16 @@ describe('getDecodedPathname', () => {
   });
 
   it('returns the raw pathname when the URI contains malformed encoding', () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     expect(getDecodedPathname('/editor/my%invoice')).toBe('/editor/my%invoice');
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Failed to decode URI component',
+      expect.objectContaining({
+        event: 'routing.decode.failed',
+        path: '/editor/my%invoice',
+        error: 'URI malformed'
+      })
+    );
   });
 
   it('returns the pathname unchanged when there is no encoding', () => {

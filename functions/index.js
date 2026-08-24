@@ -271,6 +271,7 @@ exports.checkOverdueInvoices = functions.pubsub
       const chunk = entries.slice(i, i + chunkSize);
 
       // 🌱 Flora: Replaced Promise.all with Promise.allSettled to ensure a single notification failure doesn't reject the entire batch
+      // 🌱 Flora: Replace Promise.all with Promise.allSettled so a single failure doesn't drop the rest of the chunk
       const results = await Promise.allSettled(
         chunk.map(async ([uid, stats]) => {
           if (stats.count > 0) {

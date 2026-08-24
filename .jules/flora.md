@@ -31,3 +31,7 @@
 ## 2026-08-25 - Replaced Promise.all with Promise.allSettled in chunked Push Notifications
 **Learning:** When using `Promise.all` directly inside chunked concurrent loops for dispatching push notifications across many users (e.g. for overdue invoices), a single unhandled rejection inside one mapping operation (like an FCM failure or user document read error) will reject the entire `Promise.all`. This causes the process to silently drop remaining notifications for the rest of the chunk.
 **Action:** Replace `Promise.all` with `Promise.allSettled` when mapping array elements to asynchronous operations where partial success is acceptable. Explicitly iterate through the `results` array to securely log the rejected promises and ensure errors are not swallowed silently, allowing the remainder of the chunk to complete successfully.
+
+## 2026-08-24 - Prevent batch failures in scheduled tasks
+**Learning:** Using Promise.all for batch processing (like sending notifications in chunks) makes the entire chunk fail if a single promise rejects. This causes dropped notifications for other users in the chunk.
+**Action:** Use Promise.allSettled for independent batch tasks and explicitly handle/log the rejections.

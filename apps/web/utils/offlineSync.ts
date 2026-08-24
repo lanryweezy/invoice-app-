@@ -10,22 +10,21 @@ localforage.config({
   description: 'Queues Firestore updates when the app is offline'
 });
 
-export interface Mutation {
+export type Mutation = {
   id: string;
-  // Legacy two-segment addressing (collection + docId).
-  collection?: string;
-  docId?: string;
-  // Full document path (supports subcollections, e.g. `users/{uid}/invoices/{id}`).
-  path?: string;
-  data: any;
+  data: Record<string, any>;
   timestamp: number;
   attempts?: number;
-}
+} & (
+  | { path: string; collection?: never; docId?: never }
+  // Legacy two-segment addressing (collection + docId).
+  | { collection: string; docId: string; path?: never }
+);
 
 /**
  * Pushes a mutation into the IndexedDB queue to be synced later.
  */
-export const queueMutation = async (collectionName: string, docId: string, data: any) => {
+export const queueMutation = async (collectionName: string, docId: string, data: Record<string, any>) => {
   try {
     const queue = (await localforage.getItem<Mutation[]>('syncQueue')) || [];
 
@@ -68,7 +67,7 @@ export const queueMutation = async (collectionName: string, docId: string, data:
  * Queues a mutation addressed by a full document path (supports subcollections).
  * Pending mutations for the same path are merged to avoid redundant writes.
  */
-export const queuePathMutation = async (path: string, data: any) => {
+export const queuePathMutation = async (path: string, data: Record<string, any>) => {
   try {
     const queue = (await localforage.getItem<Mutation[]>('syncQueue')) || [];
 

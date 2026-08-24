@@ -5,3 +5,6 @@
 ## $(date +%Y-%m-%d) - Extracted duplicated computeInvoiceHash
 **Learning:** Found an almost identical `computeInvoiceHash` function duplicated in both `digitalSignature.ts` and `eInvoicing.ts`. The only difference was that `eInvoicing.ts` added the `dueDate` to the payload.
 **Action:** Consolidated them into a shared utility function in `apps/web/utils/crypto.ts` utilizing an optional `includeDueDate` flag to preserve behavior. This pattern of extracting slightly diverging logic into parameterized shared utilities prevents drift.
+## 2026-08-24 - Consolidated unsafe type-casting in error handlers
+**Learning:** Found multiple instances of `catch (err) { setError((err as Error).message); }` which is unsafe if the error is not an Error instance (e.g., throwing a string).
+**Action:** Replaced these with the safer, shared `getErrorMessage(err)` utility, ensuring consistent and crash-free error parsing.
