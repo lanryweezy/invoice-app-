@@ -34,3 +34,10 @@
 **Detection gap:** The application completely lacks automated visual regression testing (e.g. Playwright snapshots). Playwright is installed but only configured for functional assertions.
 **Prevention:** Implement Playwright snapshot testing across minimum viable viewports (375px, 768px, 1280px) and explicitly test interactive states via programmatic focus (`page.keyboard.press('Tab')`) before taking snapshots.
 **Cascade risk:** Any future components that recreate button styles inline rather than using a standardized `Button` component run the risk of dropping crucial accessibility state classes.
+
+## 2026-08-24 — State Regression: Inline styling missing focus states
+**Regression:** Focus-visible rings are completely missing from interactive elements in multiple recently added components (e.g., `PremiumGate.tsx`, `PricingModal.tsx`, `FeatureGate.tsx`).
+**Root cause:** A pattern of building new modal/gate components using ad-hoc inline Tailwind classes instead of a shared UI `<Button>` component or inheriting global defaults. This manual styling missed essential `focus-visible` utilities required for keyboard accessibility.
+**Detection gap:** Playwright tests are running, but visual regression snapshots (especially for interactive states like focus triggered by `Tab`) are not implemented. Reviews likely focused on mouse interactions (hover/active).
+**Prevention:** Audit all ad-hoc buttons/links introduced without standard component wrappers. Ensure visual testing infrastructure covers keyboard focus states by simulating key presses before taking snapshots.
+**Cascade risk:** Any new component that does not use standard UI primitives is at high risk for repeating this accessibility regression.
