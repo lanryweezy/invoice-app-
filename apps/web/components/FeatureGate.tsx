@@ -136,14 +136,14 @@ export const FeatureGate: React.FC<FeatureGateProps> = ({ featureName, headline,
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <button
             onClick={onUpgrade}
-            className="w-full sm:w-auto px-10 py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-all shadow-xl shadow-slate-900/20 active:scale-[0.98] text-lg flex justify-center items-center gap-2 group"
+            className="w-full sm:w-auto px-10 py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-all shadow-xl shadow-slate-900/20 active:scale-[0.98] text-lg flex justify-center items-center gap-2 group focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
           >
             Unlock {featureName}
             <svg className="w-5 h-5 text-slate-400 group-hover:text-white transition-colors group-hover:translate-x-1 duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
           </button>
           <button
             onClick={onDismiss}
-            className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-900 font-bold rounded-xl transition-all border border-slate-200"
+            className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-900 font-bold rounded-xl transition-all border border-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
           >
             Maybe later
           </button>
