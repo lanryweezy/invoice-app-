@@ -270,6 +270,7 @@ exports.checkOverdueInvoices = functions.pubsub
     for (let i = 0; i < entries.length; i += chunkSize) {
       const chunk = entries.slice(i, i + chunkSize);
 
+      // 🌱 Flora: Replaced Promise.all with Promise.allSettled to ensure a single notification failure doesn't reject the entire batch
       // 🌱 Flora: Replace Promise.all with Promise.allSettled so a single failure doesn't drop the rest of the chunk
       const results = await Promise.allSettled(
         chunk.map(async ([uid, stats]) => {
@@ -284,9 +285,13 @@ exports.checkOverdueInvoices = functions.pubsub
         })
       );
 
-      results.forEach(result => {
+      results.forEach((result, index) => {
         if (result.status === 'rejected') {
-          console.error('Push notification failed for overdue invoice chunk', result.reason);
+          console.error('Failed to send overdue invoice push notification', {
+            event: 'checkOverdueInvoices.notification.failed',
+            uid: chunk[index][0],
+            error: result.reason
+          });
         }
       });
 
