@@ -4,6 +4,7 @@
 
 import { useState, useCallback } from 'react';
 import { rev360Api } from '../services/rev360Api';
+import { getErrorMessage } from '../utils/error';
 
 export function useRev360() {
   const [loading, setLoading] = useState(false);
@@ -22,7 +23,7 @@ export function useRev360() {
       }
       return result;
     } catch (err) {
-      setError((err as Error).message);
+      setError(getErrorMessage(err));
       return { success: false };
     } finally {
       setLoading(false);
@@ -36,7 +37,7 @@ export function useRev360() {
       const result = await rev360Api.registerInvoice(invoice);
       return result;
     } catch (err) {
-      setError((err as Error).message);
+      setError(getErrorMessage(err));
       return null;
     } finally {
       setLoading(false);
@@ -50,7 +51,7 @@ export function useRev360() {
       const result = await rev360Api.fileVATReturn(vatReturn);
       return result;
     } catch (err) {
-      setError((err as Error).message);
+      setError(getErrorMessage(err));
       return null;
     } finally {
       setLoading(false);
@@ -64,7 +65,7 @@ export function useRev360() {
       const result = await rev360Api.generateWHTCertificate(invoice);
       return result;
     } catch (err) {
-      setError((err as Error).message);
+      setError(getErrorMessage(err));
       return null;
     } finally {
       setLoading(false);
@@ -78,7 +79,7 @@ export function useRev360() {
       const result = await rev360Api.checkCompliance(tin);
       return result;
     } catch (err) {
-      setError((err as Error).message);
+      setError(getErrorMessage(err));
       return null;
     } finally {
       setLoading(false);
