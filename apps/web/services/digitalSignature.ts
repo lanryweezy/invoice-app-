@@ -84,11 +84,15 @@ function buildSignaturePayload(invoice: Invoice): SignaturePayload {
 
 export function signInvoice(
   invoice: Invoice,
-  privateKey?: string,
+  privateKey: string,
 ): SignatureData {
+  if (!privateKey) {
+    throw new Error("Private key is required for signing");
+  }
+
   const payload = buildSignaturePayload(invoice);
   const payloadString = JSON.stringify(payload);
-  const key = privateKey ?? "default-signing-key";
+  const key = privateKey;
 
   const signatureInput = payloadString + key + payload.timestamp;
   const signature = computeSignatureHash(signatureInput);
