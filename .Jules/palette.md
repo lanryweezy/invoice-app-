@@ -18,3 +18,6 @@
 ## 2026-08-24 - Add focus visible styles for keyboard navigation in FeatureGate
 **Learning:** Keyboard navigation (tabbing) is greatly enhanced by explicit focus indicators. Using Tailwind's `focus-visible` utility ensures these indicators only appear for keyboard users, preserving the default appearance for mouse clicks while satisfying WCAG requirements for focus visibility.
 **Action:** Add `focus:outline-none focus-visible:ring-2 focus-visible:ring-[color]-500 focus-visible:ring-offset-2` to all interactive elements lacking them.
+## 2026-08-26 - Add focus visible styles for keyboard navigation in TemplatePage
+**Learning:** Keyboard navigation (tabbing) is greatly enhanced by explicit focus indicators. Using Tailwind's `focus-visible` utility ensures these indicators only appear for keyboard users, preserving the default appearance for mouse clicks while satisfying WCAG requirements for focus visibility.
+**Action:** Always add `focus:outline-none focus-visible:ring-2 focus-visible:ring-[color]-500 focus-visible:ring-offset-2` to interactive elements like buttons lacking them, specially plain text looking buttons.
