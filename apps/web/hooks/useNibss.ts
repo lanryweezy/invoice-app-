@@ -5,6 +5,7 @@
 import { getErrorMessage } from '../utils/error';
 import { useState, useCallback } from 'react';
 import { initiatePayment, checkPaymentStatus, verifyBank, getAccountName } from '../services/nibssApi';
+import { getErrorMessage } from '../utils/error';
 
 export function useNibss() {
   const [loading, setLoading] = useState(false);
