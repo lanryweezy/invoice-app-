@@ -2,8 +2,10 @@
  * React Hook for NIBSS Payment API
  */
 
+import { getErrorMessage } from '../utils/error';
 import { useState, useCallback } from 'react';
 import { initiatePayment, checkPaymentStatus, verifyBank, getAccountName } from '../services/nibssApi';
+import { getErrorMessage } from '../utils/error';
 
 export function useNibss() {
   const [loading, setLoading] = useState(false);
@@ -23,7 +25,7 @@ export function useNibss() {
       const result = await initiatePayment(payment);
       return result;
     } catch (err) {
-      setError((err as Error).message);
+      setError(getErrorMessage(err));
       return null;
     } finally {
       setLoading(false);
@@ -37,7 +39,7 @@ export function useNibss() {
       const result = await checkPaymentStatus(transactionId);
       return result;
     } catch (err) {
-      setError((err as Error).message);
+      setError(getErrorMessage(err));
       return null;
     } finally {
       setLoading(false);
@@ -51,7 +53,7 @@ export function useNibss() {
       const result = await verifyBank(bankCode);
       return result;
     } catch (err) {
-      setError((err as Error).message);
+      setError(getErrorMessage(err));
       return false;
     } finally {
       setLoading(false);
@@ -65,7 +67,7 @@ export function useNibss() {
       const result = await getAccountName(accountNumber, bankCode);
       return result;
     } catch (err) {
-      setError((err as Error).message);
+      setError(getErrorMessage(err));
       return null;
     } finally {
       setLoading(false);

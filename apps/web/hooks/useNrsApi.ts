@@ -2,8 +2,10 @@
  * React Hook for NRS API
  */
 
+import { getErrorMessage } from '../utils/error';
 import { useState, useCallback } from 'react';
 import { validateTIN, submitInvoice, generateQRCode, checkInvoiceStatus } from '../services/nrsApi';
+import { getErrorMessage } from '../utils/error';
 
 export function useNrsApi() {
   const [loading, setLoading] = useState(false);
@@ -16,7 +18,7 @@ export function useNrsApi() {
       const result = await validateTIN(tin);
       return result;
     } catch (err) {
-      setError((err as Error).message);
+      setError(getErrorMessage(err));
       return null;
     } finally {
       setLoading(false);
@@ -30,7 +32,7 @@ export function useNrsApi() {
       const result = await submitInvoice(invoice);
       return result;
     } catch (err) {
-      setError((err as Error).message);
+      setError(getErrorMessage(err));
       return null;
     } finally {
       setLoading(false);
@@ -44,7 +46,7 @@ export function useNrsApi() {
       const result = await generateQRCode(invoiceId);
       return result;
     } catch (err) {
-      setError((err as Error).message);
+      setError(getErrorMessage(err));
       return null;
     } finally {
       setLoading(false);
@@ -58,7 +60,7 @@ export function useNrsApi() {
       const result = await checkInvoiceStatus(nrsInvoiceId);
       return result;
     } catch (err) {
-      setError((err as Error).message);
+      setError(getErrorMessage(err));
       return null;
     } finally {
       setLoading(false);

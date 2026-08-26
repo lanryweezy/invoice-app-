@@ -32,3 +32,7 @@
 ## 2024-10-25 - Structured logging in local storage load failures
 **Learning:** React state initializers were catching parsing or loading errors from local storage with unstructured logs (`console.error('Failed to load initial expenses', e)`). This made it impossible to trace the rate of corrupted offline state on client devices.
 **Action:** When adding observability telemetry using `trackEvent` for state initialization failures in frontend code, always include a structured log with `{ event, error }` and a `trackEvent` inside an empty `try/catch` block.
+
+## $(date +%Y-%m-%d) - Silent failure in portal links fallback
+**Learning:** The `getStoredLinks()` utility in `apps/web/utils/portalLinks.ts` used an empty `catch` block to handle parsing or access errors with `localStorage`. While providing a safe empty-object fallback (`return {}`), it silently swallowed the failure. This obscured instances where clients might be served a broken interface or lose their generated portal tokens unexpectedly due to offline storage corruption or access denial.
+**Action:** Always include a structured `console.error` payload (e.g., `{ event, error }`) and a defensive `trackEvent` call inside fallback `catch` blocks in storage retrieval utilities to maintain visibility of silent failovers.

@@ -1,5 +1,7 @@
 import type { Invoice } from '../types';
 import { generateSecureId } from './crypto';
+import { trackEvent } from './analytics';
+import { getErrorMessage } from './error';
 
 const STORAGE_KEY = 'invoiceapp_portal_links';
 
@@ -36,7 +38,9 @@ function getStoredLinks(): Record<string, any> {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     return stored ? JSON.parse(stored) : {};
-  } catch {
+  } catch (error) {
+    console.error('Failed to load portal links from storage', { event: 'portal_links.load.failed', error: getErrorMessage(error) });
+    try { trackEvent('portal_links_load_failed', { error: String(error) }); } catch {}
     return {};
   }
 }
