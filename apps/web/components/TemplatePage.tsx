@@ -16,7 +16,7 @@ export const TemplatePage: React.FC<Props> = ({ slug, onGoHome }) => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Template Not Found</h1>
-          <button onClick={onGoHome} className="text-indigo-600 hover:text-indigo-800">
+          <button onClick={onGoHome} className="text-indigo-600 hover:text-indigo-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 rounded-lg px-2 py-1">
             Return Home
           </button>
         </div>
@@ -68,7 +68,7 @@ export const TemplatePage: React.FC<Props> = ({ slug, onGoHome }) => {
       </Helmet>
 
       <div className="max-w-4xl mx-auto pt-16 px-4 sm:px-6 lg:px-8">
-        <button onClick={onGoHome} className="text-indigo-600 hover:text-indigo-800 mb-8 font-medium">
+        <button onClick={onGoHome} className="text-indigo-600 hover:text-indigo-800 mb-8 font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 rounded-lg px-2 py-1 -ml-2">
           &larr; Back to Home
         </button>
 
@@ -90,7 +90,7 @@ export const TemplatePage: React.FC<Props> = ({ slug, onGoHome }) => {
             </ul>
           </div>
 
-          <button onClick={onGoHome} className="w-full sm:w-auto px-8 py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-sm">
+          <button onClick={onGoHome} className="w-full sm:w-auto px-8 py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2">
             Use This Template Now
           </button>
         </div>
