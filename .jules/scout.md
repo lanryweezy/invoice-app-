@@ -20,3 +20,6 @@
 ## 2025-02-14 - Test Commands for CLI Workspace
 **Learning:** The `apps/cli` workspace lacks a standard `test` script in its `package.json`. Running `pnpm --filter "./apps/cli" test` fails.
 **Action:** When adding tests in `apps/cli`, run tests directly using vitest, e.g., `cd apps/cli && npx vitest run src/utils`.
+## 2026-08-25 - Coverage Artifact Pollution
+**Learning:** Running `npx vitest run --coverage` dynamically generates `coverage/` directories containing HTML and JS artifacts. These are build artifacts that should not be committed to the repository to avoid immense clutter and merge conflicts. If they are accidentally staged, they can block PRs.
+**Action:** Always clean up dynamically generated `coverage/` directories (e.g., `rm -rf coverage apps/*/coverage`) before staging and committing changes, or ensure they are explicitly excluded in `.gitignore`.
