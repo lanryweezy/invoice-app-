@@ -35,6 +35,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose, title, ch
       <div 
         className="relative w-full max-w-4xl bg-slate-50 h-full shadow-2xl flex flex-col animate-slide-in-right"
         role="dialog"
+        aria-modal="true"
         aria-labelledby="side-panel-title"
       >
         {/* Header */}
