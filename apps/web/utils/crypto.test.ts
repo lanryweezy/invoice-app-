@@ -21,24 +21,24 @@ describe('crypto', () => {
     it('generates a 6-character ID by default', () => {
       const id = generateSecureId();
       expect(id).toHaveLength(6);
-      expect(id).toBe('000102');
+      expect(id).toBe('012345');
     });
 
     it('generates an ID of the requested length', () => {
       const id = generateSecureId(12);
       expect(id).toHaveLength(12);
-      expect(id).toBe('000102030405');
+      expect(id).toBe('0123456789AB');
     });
 
     it('generates strings longer than 32 characters securely without repeating entropy', () => {
       const id = generateSecureId(50);
       expect(id).toHaveLength(50);
-      expect(id).toBe('000102030405060708090A0B0C0D0E0F101112131415161718');
+      expect(id).toBe('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCD');
     });
 
     it('returns uppercase strings', () => {
       const id = generateSecureId(32);
-      expect(id).toBe('000102030405060708090A0B0C0D0E0F');
+      expect(id).toBe('0123456789ABCDEFGHIJKLMNOPQRSTUV');
     });
   });
 });

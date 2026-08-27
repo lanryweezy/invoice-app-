@@ -12,3 +12,7 @@
 **Action:** Replaced inline `crypto.randomBytes` usages with `generateSecureId(N)` calls to enforce consistency and simplify service dependencies.
 **Learning:** Avoid using inline crypto implementations (`crypto.getRandomValues` inside components/hooks) for security-sensitive logic like invoice numbers. Always use the shared utility (`generateSecureId`) for secure randomness and consistency.
 **Action:** Replaced inline invoice number random generator with `generateSecureId(5)` in `apps/web/hooks/useInvoice.ts`.
+
+## 2024-05-18 - Use cryptographically secure custom character set for random IDs
+**Learning:** Generating random IDs by converting a byte array to a hex string and then `.toUpperCase()` reduces the possible entropy of the string, and `.padStart(2, '0')` does not effectively increase the security. Instead, mapping cryptographically secure bytes onto a larger Base36 charset ('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ') provides a wider range of possible values for the same string length, increasing unpredictability for security-sensitive IDs like payment references.
+**Action:** Refactored `generateSecureId` in `crypto.ts` to use `crypto.getRandomValues()` to index into a Base36 charset instead of generating hex strings. Updated corresponding tests.
