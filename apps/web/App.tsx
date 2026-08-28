@@ -565,7 +565,7 @@ const App: React.FC = () => {
                     <div className="absolute inset-0 p-8 flex flex-col items-center min-h-max" ref={previewContainerRef}>
                         <div style={{ transform: `scale(${previewScale})`, transformOrigin: 'top center', transition: 'transform 0.15s ease-out', paddingBottom: '4rem', width: '210mm' }}>
                           <Suspense fallback={<div className="w-[210mm] min-h-[297mm] bg-white shadow-xl animate-pulse flex items-center justify-center text-slate-400">Loading preview...</div>}>
-                            <InvoicePreview invoice={invoice} template={template}  />
+                            <InvoicePreview invoice={invoice} totals={totals} template={template} />
                           </Suspense>
                         </div>
                     </div>
