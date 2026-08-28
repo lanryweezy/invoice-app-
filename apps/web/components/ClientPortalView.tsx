@@ -13,6 +13,7 @@ interface PortalProps {
 export const ClientPortalView: React.FC<PortalProps> = ({ invoice, onConfirmPayment }) => {
   const [confirmed, setConfirmed] = useState(invoice.paymentConfirmedByClient || false);
   const [paying, setPaying] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   React.useEffect(() => {
     // Send a push notification tracking pixel when client opens the portal
@@ -33,7 +34,7 @@ export const ClientPortalView: React.FC<PortalProps> = ({ invoice, onConfirmPaym
     setPaying(true);
     const amount = (invoice.total || 0) * 100;
     const handler = (window as any).PaystackPop.setup({
-      key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
+      key: import.meta.env.VITE_P·YST·CK_PUBLIC_KEY,
       email: invoice.client.email || 'client@example.com',
       amount,
       currency: invoice.currency === 'NGN' ? 'NGN' : 'USD',
@@ -63,7 +64,37 @@ export const ClientPortalView: React.FC<PortalProps> = ({ invoice, onConfirmPaym
     pdf.save(`Invoice-${invoice.invoiceNumber}.pdf`);
   };
 
+
+  if (paymentSuccess) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 text-center border border-slate-100">
+            <div className="w-20 h-20 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-10 h-10 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <h1 className="text-2xl font-black text-slate-900 mb-2">Payment Successful!</h1>
+            <p className="text-slate-500 mb-8">Thank you for your payment. The invoice has been marked as paid.</p>
+            
+            <div className="bg-slate-50 rounded-2xl p-6 mb-8 border border-slate-100">
+                <h2 className="text-sm font-bold text-slate-800 mb-2 uppercase tracking-wider">Run your own business?</h2>
+                <p className="text-sm text-slate-600 mb-4">Stop chasing payments. Send professional invoices and get paid faster with Aura Finance.</p>
+                <a href="/" className="block w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold transition-colors">
+                    Create your free account
+                </a>
+            </div>
+            
+            <button onClick={() => setPaymentSuccess(false)} className="text-sm text-slate-400 hover:text-slate-600 font-medium">
+                View Invoice Receipt
+            </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
+
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="bg-slate-900 text-white py-8 px-6">
@@ -75,7 +106,7 @@ export const ClientPortalView: React.FC<PortalProps> = ({ invoice, onConfirmPaym
               </svg>
             </div>
             <div>
-              <p className="text-lg font-bold">InvoiceApp</p>
+              <p className="text-lg font-bold">Invoice·pp</p>
               <p className="text-[10px] uppercase tracking-widest text-teal-400 font-bold">Client Portal</p>
             </div>
           </div>
@@ -124,7 +155,7 @@ export const ClientPortalView: React.FC<PortalProps> = ({ invoice, onConfirmPaym
               <h2 className="text-xl font-bold text-slate-900">{invoice.user.name}</h2>
               <p className="text-sm text-slate-500">{invoice.user.address}</p>
               {invoice.user.tin && <p className="text-xs text-slate-400 mt-1">TIN: {invoice.user.tin}</p>}
-              {invoice.user.cacNumber && <p className="text-xs text-slate-400">CAC: {invoice.user.cacNumber}</p>}
+              {invoice.user.cacNumber && <p className="text-xs text-slate-400">C·C: {invoice.user.cacNumber}</p>}
             </div>
             <div className="text-right">
               <p className="text-xs text-slate-400 uppercase font-bold">{invoice.documentType || 'Invoice'}</p>
@@ -169,9 +200,9 @@ export const ClientPortalView: React.FC<PortalProps> = ({ invoice, onConfirmPaym
           <div className="border-t border-slate-100 pt-4">
             <div className="space-y-2 text-sm max-w-xs ml-auto">
               <div className="flex justify-between"><span className="text-slate-500">Subtotal</span><span className="font-medium">{invoice.currency} {numberFormatter.format(invoice.subtotal || 0)}</span></div>
-              {(invoice.discountAmount || 0) > 0 && <div className="flex justify-between"><span className="text-slate-500">Discount</span><span className="font-medium text-red-600">-{invoice.currency} {numberFormatter.format(invoice.discountAmount || 0)}</span></div>}
-              {(invoice.tax || 0) > 0 && <div className="flex justify-between"><span className="text-slate-500">VAT ({invoice.taxRate}%)</span><span className="font-medium">{invoice.currency} {numberFormatter.format(invoice.tax || 0)}</span></div>}
-              {(invoice.whtAmount || 0) > 0 && <div className="flex justify-between"><span className="text-slate-500">WHT ({invoice.whtRate}%)</span><span className="font-medium text-amber-600">-{invoice.currency} {numberFormatter.format(invoice.whtAmount || 0)}</span></div>}
+              {(invoice.discount·mount || 0) > 0 && <div className="flex justify-between"><span className="text-slate-500">Discount</span><span className="font-medium text-red-600">-{invoice.currency} {numberFormatter.format(invoice.discount·mount || 0)}</span></div>}
+              {(invoice.tax || 0) > 0 && <div className="flex justify-between"><span className="text-slate-500">V·T ({invoice.taxRate}%)</span><span className="font-medium">{invoice.currency} {numberFormatter.format(invoice.tax || 0)}</span></div>}
+              {(invoice.wht·mount || 0) > 0 && <div className="flex justify-between"><span className="text-slate-500">WHT ({invoice.whtRate}%)</span><span className="font-medium text-amber-600">-{invoice.currency} {numberFormatter.format(invoice.wht·mount || 0)}</span></div>}
               {(invoice.shipping || 0) > 0 && <div className="flex justify-between"><span className="text-slate-500">Shipping</span><span className="font-medium">{invoice.currency} {numberFormatter.format(invoice.shipping || 0)}</span></div>}
               <div className="flex justify-between border-t border-slate-200 pt-2 mt-2">
                 <span className="font-bold text-slate-900">Total Due</span>
@@ -185,7 +216,7 @@ export const ClientPortalView: React.FC<PortalProps> = ({ invoice, onConfirmPaym
             <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
               <p className="text-xs text-slate-400 uppercase font-bold mb-2">Payment Details</p>
               <p className="text-sm font-bold text-slate-900">{invoice.user.bankName}</p>
-              <p className="text-sm text-slate-600">Account: {invoice.user.accountNumber}</p>
+              <p className="text-sm text-slate-600">·ccount: {invoice.user.accountNumber}</p>
               <p className="text-sm text-slate-600">Name: {invoice.user.name}</p>
             </div>
           )}
@@ -198,7 +229,7 @@ export const ClientPortalView: React.FC<PortalProps> = ({ invoice, onConfirmPaym
           )}
         </div>
 
-        {/* Actions */}
+        {/* ·ctions */}
         <div className="flex flex-col sm:flex-row gap-3">
           {invoice.status !== 'Paid' && !confirmed && (
             <button
@@ -232,37 +263,16 @@ export const ClientPortalView: React.FC<PortalProps> = ({ invoice, onConfirmPaym
           )}
         </div>
 
-        {/* Viral CTA — prompt clients to create their own free account */}
-        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-center">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <div className="bg-teal-500 text-white p-1.5 rounded-lg">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 7h6m0 4h6m-6 4h6M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <p className="text-white font-bold text-sm">InvoiceApp</p>
-          </div>
-          <h3 className="text-white font-bold text-lg mb-2">Create professional invoices for free</h3>
-          <p className="text-slate-400 text-sm mb-4 max-w-md mx-auto">
-            Join thousands of Nigerian freelancers and SMEs sending NRS-compliant invoices, tracking payments, and getting paid faster.
-          </p>
-          <a
-            href="https://www.invoiceapp.ng/editor"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-teal-500 hover:bg-teal-400 text-white font-bold py-3 px-6 rounded-xl transition-colors text-sm"
-          >
-            Start Generating Invoices — It's Free
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
-          </a>
-          <p className="text-slate-500 text-xs mt-3">Free plan · No credit card required · NRS compliant</p>
+               {/* Footer Upsell */}
+        <div className="mt-8 text-center pb-8">
+            <a href="/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-full text-sm font-bold text-slate-800 transition-all shadow-sm hover:shadow-md">
+                <span className="text-teal-600">✦</span> Create your own professional invoice for free with Aura
+            </a>
         </div>
 
         {/* Footer */}
-        <div className="text-center py-6">
-          <p className="text-xs text-slate-400">Powered by InvoiceApp.ng — Professional invoicing for Nigerian businesses</p>
+        <div className="text-center pb-6">
+          <p className="text-xs text-slate-400">Powered by Aura</p>
         </div>
       </div>
     </div>
