@@ -1,6 +1,6 @@
 ﻿import { getDecodedPathname } from "./utils/routing";
 import { toast } from 'sonner';
-import { IdleLockScreen } from './components/IdleLockScreen';
+
 import { useLocation, useNavigate, Routes, Route, Navigate, useSearchParams, Link } from 'react-router-dom';
 import React, { useState, useCallback, useMemo, useEffect, Suspense, useRef } from 'react';
 
@@ -436,7 +436,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <IdleLockScreen timeoutMinutes={15}>
+    <>
       <div className="h-screen flex flex-col bg-slate-50 text-slate-800 font-sans overflow-hidden selection:bg-teal-100 selection:text-teal-900">
         <CommandPaletteProvider
           onNavigate={(view) => {
@@ -606,7 +606,7 @@ const App: React.FC = () => {
             </div>
         )}
       </div>
-    </IdleLockScreen>
+    </>
   );
 };
 
