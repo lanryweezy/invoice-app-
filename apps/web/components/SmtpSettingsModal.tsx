@@ -38,45 +38,45 @@ const PRESETS: Preset[] = [
     port: "587",
     helpUrl: "https://myaccount.google.com/apppasswords",
     instructions: [
-      "Go to myaccount.google.com â†’ Security",
+      "Go to myaccount.google.com → Security",
       "Enable 2-Step Verification (required)",
-      'Search "App Passwords" â†’ Generate one for "Mail"',
+      'Search "App Passwords" → Generate one for "Mail"',
       "Copy the 16-character password below",
     ],
   },
   {
     name: "Outlook / 365",
-    icon: "ðŸ“¨",
+    icon: "📨",
     host: "smtp.office365.com",
     port: "587",
     helpUrl: "https://support.microsoft.com/en-us/office",
     instructions: [
       "Use your regular Outlook email and password",
       "If 2FA is enabled, generate an App Password",
-      "Go to account.microsoft.com â†’ Security â†’ App Passwords",
+      "Go to account.microsoft.com → Security → App Passwords",
     ],
   },
   {
     name: "Yahoo",
-    icon: "ðŸ“¬",
+    icon: "📬",
     host: "smtp.mail.yahoo.com",
     port: "587",
     helpUrl:
       "https://help.yahoo.com/kb/generate-manage-app-passwords-sln15241.html",
     instructions: [
-      "Go to Account Security â†’ App Passwords",
+      "Go to Account Security → App Passwords",
       'Generate a new app password for "Mail"',
       "Copy and paste it below (not your regular password)",
     ],
   },
   {
     name: "Zoho",
-    icon: "ðŸ“®",
+    icon: "📮",
     host: "smtp.zoho.com",
     port: "587",
     helpUrl: "https://www.zoho.com/mail/help/smtp-authentication.html",
     instructions: [
-      "Go to Zoho Mail â†’ Settings â†’ Mail Accounts",
+      "Go to Zoho Mail → Settings → Mail Accounts",
       "Enable SMTP Access",
       "Use your Zoho email and a dedicated SMTP password",
     ],
@@ -213,7 +213,7 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({
     setTesting(true);
     setMessage(null);
 
-    // ðŸŒ± Flora: Wraps native fetch with AbortController to prevent indefinite UI hangs if the external SMTP server is unresponsive
+    // 🌱 Flora: Wraps native fetch with AbortController to prevent indefinite UI hangs if the external SMTP server is unresponsive
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
     try {
@@ -226,7 +226,7 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({
         },
         body: JSON.stringify({
           to: smtp.fromEmail || smtp.user,
-          subject: "InvoiceApp â€” Test Email",
+          subject: "InvoiceApp — Test Email",
           text: "Your email is configured correctly! You can now send invoices directly from InvoiceApp.",
         }),
         signal: controller.signal,
@@ -341,13 +341,13 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({
             {!isPro ? (
               <div className="text-center py-4">
                 <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
-                  ðŸ“§
+                  📧
                 </div>
                 <h4 className="text-lg font-bold text-slate-900 mb-2">
                   Direct Email Sending
                 </h4>
                 <p className="text-sm text-slate-500 mb-6 max-w-sm mx-auto">
-                  Send invoices straight from your inbox to your client â€” no
+                  Send invoices straight from your inbox to your client — no
                   copy-pasting needed. A Pro feature.
                 </p>
                 <button
@@ -405,7 +405,7 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({
                         rel="noopener noreferrer"
                         className="inline-block mt-2 text-xs font-bold text-blue-600 hover:text-blue-800 underline"
                       >
-                        Open help page â†’
+                        Open help page →
                       </a>
                     )}
                   </div>
@@ -538,7 +538,7 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({
                 disabled={testing}
                 className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 transition-colors disabled:opacity-50"
               >
-                {testing ? "Sending..." : "ðŸ“§ Send Test"}
+                {testing ? "Sending..." : "📧 Send Test"}
               </button>
               <div className="flex-1" />
               {hasExisting && (

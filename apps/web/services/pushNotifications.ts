@@ -1,6 +1,6 @@
 ﻿import { getErrorMessage } from '../utils/error';
 // Push Notification Service for InvoiceApp
-// Uses Firebase Cloud Messaging (FCM) â€” no VAPID keys needed
+// Uses Firebase Cloud Messaging (FCM) — no VAPID keys needed
 
 import { db } from './firebase';
 import { doc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';

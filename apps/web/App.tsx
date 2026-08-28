@@ -1,7 +1,7 @@
 ﻿import { getDecodedPathname } from "./utils/routing";
 import { toast } from 'sonner';
 import { IdleLockScreen } from './components/IdleLockScreen';
-import { useLocation, useNavigate, Routes, Route, Navigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, Routes, Route, Navigate, useSearchParams, Link } from 'react-router-dom';
 import React, { useState, useCallback, useMemo, useEffect, Suspense, useRef } from 'react';
 
 import { InvoiceForm } from './components/InvoiceForm';
@@ -228,7 +228,7 @@ const App: React.FC = () => {
     const updateScale = () => {
       if (!previewContainerRef.current) return;
       const containerWidth = previewContainerRef.current.offsetWidth;
-      // A4 width ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â  794px at 96dpi
+      // A4 width ÃƒÆ’Ã†'Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†'Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã†'ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â  794px at 96dpi
       const a4Width = 794;
 
       const availableWidth = containerWidth - 32;
@@ -240,7 +240,7 @@ const App: React.FC = () => {
 
     const handleResize = () => {
       clearTimeout(timeoutId);
-      timeoutId = setTimeout(updateScale, 50); // ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ Bolt: Debounce resize event to prevent rapid re-renders
+      timeoutId = setTimeout(updateScale, 50); // ÃƒÆ’Ã†'Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†'ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†'ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ Bolt: Debounce resize event to prevent rapid re-renders
     };
 
     timeoutId = setTimeout(updateScale, 10);
@@ -333,7 +333,7 @@ const App: React.FC = () => {
       }
   }, [isPro, savedClients, saveClient]);
 
-  // ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ Bolt: Memoize updateInvoice handler to prevent InvoiceForm from re-rendering on every App state change
+  // ÃƒÆ’Ã†'Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†'ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†'ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ Bolt: Memoize updateInvoice handler to prevent InvoiceForm from re-rendering on every App state change
   const handleUpdateInvoice = useCallback((key: keyof Invoice, value: any) => {
       if (key === 'status' && value === 'Paid' && invoice.status !== 'Paid') {
           setIsPaymentModalOpen(true);
@@ -341,7 +341,7 @@ const App: React.FC = () => {
       updateInvoice(key, value);
   }, [invoice.status, updateInvoice]);
 
-  // ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ Bolt: Memoize saveBusinessProfile handler to prevent InvoiceForm from re-rendering on every App state change
+  // ÃƒÆ’Ã†'Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†'ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†'ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ Bolt: Memoize saveBusinessProfile handler to prevent InvoiceForm from re-rendering on every App state change
   const handleSaveBusinessProfile = useCallback((profile: any) => {
       saveBusinessProfile(profile);
       showToast('Business profile saved!');
@@ -504,8 +504,11 @@ const App: React.FC = () => {
         </header>
 
         {/* ROUTES CONTAINER */}
-        <div className="flex-1 overflow-hidden relative">
-          <Routes>
+        <div className="flex-1 overflow-hidden relative flex flex-row h-full">
+          <Sidebar />
+          <div className="flex-1 overflow-hidden h-full">
+            <Routes>
+              
             <Route path="/" element={
               <div className="flex flex-col h-full w-full">
                 {/* Editor Specific Command Bar */}
@@ -581,7 +584,9 @@ const App: React.FC = () => {
             <Route path="/p/:username" element={<PublicProfile username={''} />} />
             <Route path="/templates/:slug" element={<TemplatePage slug={''} onGoHome={() => window.location.href='/'} />} />
             <Route path="/settings" element={<div className="p-8 w-full h-full overflow-y-auto"><SettingsModal isOpen={true} onClose={() => window.location.href='/'} user={user} isPro={isPro} logout={logout} /></div>} />
-          </Routes>
+          
+            </Routes>
+          </div>
         </div>
 
         {/* Global Modals */}
@@ -604,5 +609,46 @@ const App: React.FC = () => {
     </IdleLockScreen>
   );
 };
+
+
+function Sidebar() {
+  const links = [
+    { name: 'Invoice Editor', path: '/' },
+    { name: 'Accounting', path: '/accounting' },
+    { name: 'Recurring', path: '/recurring' },
+    { name: 'Receipts', path: '/receipts' },
+    { name: 'Integrations', path: '/integrations' },
+    { name: 'CLI & MCP', path: '/cli' },
+    { name: 'Settings', path: '/settings' },
+    { name: 'Blog', path: '/blog', external: true }
+  ];
+  return (
+    <div className="w-16 md:w-64 bg-slate-900 text-slate-300 flex flex-col h-full border-r border-slate-800">
+      <div className="p-4 sm:p-6 border-b border-slate-800">
+        <h1 className="text-white font-bold text-xl tracking-tight hidden md:block">InvoiceApp</h1>
+        <h1 className="text-white font-bold text-xl tracking-tight block md:hidden">IA</h1>
+      </div>
+      <div className="flex-1 py-6 flex flex-col gap-2 px-3 overflow-y-auto">
+        {links.map(l => (
+          l.external ? 
+            <a key={l.name} href={l.path} className="px-3 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium flex items-center justify-center md:justify-start">
+              <span className="hidden md:inline">{l.name}</span>
+              <span className="inline md:hidden" title={l.name}>{l.name.substring(0, 1)}</span>
+            </a>
+          :
+            <Link key={l.name} to={l.path} className="px-3 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium flex items-center justify-center md:justify-start">
+              <span className="hidden md:inline">{l.name}</span>
+              <span className="inline md:hidden" title={l.name}>{l.name.substring(0, 1)}</span>
+            </Link>
+        ))}
+      </div>
+      <div className="p-4 border-t border-slate-800 text-xs flex flex-col gap-2 justify-center md:justify-start">
+        <Link to="/privacy" className="hover:text-white transition-colors hidden md:block">Privacy Policy</Link>
+        <Link to="/terms" className="hover:text-white transition-colors hidden md:block">Terms of Service</Link>
+        <Link to="/support" className="hover:text-white transition-colors hidden md:block">Support</Link>
+      </div>
+    </div>
+  );
+}
 
 export default App;

@@ -160,7 +160,7 @@ Bank Transfer Details:
 Bank: ${bankName}
 Account Number: ${accountNumber}
 Account Name: [Business Name]
-Amount: â‚¦${amount.toLocaleString()}
+Amount: ₦${amount.toLocaleString()}
 Description: ${description}
 Date: ${new Date().toLocaleDateString('en-NG')}
 ---------------------

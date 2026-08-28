@@ -127,7 +127,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
           <div className="flex-1 p-5">
             <div className="text-center mb-4">
               <h3 className="text-base font-bold text-slate-900 mb-1">Free</h3>
-              <div className="text-2xl font-bold text-slate-900 mb-0.5">â‚¦0<span className="text-xs font-normal text-slate-500">/mo</span></div>
+              <div className="text-2xl font-bold text-slate-900 mb-0.5">₦0<span className="text-xs font-normal text-slate-500">/mo</span></div>
               <p className="text-[11px] text-slate-500">Perfect for getting started</p>
             </div>
             <ul className="space-y-2 mb-5">
@@ -152,7 +152,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
               <h3 className="text-base font-bold text-teal-600 mb-1">Pro</h3>
               <div className="flex justify-center items-baseline gap-1 mb-0.5">
                 <span className="text-2xl font-bold text-slate-900">
-                  â‚¦{price.toLocaleString()}
+                  ₦{price.toLocaleString()}
                 </span>
                 <span className="text-xs font-normal text-slate-500">
                   /{billingCycle === 'yearly' ? 'yr' : 'mo'}
@@ -160,7 +160,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
               </div>
               {billingCycle === 'yearly' && (
                 <div className="text-xs text-green-600 font-medium mb-0.5">
-                  (â‚¦{monthlyEquiv.toLocaleString()}/mo)
+                  (₦{monthlyEquiv.toLocaleString()}/mo)
                 </div>
               )}
               <p className="text-[11px] text-slate-500 mt-1">For growing businesses</p>
@@ -185,7 +185,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                 </svg>
               )}
-              {loading ? 'Processing Payment...' : user ? `Pay â‚¦${price.toLocaleString()}` : 'Sign in to Upgrade'}
+              {loading ? 'Processing Payment...' : user ? `Pay ₦${price.toLocaleString()}` : 'Sign in to Upgrade'}
             </button>
             {!user && (
               <p className="text-center text-xs text-slate-400 mt-3">

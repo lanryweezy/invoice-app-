@@ -62,10 +62,10 @@ export const ReceiptsManager: React.FC<ReceiptsManagerProps & { isPro?: boolean;
                                     <span className="px-2 py-0.5 text-xs font-medium bg-teal-100 text-teal-800 rounded-full">Paid</span>
                                 </div>
                                 <p className="text-sm text-slate-500">
-                                    Invoice: {receipt.invoiceNumber} â€¢ Client: {receipt.invoice?.client?.name || 'Unknown'}
+                                    Invoice: {receipt.invoiceNumber} • Client: {receipt.invoice?.client?.name || 'Unknown'}
                                 </p>
                                 <p className="text-sm text-slate-500 mt-1">
-                                    {receipt.paymentDate} â€¢ {receipt.paymentMethod} â€¢ {receipt.invoice?.currency} {numberFormatter.format(receipt.amountPaid)}
+                                    {receipt.paymentDate} • {receipt.paymentMethod} • {receipt.invoice?.currency} {numberFormatter.format(receipt.amountPaid)}
                                 </p>
                             </div>
                             <div className="flex items-center gap-3 mt-4 sm:mt-0">

@@ -534,7 +534,7 @@ export function getComplianceIssues(invoice: Invoice): ComplianceIssue[] {
 }
 
 /**
- * ðŸ”© Hinge Extension Point: ComplianceSuggestionStrategy
+ * 🔧 Hinge Extension Point: ComplianceSuggestionStrategy
  *
  * Pressure: The `suggestFixes` function had a growing `switch (issue.category)` block
  * that needed modification every time a new compliance category was added.

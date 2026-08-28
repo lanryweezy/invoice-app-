@@ -68,7 +68,7 @@ export const useExpenses = () => {
         if (!isCloudLoaded.current) return;
 
         const timeoutId = setTimeout(() => {
-            // ðŸŒ± Flora: Catch floating promise rejections inside setTimeout to prevent silent failures
+            // 🌱 Flora: Catch floating promise rejections inside setTimeout to prevent silent failures
             // bypassing standard React error boundaries.
             syncToCloud(expenses).catch(console.error);
         }, 1000);
