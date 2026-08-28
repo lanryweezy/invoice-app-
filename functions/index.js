@@ -30,16 +30,23 @@ async function uidFromCustomer(db, data) {
 
 // Independently confirm a transaction with Paystack's API — never trust the webhook body alone.
 async function verifyTransaction(reference) {
+    // 🌱 Flora: Add timeout to prevent the external Paystack API call from hanging indefinitely
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+
     try {
         const resp = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`, {
             headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` },
+            signal: controller.signal,
         });
+        clearTimeout(timeout);
         if (!resp.ok) return null;
         const json = await resp.json();
         return json && json.status ? json.data : null;
     } catch (err) {
+        clearTimeout(timeout);
         console.error('Paystack verify call failed', { reference, error: err.message });
-        return null;
+        return null; // Safe fallback: returns null, allowing the webhook to either retry or fail safely
     }
 }
 
@@ -263,7 +270,9 @@ exports.checkOverdueInvoices = functions.pubsub
     for (let i = 0; i < entries.length; i += chunkSize) {
       const chunk = entries.slice(i, i + chunkSize);
 
-      await Promise.all(
+      // 🌱 Flora: Replaced Promise.all with Promise.allSettled to ensure a single notification failure doesn't reject the entire batch
+      // 🌱 Flora: Replace Promise.all with Promise.allSettled so a single failure doesn't drop the rest of the chunk
+      const results = await Promise.allSettled(
         chunk.map(async ([uid, stats]) => {
           if (stats.count > 0) {
             await sendPushNotification(
@@ -275,6 +284,16 @@ exports.checkOverdueInvoices = functions.pubsub
           }
         })
       );
+
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          console.error('Failed to send overdue invoice push notification', {
+            event: 'checkOverdueInvoices.notification.failed',
+            uid: chunk[index][0],
+            error: result.reason
+          });
+        }
+      });
 
       // Rate-limiting pause between chunks
       if (i + chunkSize < entries.length) {

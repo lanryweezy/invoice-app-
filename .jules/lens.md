@@ -22,3 +22,22 @@
 **Detection gap:** The component was visually reviewed using a mouse, which triggered standard `hover:` states, but keyboard navigation (tabbing) was not tested before the component was merged. Automated tests lack visual interaction testing.
 **Prevention:** Interactive elements should be audited via keyboard navigation during PR review, and `focus-visible` utilities should be enforced via a linting rule or a centralized button component to avoid missing them in isolated ad-hoc implementations.
 **Cascade risk:** Any future components that recreate button styles inline rather than using a standardized `Button` component run the risk of dropping crucial accessibility state classes.
+## 2026-08-20 — State Regression: FeatureGate.tsx buttons missing focus rings
+**Regression:** Focus-visible rings are missing from the primary and secondary action buttons in the new FeatureGate component, making them inaccessible for keyboard navigation.
+**Root cause:** A new component (`FeatureGate.tsx`) was introduced in a recent refactor without carrying over the standard `focus-visible` token classes (e.g. `focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2`) used throughout the rest of the application.
+**Detection gap:** The component was visually reviewed using a mouse, which triggered standard `hover:` states, but keyboard navigation (tabbing) was not tested before the component was merged. Automated tests lack visual interaction testing.
+**Prevention:** Interactive elements should be audited via keyboard navigation during PR review, and `focus-visible` utilities should be enforced via a linting rule or a centralized button component to avoid missing them in isolated ad-hoc implementations.
+**Cascade risk:** Any future components that recreate button styles inline rather than using a standardized `Button` component run the risk of dropping crucial accessibility state classes.
+## 2026-08-21 — State Regression: FeatureGate.tsx buttons missing focus rings
+**Regression:** Focus-visible rings are missing from the primary and secondary action buttons in the new FeatureGate component, making them inaccessible for keyboard navigation.
+**Root cause:** A new component (`FeatureGate.tsx`) was introduced in a recent refactor without carrying over the standard `focus-visible` token classes (e.g. `focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2`) used throughout the rest of the application. The buttons were styled inline instead of using a standardized Button component.
+**Detection gap:** The application completely lacks automated visual regression testing (e.g. Playwright snapshots). Playwright is installed but only configured for functional assertions.
+**Prevention:** Implement Playwright snapshot testing across minimum viable viewports (375px, 768px, 1280px) and explicitly test interactive states via programmatic focus (`page.keyboard.press('Tab')`) before taking snapshots.
+**Cascade risk:** Any future components that recreate button styles inline rather than using a standardized `Button` component run the risk of dropping crucial accessibility state classes.
+
+## 2026-08-24 — State Regression: Inline styling missing focus states
+**Regression:** Focus-visible rings are completely missing from interactive elements in multiple recently added components (e.g., `PremiumGate.tsx`, `PricingModal.tsx`, `FeatureGate.tsx`).
+**Root cause:** A pattern of building new modal/gate components using ad-hoc inline Tailwind classes instead of a shared UI `<Button>` component or inheriting global defaults. This manual styling missed essential `focus-visible` utilities required for keyboard accessibility.
+**Detection gap:** Playwright tests are running, but visual regression snapshots (especially for interactive states like focus triggered by `Tab`) are not implemented. Reviews likely focused on mouse interactions (hover/active).
+**Prevention:** Audit all ad-hoc buttons/links introduced without standard component wrappers. Ensure visual testing infrastructure covers keyboard focus states by simulating key presses before taking snapshots.
+**Cascade risk:** Any new component that does not use standard UI primitives is at high risk for repeating this accessibility regression.

@@ -114,7 +114,7 @@ describe('digitalSignature', () => {
 
   describe('signInvoice', () => {
     it('creates a valid signature data object', () => {
-      const signatureData = signInvoice(mockInvoice);
+      const signatureData = signInvoice(mockInvoice, 'test-private-key');
 
       expect(signatureData.payload.invoiceNumber).toBe('INV-001');
       expect(signatureData.payload.issuerName).toBe('Acme Corp');
@@ -125,7 +125,7 @@ describe('digitalSignature', () => {
     });
 
     it('creates a valid signature data object with fallback defaults for missing invoice data', () => {
-      const signatureData = signInvoice(mockInvoiceMissingData);
+      const signatureData = signInvoice(mockInvoiceMissingData, 'test-private-key');
 
       expect(signatureData.payload.totalAmount).toBe(0);
       expect(signatureData.payload.issuerTIN).toBe('');
@@ -133,7 +133,7 @@ describe('digitalSignature', () => {
     });
 
     it('generates a different signature when a custom private key is provided', () => {
-      const defaultSignatureData = signInvoice(mockInvoice);
+      const defaultSignatureData = signInvoice(mockInvoice, 'test-private-key');
       const customSignatureData = signInvoice(mockInvoice, 'custom-private-key');
 
       expect(customSignatureData.signature).toBeDefined();
@@ -143,43 +143,43 @@ describe('digitalSignature', () => {
 
   describe('verifySignature', () => {
     it('returns true for a valid signature generated from the same invoice', () => {
-      const signatureData = signInvoice(mockInvoice);
+      const signatureData = signInvoice(mockInvoice, 'test-private-key');
       expect(verifySignature(mockInvoice, signatureData)).toBe(true);
     });
 
     it('returns false if totalAmount does not match', () => {
-      const signatureData = signInvoice(mockInvoice);
+      const signatureData = signInvoice(mockInvoice, 'test-private-key');
       const modifiedInvoice = { ...mockInvoice, total: 20000 } as Invoice;
       expect(verifySignature(modifiedInvoice, signatureData)).toBe(false);
     });
 
     it('returns false if issuerName does not match', () => {
-      const signatureData = signInvoice(mockInvoice);
+      const signatureData = signInvoice(mockInvoice, 'test-private-key');
       const modifiedInvoice = { ...mockInvoice, user: { ...mockInvoice.user, name: 'Different Corp' } } as Invoice;
       expect(verifySignature(modifiedInvoice, signatureData)).toBe(false);
     });
 
     it('returns false if currency does not match', () => {
-      const signatureData = signInvoice(mockInvoice);
+      const signatureData = signInvoice(mockInvoice, 'test-private-key');
       const modifiedInvoice = { ...mockInvoice, currency: 'USD' } as Invoice;
       expect(verifySignature(modifiedInvoice, signatureData)).toBe(false);
     });
 
     it('returns false if invoiceNumber does not match', () => {
-      const signatureData = signInvoice(mockInvoice);
+      const signatureData = signInvoice(mockInvoice, 'test-private-key');
       const modifiedInvoice = { ...mockInvoice, invoiceNumber: 'INV-999' } as Invoice;
       expect(verifySignature(modifiedInvoice, signatureData)).toBe(false);
     });
 
     it('returns false if payload hash does not match', () => {
-      const signatureData = signInvoice(mockInvoice);
+      const signatureData = signInvoice(mockInvoice, 'test-private-key');
       // Modify a field that affects computeInvoiceHash but isn't directly checked before it
       const modifiedInvoice = { ...mockInvoice, issueDate: '2024-12-31' } as Invoice;
       expect(verifySignature(modifiedInvoice, signatureData)).toBe(false);
     });
 
     it('returns false if certificate age is older than 1 year', () => {
-      const signatureData = signInvoice(mockInvoice);
+      const signatureData = signInvoice(mockInvoice, 'test-private-key');
 
       // Advance time by more than 1 year
       vi.setSystemTime(new Date('2025-01-02T12:00:00Z'));
@@ -190,7 +190,7 @@ describe('digitalSignature', () => {
 
   describe('getSignatureInfo', () => {
     it('returns signature info with validity status', () => {
-      const signatureData = signInvoice(mockInvoice);
+      const signatureData = signInvoice(mockInvoice, 'test-private-key');
       const info = getSignatureInfo(signatureData);
 
       expect(info.valid).toBe(true);

@@ -1,4 +1,4 @@
-import { generateSecureId } from "../utils/crypto";
+import { generateSecureId, computeInvoiceHash } from "../utils/crypto";
 import type { Invoice } from "../types";
 
 export interface SignaturePayload {
@@ -42,25 +42,6 @@ export interface Certificate {
 
 const SIGNATURE_ALGORITHM = "SHA-256 with RSA";
 
-function computeInvoiceHash(invoice: Invoice): string {
-  const payload = [
-    invoice.invoiceNumber,
-    invoice.issueDate,
-    invoice.user.tin || "",
-    invoice.client.tin || "",
-    invoice.client.name,
-    String(invoice.total || 0),
-    invoice.currency,
-  ].join("|");
-
-  let hash = 0;
-  for (let i = 0; i < payload.length; i++) {
-    const char = payload.charCodeAt(i);
-    hash = ((hash << 5) - hash + char) | 0;
-  }
-  return Math.abs(hash).toString(16).padStart(8, "0");
-}
-
 function computeSignatureHash(data: string): string {
   let h1 = 0xdeadbeef;
   let h2 = 0x41c6ce57;
@@ -103,11 +84,15 @@ function buildSignaturePayload(invoice: Invoice): SignaturePayload {
 
 export function signInvoice(
   invoice: Invoice,
-  privateKey?: string,
+  privateKey: string,
 ): SignatureData {
+  if (!privateKey) {
+    throw new Error("Private key is required for signing");
+  }
+
   const payload = buildSignaturePayload(invoice);
   const payloadString = JSON.stringify(payload);
-  const key = privateKey ?? "default-signing-key";
+  const key = privateKey;
 
   const signatureInput = payloadString + key + payload.timestamp;
   const signature = computeSignatureHash(signatureInput);

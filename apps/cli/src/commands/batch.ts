@@ -5,7 +5,7 @@ import { ensureAuthenticated, getConfig } from '../lib/config';
 import { getDb } from '../lib/firebase-client';
 import { Invoice } from '../types';
 import { generateEmailContent } from '../utils/email-templates';
-import { createSpinner, succeed, fail } from '../utils/spinner';
+import { createSpinner, succeed, fail, handleCliError } from '../utils/spinner';
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -106,7 +106,8 @@ export default function registerBatchCommand(program: Command) {
           const chunk = invoices.slice(i, i + CHUNK_SIZE);
           spinnerProgress.text = `[${Math.min(i + CHUNK_SIZE, invoices.length)}/${invoices.length}] Sending invoices...`;
 
-          const results = await Promise.all(
+          // 🌱 Flora: Replace Promise.all with Promise.allSettled to prevent partial failures from rejecting the entire batch
+          const results = await Promise.allSettled(
             chunk.map(async (inv) => {
               const success = await sendInvoiceEmail(inv, template);
               if (success) {
@@ -131,8 +132,13 @@ export default function registerBatchCommand(program: Command) {
           );
 
           results.forEach(res => {
-            if (res) sent++;
-            else failed++;
+            if (res.status === 'fulfilled') {
+              if (res.value) sent++;
+              else failed++;
+            } else if (res.status === 'rejected') {
+              console.error('\nFailed to process invoice in batch', { error: res.reason });
+              failed++;
+            }
           });
 
           // Rate limit: max 10 per minute
@@ -146,8 +152,7 @@ export default function registerBatchCommand(program: Command) {
         console.log(`  Sent: ${chalk.green(sent)}`);
         console.log(`  Failed: ${chalk.red(failed)}`);
       } catch (error: any) {
-        console.error(chalk.red('Batch send failed:'), error.message);
-        process.exit(1);
+        handleCliError(error, 'Batch send failed:');
       }
     });
 }

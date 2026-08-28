@@ -144,35 +144,34 @@ export default function registerTaxReportCommand(program: Command) {
         const startTimestamp = startDate.getTime();
         const endTimestamp = endDate.getTime();
 
-        const invoices: Invoice[] = [];
+        const rows: any[] = [];
+        let invoiceCount = 0;
+
         snapshot.forEach((doc) => {
           const inv = { id: doc.id, ...doc.data() } as Invoice;
           // ⚡ Bolt: Use Date.parse instead of new Date() in the map/filter loop to prevent object allocation
           const issueTimestamp = Date.parse(inv.issueDate);
           if (issueTimestamp >= startTimestamp && issueTimestamp <= endTimestamp) {
-            invoices.push(inv);
+            invoiceCount++;
+            const tax = calculateInvoiceTax(inv);
+            rows.push({
+              number: inv.invoiceNumber,
+              client: inv.client.name,
+              subtotal: tax.subtotal,
+              vat: tax.vat,
+              wht: tax.wht,
+              stampDuty: tax.stampDuty,
+              net: tax.net,
+              date: inv.issueDate,
+              currency: inv.currency || currency,
+            });
           }
         });
 
-        if (invoices.length === 0) {
+        if (invoiceCount === 0) {
           fail(spinner, chalk.yellow('No invoices found for the specified period'));
           return;
         }
-
-        const rows = invoices.map((inv) => {
-          const tax = calculateInvoiceTax(inv);
-          return {
-            number: inv.invoiceNumber,
-            client: inv.client.name,
-            subtotal: tax.subtotal,
-            vat: tax.vat,
-            wht: tax.wht,
-            stampDuty: tax.stampDuty,
-            net: tax.net,
-            date: inv.issueDate,
-            currency: inv.currency || currency,
-          };
-        });
 
         const totals = rows.reduce(
           (acc, r) => ({
@@ -185,7 +184,7 @@ export default function registerTaxReportCommand(program: Command) {
           { subtotal: 0, vat: 0, wht: 0, stampDuty: 0, net: 0 }
         );
 
-        succeed(spinner, `Found ${invoices.length} invoice(s)`);
+        succeed(spinner, `Found ${invoiceCount} invoice(s)`);
 
         const strategy = taxReportOutputStrategies.get(options.format) || taxReportOutputStrategies.get('table')!;
         const output = strategy.serialize(rows, totals, currency as string);

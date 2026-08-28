@@ -1,9 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { generatePortalToken, createPortalLink, getPortalLink } from './portalLinks';
 import type { Invoice } from '../types';
+import { trackEvent } from './analytics';
+
+vi.mock('./analytics', () => ({
+  trackEvent: vi.fn(),
+}));
 
 describe('portalLinks', () => {
   beforeEach(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.stubGlobal('localStorage', {
       getItem: vi.fn(),
       setItem: vi.fn()
@@ -93,6 +99,7 @@ describe('portalLinks', () => {
 
     it('handles localStorage read errors gracefully by creating a fresh object', () => {
       vi.mocked(localStorage.getItem).mockImplementation(() => { throw new Error('Access denied'); });
+      const consoleSpy = vi.spyOn(console, 'error');
 
       const link = createPortalLink(mockInvoice);
       const token = link.split('/').pop();
@@ -101,10 +108,13 @@ describe('portalLinks', () => {
       const parsedStored = JSON.parse(setCall);
 
       expect(parsedStored[token!]).toBeDefined();
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to load portal links from storage', expect.objectContaining({ event: 'portal_links.load.failed', error: 'Access denied' }));
+      expect(trackEvent).toHaveBeenCalledWith('portal_links_load_failed', { error: 'Error: Access denied' });
     });
 
     it('handles malformed JSON in stored links gracefully by creating a fresh object, testing the catch branch in getStoredLinks', () => {
       vi.mocked(localStorage.getItem).mockReturnValue('invalid-json-{');
+      const consoleSpy = vi.spyOn(console, 'error');
 
       const link = createPortalLink(mockInvoice);
       const token = link.split('/').pop();
@@ -114,6 +124,8 @@ describe('portalLinks', () => {
 
       expect(localStorage.getItem).toHaveBeenCalledWith('invoiceapp_portal_links');
       expect(parsedStored[token!]).toBeDefined();
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to load portal links from storage', expect.objectContaining({ event: 'portal_links.load.failed' }));
+      expect(trackEvent).toHaveBeenCalledWith('portal_links_load_failed', expect.any(Object));
     });
   });
 
@@ -147,19 +159,25 @@ describe('portalLinks', () => {
 
     it('returns null if localStorage read throws an error', () => {
       vi.mocked(localStorage.getItem).mockImplementation(() => { throw new Error('Access denied'); });
+      const consoleSpy = vi.spyOn(console, 'error');
 
       const linkData = getPortalLink('my-token');
 
       expect(linkData).toBeNull();
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to load portal links from storage', expect.objectContaining({ event: 'portal_links.load.failed', error: 'Access denied' }));
+      expect(trackEvent).toHaveBeenCalledWith('portal_links_load_failed', { error: 'Error: Access denied' });
     });
 
     it('returns null if stored links contain malformed JSON, testing the catch branch in getStoredLinks', () => {
       vi.mocked(localStorage.getItem).mockReturnValue('invalid-json-{');
+      const consoleSpy = vi.spyOn(console, 'error');
 
       const linkData = getPortalLink('my-token');
 
       expect(localStorage.getItem).toHaveBeenCalledWith('invoiceapp_portal_links');
       expect(linkData).toBeNull();
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to load portal links from storage', expect.objectContaining({ event: 'portal_links.load.failed' }));
+      expect(trackEvent).toHaveBeenCalledWith('portal_links_load_failed', expect.any(Object));
     });
   });
 });
