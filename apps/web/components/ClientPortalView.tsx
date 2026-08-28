@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import type { Invoice } from '../types';
 import { numberFormatter } from '../utils/formatters';
 
+import { trackEvent } from '../utils/analytics';
+
+
 interface PortalProps {
   invoice: Invoice;
   onConfirmPayment?: () => void;
@@ -10,6 +13,12 @@ interface PortalProps {
 export const ClientPortalView: React.FC<PortalProps> = ({ invoice, onConfirmPayment }) => {
   const [confirmed, setConfirmed] = useState(invoice.paymentConfirmedByClient || false);
   const [paying, setPaying] = useState(false);
+
+  React.useEffect(() => {
+    // Send a push notification tracking pixel when client opens the portal
+    trackEvent('invoice_viewed_by_client', { invoiceId: invoice.id });
+    
+  }, [invoice.id, invoice.invoiceNumber, invoice.user.id]);
 
   const handleConfirm = () => {
     setConfirmed(true);

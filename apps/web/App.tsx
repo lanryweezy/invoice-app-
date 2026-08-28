@@ -218,136 +218,8 @@ const App: React.FC = () => {
 
   // Main view state
   const [gatedFeature, setGatedFeature] = useState<'Branches' | 'Accounting' | 'Recurring' | 'Receipts' | 'Integrations' | null>(null);
-    const [searchParams, setSearchParams] = useSearchParams();
-  const activePanel = searchParams.get('panel') as 'branches' | 'accounting' | 'recurring' | 'receipts' | 'integrations' | null;
+  
 
-  const setActivePanel = useCallback((panel: string | null) => {
-    if (panel === null) {
-        setSearchParams(prev => {
-            const next = new URLSearchParams(prev);
-            next.delete('panel');
-            return next;
-        });
-    } else {
-        setSearchParams(prev => {
-            const next = new URLSearchParams(prev);
-            next.set('panel', panel);
-            return next;
-        });
-    }
-  }, [setSearchParams]);
-  const [activeView, setActiveView] = useState<'editor' | 'branches' | 'accounting' | 'recurring' | 'receipts' | 'integrations' | 'cli' | 'blog' | 'blogPost' | 'publicProfile' | 'templatePage' | 'privacy' | 'terms' | 'support'>(() => {
-      let path = getDecodedPathname();
-
-      if (path === '/privacy') return 'privacy';
-      if (path === '/terms') return 'terms';
-      if (path === '/support') return 'support';
-      if (path.startsWith('/p/')) return 'publicProfile';
-      if (path.startsWith('/templates/')) return 'templatePage';
-            if (path === '/branches') return 'branches';
-      if (path === '/accounting') return 'accounting';
-      if (path === '/recurring') return 'recurring';
-      if (path === '/receipts') return 'receipts';
-      if (path === '/integrations') return 'integrations';
-      if (path === '/cli') return 'cli';
-      if (path === '/blog') return 'blog';
-
-      // Handle legacy /blog/:id routes by redirecting them or showing blogPost view
-      if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts' && path !== '/integrations' && path !== '/cli' && path !== '/privacy' && path !== '/terms' && path !== '/support' && !path.startsWith('/p/') && !path.startsWith('/templates/')) {
-          return 'blogPost';
-      }
-      return 'editor';
-  });
-
-  const [publicUsername, setPublicUsername] = useState<string | null>(() => {
-      let path = getDecodedPathname();
-      if (path.startsWith('/p/')) return path.split('/')[2] || null;
-      return null;
-  });
-
-  const [activeTemplateSlug, setActiveTemplateSlug] = useState<string | null>(() => {
-      let path = getDecodedPathname();
-      if (path.startsWith('/templates/')) {
-          return path.split('/')[2] || null;
-      }
-      return null;
-  });
-
-  const [activeBlogPostSlug, setActiveBlogPostSlug] = useState<string | null>(() => {
-      let path = getDecodedPathname();
-
-      // Support legacy paths
-      if (path.startsWith('/blog/')) {
-          return path.substring(6);
-      }
-
-      if (path !== '/' && path !== '/blog' && !path.startsWith('/p/') && !path.startsWith('/templates/') && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts') {
-          return path.substring(1); // Remove leading slash
-      }
-      return null;
-  });
-
-  // Handle URL updates when state changes
-  useEffect(() => {
-      let path = '/';
-      if (activeView === 'blog') path = '/blog';
-      else if (activeView === 'integrations') path = '/integrations';
-      else if (activeView === 'cli') path = '/cli';
-      else if (activeView === 'blogPost' && activeBlogPostSlug !== null) path = `/${encodeURIComponent(activeBlogPostSlug)}`;
-      else if (activeView === 'publicProfile' && publicUsername !== null) path = `/p/${publicUsername}`;
-      else if (activeView === 'templatePage' && activeTemplateSlug !== null) path = `/templates/${encodeURIComponent(activeTemplateSlug)}`;
-
-      // Update the URL without reloading the page
-      let currentDecodedPath = getDecodedPathname();
-
-      let targetDecodedPath = getDecodedPathname(path);
-
-      if (currentDecodedPath !== targetDecodedPath) {
-          window.history.pushState(null, '', path);
-      }
-  }, [activeView, activeBlogPostSlug, publicUsername]);
-
-  // Handle browser back/forward buttons
-  useEffect(() => {
-      const handlePopState = () => {
-          let path = getDecodedPathname();
-          if (path === '/blog') {
-              window.location.href = '/blog';
-          } else if (path === '/integrations') {
-              setActiveView('integrations');
-          } else if (path === '/cli') {
-              setActiveView('cli');
-          } else if (path === '/branches') {
-              setActiveView('branches');
-          } else if (path === '/accounting') {
-              setActiveView('accounting');
-          } else if (path === '/recurring') {
-              setActiveView('recurring');
-          } else if (path === '/receipts') {
-              setActiveView('receipts');
-          } else if (path === '/privacy') {
-              setActiveView('privacy');
-          } else if (path === '/terms') {
-              setActiveView('terms');
-          } else if (path === '/support') {
-              setActiveView('support');
-          } else if (path.startsWith('/p/')) {
-              setPublicUsername(path.split('/')[2] || null);
-              setActiveView('publicProfile');
-          } else if (path.startsWith('/templates/')) {
-              setActiveTemplateSlug(path.split('/')[2] || null);
-              setActiveView('templatePage');
-          } else if (path !== '/' && path !== '/editor' && path !== '/branches' && path !== '/accounting' && path !== '/recurring' && path !== '/receipts' && path !== '/integrations' && path !== '/cli' && path !== '/privacy' && path !== '/terms' && path !== '/support') {
-              setActiveBlogPostSlug(path.substring(1));
-              setActiveView('blogPost');
-          } else {
-              setActiveView('editor');
-          }
-      };
-
-      window.addEventListener('popstate', handlePopState);
-      return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
 
   // 'edit' vs 'preview' for mobile tabs
   const [activeMobileTab, setActiveMobileTab] = useState<'edit' | 'preview'>('edit');
@@ -479,7 +351,7 @@ const App: React.FC = () => {
       if (!isPro) {
           setGatedFeature(featureName);
       } else {
-          setActivePanel(featureName.toLowerCase() as 'branches' | 'accounting' | 'recurring' | 'receipts' | 'integrations');
+          window.location.href='/receipts';
       }
   }, [isPro]);
 
@@ -566,591 +438,171 @@ const App: React.FC = () => {
   return (
     <IdleLockScreen timeoutMinutes={15}>
       <div className="h-screen flex flex-col bg-slate-50 text-slate-800 font-sans overflow-hidden selection:bg-teal-100 selection:text-teal-900">
-      <CommandPaletteProvider
-        onNavigate={(view) => {
-          if (view === 'blog') {
-            window.location.href = '/blog';
-          } else if (view === 'editor') {
-            setActiveView('editor');
-          } else {
-            handleProFeatureClick(view.charAt(0).toUpperCase() + view.slice(1));
-          }
-        }}
-        onAction={(action) => {
-          if (action === 'settings') setIsSettingsModalOpen(true);
-          if (action === 'upgrade') {
-            setPricingModalContent({ title: 'Upgrade to Pro', message: 'Unlock advanced features to supercharge your business.' });
-            setIsPricingModalOpen(true);
-          }
-        }}
-      />
-      <Helmet>
-        <title>{invoice.invoiceNumber ? `Invoice #${invoice.invoiceNumber} | InvoiceApp` : 'Free Invoice Generator for Nigeria | InvoiceApp'}</title>
-        <meta name="description" content={invoice.user.name ? `Invoice generated by ${invoice.user.name} for ${invoice.client.name || 'a client'} using InvoiceApp.` : "Create professional invoices in seconds. The #1 free invoice generator tailored for Nigerian freelancers and businesses."} />
-        <link rel="canonical" href="https://www.invoiceapp.ng/" />
+        <CommandPaletteProvider
+          onNavigate={(view) => {
+            if (view === 'blog') window.location.href = '/blog';
+            else window.location.href = `/${view}`;
+          }}
+          onAction={(action) => {
+            if (action === 'settings') setIsSettingsModalOpen(true);
+            if (action === 'upgrade') {
+              setPricingModalContent({ title: 'Upgrade to Pro', message: 'Unlock advanced features to supercharge your business.' });
+              setIsPricingModalOpen(true);
+            }
+          }}
+        />
+        <Helmet>
+          <title>{invoice.invoiceNumber ? `Invoice #${invoice.invoiceNumber} | InvoiceApp` : 'Free Invoice Generator for Nigeria | InvoiceApp'}</title>
+          <meta name="description" content={invoice.user.name ? `Invoice generated by ${invoice.user.name} for ${invoice.client.name || 'a client'} using InvoiceApp.` : "Create professional invoices in seconds. The #1 free invoice generator tailored for Nigerian freelancers and businesses."} />
+          <link rel="canonical" href="https://www.invoiceapp.ng/" />
+        </Helmet>
 
-        {/* Dynamic Open Graph */}
-        <meta property="og:title" content={invoice.invoiceNumber ? `Invoice #${invoice.invoiceNumber} | InvoiceApp` : 'Free Invoice Generator for Nigeria'} />
-        <meta property="og:description" content={invoice.user.name ? `Professional invoice created by ${invoice.user.name} via InvoiceApp.` : 'Create and share professional invoices for free.'} />
-        <meta property="og:image" content="https://www.invoiceapp.ng/og-image.jpg" />
-
-        {/* Dynamic Twitter */}
-        <meta name="twitter:title" content={invoice.invoiceNumber ? `Invoice #${invoice.invoiceNumber} | InvoiceApp` : 'Free Invoice Generator for Nigeria'} />
-        <meta name="twitter:description" content={invoice.user.name ? `Check out this invoice created by ${invoice.user.name} using #InvoiceApp.` : 'The best way to generate invoices in Nigeria.'} />
-        <meta name="twitter:image" content="https://www.invoiceapp.ng/og-image.jpg" />
-      </Helmet>
-
-      {/* Main Header - Fixed height, Dark Theme */}
-      <header className="flex-none bg-slate-900 border-b border-slate-800 z-50 text-white">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-teal-500 text-white p-2 rounded-xl shadow-lg shadow-teal-900/50 ring-1 ring-white/10">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 7h6m0 4h6m-6 4h6M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-white leading-none tracking-tight">InvoiceApp</h1>
-              <div className="flex items-center gap-2 mt-1">
-                  <p className="text-[10px] uppercase tracking-widest text-teal-400 font-bold leading-none">.ng {isPro && <span className="bg-gradient-to-r from-teal-400 to-teal-300 text-slate-900 px-1.5 py-0.5 rounded text-[9px] ml-1">PRO</span>}</p>
-                  {isOffline && (
-                      <span className="flex items-center gap-1 text-[9px] uppercase tracking-wider font-bold bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded border border-amber-500/30" title="Changes will sync when reconnected">
-                          <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-3-3m0 0l-3 3m3-3v8" /></svg>
-                          Offline {pendingSyncCount > 0 ? `(${pendingSyncCount} pending)` : ''}
-                      </span>
-                  )}
+        {/* Main Header */}
+        <header className="flex-none bg-slate-900 border-b border-slate-800 z-50 text-white">
+          <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <div className="flex items-center gap-3" onClick={() => window.location.href = '/'} style={{cursor: 'pointer'}}>
+              <div className="bg-teal-500 text-white p-2 rounded-xl shadow-lg shadow-teal-900/50 ring-1 ring-white/10">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 7h6m0 4h6m-6 4h6M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-white leading-none tracking-tight">InvoiceApp</h1>
+                <div className="flex items-center gap-2 mt-1">
+                    <p className="text-[10px] uppercase tracking-widest text-teal-400 font-bold leading-none">.ng {isPro && <span className="bg-gradient-to-r from-teal-400 to-teal-300 text-slate-900 px-1.5 py-0.5 rounded text-[9px] ml-1">PRO</span>}</p>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="hidden sm:flex items-center gap-4">
-             <button onClick={() => { setActiveView('editor'); setActivePanel(null); }} className={`text-xs font-medium transition-colors ${activeView === 'editor' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Invoice Editor</button>
-             
-             <button onClick={() => user ? setActivePanel('accounting') : handleProFeatureClick('Accounting')} className={`text-xs font-medium transition-colors ${activeView === 'accounting' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Accounting</button>
-             <button onClick={() => user ? setActivePanel('recurring') : handleProFeatureClick('Recurring')} className={`text-xs font-medium transition-colors ${activeView === 'recurring' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Recurring</button>
-             <button onClick={() => user ? setActivePanel('receipts') : handleProFeatureClick('Receipts')} className={`text-xs font-medium transition-colors ${activeView === 'receipts' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Receipts</button>
-             <button onClick={() => user ? setActivePanel('integrations') : handleProFeatureClick('Integrations')} className={`text-xs font-medium transition-colors ${activeView === 'integrations' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Integrations</button>
-                 <a href="/blog" onClick={(e) => { e.preventDefault(); setActiveView('blog'); setActivePanel(null); }} className={`text-xs font-medium transition-colors ${activeView === 'blog' ? 'text-white' : 'text-slate-400 hover:text-white'}`}>Blog</a>
-             <div className="w-px h-4 bg-slate-700"></div>
-             {!loading && (
-                 user ? (
-                     <div className="flex items-center gap-3">
-                         <button onClick={() => setIsSettingsModalOpen(true)} className="text-xs text-slate-400 hover:text-white transition-colors" title={user.email || ''}>{user.displayName || 'Settings'}</button>
-                         {!isPro && (
-                             <button onClick={() => { setPricingModalContent({ title: 'Upgrade to Pro', message: 'Unlock advanced features to supercharge your business.' }); setIsPricingModalOpen(true); }} className="text-xs font-bold bg-teal-500 hover:bg-teal-400 text-white px-3 py-1.5 rounded-lg transition-colors">
-                                 Upgrade
-                             </button>
-                         )}
-                     </div>
-                 ) : (
-                     <button onClick={() => setIsAuthModalOpen(true)} className="text-xs font-bold text-slate-300 hover:text-white transition-colors">Login</button>
-                 )
-             )}
-          </div>
-        </div>
-      </header>
 
-      {/* COMMAND BAR (Sub-Nav) - Fixed height below header - ONLY SHOW IN EDITOR VIEW */}
-      {activeView === 'editor' && (
-      <div className="flex-none z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all">
-        <div className="max-w-[1600px] mx-auto">
-
-            {/* Desktop Command Bar Content */}
-            <div className="hidden md:flex items-center justify-between px-6 py-3">
-                 {/* Left: Status */}
-                <div className="flex items-center gap-3">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border
-                        ${invoice.status === 'Paid' ? 'bg-teal-100 text-teal-800 border-teal-200' :
-                          invoice.status === 'Sent' ? 'bg-blue-100 text-blue-800 border-blue-200' :
-                          'bg-slate-100 text-slate-800 border-slate-200'}`}>
-                        {invoice.status}
-                    </span>
-                    <span className="text-sm text-slate-400 font-mono">#{invoice.invoiceNumber}</span>
-                </div>
-
-                {/* Center: Template Selector */}
-                <div className="flex-1 flex justify-center">
-                    <TemplateSelector selectedTemplate={template} onSelectTemplate={setTemplate} />
-                </div>
-
-                {/* Right: Actions */}
-                <div className="flex items-center gap-2">
-                    <ActionButtons
-                        onGenerateEmail={handleGenerateEmail}
-                        onDownloadPdf={handleDownloadPdf}
-                        isMobile={false}
-                        invoiceNumber={invoice.invoiceNumber}
-                        totalAmount={`${invoice.currency} ${numberFormatter.format(totals.total)}`}
-                        documentType={invoice.documentType}
-                        onConvertToInvoice={handleConvertToInvoice}
-                        invoice={invoice}
-                        isGeneratingPdf={isGeneratingPdf}
-                        onNewInvoice={resetInvoice}
-                    />
-                </div>
+            <div className="flex items-center gap-2 sm:gap-4">
+               {isOffline && (
+                   <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 text-amber-500 rounded-full text-xs font-medium border border-amber-500/20">
+                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                       Offline Mode {pendingSyncCount > 0 && `(${pendingSyncCount} pending)`}
+                   </div>
+               )}
+               {!user ? (
+                 <div className="flex items-center gap-2">
+                   <button onClick={() => setIsAuthModalOpen(true)} className="text-sm font-medium text-slate-300 hover:text-white px-3 py-1.5 transition-colors">Sign In</button>
+                   <button onClick={() => setIsAuthModalOpen(true)} className="text-sm font-bold text-slate-900 bg-white hover:bg-slate-100 px-4 py-1.5 rounded-full transition-colors shadow-sm">Get Started</button>
+                 </div>
+               ) : (
+                 <div className="flex items-center gap-3">
+                   {!isPro && (
+                     <button onClick={() => setIsPricingModalOpen(true)} className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-teal-400 to-teal-500 text-slate-900 font-bold text-xs rounded-full hover:shadow-lg hover:shadow-teal-500/20 transition-all hover:-translate-y-0.5">
+                       Upgrade to Pro
+                     </button>
+                   )}
+                   <div className="flex items-center gap-3 pl-3 border-l border-slate-700">
+                       <button onClick={() => window.location.href='/settings'} className="text-xs text-slate-400 hover:text-white transition-colors" title={user.email || ''}>{user.displayName || 'Settings'}</button>
+                       <button onClick={logout} className="text-xs text-slate-400 hover:text-red-400 transition-colors">Sign Out</button>
+                   </div>
+                 </div>
+               )}
             </div>
+          </div>
+        </header>
 
-            {/* Mobile Command Bar Content */}
-            <div className="md:hidden">
-                {/* Row 1: Switcher & Actions */}
-                <div className="flex items-center justify-between px-4 py-2 gap-4">
-                    {/* Segmented Control */}
-                    <div className="flex bg-slate-100 p-1 rounded-lg flex-1 max-w-[200px]">
-                        <button
-                            onClick={() => setActiveMobileTab('edit')}
-                            className={`flex-1 py-1.5 text-xs font-bold flex items-center justify-center gap-1.5 rounded-md transition-all ${activeMobileTab === 'edit' ? 'bg-white text-teal-700 shadow-sm' : 'text-slate-500'}`}
-                        >
-                            <EditIcon className="w-3.5 h-3.5" /> Editor
-                        </button>
-                        <button
-                            onClick={() => setActiveMobileTab('preview')}
-                            className={`flex-1 py-1.5 text-xs font-bold flex items-center justify-center gap-1.5 rounded-md transition-all ${activeMobileTab === 'preview' ? 'bg-white text-teal-700 shadow-sm' : 'text-slate-500'}`}
-                        >
-                            <EyeIcon className="w-3.5 h-3.5" /> Preview
-                        </button>
+        {/* ROUTES CONTAINER */}
+        <div className="flex-1 overflow-hidden relative">
+          <Routes>
+            <Route path="/" element={
+              <div className="flex flex-col h-full w-full">
+                {/* Editor Specific Command Bar */}
+                <div className="flex-none z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all px-6 py-3 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-slate-100 text-slate-800 border-slate-200">{invoice.status}</span>
+                        <span className="text-sm text-slate-400 font-mono">#{invoice.invoiceNumber}</span>
                     </div>
-
-                    {/* Compact Actions */}
-                    <div className="flex items-center">
+                    <div className="flex-1 flex justify-center">
+                        <TemplateSelector selectedTemplate={template} onSelectTemplate={setTemplate} />
+                    </div>
+                    <div className="flex items-center gap-2">
                         <ActionButtons
                             onGenerateEmail={handleGenerateEmail}
                             onDownloadPdf={handleDownloadPdf}
-                            isMobile={true}
+                            isMobile={false}
                             invoiceNumber={invoice.invoiceNumber}
-                            totalAmount={`${invoice.currency} ${numberFormatter.format(totals.total)}`}
+                            totalAmount={`\${invoice.currency} \${numberFormatter.format(totals.total)}`}
                             documentType={invoice.documentType}
                             onConvertToInvoice={handleConvertToInvoice}
                             invoice={invoice}
                             isGeneratingPdf={isGeneratingPdf}
-                        onNewInvoice={resetInvoice}
-                    />
+                            onNewInvoice={resetInvoice}
+                        />
                     </div>
                 </div>
-
-                {/* Row 2: Templates (Only visible in Preview) */}
-                {activeMobileTab === 'preview' && (
-                    <div className="px-4 py-2 border-t border-slate-100 bg-slate-50/50 overflow-x-auto">
-                         <TemplateSelector selectedTemplate={template} onSelectTemplate={setTemplate} />
+                
+                {/* Editor Split View */}
+                <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+                  <div className="w-full md:w-[45%] lg:w-[40%] bg-white md:border-r border-slate-200 h-full overflow-y-auto custom-scrollbar flex flex-col block">
+                    <div className="p-4 sm:p-6 lg:p-8 flex-1">
+                      <div className="max-w-xl mx-auto pb-8">
+                        <InvoiceForm
+                          invoice={invoice}
+                          updateInvoice={handleUpdateInvoice}
+                          addLineItem={addLineItem}
+                          removeLineItem={removeLineItem}
+                          updateLineItem={updateLineItem}
+                          savedClients={savedClients}
+                          onSaveClient={handleSaveClient}
+                          businessProfiles={businessProfiles}
+                          onSaveBusinessProfile={handleSaveBusinessProfile}
+                          onSaveRecurring={handleSaveRecurringWrapper}
+                          onSaveInvoice={saveInvoice}
+                          isPro={isPro}
+                          onProFeatureClick={handleProFeatureRecurring}
+                        />
+                      </div>
                     </div>
-                )}
-            </div>
-        </div>
-      </div>
-      )}
-
-      {/* Main Layout - Flex-1 fills remaining space */}
-      {isPaymentModalOpen && (
-          <PaymentModal
-              isOpen={isPaymentModalOpen}
-              onClose={() => setIsPaymentModalOpen(false)}
-              invoice={invoice}
-              totalAmount={totals.total}
-              onSubmit={(paymentDetails) => {
-                  addReceipt({
-                      invoiceNumber: invoice.invoiceNumber,
-                      ...paymentDetails,
-                      invoice: invoice
-                  });
-                  setIsPaymentModalOpen(false);
-                  showToast('Receipt generated successfully');
-                  setActivePanel('receipts');
-              }}
-          />
-      )}
-
-      {viewingReceipt && (
-          <ReceiptPreview
-              receipt={viewingReceipt}
-              template={template}
-              onClose={() => setViewingReceipt(null)}
-          />
-      )}
-
-      <main className="flex-1 min-h-0 w-full max-w-[1600px] mx-auto overflow-y-auto">
-
-        {gatedFeature ? (
-          <div className="p-4 sm:p-8 max-w-6xl mx-auto">
-            <FeatureGate
-              featureName={gatedFeature}
-              headline={getProFeatureContent(gatedFeature).headline}
-              subhead={getProFeatureContent(gatedFeature).subhead}
-              bullets={getProFeatureContent(gatedFeature).bullets}
-              onUpgrade={() => {
-                  setPricingModalContent({ title: `Unlock ${gatedFeature}`, message: `Upgrade to Pro to unlock ${gatedFeature} and much more.` });
-                  setIsPricingModalOpen(true);
-              }}
-              onDismiss={() => {
-                  setGatedFeature(null);
-                  setActiveView('editor');
-                  setActivePanel(null);
-              }}
-            />
-          </div>
-        ) : activeView === 'cli' ? (
-            <div className="p-4 sm:p-8">
-                <CLIAccessView />
-            </div>
-        ) : activeView === 'privacy' ? (
-            <PrivacyPage />
-        ) : activeView === 'terms' ? (
-            <TermsPage />
-        ) : activeView === 'support' ? (
-            <SupportPage />
-        ) : activeView === 'publicProfile' && publicUsername !== null ? (
-            <PublicProfile username={publicUsername} />
-        ) : activeView === 'templatePage' && activeTemplateSlug !== null ? (
-            <TemplatePage slug={activeTemplateSlug} onGoHome={() => { setActiveView('editor'); setActivePanel(null); }} />
-        ) : activeView === 'blog' || activeView === 'blogPost' ? (
-            <div className="flex items-center justify-center h-full bg-slate-50">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto mb-4"></div>
-                    <p className="text-slate-600 font-medium">Loading blog...</p>
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="mt-4 text-xs text-teal-600 hover:text-teal-700 font-bold underline"
-                    >
-                        Click here if it doesn't load
-                    </button>
+                  </div>
+                  
+                  {/* Preview Panel */}
+                  <div className="hidden md:block md:w-[55%] lg:w-[60%] bg-slate-100 h-full overflow-y-auto relative custom-scrollbar">
+                    <div className="absolute inset-0 p-8 flex flex-col items-center min-h-max" ref={previewContainerRef}>
+                        <div style={{ transform: `scale(${previewScale})`, transformOrigin: 'top center', transition: 'transform 0.15s ease-out', paddingBottom: '4rem', width: '210mm' }}>
+                          <Suspense fallback={<div className="w-[210mm] min-h-[297mm] bg-white shadow-xl animate-pulse flex items-center justify-center text-slate-400">Loading preview...</div>}>
+                            <InvoicePreview invoice={invoice} template={template}  />
+                          </Suspense>
+                        </div>
+                    </div>
+                  </div>
                 </div>
-            </div>
-        ) : (
-        <div className="flex flex-col md:flex-row h-full">
-
-          {/* LEFT COLUMN: Editor Form - Independent Scroll */}
-          <div className={`w-full md:w-[45%] lg:w-[40%] bg-white md:border-r border-slate-200 h-full overflow-y-auto custom-scrollbar flex flex-col ${activeMobileTab === 'edit' ? 'block' : 'hidden md:flex'}`}>
-            <div className="p-4 sm:p-6 lg:p-8 flex-1">
-              <div className="max-w-xl mx-auto pb-8">
-                <InvoiceForm
-                  invoice={invoice}
-                  updateInvoice={handleUpdateInvoice}
-                  addLineItem={addLineItem}
-                  removeLineItem={removeLineItem}
-                  updateLineItem={updateLineItem}
-                  savedClients={savedClients}
-                  onSaveClient={handleSaveClient}
-                  businessProfiles={businessProfiles}
-                  onSaveBusinessProfile={handleSaveBusinessProfile}
-                  onSaveRecurring={handleSaveRecurringWrapper}
-                  onSaveInvoice={saveInvoice}
-                  isPro={isPro}
-                  onProFeatureClick={handleProFeatureRecurring}
-                />
               </div>
-            </div>
-            {/* Footer */}
-            <div className="px-8 py-8 border-t border-slate-100 bg-slate-50/50">
-               <div className="max-w-xl mx-auto space-y-5">
-                   {/* Trust Badge */}
-                   <div className="flex items-center justify-center gap-3 mb-2">
-                       <div className="h-px bg-slate-200 w-12"></div>
-                       <span className="text-[10px] uppercase tracking-widest font-bold text-slate-400 flex items-center gap-1">
-                           <svg className="w-3 h-3 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                           Secure & Local
-                       </span>
-                       <div className="h-px bg-slate-200 w-12"></div>
-                   </div>
-
-                    <p className="text-xs text-slate-500 text-center leading-relaxed">
-                        Built for Nigerian freelancers & SMEs. Free plan stores data locally. Pro plan adds optional cloud sync.
-                    </p>
-
-                   {/* Links */}
-                   <div className="flex justify-center gap-6 text-xs font-bold text-slate-600">
-                       <a href="/privacy" onClick={(e) => { e.preventDefault(); setActiveView('privacy'); }} className="hover:text-teal-600 transition-colors">Privacy</a>
-                       <span className="text-slate-300">ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢</span>
-                       <a href="/terms" onClick={(e) => { e.preventDefault(); setActiveView('terms'); }} className="hover:text-teal-600 transition-colors">Terms</a>
-                       <span className="text-slate-300">ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢</span>
-                       <a href="/blog" className="hover:text-teal-600 transition-colors">Blog</a>
-                       <span className="text-slate-300">ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢</span>
-                       <a href="/support" onClick={(e) => { e.preventDefault(); setActiveView('support'); }} className="hover:text-teal-600 transition-colors">Support</a>
-                   </div>
-
-                   {/* Copyright */}
-                   <div className="pt-4 border-t border-slate-200/50 text-center">
-                       <p className="text-[11px] text-slate-400 font-medium">
-                          ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â© {new Date().getFullYear()} InvoiceApp.
-                       </p>
-                   </div>
-               </div>
-            </div>
-          </div>
-
-          {/* RIGHT COLUMN: Preview - Independent Scroll */}
-          {/* Responsive container for dynamic scaling */}
-          <div
-            ref={previewContainerRef}
-            className={`w-full md:w-[55%] lg:w-[60%] bg-slate-100/50 h-full overflow-y-auto overflow-x-auto custom-scrollbar flex flex-col ${activeMobileTab === 'preview' ? 'block' : 'hidden md:flex'}`}
-          >
-            {/* Background Pattern */}
-            <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0" style={{ backgroundImage: 'radial-gradient(#0f766e 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
-
-            {/* Removed overflow-hidden to prevent clipping, added padding bottom for scroll space */}
-            <div className="p-4 sm:p-6 lg:p-8 min-h-full flex flex-col items-center relative z-10 pt-8">
-
-              {/* Responsive scaling wrapper */}
-              <div
-                className="origin-top-left transition-transform duration-200 ease-in-out pb-32 md:pb-0"
-                style={{
-                  transform: `scale(${previewScale})`,
-                  width: `${210 * previewScale}mm`,
-                  height: `${297 * previewScale}mm`,
-                }}
-              >
-                 {/* True A4 Paper Preview */}
-                 <div id="invoice-preview-container" className="bg-white text-slate-900 shadow-2xl shadow-slate-400/30 rounded-sm min-h-[297mm] w-[210mm] origin-top-left border border-slate-200/60">
-                    <div className="p-8 md:p-12 h-full flex flex-col relative">
-                        <Suspense fallback={
-                            <div className="animate-pulse space-y-8 w-full h-full p-4">
-                                <div className="flex justify-between items-start border-b-2 border-slate-100 pb-8">
-                                    <div className="flex items-start gap-6">
-                                        <div className="h-20 w-20 bg-slate-100 rounded-lg"></div>
-                                        <div className="space-y-3">
-                                            <div className="h-8 w-48 bg-slate-200 rounded"></div>
-                                            <div className="h-4 w-64 bg-slate-100 rounded"></div>
-                                            <div className="h-4 w-40 bg-slate-100 rounded"></div>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-3 flex flex-col items-end">
-                                        <div className="h-10 w-32 bg-slate-200 rounded"></div>
-                                        <div className="h-6 w-24 bg-slate-100 rounded"></div>
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-12 pt-8">
-                                    <div className="space-y-3">
-                                        <div className="h-3 w-16 bg-slate-100 rounded"></div>
-                                        <div className="h-6 w-32 bg-slate-200 rounded"></div>
-                                        <div className="h-4 w-40 bg-slate-100 rounded"></div>
-                                    </div>
-                                    <div className="flex justify-center gap-12">
-                                        <div className="space-y-3">
-                                            <div className="h-3 w-16 bg-slate-100 rounded"></div>
-                                            <div className="h-5 w-24 bg-slate-200 rounded"></div>
-                                        </div>
-                                        <div className="space-y-3">
-                                            <div className="h-3 w-16 bg-slate-100 rounded"></div>
-                                            <div className="h-5 w-24 bg-slate-200 rounded"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="pt-12 space-y-4">
-                                    <div className="h-8 w-full bg-slate-50 rounded"></div>
-                                    <div className="h-12 w-full bg-slate-100 rounded"></div>
-                                    <div className="h-12 w-full bg-slate-100 rounded"></div>
-                                    <div className="h-12 w-full bg-slate-100 rounded"></div>
-                                </div>
-                                <div className="mt-auto pt-12 flex justify-end">
-                                    <div className="w-64 space-y-3">
-                                        <div className="flex justify-between"><div className="h-4 w-20 bg-slate-100 rounded"></div><div className="h-4 w-20 bg-slate-100 rounded"></div></div>
-                                        <div className="flex justify-between"><div className="h-4 w-20 bg-slate-100 rounded"></div><div className="h-4 w-20 bg-slate-100 rounded"></div></div>
-                                        <div className="h-16 w-full bg-slate-900/5 rounded-lg"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        }>
-                            <InvoicePreview invoice={invoice} totals={totals} template={template} isPro={isPro} />
-                        </Suspense>
-                    </div>
-                 </div>
-              </div>
-
-              {/* Spacer */}
-              <div className="h-12"></div>
-            </div>
-          </div>
-
+            } />
+            <Route path="/accounting" element={<AccountingDashboard expenses={expenses} addExpense={addExpense} removeExpense={removeExpense} invoiceTotals={totals.total} onBack={() => window.location.href='/'} />} />
+            <Route path="/recurring" element={<RecurringManager recurringInvoices={recurringInvoices} onEdit={(inv) => { setInvoice(inv); window.location.href='/'; }} onDelete={removeRecurringInvoice} onToggleActive={toggleRecurringActive} onBack={() => window.location.href='/'} />} />
+            <Route path="/receipts" element={<ReceiptsManager receipts={receipts} savedInvoices={savedInvoices} onAddReceipt={addReceipt} onDeleteReceipt={removeReceipt} onBack={() => window.location.href='/'} onViewReceipt={setViewingReceipt} />} />
+            <Route path="/integrations" element={<IntegrationsView />} />
+            <Route path="/cli" element={<CLIAccessView />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/support" element={<SupportPage />} />
+            <Route path="/p/:username" element={<PublicProfile username={''} />} />
+            <Route path="/templates/:slug" element={<TemplatePage slug={''} onGoHome={() => window.location.href='/'} />} />
+            <Route path="/settings" element={<div className="p-8 w-full h-full overflow-y-auto"><SettingsModal isOpen={true} onClose={() => window.location.href='/'} user={user} isPro={isPro} logout={logout} /></div>} />
+          </Routes>
         </div>
-        )}
-      </main>
 
-      <EmailModal
-        isOpen={isEmailModalOpen}
-        onClose={() => setIsEmailModalOpen(false)}
-        emailContent={generatedEmail}
-        onTemplateChange={(type) => handleGenerateEmail(type)}
-        activeTemplate={emailTemplate}
-        recipientEmail={invoice.client.email}
-        smtpSettings={smtpSettings}
-        onOpenSmtpSettings={() => { setIsEmailModalOpen(false); setIsSmtpModalOpen(true); }}
-      />
-
-      <SmtpSettingsModal
-        isOpen={isSmtpModalOpen}
-        onClose={() => setIsSmtpModalOpen(false)}
-        user={user}
-        isPro={isPro}
-        onSmtpSaved={(settings) => setSmtpSettings(settings)}
-        onUpgrade={() => {
-          setIsSmtpModalOpen(false);
-          setPricingModalContent({ title: 'Unlock Direct Email', message: 'Send invoices straight from your inbox to your clients ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â no copy-pasting needed.' });
-          setIsPricingModalOpen(true);
-        }}
-      />
-
-      <PricingModal
-        isOpen={isPricingModalOpen}
-        onClose={() => setIsPricingModalOpen(false)}
-        onUpgrade={async (planType) => {
-            const success = await upgradeToPro(planType);
-            return success;
-        }}
-        onLogin={() => {
-            setIsAuthModalOpen(true);
-        }}
-        user={user}
-        title={pricingModalContent.title}
-        message={pricingModalContent.message}
-      />
-
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onLoginWithGoogle={loginWithGoogle}
-        onLoginWithEmail={loginWithEmail}
-        onSignUpWithEmail={signUpWithEmail}
-      />
-
-      <SettingsModal
-        isOpen={isSettingsModalOpen}
-        onClose={() => setIsSettingsModalOpen(false)}
-        user={user}
-        isPro={isPro}
-        logout={() => {
-            logout();
-            setActiveView('editor');
-            setActivePanel(null);
-        }}
-      />
-
-      <PrivacyModal
-        isOpen={isPrivacyModalOpen}
-        onClose={() => setIsPrivacyModalOpen(false)}
-      />
-
-      <TermsModal
-        isOpen={isTermsModalOpen}
-        onClose={() => setIsTermsModalOpen(false)}
-      />
-
-      {/* NRS Compliance Modals */}
-      {isComplianceOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setIsComplianceOpen(false)} onKeyDown={(e) => e.key === 'Escape' && setIsComplianceOpen(false)}>
-          <div className="bg-white rounded-xl max-w-3xl w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <ComplianceDashboard
-              invoice={invoice}
-              onClose={() => setIsComplianceOpen(false)}
-            />
-          </div>
-        </div>
-      )}
-
-      {isQRCodeOpen && invoice && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setIsQRCodeOpen(false)} onKeyDown={(e) => e.key === 'Escape' && setIsQRCodeOpen(false)}>
-          <div className="bg-white rounded-xl p-5 max-w-sm w-full" onClick={e => e.stopPropagation()}>
-            <QRCodeDisplay invoice={invoice} />
-          </div>
-        </div>
-      )}
-
-      {isPaymentDetailsOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setIsPaymentDetailsOpen(false)} onKeyDown={(e) => e.key === 'Escape' && setIsPaymentDetailsOpen(false)}>
-          <div className="w-full max-w-sm" onClick={e => e.stopPropagation()}>
-            <PaymentDetails
-              invoice={invoice}
-              updateInvoice={handleUpdateInvoice}
-            />
-          </div>
-        </div>
-      )}
-
-      <SidePanel
-        isOpen={activePanel !== null}
-        onClose={() => setActivePanel(null)}
-        title={
-          activePanel === 'branches' ? 'Branches' :
-          activePanel === 'accounting' ? 'Accounting' :
-          activePanel === 'recurring' ? 'Recurring Invoices' :
-          activePanel === 'receipts' ? 'Receipts' :
-          activePanel === 'integrations' ? 'Integrations' : ''
-        }
-      >
+        {/* Global Modals */}
+        <EmailModal isOpen={isEmailModalOpen} onClose={() => setIsEmailModalOpen(false)} onSend={async () => {}} generatedEmail={generatedEmail} emailTemplate={emailTemplate} onTemplateChange={setEmailTemplate} invoiceNumber={invoice.invoiceNumber} clientName={invoice.client.name} amount={`\${invoice.currency} \${numberFormatter.format(totals.total)}`} documentType={invoice.documentType} smtpSettings={smtpSettings} onOpenSmtpSettings={() => setIsSmtpModalOpen(true)} isPro={isPro} onProFeatureClick={() => handleProFeatureClick('Email Delivery')} />
+        <PricingModal isOpen={isPricingModalOpen} onClose={() => setIsPricingModalOpen(false)} onUpgrade={upgradeToPro} user={user} loading={loading} content={pricingModalContent} />
+        <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} onGoogleLogin={loginWithGoogle} onEmailLogin={loginWithEmail} onEmailSignUp={signUpWithEmail} loading={loading} />
+        <PrivacyModal isOpen={isPrivacyModalOpen} onClose={() => setIsPrivacyModalOpen(false)} />
+        <TermsModal isOpen={isTermsModalOpen} onClose={() => setIsTermsModalOpen(false)} />
+        <SmtpSettingsModal isOpen={isSmtpModalOpen} onClose={() => setIsSmtpModalOpen(false)} onSmtpSaved={setSmtpSettings} />
         
-        {activePanel === 'accounting' && (
-          <div className="p-4 sm:p-8">
-            <AccountingDashboard
-                invoices={savedInvoices}
-                expenses={expenses}
-                onAddExpense={addExpense}
-                onRemoveExpense={removeExpense}
-                isPro={isPro}
-                onUpgrade={() => {
-                    setPricingModalContent({ title: 'Unlock Full Financial History', message: 'Upgrade to Pro to see your full transaction history, download detailed audit logs, and export for NRS bulk filing.' });
-                    setIsPricingModalOpen(true);
-                }}
-            />
-          </div>
+        {viewingReceipt && (
+            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+                <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative">
+                    <button onClick={() => setViewingReceipt(null)} className="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors z-10"><svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
+                    <ReceiptPreview receipt={viewingReceipt} invoice={savedInvoices.find(i => i.id === viewingReceipt.invoiceId)}  />
+                </div>
+            </div>
         )}
-        {activePanel === 'recurring' && (
-          <div className="p-4 sm:p-8">
-            <RecurringManager
-                recurringInvoices={recurringInvoices}
-                onGenerateNext={(inv) => {
-                    setInvoice({
-                        ...inv,
-                        issueDate: new Date().toISOString().split('T')[0],
-                        invoiceNumber: generateSequentialInvoiceNumber()
-                    });
-                    setActivePanel(null);
-                    showToast('Recurring template loaded into editor', 'success');
-                }}
-                onRemove={removeRecurringInvoice}
-                onToggleActive={toggleRecurringActive}
-            />
-          </div>
-        )}
-        {activePanel === 'receipts' && (
-          <div className="p-4 sm:p-8">
-            <ReceiptsManager
-                receipts={receipts}
-                onViewReceipt={setViewingReceipt}
-                onRemoveReceipt={(id) => {
-                    removeReceipt(id);
-                    showToast('Receipt deleted');
-                }}
-                isPro={isPro}
-                onUpgrade={() => {
-                    setPricingModalContent({ title: 'Unlock Professional Receipts', message: 'Upgrade to Pro to automatically generate and manage receipts.' });
-                    setIsPricingModalOpen(true);
-                }}
-            />
-          </div>
-        )}
-        {activePanel === 'integrations' && (
-          <div className="p-4 sm:p-8">
-            <IntegrationsView
-                onUpgrade={() => {
-                    setPricingModalContent({ title: 'Unlock Integrations', message: 'Upgrade to Pro to connect payment gateways, accounting software, and more.' });
-                    setIsPricingModalOpen(true);
-                }}
-            />
-          </div>
-        )}
-      </SidePanel>
       </div>
     </IdleLockScreen>
   );
 };
 
 export default App;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
