@@ -4,7 +4,7 @@ import { numberFormatter } from '../utils/formatters';
 import { PremiumGate } from './PremiumGate';
 
 /**
- * ðŸ”© Hinge Extension Point: RecurringFrequencyStrategy
+ * 🔧 Hinge Extension Point: RecurringFrequencyStrategy
  *
  * Pressure: The `RecurringManager` component had hardcoded maps for colors/labels,
  * and switch statements in `getNextDueDate` and `monthlyEstimate` that needed
@@ -108,14 +108,14 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
     return (
       <PremiumGate
         title="Turn your best clients into automatic monthly income."
-        subhead="Sleep knowing next monthâ€™s invoices are already scheduled."
+        subhead="Sleep knowing next month's invoices are already scheduled."
         bullets={[
-          "Autoâ€‘send on your chosen date",
+          "Auto‑send on your chosen date",
           "No more forgetting renewals",
           "See predictable monthly revenue"
         ]}
         primaryCta="Unlock Recurring"
-        secondaryCta="Send a oneâ€‘time invoice"
+        secondaryCta="Send a one‑time invoice"
         onPrimaryClick={onUpgrade || (() => {})}
         onSecondaryClick={onGoToEditor || (() => {})}
       />
@@ -154,7 +154,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
           </div>
           <div className="bg-white p-5 rounded-2xl border border-slate-200">
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Est. Monthly Revenue</p>
-            <p className="text-3xl font-black text-slate-900 mt-1">â‚¦{numberFormatter.format(Math.round(stats.monthlyEstimate))}</p>
+            <p className="text-3xl font-black text-slate-900 mt-1">₦{numberFormatter.format(Math.round(stats.monthlyEstimate))}</p>
             <p className="text-xs text-slate-500 mt-1">from recurring</p>
           </div>
           <div className="bg-white p-5 rounded-2xl border border-slate-200">
@@ -218,7 +218,7 @@ export const RecurringManager: React.FC<RecurringManagerProps> = ({
                       </div>
                       <p className="text-sm text-slate-500 mt-0.5">
                         {inv.currency} {inv.total != null ? numberFormatter.format(inv.total) : '---'}
-                        <span className="mx-1.5 text-slate-300">Â·</span>
+                        <span className="mx-1.5 text-slate-300">·</span>
                         {inv.lineItems.length} item{inv.lineItems.length !== 1 ? 's' : ''}
                       </p>
                     </div>

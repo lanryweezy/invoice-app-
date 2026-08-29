@@ -1,3 +1,4 @@
+﻿import { Tooltip, InfoIcon } from './Tooltip';
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, updateDoc, runTransaction } from 'firebase/firestore';
 import { db } from '../services/firebase';
@@ -191,7 +192,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Public Username</label>
+                  <div className="flex items-center gap-1.5 mb-1"><label className="block text-xs font-medium text-slate-700">Public Username</label><Tooltip content="This creates a public page where clients can see your business info and verified status."><InfoIcon /></Tooltip></div>
                   <div className="flex rounded-lg shadow-sm">
                     <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-slate-200 bg-slate-50 text-slate-500 text-sm">
                       invoiceapp.ng/p/
@@ -336,3 +337,4 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
     </div>
   );
 };
+

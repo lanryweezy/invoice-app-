@@ -1,4 +1,4 @@
-vi.mock('firebase/analytics', () => ({ getAnalytics: vi.fn(), isSupported: vi.fn().mockResolvedValue(false), logEvent: vi.fn() }));
+﻿vi.mock('firebase/analytics', () => ({ getAnalytics: vi.fn(), isSupported: vi.fn().mockResolvedValue(false), logEvent: vi.fn() }));
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
@@ -17,6 +17,7 @@ vi.mock('firebase/firestore', () => ({
     setDoc: vi.fn().mockResolvedValue(undefined),
     getDoc: vi.fn().mockResolvedValue({ exists: () => false }),
     getFirestore: vi.fn(),
+    enableIndexedDbPersistence: vi.fn(() => Promise.resolve()),
     db: {}
 }));
 
@@ -114,3 +115,4 @@ describe('useExpenses', () => {
         expect(result.current.expenses.length).toBe(0);
     });
 });
+

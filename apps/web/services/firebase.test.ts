@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 vi.mock('firebase/app', () => ({
   initializeApp: vi.fn(() => ({ name: '[DEFAULT]' }))
@@ -16,6 +16,7 @@ vi.mock('firebase/auth', () => ({
 
 vi.mock('firebase/firestore', () => ({
   getFirestore: vi.fn(() => ({})),
+  enableIndexedDbPersistence: vi.fn(() => Promise.resolve()),
   doc: vi.fn(),
   getDoc: vi.fn(),
   setDoc: vi.fn()
@@ -77,3 +78,5 @@ describe('firebase setup', () => {
     expect(firebaseModule.analytics).toBeNull();
   });
 });
+
+

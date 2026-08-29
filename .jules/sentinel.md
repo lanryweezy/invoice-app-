@@ -12,7 +12,7 @@
 **Action:** Replaced inline `crypto.randomBytes` usages with `generateSecureId(N)` calls to enforce consistency and simplify service dependencies.
 **Learning:** Avoid using inline crypto implementations (`crypto.getRandomValues` inside components/hooks) for security-sensitive logic like invoice numbers. Always use the shared utility (`generateSecureId`) for secure randomness and consistency.
 **Action:** Replaced inline invoice number random generator with `generateSecureId(5)` in `apps/web/hooks/useInvoice.ts`.
-## 2026-08-16 - Security Fix: Remove hardcoded default signing key
-**Vulnerability:** The `signInvoice` function in `apps/web/services/digitalSignature.ts` used a hardcoded fallback value (`"default-signing-key"`) for its optional `privateKey` parameter. This constitutes a critical hardcoded secret vulnerability, as any system relying on this default signature will use a publicly exposed, insecure key, defeating the purpose of digital signatures.
-**Learning:** Security-sensitive parameters like private keys must never fall back to hardcoded defaults in the codebase.
-**Prevention:** Always enforce the presence of required cryptographic keys at compile-time by making the parameter strictly required (`privateKey: string` rather than `privateKey?: string`). If a fallback is necessary, it must be generated securely (e.g., using `crypto.getRandomValues()`) or sourced from a secure environment variable, never from a hardcoded string.
+
+## 2024-05-18 - Use cryptographically secure custom character set for random IDs
+**Learning:** Generating random IDs by converting a byte array to a hex string and then `.toUpperCase()` reduces the possible entropy of the string, and `.padStart(2, '0')` does not effectively increase the security. Instead, mapping cryptographically secure bytes onto a larger Base36 charset ('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ') provides a wider range of possible values for the same string length, increasing unpredictability for security-sensitive IDs like payment references.
+**Action:** Refactored `generateSecureId` in `crypto.ts` to use `crypto.getRandomValues()` to index into a Base36 charset instead of generating hex strings. Updated corresponding tests.

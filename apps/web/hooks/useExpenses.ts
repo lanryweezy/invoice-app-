@@ -1,10 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+﻿import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Expense } from '../types';
 import { useSubscription } from './useSubscription';
 import { db, doc, setDoc, getDoc } from '../services/firebase';
-import { queueMutation } from '../utils/offlineSync';
 import { trackEvent } from '../utils/analytics';
-import { getErrorMessage } from '../utils/error';
 
 export const useExpenses = () => {
     const [expenses, setExpenses] = useState<Expense[]>(() => {
@@ -12,8 +10,7 @@ export const useExpenses = () => {
             const stored = localStorage.getItem('invoiceExpenses');
             return stored ? JSON.parse(stored) : [];
         } catch (e) {
-            console.error('Failed to load initial expenses', { event: 'expenses.load.local.failed', error: getErrorMessage(e) });
-            try { trackEvent('expenses_load_local_failed', { error: getErrorMessage(e) }); } catch {}
+            console.error('Failed to load initial expenses', e);
             return [];
         }
     });
@@ -26,13 +23,7 @@ export const useExpenses = () => {
         if (isPro && firebaseUser) {
             const loadCloudData = async () => {
                 try {
-                    // Check offline queue first to prevent clobbering newer local data
-                    const { getQueueCount } = await import('../utils/offlineSync');
-                    const queueCount = await getQueueCount();
-
-                    if (queueCount > 0) {
-                        return;
-                    }
+                    
 
                     const userRef = doc(db, 'users', firebaseUser.uid);
                     const userSnap = await getDoc(userRef);
@@ -55,22 +46,16 @@ export const useExpenses = () => {
         }
     }, [isPro, firebaseUser]);
 
-    const syncToCloud = useCallback(async (newExpenses: Expense[]) => {
-        if (isPro && firebaseUser) {
-            if (!navigator.onLine) {
-                await queueMutation('users', firebaseUser.uid, { expenses: newExpenses });
-                return;
-            }
-
-            try {
-                const userRef = doc(db, 'users', firebaseUser.uid);
-                await setDoc(userRef, { expenses: newExpenses }, { merge: true });
-            } catch (error) {
-                console.error("Failed to sync expenses, queueing locally instead", error);
-                await queueMutation('users', firebaseUser.uid, { expenses: newExpenses });
-            }
-        }
-    }, [isPro, firebaseUser]);
+      const syncToCloud = useCallback(async (newExpenses: Expense[]) => {
+      if (isPro && firebaseUser) {
+          try {
+              const userRef = doc(db, 'users', firebaseUser.uid);
+              await setDoc(userRef, { expenses: newExpenses }, { merge: true });
+          } catch (error) {
+              console.error("Failed to sync expenses", error);
+          }
+      }
+  }, [isPro, firebaseUser]);
 
     // Immediate local persistence
     useEffect(() => {
@@ -101,3 +86,5 @@ export const useExpenses = () => {
 
     return { expenses, addExpense, removeExpense };
 };
+
+

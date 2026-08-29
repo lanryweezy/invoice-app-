@@ -1,9 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import type { Receipt } from '../types';
 import { useSubscription } from './useSubscription';
 import { db, doc, setDoc, getDoc } from '../services/firebase';
 import { trackEvent } from '../utils/analytics';
-import { queueMutation } from '../utils/offlineSync';
 import { getErrorMessage } from '../utils/error';
 
 export const useReceipts = () => {
@@ -42,11 +41,6 @@ export const useReceipts = () => {
 
     const syncToCloud = useCallback(async (newReceipts: Receipt[]) => {
         if (isPro && firebaseUser) {
-            if (!navigator.onLine) {
-                await queueMutation('users', firebaseUser.uid, { receipts: newReceipts });
-                return;
-            }
-
             try {
                 const userRef = doc(db, 'users', firebaseUser.uid);
                 await setDoc(userRef, { receipts: newReceipts }, { merge: true });
@@ -80,3 +74,6 @@ export const useReceipts = () => {
 
     return { receipts, addReceipt, removeReceipt };
 };
+
+
+

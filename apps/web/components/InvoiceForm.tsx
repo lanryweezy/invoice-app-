@@ -1,4 +1,5 @@
 
+import { trackEvent } from '../utils/analytics';
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import type { Invoice, LineItem, Currency, InvoiceStatus, Client } from '../types';
 import { getCurrencyFormatter } from '../utils/formatters';

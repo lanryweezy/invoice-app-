@@ -1,3 +1,4 @@
+﻿import { Tooltip, InfoIcon } from './Tooltip';
 import React, { useState, useEffect } from "react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db, auth } from "../services/firebase";
@@ -32,7 +33,7 @@ interface Preset {
 const PRESETS: Preset[] = [
   {
     name: "Gmail",
-    icon: "✉️",
+    icon: "âœ‰ï¸",
     host: "smtp.gmail.com",
     port: "587",
     helpUrl: "https://myaccount.google.com/apppasswords",
@@ -82,7 +83,7 @@ const PRESETS: Preset[] = [
   },
   {
     name: "Custom",
-    icon: "⚙️",
+    icon: "âš™ï¸",
     host: "",
     port: "587",
     helpUrl: "",
@@ -413,9 +414,7 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({
                 {/* Form */}
                 <div className="grid grid-cols-3 gap-3">
                   <div className="col-span-2">
-                    <label className="block text-xs font-bold text-slate-500 mb-1">
-                      SMTP Server
-                    </label>
+                    <div className="flex items-center gap-1.5 mb-1"><label className="block text-xs font-bold text-slate-500">SMTP Server</label><Tooltip content="The address of your mail server, e.g., smtp.gmail.com or smtp.sendgrid.net"><InfoIcon /></Tooltip></div>
                     <input
                       type="text"
                       value={smtp.host}
@@ -427,9 +426,7 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">
-                      Port
-                    </label>
+                    <div className="flex items-center gap-1.5 mb-1"><label className="block text-xs font-bold text-slate-500">Port</label><Tooltip content="Usually 587 for TLS, or 465 for SSL."><InfoIcon /></Tooltip></div>
                     <input
                       type="text"
                       value={smtp.port}
@@ -500,9 +497,7 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">
-                      From Email
-                    </label>
+                    <div className="flex items-center gap-1.5 mb-1"><label className="block text-xs font-bold text-slate-500">From Email</label><Tooltip content="The email address your clients will see as the sender."><InfoIcon /></Tooltip></div>
                     <input
                       type="email"
                       value={smtp.fromEmail}
@@ -522,7 +517,7 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({
                   }}
                   className="text-xs font-medium text-slate-500 hover:text-slate-700"
                 >
-                  ← Choose a different provider
+                  â† Choose a different provider
                 </button>
 
                 {message && (
@@ -569,3 +564,4 @@ export const SmtpSettingsModal: React.FC<SmtpSettingsModalProps> = ({
     </div>
   );
 };
+

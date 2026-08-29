@@ -1,3 +1,4 @@
+﻿import { getErrorMessage } from '../utils/error';
 /**
  * NIBSS Payment API Client
  */
@@ -166,3 +167,4 @@ Date: ${new Date().toLocaleDateString('en-NG')}
 Please use your invoice number as reference.
   `.trim();
 }
+

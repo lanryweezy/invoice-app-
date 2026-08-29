@@ -21,7 +21,7 @@ const AVAILABLE_INTEGRATIONS: Omit<Integration, 'connected'>[] = [
     name: 'Paystack',
     description: 'Accept card & bank transfers. Most popular in Nigeria.',
     category: 'payment',
-    icon: 'ðŸ’³',
+    icon: '💳',
   },
   {
     id: 'flutterwave',
@@ -49,7 +49,7 @@ const AVAILABLE_INTEGRATIONS: Omit<Integration, 'connected'>[] = [
     name: 'OPay',
     description: 'Mobile money & transfers. Huge user base.',
     category: 'payment',
-    icon: 'ðŸ“±',
+    icon: '📱',
   },
   // Payment - Global
   {
@@ -57,7 +57,7 @@ const AVAILABLE_INTEGRATIONS: Omit<Integration, 'connected'>[] = [
     name: 'Stripe',
     description: 'Global payment processing. Cards & wallets.',
     category: 'payment',
-    icon: 'ðŸ’°',
+    icon: '💰',
   },
   {
     id: 'paypal',
@@ -72,21 +72,21 @@ const AVAILABLE_INTEGRATIONS: Omit<Integration, 'connected'>[] = [
     name: 'QuickBooks',
     description: 'Sync invoices & payments automatically.',
     category: 'accounting',
-    icon: 'ðŸ“Š',
+    icon: '📊',
   },
   {
     id: 'xero',
     name: 'Xero',
     description: 'Cloud accounting. Real-time financial data.',
     category: 'accounting',
-    icon: 'ðŸ“ˆ',
+    icon: '📈',
   },
   {
     id: 'wave',
     name: 'Wave',
     description: 'Free accounting software. Perfect for startups.',
     category: 'accounting',
-    icon: 'ðŸŒŠ',
+    icon: '🌊',
   },
   // E-Commerce
   {
@@ -94,7 +94,7 @@ const AVAILABLE_INTEGRATIONS: Omit<Integration, 'connected'>[] = [
     name: 'Shopify',
     description: 'Auto-create invoices from store orders.',
     category: 'ecommerce',
-    icon: 'ðŸ›’',
+    icon: '🛒',
     ComingSoon: true,
   },
   {
@@ -111,21 +111,21 @@ const AVAILABLE_INTEGRATIONS: Omit<Integration, 'connected'>[] = [
     name: 'Zapier',
     description: 'Connect to 1000+ apps. Automate workflows.',
     category: 'productivity',
-    icon: 'âš¡',
+    icon: '⚡',
   },
   {
     id: 'google',
     name: 'Google Workspace',
     description: 'Sync contacts, drive, and calendar.',
     category: 'productivity',
-    icon: 'ðŸ“Ž',
+    icon: '📎',
   },
   {
     id: 'slack',
     name: 'Slack',
     description: 'Get invoice notifications in your workspace.',
     category: 'productivity',
-    icon: 'ðŸ’¬',
+    icon: '💬',
   },
 ];
 
@@ -327,7 +327,7 @@ export const IntegrationsView: React.FC<{ onUpgrade: () => void }> = ({ onUpgrad
           We're constantly adding new integrations. Let us know what you need and we'll prioritize it.
         </p>
         <button className="text-sm font-medium text-teal-600 hover:text-teal-700">
-          Request Integration â†’
+          Request Integration →
         </button>
       </div>
 
@@ -335,7 +335,7 @@ export const IntegrationsView: React.FC<{ onUpgrade: () => void }> = ({ onUpgrad
         <PremiumGate
           isModal
           title="Connect InvoiceApp to the tools you already use."
-          subhead="Your invoices shouldnâ€™t live alone. Plug into your accounting, CRM, and payment tools so everything updates itself."
+          subhead="Your invoices shouldn't live alone. Plug into your accounting, CRM, and payment tools so everything updates itself."
           bullets={[
             "Sync paid invoices to your accounting tool.",
             "Log payments in your CRM automatically.",
