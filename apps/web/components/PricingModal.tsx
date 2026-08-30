@@ -202,7 +202,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
           )}
           <div className="flex justify-between items-center">
             <p className="text-xs text-slate-400">Secure payment powered by Paystack</p>
-            <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all cursor-pointer">
+            <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 cursor-pointer">
               Maybe Later
             </button>
           </div>

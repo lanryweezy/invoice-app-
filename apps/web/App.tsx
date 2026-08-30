@@ -599,7 +599,7 @@ const App: React.FC = () => {
         {viewingReceipt && (
             <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
                 <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative">
-                    <button onClick={() => setViewingReceipt(null)} className="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors z-10"><svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
+                    <button onClick={() => setViewingReceipt(null)} aria-label="Close receipt preview" className="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-slate-500 z-10"><svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
                     <ReceiptPreview receipt={viewingReceipt} invoice={savedInvoices.find(i => i.id === viewingReceipt.invoiceId)}  />
                 </div>
             </div>
