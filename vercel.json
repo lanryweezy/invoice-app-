@@ -1,6 +1,6 @@
 {
   "installCommand": "pnpm install --no-frozen-lockfile",
-  "buildCommand": "cd apps/web && npm run build",
+  "buildCommand": "node scripts/build.js",
   "outputDirectory": "apps/web/dist",
   "framework": "vite",
   "headers": [
