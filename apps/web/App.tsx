@@ -1,7 +1,7 @@
 ﻿import { getDecodedPathname } from "./utils/routing";
 import { toast } from 'sonner';
 
-import { useLocation, useNavigate, Routes, Route, Navigate, useSearchParams, Link } from 'react-router-dom';
+import { useLocation, useNavigate, Routes, Route, Navigate, useSearchParams, Link, NavLink } from 'react-router-dom';
 import React, { useState, useCallback, useMemo, useEffect, Suspense, useRef } from 'react';
 
 import { InvoiceForm } from './components/InvoiceForm';
@@ -505,7 +505,6 @@ const App: React.FC = () => {
 
         {/* ROUTES CONTAINER */}
         <div className="flex-1 overflow-hidden relative flex flex-row h-full">
-          <Sidebar />
           <div className="flex-1 overflow-hidden h-full">
             <Routes>
               
@@ -611,44 +610,6 @@ const App: React.FC = () => {
 };
 
 
-function Sidebar() {
-  const links = [
-    { name: 'Invoice Editor', path: '/' },
-    { name: 'Accounting', path: '/accounting' },
-    { name: 'Recurring', path: '/recurring' },
-    { name: 'Receipts', path: '/receipts' },
-    { name: 'Integrations', path: '/integrations' },
-    { name: 'CLI & MCP', path: '/cli' },
-    { name: 'Settings', path: '/settings' },
-    { name: 'Blog', path: '/blog', external: true }
-  ];
-  return (
-    <div className="w-16 md:w-64 bg-slate-900 text-slate-300 flex flex-col h-full border-r border-slate-800">
-      <div className="p-4 sm:p-6 border-b border-slate-800">
-        <h1 className="text-white font-bold text-xl tracking-tight hidden md:block">InvoiceApp</h1>
-        <h1 className="text-white font-bold text-xl tracking-tight block md:hidden">IA</h1>
-      </div>
-      <div className="flex-1 py-6 flex flex-col gap-2 px-3 overflow-y-auto">
-        {links.map(l => (
-          l.external ? 
-            <a key={l.name} href={l.path} className="px-3 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium flex items-center justify-center md:justify-start">
-              <span className="hidden md:inline">{l.name}</span>
-              <span className="inline md:hidden" title={l.name}>{l.name.substring(0, 1)}</span>
-            </a>
-          :
-            <Link key={l.name} to={l.path} className="px-3 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium flex items-center justify-center md:justify-start">
-              <span className="hidden md:inline">{l.name}</span>
-              <span className="inline md:hidden" title={l.name}>{l.name.substring(0, 1)}</span>
-            </Link>
-        ))}
-      </div>
-      <div className="p-4 border-t border-slate-800 text-xs flex flex-col gap-2 justify-center md:justify-start">
-        <Link to="/privacy" className="hover:text-white transition-colors hidden md:block">Privacy Policy</Link>
-        <Link to="/terms" className="hover:text-white transition-colors hidden md:block">Terms of Service</Link>
-        <Link to="/support" className="hover:text-white transition-colors hidden md:block">Support</Link>
-      </div>
-    </div>
-  );
-}
+
 
 export default App;

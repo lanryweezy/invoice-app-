@@ -33,7 +33,7 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <Sentry.ErrorBoundary fallback={<div className="p-8 text-center"><h2 className="text-xl font-bold text-slate-900 mb-2">Something went wrong</h2><p className="text-slate-500">Please refresh the page. If this keeps happening, contact support.</p></div>}>
+    <Sentry.ErrorBoundary fallback={({error, resetError}) => <div className="p-8 text-center"><h2 className="text-xl font-bold text-red-600 mb-2">Crash: {error?.message}</h2><pre className="text-left bg-slate-100 p-4 text-xs overflow-auto">{error?.stack}</pre></div>}>
       <HelmetProvider>
         <BrowserRouter>
           <AuthProvider>
