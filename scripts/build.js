@@ -11,7 +11,7 @@ async function build() {
   execSync('npm run build', { cwd: path.join(rootDir, 'apps/web'), stdio: 'inherit' });
 
   console.log('--- Building Marketing App ---');
-  execSync('npm run build', { cwd: path.join(rootDir, 'apps/marketing'), stdio: 'inherit' });
+  execSync('npx astro build', { cwd: path.join(rootDir, 'apps/marketing'), stdio: 'inherit' });
 
   console.log('--- Merging marketing into web dist ---');
   // Copy marketing assets into web dist so Vercel serves them together
