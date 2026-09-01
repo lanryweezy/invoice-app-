@@ -66,7 +66,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[20vh]">
+    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[20vh]" role="dialog" aria-modal="true" aria-label="Command Palette">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
@@ -84,6 +84,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
             type="text"
             className="w-full px-4 py-4 text-slate-900 bg-transparent border-0 focus:ring-0 placeholder-slate-400 text-lg outline-none"
             placeholder="Type a command or search..."
+            aria-label="Search commands"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -98,10 +99,12 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
               No results found for "{search}"
             </div>
           ) : (
-            <div className="space-y-1">
+            <div className="space-y-1" role="listbox">
               {filteredActions.map((action, index) => (
                 <button
                   key={action.id}
+                  role="option"
+                  aria-selected={index === selectedIndex}
                   onClick={() => {
                     action.onSelect();
                     onClose();
