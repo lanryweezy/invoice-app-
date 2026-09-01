@@ -246,7 +246,6 @@ describe('pushNotifications', () => {
         body: 'Test Body',
         icon: '/custom-icon.png',
         badge: '/favicon.svg',
-        vibrate: [200, 100, 200],
       });
     });
 
@@ -257,7 +256,6 @@ describe('pushNotifications', () => {
         body: 'Test Body',
         icon: '/favicon.svg',
         badge: '/favicon.svg',
-        vibrate: [200, 100, 200],
       });
     });
 
