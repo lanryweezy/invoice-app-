@@ -197,6 +197,15 @@ export function registerAuthCommands(program: Command): void {
         masked.smtp = { ...masked.smtp, pass: '****' };
       }
 
+      // 🛡️ Sentinel: Actively mask sensitive authentication tokens to prevent plaintext console leakage
+      if (masked.idToken) {
+        masked.idToken = '****';
+      }
+
+      if (masked.refreshToken) {
+        masked.refreshToken = '****';
+      }
+
       console.log(JSON.stringify(masked, null, 2));
     });
 
