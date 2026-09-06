@@ -16,3 +16,8 @@
 ## 2024-05-18 - Use cryptographically secure custom character set for random IDs
 **Learning:** Generating random IDs by converting a byte array to a hex string and then `.toUpperCase()` reduces the possible entropy of the string, and `.padStart(2, '0')` does not effectively increase the security. Instead, mapping cryptographically secure bytes onto a larger Base36 charset ('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ') provides a wider range of possible values for the same string length, increasing unpredictability for security-sensitive IDs like payment references.
 **Action:** Refactored `generateSecureId` in `crypto.ts` to use `crypto.getRandomValues()` to index into a Base36 charset instead of generating hex strings. Updated corresponding tests.
+
+## YYYY-MM-DD - [CRITICAL] Prevent plaintext token leakage in CLI output
+**Vulnerability:** The CLI `config get` command dumped the entire configuration object to the console, inadvertently exposing sensitive authentication tokens (`idToken`, `refreshToken`) in plaintext.
+**Learning:** Any CLI command that outputs configuration data must actively filter or mask all sensitive keys, not just passwords, to prevent credential leakage in terminal logs or screen sharing.
+**Prevention:** Always implement an explicit masking or allowlist approach when printing configuration objects to the console, specifically targeting authentication tokens and secrets.
