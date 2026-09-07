@@ -16,3 +16,8 @@
 ## 2024-05-18 - Use cryptographically secure custom character set for random IDs
 **Learning:** Generating random IDs by converting a byte array to a hex string and then `.toUpperCase()` reduces the possible entropy of the string, and `.padStart(2, '0')` does not effectively increase the security. Instead, mapping cryptographically secure bytes onto a larger Base36 charset ('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ') provides a wider range of possible values for the same string length, increasing unpredictability for security-sensitive IDs like payment references.
 **Action:** Refactored `generateSecureId` in `crypto.ts` to use `crypto.getRandomValues()` to index into a Base36 charset instead of generating hex strings. Updated corresponding tests.
+
+## 2024-10-27 - Security Fix: Mask sensitive authentication tokens in CLI output
+**Vulnerability:** The `invoiceapp config get` command in `apps/cli/src/commands/auth.ts` printed the entire configuration object to the console, masking the SMTP password but exposing `idToken` and `refreshToken` in plain text.
+**Learning:** CLI tools that handle authentication tokens must actively filter or mask these tokens when outputting configuration state to the console or logs. Relying on default serialization can easily leak short-lived or long-lived credentials.
+**Prevention:** Always implement explicit masking or redaction for properties known to hold sensitive data (like `idToken`, `refreshToken`, `apiKey`) before logging objects to stdout or returning them in API responses.
