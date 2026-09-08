@@ -74,7 +74,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
       />
 
       {/* Palette */}
-      <div className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200 transform transition-all scale-100 opacity-100">
+      <div className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200 transform transition-all scale-100 opacity-100" role="dialog" aria-modal="true" aria-label="Command Palette">
         <div className="flex items-center px-4 border-b border-slate-100">
           <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -82,6 +82,10 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
           <input
             ref={inputRef}
             type="text"
+            role="combobox"
+            aria-expanded="true"
+            aria-controls="command-palette-options"
+            aria-activedescendant={selectedIndex >= 0 && filteredActions.length > 0 ? filteredActions[selectedIndex].id : undefined}
             className="w-full px-4 py-4 text-slate-900 bg-transparent border-0 focus:ring-0 placeholder-slate-400 text-lg outline-none"
             placeholder="Type a command or search..."
             value={search}
@@ -92,7 +96,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
           </div>
         </div>
 
-        <div className="max-h-[60vh] overflow-y-auto p-2">
+        <div className="max-h-[60vh] overflow-y-auto p-2" role="listbox" id="command-palette-options">
           {filteredActions.length === 0 ? (
             <div className="py-12 text-center text-slate-500">
               No results found for "{search}"
@@ -102,6 +106,9 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
               {filteredActions.map((action, index) => (
                 <button
                   key={action.id}
+                  id={action.id}
+                  role="option"
+                  aria-selected={index === selectedIndex}
                   onClick={() => {
                     action.onSelect();
                     onClose();
