@@ -21,3 +21,7 @@
 **Vulnerability:** The CLI `config get` command printed the entire `config.json` file content, including sensitive `idToken` and `refreshToken` properties in plain text.
 **Learning:** Any debug or status commands that print configuration objects to the console must actively filter or mask all sensitive authentication tokens, not just third-party passwords like SMTP.
 **Prevention:** Always implement an explicit omit or mask list (e.g. `['pass', 'idToken', 'refreshToken']`) when serializing configuration objects for console output.
+## 2024-09-10 - Security Fix: Prevent CLI from leaking auth tokens
+**Vulnerability:** The CLI `config get` command printed the entire configuration object to the console, including sensitive `idToken` and `refreshToken` without masking them, exposing tokens to shoulder surfers and logs.
+**Learning:** Never assume JSON stringification of configuration objects is safe. Sensitive keys (like tokens and passwords) must be explicitly filtered or masked before any console output.
+**Prevention:** Always mask sensitive fields before printing.

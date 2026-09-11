@@ -193,6 +193,10 @@ export function registerAuthCommands(program: Command): void {
       const config = getConfig();
       const masked = { ...config };
 
+      // SECURITY: Actively mask sensitive authentication tokens to prevent plaintext leakage
+      if (masked.idToken) masked.idToken = '****';
+      if (masked.refreshToken) masked.refreshToken = '****';
+
       if (masked.smtp?.pass) {
         masked.smtp = { ...masked.smtp, pass: '****' };
       }
