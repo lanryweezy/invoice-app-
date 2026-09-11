@@ -200,6 +200,12 @@ export function registerAuthCommands(program: Command): void {
       if (masked.smtp?.pass) {
         masked.smtp = { ...masked.smtp, pass: '****' };
       }
+      if (masked.idToken) {
+        masked.idToken = '****';
+      }
+      if (masked.refreshToken) {
+        masked.refreshToken = '****';
+      }
 
       if (masked.idToken) {
         masked.idToken = '****';
