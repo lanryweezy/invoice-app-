@@ -14,6 +14,7 @@ export const ClientPortalView: React.FC<PortalProps> = ({ invoice, onConfirmPaym
   const [confirmed, setConfirmed] = useState(invoice.paymentConfirmedByClient || false);
   const [paying, setPaying] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   React.useEffect(() => {
     // Send a push notification tracking pixel when client opens the portal
@@ -56,12 +57,17 @@ export const ClientPortalView: React.FC<PortalProps> = ({ invoice, onConfirmPaym
   const handleDownloadPdf = async () => {
     const el = document.getElementById('portal-invoice-content');
     if (!el) return;
-    const { toJpeg } = await import('html-to-image');
-    const { jsPDF } = await import('jspdf');
-    const imgData = await toJpeg(el, { quality: 0.95, pixelRatio: 2 });
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
-    pdf.save(`Invoice-${invoice.invoiceNumber}.pdf`);
+    setIsGeneratingPdf(true);
+    try {
+      const { toJpeg } = await import('html-to-image');
+      const { jsPDF } = await import('jspdf');
+      const imgData = await toJpeg(el, { quality: 0.95, pixelRatio: 2 });
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+      pdf.save(`Invoice-${invoice.invoiceNumber}.pdf`);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
   };
 
 
@@ -245,9 +251,13 @@ export const ClientPortalView: React.FC<PortalProps> = ({ invoice, onConfirmPaym
               {paying ? 'Opening Payment...' : `Pay ${invoice.currency} ${numberFormatter.format(invoice.total || 0)}`}
             </button>
           )}
-          <button onClick={handleDownloadPdf} className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors flex items-center justify-center gap-2">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-            Download PDF
+          <button onClick={handleDownloadPdf} disabled={isGeneratingPdf} className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 disabled:opacity-70 disabled:cursor-not-allowed">
+            {isGeneratingPdf ? (
+              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+            ) : (
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+            )}
+            {isGeneratingPdf ? 'Generating...' : 'Download PDF'}
           </button>
           {invoice.status !== 'Paid' && !confirmed && onConfirmPayment && (
             <button onClick={handleConfirm} className="flex-1 py-3 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 font-bold rounded-xl transition-colors flex items-center justify-center gap-2">
