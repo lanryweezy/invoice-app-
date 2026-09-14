@@ -32,3 +32,6 @@
 ## 2024-03-24 - Ensure keyboard focus visibility and aria roles on Command Palette
 **Learning:** Command palette components that filter lists of actions frequently omit the `role="listbox"` and `role="option"` with `aria-selected` attributes, severely impacting screen reader interpretation of the filtered results. Furthermore, the interactive options must include explicit `focus-visible` styles (e.g. `focus-visible:ring-2 focus-visible:ring-indigo-500`) to guarantee visibility for keyboard navigators.
 **Action:** When implementing or modifying highly interactive autocomplete or command palette lists, wrap the results container in `role="listbox"`, apply `role="option"` to individual items mapped with `aria-selected` to the current selection index, and strictly ensure that the active and focused states are visually prominent via `focus-visible` ring utilities.
+## 2024-05-18 - Missing loading states on critical actions
+**Learning:** Found that "Download PDF" action in ClientPortalView and ActionButtons lacks loading states and can take several seconds to generate the document on the client-side causing user confusion.
+**Action:** When implementing client-side PDF generation, always add an `isGenerating` state and display a loading spinner on the trigger button.
