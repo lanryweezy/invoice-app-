@@ -35,3 +35,7 @@
 ## 2024-05-18 - Missing loading states on critical actions
 **Learning:** Found that "Download PDF" action in ClientPortalView and ActionButtons lacks loading states and can take several seconds to generate the document on the client-side causing user confusion.
 **Action:** When implementing client-side PDF generation, always add an `isGenerating` state and display a loading spinner on the trigger button.
+
+## 2024-05-24 - [Template Selector Accessibility]
+**Learning:** Custom template selectors were using role="listitem" with aria-pressed, which is meant for toggle buttons.
+**Action:** When building single-select lists, always use role="listbox" with role="option" and aria-selected to convey the selected state properly to screen readers.
