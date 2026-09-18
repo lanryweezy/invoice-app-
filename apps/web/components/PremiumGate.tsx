@@ -37,7 +37,7 @@ export const PremiumGate: React.FC<PremiumGateProps> = ({
         </div>
 
         {/* Hero Copy */}
-        <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4 tracking-tight">
+        <h2 id="premium-gate-title" className="text-3xl sm:text-4xl font-black text-slate-900 mb-4 tracking-tight">
           {title}
         </h2>
         <p className="text-lg text-slate-500 mb-10 max-w-lg mx-auto">
@@ -103,7 +103,7 @@ export const PremiumGate: React.FC<PremiumGateProps> = ({
 
   if (isModal) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm overflow-y-auto" role="dialog" aria-modal="true">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="premium-gate-title">
         <div className="relative w-full max-w-2xl my-8">
           {content}
         </div>
