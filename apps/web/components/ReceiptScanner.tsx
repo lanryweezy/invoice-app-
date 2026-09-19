@@ -31,13 +31,13 @@ export const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onCapture, onClo
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900 flex flex-col">
+    <div className="fixed inset-0 z-50 bg-slate-900 flex flex-col" role="dialog" aria-modal="true" aria-labelledby="receipt-scanner-title">
       {/* Header */}
       <div className="flex items-center justify-between p-4 bg-slate-800">
         <button onClick={onClose} className="text-white text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800 rounded px-2 py-1">
           Cancel
         </button>
-        <h2 className="text-white font-bold">Scan Receipt</h2>
+        <h2 id="receipt-scanner-title" className="text-white font-bold">Scan Receipt</h2>
         <div className="w-16" />
       </div>
 

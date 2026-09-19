@@ -35,3 +35,7 @@
 ## 2024-05-18 - Missing loading states on critical actions
 **Learning:** Found that "Download PDF" action in ClientPortalView and ActionButtons lacks loading states and can take several seconds to generate the document on the client-side causing user confusion.
 **Action:** When implementing client-side PDF generation, always add an `isGenerating` state and display a loading spinner on the trigger button.
+
+## 2024-03-24 - Ensure keyboard focus visibility and aria-modal on common dialogs
+**Learning:** Common dialogs like PricingModal and SidePanel often lack essential focus rings on secondary buttons (like 'Maybe Later') and the `aria-modal="true"` attribute on elements with `role="dialog"`, respectively, making keyboard navigation and screen reader experiences subpar.
+**Action:** Always verify that all interactive elements, especially secondary actions, have explicit `focus-visible` styles and that dialog containers implement the correct ARIA attributes for modal behavior. This includes `role="dialog"`, `aria-modal="true"`, and `aria-labelledby`.
