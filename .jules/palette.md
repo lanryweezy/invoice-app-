@@ -35,3 +35,6 @@
 ## 2024-05-18 - Missing loading states on critical actions
 **Learning:** Found that "Download PDF" action in ClientPortalView and ActionButtons lacks loading states and can take several seconds to generate the document on the client-side causing user confusion.
 **Action:** When implementing client-side PDF generation, always add an `isGenerating` state and display a loading spinner on the trigger button.
+## 2024-05-20 - Keyboard Accessibility for Secondary Actions
+**Learning:** Secondary buttons and interactive toggles (like "I Paid Offline" or QR code toggles) are frequently overlooked for keyboard focus states, breaking navigation for power users and screen readers.
+**Action:** Always ensure all interactive elements, including those in details panels and side-bars, use `focus:outline-none focus-visible:ring-2` to support keyboard navigation.
