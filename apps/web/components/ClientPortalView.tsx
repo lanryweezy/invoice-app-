@@ -3,6 +3,7 @@ import type { Invoice } from '../types';
 import { numberFormatter } from '../utils/formatters';
 
 import { trackEvent } from '../utils/analytics';
+import { generateSecureId } from '../utils/crypto';
 
 
 interface PortalProps {
@@ -35,11 +36,11 @@ export const ClientPortalView: React.FC<PortalProps> = ({ invoice, onConfirmPaym
     setPaying(true);
     const amount = (invoice.total || 0) * 100;
     const handler = (window as any).PaystackPop.setup({
-      key: import.meta.env.VITE_P·YST·CK_PUBLIC_KEY,
+      key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
       email: invoice.client.email || 'client@example.com',
       amount,
       currency: invoice.currency === 'NGN' ? 'NGN' : 'USD',
-      ref: `INV-${invoice.invoiceNumber}-${Date.now()}`,
+      ref: `INV-${invoice.invoiceNumber}-${Date.now()}-${generateSecureId(16)}`,
       metadata: {
         invoice_number: invoice.invoiceNumber,
         client_name: invoice.client.name,
