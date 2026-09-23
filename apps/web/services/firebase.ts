@@ -19,11 +19,14 @@ const db = getFirestore(app);
 
 // Enable offline persistence
 if (typeof window !== 'undefined') {
+  // 🌱 Flora: Add comprehensive error handling to floating promise for IndexedDB persistence initialization to prevent silent unhandled rejections
   enableIndexedDbPersistence(db).catch((err) => {
     if (err.code === 'failed-precondition') {
-      console.warn('Multiple tabs open, persistence can only be enabled in one tab at a a time.');
+      console.warn('Multiple tabs open, persistence can only be enabled in one tab at a a time.', err);
     } else if (err.code === 'unimplemented') {
-      console.warn('The current browser does not support all of the features required to enable persistence');
+      console.warn('The current browser does not support all of the features required to enable persistence', err);
+    } else {
+      console.error('Failed to initialize offline persistence:', err);
     }
   });
 }
