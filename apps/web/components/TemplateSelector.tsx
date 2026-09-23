@@ -19,15 +19,15 @@ const templates: { id: TemplateId; name: string }[] = [
 
 export const TemplateSelector: React.FC<TemplateSelectorProps> = ({ selectedTemplate, onSelectTemplate }) => {
   return (
-    <div className="flex items-center gap-3 overflow-x-auto hide-scrollbar max-w-full" role="group" aria-label="Invoice Templates">
+    <div className="flex items-center gap-3 overflow-x-auto hide-scrollbar max-w-full" aria-label="Invoice Templates">
       <span id="template-selector-label" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-1 hidden lg:block whitespace-nowrap">Template:</span>
-      <div className="flex p-0.5 rounded-lg gap-2" role="list">
+      <div className="flex p-0.5 rounded-lg gap-2" role="listbox" aria-labelledby="template-selector-label">
         {templates.map(template => (
             <button
               key={template.id}
-              role="listitem"
+              role="option"
               onClick={() => onSelectTemplate(template.id)}
-              aria-pressed={selectedTemplate === template.id}
+              aria-selected={selectedTemplate === template.id}
               aria-label={`Select ${template.name} template`}
               className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all whitespace-nowrap border shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1 ${
                   selectedTemplate === template.id
