@@ -25,3 +25,7 @@
 **Vulnerability:** The CLI `config get` command printed the entire configuration object to the console, including sensitive `idToken` and `refreshToken` without masking them, exposing tokens to shoulder surfers and logs.
 **Learning:** Never assume JSON stringification of configuration objects is safe. Sensitive keys (like tokens and passwords) must be explicitly filtered or masked before any console output.
 **Prevention:** Always mask sensitive fields before printing.
+## 2024-05-24 - Fix Predictable Payment References
+**Vulnerability:** The Paystack payment initialization in the Client Portal used a predictable reference format (`INV-{invoiceNumber}-{timestamp}`).
+**Learning:** Predictable payment references can allow attackers to enumerate or replay transactions, potentially causing state manipulation or denial of service on payment webhooks.
+**Prevention:** Always use cryptographically secure random identifiers (e.g., `generateSecureId`) appended to predictable data when generating transaction references for external payment gateways.
