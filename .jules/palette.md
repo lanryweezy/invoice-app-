@@ -39,3 +39,6 @@
 ## 2024-05-24 - [Template Selector Accessibility]
 **Learning:** Custom template selectors were using role="listitem" with aria-pressed, which is meant for toggle buttons.
 **Action:** When building single-select lists, always use role="listbox" with role="option" and aria-selected to convey the selected state properly to screen readers.
+## 2024-03-05 - Missing ARIA Labels on Role Dialogs
+**Learning:** Found that custom `role="dialog"` elements used in modal conditions often miss their required `aria-labelledby` property. Also learned that supplementary buttons in these modals can be frequently missed when applying uniform `focus-visible` ring styles.
+**Action:** When auditing custom modal or panel implementations, specifically verify that any `role="dialog"` includes `aria-labelledby` linking to a visible title ID, and that all interactive elements have explicit focus rings (`focus-visible:ring-2`) to ensure keyboard navigability.
