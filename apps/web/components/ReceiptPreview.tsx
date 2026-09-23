@@ -42,10 +42,10 @@ export const ReceiptPreview: React.FC<ReceiptPreviewProps> = ({ receipt, templat
     };
 
     return (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="receipt-preview-title">
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
                 <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                    <h2 className="text-xl font-bold text-slate-900">Receipt {receipt.id}</h2>
+                    <h2 id="receipt-preview-title" className="text-xl font-bold text-slate-900">Receipt {receipt.id}</h2>
                     <div className="flex items-center gap-2">
                         <button onClick={handleDownload} className="flex items-center gap-2 px-3 py-1.5 bg-teal-50 text-teal-700 hover:bg-teal-100 rounded-lg transition-colors text-sm font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1">
                             <DownloadIcon className="w-4 h-4" /> Download PDF
