@@ -48,3 +48,6 @@
 ## 2024-03-05 - Missing ARIA Labels on Role Dialogs
 **Learning:** Found that custom `role="dialog"` elements used in modal conditions often miss their required `aria-labelledby` property. Also learned that supplementary buttons in these modals can be frequently missed when applying uniform `focus-visible` ring styles.
 **Action:** When auditing custom modal or panel implementations, specifically verify that any `role="dialog"` includes `aria-labelledby` linking to a visible title ID, and that all interactive elements have explicit focus rings (`focus-visible:ring-2`) to ensure keyboard navigability.
+## 2024-05-18 - Missing Focus Visible Styles on Destructive Actions
+**Learning:** Secondary buttons, especially destructive ones like "Sign Out" located at the bottom of modals, are frequently missed when applying `focus-visible` keyboard navigation styles compared to primary form actions.
+**Action:** Always verify keyboard navigation styles (`focus-visible:ring-2`, `focus-visible:ring-offset-2`) exist on ALL interactive elements in a modal, not just the primary submit button.
