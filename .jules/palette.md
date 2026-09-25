@@ -51,3 +51,6 @@
 ## 2024-05-18 - Missing Focus Visible Styles on Destructive Actions
 **Learning:** Secondary buttons, especially destructive ones like "Sign Out" located at the bottom of modals, are frequently missed when applying `focus-visible` keyboard navigation styles compared to primary form actions.
 **Action:** Always verify keyboard navigation styles (`focus-visible:ring-2`, `focus-visible:ring-offset-2`) exist on ALL interactive elements in a modal, not just the primary submit button.
+## 2024-05-20 - [ARIA Attributes for Success Dialogs]
+**Learning:** Success dialogs mapped conditionally within the same modal file may be missed during a11y sweeps if the primary dialog already has standard attributes.
+**Action:** Always verify all conditional rendering branches (`if (success) {...}`) of a modal component when verifying `role="dialog"` or `aria-labelledby` usage.
