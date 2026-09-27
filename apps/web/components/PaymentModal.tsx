@@ -62,7 +62,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                 <div className="px-5 py-3 border-b border-slate-100">
                     <div className="flex justify-between items-center mb-2">
                         <h2 id="payment-modal-title" className="text-base font-bold text-slate-900">Record Payment</h2>
-                        <button onClick={onClose} aria-label="Close" className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+                        <button onClick={onClose} aria-label="Close" className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2">
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                     </div>
@@ -126,7 +126,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                                     key={m.value}
                                     type="button"
                                     onClick={() => setPaymentMethod(m.value)}
-                                    className={`p-2 rounded-lg border text-left transition-all ${
+                                    className={`p-2 rounded-lg border text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1 ${
                                         paymentMethod === m.value
                                             ? 'border-teal-500 bg-teal-50 ring-1 ring-teal-500/20'
                                             : 'border-slate-200 hover:border-slate-300 bg-white'
@@ -138,7 +138,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                             ))}
                         </div>
                         {!showAllMethods && (
-                            <button type="button" onClick={() => setShowAllMethods(true)} className="text-xs text-teal-600 font-bold mt-2 hover:underline">
+                            <button type="button" onClick={() => setShowAllMethods(true)} className="text-xs text-teal-600 font-bold mt-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 rounded">
                                 Show more methods
                             </button>
                         )}
@@ -172,7 +172,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
 
                     {/* Actions */}
                     <div className="pt-1 flex gap-2">
-                        <button type="button" onClick={onClose} className="flex-1 px-3 py-2.5 text-slate-700 font-bold bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors text-xs">
+                        <button type="button" onClick={onClose} className="flex-1 px-3 py-2.5 text-slate-700 font-bold bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2">
                             Cancel
                         </button>
                         <button

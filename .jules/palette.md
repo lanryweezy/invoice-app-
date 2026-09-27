@@ -51,3 +51,6 @@
 ## 2024-05-18 - Missing Focus Visible Styles on Destructive Actions
 **Learning:** Secondary buttons, especially destructive ones like "Sign Out" located at the bottom of modals, are frequently missed when applying `focus-visible` keyboard navigation styles compared to primary form actions.
 **Action:** Always verify keyboard navigation styles (`focus-visible:ring-2`, `focus-visible:ring-offset-2`) exist on ALL interactive elements in a modal, not just the primary submit button.
+## 2024-05-18 - Missing focus states on secondary buttons
+**Learning:** Found that secondary modal interactive elements (close, cancel, selector buttons) across custom modals in `apps/web` often miss keyboard `focus-visible` states, making keyboard navigation difficult to track visually.
+**Action:** Always ensure explicitly defined `focus-visible:ring-2 focus-visible:ring-offset-2` (using appropriate brand colors) is applied to all secondary or icon-only interactive elements within modals for a fully accessible keyboard experience.

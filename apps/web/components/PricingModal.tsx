@@ -68,7 +68,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
 
   if (success) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" role="dialog" aria-modal="true">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="pricing-success-title">
         <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden text-center">
           <div className="p-8">
             <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -76,7 +76,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-xl font-black text-slate-900 mb-2">Welcome to Pro!</h2>
+            <h2 id="pricing-success-title" className="text-xl font-black text-slate-900 mb-2">Welcome to Pro!</h2>
             <p className="text-sm text-slate-500 mb-1">Your account has been upgraded successfully.</p>
             <p className="text-xs text-slate-400 mb-6">
               Unlimited clients, branches, accounting, cloud sync, and more.
