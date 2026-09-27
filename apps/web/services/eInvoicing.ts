@@ -1,5 +1,5 @@
 import type { Invoice, User, Client, LineItem } from '../types';
-import { computeInvoiceHash } from '../utils/crypto';
+import { computeInvoiceHash, generateSecureId } from '../utils/crypto';
 
 export interface NRSValidationError {
   field: string;
@@ -379,7 +379,7 @@ export async function submitToNRS(invoice: Invoice, signature?: string): Promise
     submissionTimestamp: new Date().toISOString(),
   };
 
-  const submissionId = `NRS-${invoice.invoiceNumber}-${Date.now()}`;
+  const submissionId = `NRS-${invoice.invoiceNumber}-${Date.now()}-${generateSecureId(6)}`;
 
   return {
     success: true,
