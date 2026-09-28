@@ -35,3 +35,7 @@
 ## 2026-08-24 - Prevent batch failures in scheduled tasks
 **Learning:** Using Promise.all for batch processing (like sending notifications in chunks) makes the entire chunk fail if a single promise rejects. This causes dropped notifications for other users in the chunk.
 **Action:** Use Promise.allSettled for independent batch tasks and explicitly handle/log the rejections.
+
+## 2026-08-06 - Nodemailer SMTP Hangs in Serverless Functions
+**Learning:** Default Nodemailer configurations do not have explicit connection or socket timeouts. If the external SMTP server hangs without closing the TCP connection, `transporter.sendMail()` can block indefinitely. In a serverless environment like Vercel API routes, this causes the function to hang until it is forcibly terminated, dropping requests and potentially leading to connection exhaustion.
+**Action:** Always pass explicit `connectionTimeout` (e.g., 10000ms) and `socketTimeout` (e.g., 15000ms) inside the `nodemailer.createTransport()` configuration block, not just in background jobs, but also in real-time API endpoints.

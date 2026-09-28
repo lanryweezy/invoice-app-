@@ -132,6 +132,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
       connectionTimeout: 10000,
       greetingTimeout: 10000,
+      // 🌱 Flora: Add socketTimeout to prevent indefinite hangs during email sending if the server becomes unresponsive
+      socketTimeout: 15000,
     });
 
     const fromName = process.env.SMTP_FROM_NAME || process.env.SMTP_USER;
