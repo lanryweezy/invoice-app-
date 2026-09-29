@@ -120,12 +120,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onS
                     {/* Quick Method Selector */}
                     <div>
                         <label className="block text-xs font-semibold text-slate-700 mb-1">Payment Method</label>
-                        <div className="grid grid-cols-3 gap-1.5">
+                        <div className="grid grid-cols-3 gap-1.5" role="group" aria-label="Payment Method">
                             {(showAllMethods ? getAllPaymentMethods() : getQuickPaymentMethods()).map(m => (
                                 <button
                                     key={m.value}
                                     type="button"
                                     onClick={() => setPaymentMethod(m.value)}
+                                    aria-pressed={paymentMethod === m.value}
                                     className={`p-2 rounded-lg border text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1 ${
                                         paymentMethod === m.value
                                             ? 'border-teal-500 bg-teal-50 ring-1 ring-teal-500/20'

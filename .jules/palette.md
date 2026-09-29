@@ -54,3 +54,7 @@
 ## 2024-05-18 - Missing focus states on secondary buttons
 **Learning:** Found that secondary modal interactive elements (close, cancel, selector buttons) across custom modals in `apps/web` often miss keyboard `focus-visible` states, making keyboard navigation difficult to track visually.
 **Action:** Always ensure explicitly defined `focus-visible:ring-2 focus-visible:ring-offset-2` (using appropriate brand colors) is applied to all secondary or icon-only interactive elements within modals for a fully accessible keyboard experience.
+
+## 2024-05-18 - Missing State on Custom Button Groups
+**Learning:** Custom selectable button groups (like payment method selectors) often lack `aria-pressed` or `aria-selected` attributes, leaving screen reader users unaware of their selected state.
+**Action:** Always add `aria-pressed={state === value}` to individual toggle buttons and wrap them in a container with `role="group"` and a descriptive `aria-label` to communicate their context and state.
