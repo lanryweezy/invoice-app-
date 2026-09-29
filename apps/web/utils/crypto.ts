@@ -2,12 +2,20 @@ import type { Invoice } from "../types";
 
 export function generateSecureId(length: number = 6): string {
   const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  const array = new Uint8Array(length);
-  crypto.getRandomValues(array);
-
   let result = '';
-  for (let i = 0; i < length; i++) {
-    result += charset[array[i] % charset.length];
+  const maxValid = 256 - (256 % charset.length);
+
+  while (result.length < length) {
+    const needed = length - result.length;
+    // Generate extra bytes to minimize loop iterations
+    const array = new Uint8Array(Math.ceil(needed * 256 / maxValid));
+    crypto.getRandomValues(array);
+
+    for (let i = 0; i < array.length && result.length < length; i++) {
+      if (array[i] < maxValid) {
+        result += charset[array[i] % charset.length];
+      }
+    }
   }
 
   return result;
