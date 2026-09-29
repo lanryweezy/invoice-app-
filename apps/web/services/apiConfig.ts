@@ -3,6 +3,7 @@
  */
 
 import { trackEvent } from '../utils/analytics';
+import { getErrorMessage } from '../utils/error';
 
 export interface NrsApiConfig {
   baseUrl: string;
@@ -75,14 +76,14 @@ export async function apiRequest<T = unknown, R = unknown>(
     return await response.json();
   } catch (error) {
     const duration = Date.now() - startTime;
-    if ((error as Error).name === 'AbortError') {
+    if (error instanceof Error && error.name === 'AbortError') {
       logApiCall(endpoint, method, duration, 408);
       throw new NrsApiError(408, 'Request timed out', endpoint);
     }
     if (error instanceof NrsApiError) throw error;
 
     logApiCall(endpoint, method, duration, 0);
-    throw new NrsApiError(0, (error as Error).message, endpoint);
+    throw new NrsApiError(0, getErrorMessage(error), endpoint);
   } finally {
     clearTimeout(timeoutId);
   }
