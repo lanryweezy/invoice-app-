@@ -138,7 +138,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
               <Feature text="Accounting Activities" />
             </ul>
             {!user ? (
-              <button onClick={onLogin} className="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2.5 px-4 rounded-xl transition-colors text-sm cursor-pointer">
+              <button onClick={onLogin} className="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2.5 px-4 rounded-xl transition-colors text-sm cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2">
                 Create Free Account
               </button>
             ) : (
