@@ -58,3 +58,6 @@
 ## 2024-05-18 - Missing State on Custom Button Groups
 **Learning:** Custom selectable button groups (like payment method selectors) often lack `aria-pressed` or `aria-selected` attributes, leaving screen reader users unaware of their selected state.
 **Action:** Always add `aria-pressed={state === value}` to individual toggle buttons and wrap them in a container with `role="group"` and a descriptive `aria-label` to communicate their context and state.
+## YYYY-MM-DD - [Missing Focus Styles on Modal CTA]
+**Learning:** Found that secondary or conditionally rendered CTA buttons inside modals (like the 'Create Free Account' in PricingModal) occasionally lack `focus-visible` outline styles, which impacts keyboard navigation for unauthenticated users.
+**Action:** Always verify keyboard focus styles (`focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2`) are explicitly set on all interactive elements in modals, not just primary upgrade buttons.
