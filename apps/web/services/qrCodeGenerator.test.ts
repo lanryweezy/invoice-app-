@@ -10,6 +10,9 @@ import {
 import type { Invoice } from '../types';
 
 vi.mock('qrcode', () => ({ default: { toString: vi.fn() } }));
+vi.mock('../utils/crypto', () => ({
+  generateSecureId: () => 'ABCDEF'
+}));
 
 describe('qrCodeGenerator', () => {
   beforeEach(() => {
@@ -36,7 +39,7 @@ describe('qrCodeGenerator', () => {
         bankName: 'GTB',
         accountNumber: '01234',
         accountName: 'John',
-        reference: 'INV-1234567890',
+        reference: 'INV-1234567890-ABCDEF',
         description: 'Payment of NGN 15,000',
       }),
       expect.objectContaining({ type: 'svg', errorCorrectionLevel: 'M' })
