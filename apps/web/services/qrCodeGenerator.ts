@@ -1,4 +1,5 @@
 import QRCode from 'qrcode';
+import { generateSecureId } from '../utils/crypto';
 import type { Invoice } from '../types';
 
 export interface QRCodeOptions {
@@ -71,7 +72,7 @@ export async function generatePaymentQR(
     bankName,
     accountNumber,
     accountName,
-    reference: `INV-${Date.now()}`,
+    reference: `INV-${Date.now()}-${generateSecureId(6)}`,
     description: `Payment of NGN ${amount.toLocaleString()}`,
   };
 

@@ -29,3 +29,7 @@
 **Vulnerability:** The Paystack payment initialization in the Client Portal used a predictable reference format (`INV-{invoiceNumber}-{timestamp}`).
 **Learning:** Predictable payment references can allow attackers to enumerate or replay transactions, potentially causing state manipulation or denial of service on payment webhooks.
 **Prevention:** Always use cryptographically secure random identifiers (e.g., `generateSecureId`) appended to predictable data when generating transaction references for external payment gateways.
+## 2025-05-24 - Predictable Payment Transaction References
+**Vulnerability:** Payment QR references were predictably generated using Date.now().
+**Learning:** Using predictable timestamps for payment gateways can lead to transaction enumeration and replay vulnerabilities.
+**Prevention:** Always append cryptographically secure random identifiers (like generateSecureId) when generating transaction references.
