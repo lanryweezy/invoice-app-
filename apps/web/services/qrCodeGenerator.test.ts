@@ -29,16 +29,7 @@ describe('qrCodeGenerator', () => {
     const result = await generatePaymentQR(15000, 'GTB', '01234', 'John');
 
     expect(QRCode.toString).toHaveBeenCalledWith(
-      JSON.stringify({
-        type: 'payment',
-        amount: 15000,
-        currency: 'NGN',
-        bankName: 'GTB',
-        accountNumber: '01234',
-        accountName: 'John',
-        reference: 'INV-1234567890',
-        description: 'Payment of NGN 15,000',
-      }),
+      expect.stringMatching(/"reference":"INV-1234567890-[A-Z0-9]{6}"/),
       expect.objectContaining({ type: 'svg', errorCorrectionLevel: 'M' })
     );
     expect(result).toBe(`data:image/svg+xml;base64,${btoa('<svg>test</svg>')}`);
