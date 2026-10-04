@@ -33,3 +33,7 @@
 **Vulnerability:** Payment QR references were predictably generated using Date.now().
 **Learning:** Using predictable timestamps for payment gateways can lead to transaction enumeration and replay vulnerabilities.
 **Prevention:** Always append cryptographically secure random identifiers (like generateSecureId) when generating transaction references.
+## 2024-10-04 - Fix CSV Injection in Audit Trail Export
+**Vulnerability:** The CSV export function `escapeCSV` in `apps/web/services/auditTrail.ts` failed to sanitize cells starting with formula characters (`=`, `+`, `-`, `@`), enabling CSV Injection (Formula Injection) attacks.
+**Learning:** Just escaping commas and quotes is insufficient for secure CSV exports when the file might be opened in spreadsheet software.
+**Prevention:** Always prepend a single quote (`'`) to any CSV value starting with `=, +, -, or @` before wrapping in double quotes.
