@@ -58,3 +58,6 @@
 ## 2024-05-18 - Missing State on Custom Button Groups
 **Learning:** Custom selectable button groups (like payment method selectors) often lack `aria-pressed` or `aria-selected` attributes, leaving screen reader users unaware of their selected state.
 **Action:** Always add `aria-pressed={state === value}` to individual toggle buttons and wrap them in a container with `role="group"` and a descriptive `aria-label` to communicate their context and state.
+## 2024-03-24 - Missing ARIA Live regions on dynamic state indicators
+**Learning:** Found that the `OfflineIndicator` component appeared on the screen and changed states (online/offline) dynamically without any screen reader announcements. This meant visually impaired users were completely unaware of critical connectivity changes.
+**Action:** When implementing global or transient state indicators (like toast messages or offline banners), always include dynamic `role` (`alert` or `status`) and `aria-live` (`assertive` or `polite`) attributes that match the severity of the state change.
