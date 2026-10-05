@@ -153,6 +153,43 @@ describe('structuredExport', () => {
       // So the expected format is: "Line 1\nLine 2"|1|100|Standard|PCS|100;"Item ""Special"""|1|200|Standard|PCS|200
       expect(dataRow).toContain('"Line 1\nLine 2"|1|100|Standard|PCS|100;"Item ""Special"""|1|200|Standard|PCS|200');
     });
+
+    it('prevents CSV injection by escaping formula characters', () => {
+      const csvInvoice = {
+        ...mockInvoice,
+        client: {
+          ...mockInvoice.client,
+          name: '=cmd|\\\' /C calc\'!A0',
+        },
+        lineItems: [
+          {
+            id: '1',
+            description: '+1-1',
+            quantity: 1,
+            price: 100
+          },
+          {
+            id: '2',
+            description: '@SUM(A1:A2)',
+            quantity: 1,
+            price: 200
+          },
+          {
+            id: '3',
+            description: '-1+1',
+            quantity: 1,
+            price: 300
+          }
+        ]
+      } as unknown as Invoice;
+
+      const result = exportToCSV(csvInvoice);
+      const lines = result.split('\n');
+      const dataRow = lines.slice(1).join('\n');
+
+      expect(dataRow).toContain("'=cmd|\\\' /C calc\'!A0");
+      expect(dataRow).toContain("'+1-1|1|100|Standard|PCS|100;'@SUM(A1:A2)|1|200|Standard|PCS|200;'-1+1|1|300|Standard|PCS|300");
+    });
   });
 
   it('exports batch as JSON using built-in strategy', async () => {
