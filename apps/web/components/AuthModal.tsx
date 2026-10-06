@@ -100,7 +100,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginWi
         <div className="p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 rounded-lg border border-red-100">
+              <div className="p-3 text-sm text-red-600 bg-red-50 rounded-lg border border-red-100" role="alert" aria-live="assertive">
                 {error}
               </div>
             )}
