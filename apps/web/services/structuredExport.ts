@@ -216,10 +216,15 @@ export function exportToXML(invoice: Invoice): string {
 }
 
 function escapeCSV(value: string): string {
-  if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-    return `"${value.replace(/"/g, '""')}"`;
+  let sanitized = value;
+  // Security: Prevent CSV Injection (Formula Injection)
+  if (/^[=+\-@]/.test(sanitized)) {
+    sanitized = "'" + sanitized;
   }
-  return value;
+  if (sanitized.includes(',') || sanitized.includes('"') || sanitized.includes('\n')) {
+    return `"${sanitized.replace(/"/g, '""')}"`;
+  }
+  return sanitized;
 }
 
 export function exportToCSV(invoice: Invoice): string {
