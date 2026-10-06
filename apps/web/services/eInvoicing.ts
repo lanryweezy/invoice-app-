@@ -351,11 +351,23 @@ export function exportStructuredData(invoice: Invoice): {
   };
 }
 
+function escapeCSV(value: string): string {
+  let sanitized = value;
+  // Security: Prevent CSV Injection (Formula Injection)
+  if (/^[=+\-@]/.test(sanitized)) {
+    sanitized = "'" + sanitized;
+  }
+  if (sanitized.includes(',') || sanitized.includes('"') || sanitized.includes('\n')) {
+    return `"${sanitized.replace(/"/g, '""')}"`;
+  }
+  return sanitized;
+}
+
 function convertToCSV(json: NRSInvoiceJSON): string {
   const header = 'Description,Quantity,UnitPrice,TaxCategory,UnitOfMeasure,LineTotal';
   const rows = json.lineItems.map(
     (item) =>
-      `"${item.description}",${item.quantity},${item.unitPrice},"${item.taxCategory}","${item.unitOfMeasure}",${item.lineTotal}`
+      `${escapeCSV(item.description)},${item.quantity},${item.unitPrice},${escapeCSV(item.taxCategory)},${escapeCSV(item.unitOfMeasure)},${item.lineTotal}`
   );
   const totals = `,,,"TOTAL",,${json.totals.totalAmount}`;
   return [header, ...rows, totals].join('\n');
