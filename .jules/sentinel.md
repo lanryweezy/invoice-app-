@@ -37,3 +37,7 @@
 **Vulnerability:** The CSV export function `escapeCSV` in `apps/web/services/auditTrail.ts` failed to sanitize cells starting with formula characters (`=`, `+`, `-`, `@`), enabling CSV Injection (Formula Injection) attacks.
 **Learning:** Just escaping commas and quotes is insufficient for secure CSV exports when the file might be opened in spreadsheet software.
 **Prevention:** Always prepend a single quote (`'`) to any CSV value starting with `=, +, -, or @` before wrapping in double quotes.
+## 2024-10-04 - Fix CSV Injection in Invoice Export
+**Vulnerability:** The CSV export functions in `apps/web/services/structuredExport.ts` and `apps/web/services/eInvoicing.ts` failed to sanitize cells starting with formula characters (`=`, `+`, `-`, `@`), enabling CSV Injection (Formula Injection) attacks.
+**Learning:** Reusing logic without consistently applying security patches can lead to vulnerabilities. We must ensure all CSV export functions sanitize against formula injection.
+**Prevention:** Always prepend a single quote (`'`) to any CSV value starting with `=, +, -, or @` before wrapping in double quotes, and enforce the use of centralized, secure CSV escaping utilities.
