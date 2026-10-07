@@ -41,3 +41,8 @@
 **Vulnerability:** The CSV export functions in `apps/web/services/structuredExport.ts` and `apps/web/services/eInvoicing.ts` failed to sanitize cells starting with formula characters (`=`, `+`, `-`, `@`), enabling CSV Injection (Formula Injection) attacks.
 **Learning:** Reusing logic without consistently applying security patches can lead to vulnerabilities. We must ensure all CSV export functions sanitize against formula injection.
 **Prevention:** Always prepend a single quote (`'`) to any CSV value starting with `=, +, -, or @` before wrapping in double quotes, and enforce the use of centralized, secure CSV escaping utilities.
+
+## 2024-10-24 - Fix Predictable Transaction References
+**Vulnerability:** External payment gateways (e.g., Paystack, Flutterwave) used predictable `Date.now()` strings for transaction references, enabling transaction enumeration and replay attacks.
+**Learning:** Never use purely time-based IDs for security-sensitive references.
+**Prevention:** Use a cryptographically secure random identifier (e.g., `generateSecureId`) for all payment and transaction references.

@@ -1,3 +1,5 @@
+import { generateSecureId } from '../utils/crypto';
+
 export interface Customer {
   id: string;
   email: string;
@@ -50,7 +52,7 @@ export class PaystackAdapter implements PaymentProvider {
 
   async initialize(amount: number, currency: string, customer: Customer, invoiceId: string): Promise<PaymentLink> {
     // Stubbed implementation for Paystack
-    return { url: `https://paystack.com/pay/${invoiceId}`, reference: `PAYSTACK-${Date.now()}` };
+    return { url: `https://paystack.com/pay/${invoiceId}`, reference: `PAYSTACK-${generateSecureId(12)}` };
   }
 
   async verify(reference: string): Promise<PaymentStatus> {
@@ -62,7 +64,7 @@ export class PaystackAdapter implements PaymentProvider {
   }
 
   async createVirtualAccount(customer: Customer): Promise<VirtualAccount> {
-    return { accountName: customer.firstName || 'Customer', accountNumber: '0123456789', bankName: 'Paystack Bank', reference: `DVA-${Date.now()}` };
+    return { accountName: customer.firstName || 'Customer', accountNumber: '0123456789', bankName: 'Paystack Bank', reference: `DVA-${generateSecureId(12)}` };
   }
 
   async get(reference: string): Promise<PaymentStatus> {
@@ -87,7 +89,7 @@ export class FlutterwaveAdapter implements PaymentProvider {
 
   async initialize(amount: number, currency: string, customer: Customer, invoiceId: string): Promise<PaymentLink> {
     // Stubbed implementation for Flutterwave
-    return { url: `https://flutterwave.com/pay/${invoiceId}`, reference: `FLW-${Date.now()}` };
+    return { url: `https://flutterwave.com/pay/${invoiceId}`, reference: `FLW-${generateSecureId(12)}` };
   }
 
   async verify(reference: string): Promise<PaymentStatus> {
@@ -99,7 +101,7 @@ export class FlutterwaveAdapter implements PaymentProvider {
   }
 
   async createVirtualAccount(customer: Customer): Promise<VirtualAccount> {
-    return { accountName: customer.firstName || 'Customer', accountNumber: '9876543210', bankName: 'Wema Bank', reference: `FLW-DVA-${Date.now()}` };
+    return { accountName: customer.firstName || 'Customer', accountNumber: '9876543210', bankName: 'Wema Bank', reference: `FLW-DVA-${generateSecureId(12)}` };
   }
 
   async get(reference: string): Promise<PaymentStatus> {
