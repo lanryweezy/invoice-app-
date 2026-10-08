@@ -46,3 +46,7 @@
 **Vulnerability:** External payment gateways (e.g., Paystack, Flutterwave) used predictable `Date.now()` strings for transaction references, enabling transaction enumeration and replay attacks.
 **Learning:** Never use purely time-based IDs for security-sensitive references.
 **Prevention:** Use a cryptographically secure random identifier (e.g., `generateSecureId`) for all payment and transaction references.
+## 2024-11-13 - [Predictable Identifiers Overwriting Secure Ones]
+**Vulnerability:** `stampDuty.ts` securely generated a receipt number in `calculateStampDuty`, but `generateStampReceipt` subsequently overwrote it with a predictable `SD-${invoice.id}-${Date.now()}`. A similar issue existed in `whrCalculator.ts` for WHT certificates.
+**Learning:** Functions that wrap or extend core logic may inadvertently regress security enhancements (like secure IDs) if they attempt to rebuild or customize identifiers locally without including the necessary entropy.
+**Prevention:** Always reuse the securely generated identifier from the base object rather than recreating it, or ensure all layers use `generateSecureId` when generating public-facing identifiers like receipt or certificate numbers to prevent enumeration.

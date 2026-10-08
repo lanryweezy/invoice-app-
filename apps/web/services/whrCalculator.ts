@@ -1,3 +1,5 @@
+import { generateSecureId } from '../utils/crypto';
+
 export interface Invoice {
   id: string;
   clientName: string;
@@ -120,7 +122,7 @@ export function generateWHTCertificate(invoice: Invoice): WHTCertificate {
   const whtType = detectWHTType(invoice.description);
   const whtRate = WHT_RATES[whtType];
   const whtAmount = calculateWHT(invoice.amount, whtType);
-  const certNumber = `WHT-${invoice.id}-${Date.now()}`;
+  const certNumber = `WHT-${invoice.id}-${Date.now()}-${generateSecureId(6)}`;
 
   return {
     invoiceId: invoice.id,
