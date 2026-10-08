@@ -7,6 +7,7 @@ interface TooltipProps {
 
 export const Tooltip: React.FC<TooltipProps> = ({ content, children }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const tooltipId = React.useId();
 
   return (
     <div 
@@ -15,10 +16,12 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, children }) => {
         onMouseLeave={() => setIsVisible(false)}
         onFocus={() => setIsVisible(true)}
         onBlur={() => setIsVisible(false)}
+        aria-describedby={isVisible ? tooltipId : undefined}
+        tabIndex={0}
     >
       {children}
       {isVisible && (
-        <div className="absolute z-50 w-48 p-2 text-xs text-white bg-slate-900 rounded-lg shadow-xl -top-2 left-1/2 -translate-x-1/2 -translate-y-full animate-fadeIn pointer-events-none text-center">
+        <div id={tooltipId} role="tooltip" className="absolute z-50 w-48 p-2 text-xs text-white bg-slate-900 rounded-lg shadow-xl -top-2 left-1/2 -translate-x-1/2 -translate-y-full animate-fadeIn pointer-events-none text-center">
           {content}
           <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45"></div>
         </div>
