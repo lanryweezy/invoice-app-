@@ -79,7 +79,7 @@ describe('stampDuty', () => {
         amount: 50,
         rate: 50,
         stampType: 'electronic',
-        receiptNumber: 'SD-INV-123-1704067200000',
+        receiptNumber: expect.stringMatching(/^SD-INV-123-1704067200000-[A-Z0-9]{4}$/),
         date: '2024-01-01T00:00:00.000Z'
       });
     });
@@ -92,7 +92,7 @@ describe('stampDuty', () => {
         amount: 200,
         rate: 200,
         stampType: 'electronic',
-        receiptNumber: 'SD-CON-456-1704067200000',
+        receiptNumber: expect.stringMatching(/^SD-CON-456-1704067200000-[A-Z0-9]{4}$/),
         date: '2024-01-01T00:00:00.000Z'
       });
     });

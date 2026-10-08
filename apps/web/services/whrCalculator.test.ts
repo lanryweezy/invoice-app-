@@ -101,7 +101,7 @@ describe('whrCalculator', () => {
         whtRate: 0.10,
         whtAmount: 500,
         date: '2024-01-01',
-        certificateNumber: 'WHT-INV-123-1704067200000'
+        certificateNumber: expect.stringMatching(/^WHT-INV-123-1704067200000-[A-Z0-9]{6}$/)
       });
     });
 

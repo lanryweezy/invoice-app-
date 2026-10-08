@@ -46,6 +46,7 @@ export function generateStampReceipt(invoice: {
 }): StampDutyResult {
   const docType = invoice.type ?? 'invoice';
   const result = calculateStampDuty(docType, invoice.amount);
-  result.receiptNumber = `SD-${invoice.id}-${Date.now()}`;
+  const randomStr = generateSecureId(4);
+  result.receiptNumber = `SD-${invoice.id}-${Date.now()}-${randomStr}`;
   return result;
 }
