@@ -593,7 +593,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                     <div className="flex justify-end pt-2 pb-4">
                         <button
                             onClick={() => onSaveBusinessProfile(invoice.user)}
-                            className="flex items-center gap-1.5 text-[11px] font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-md transition-colors border border-teal-100"
+                            className="flex items-center gap-1.5 text-[11px] font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-md transition-colors border border-teal-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
                         >
                             <SaveIcon className="w-3.5 h-3.5" />
                             Save Business Profile
@@ -933,7 +933,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
 
                     <button
                         onClick={addLineItem}
-                        className="w-full py-3 border border-dashed border-slate-300 rounded-xl text-slate-500 font-bold hover:border-teal-400 hover:text-teal-700 hover:bg-teal-50/50 transition-all flex items-center justify-center gap-2 group mt-2"
+                        className="w-full py-3 border border-dashed border-slate-300 rounded-xl text-slate-500 font-bold hover:border-teal-400 hover:text-teal-700 hover:bg-teal-50/50 transition-all flex items-center justify-center gap-2 group mt-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
                     >
                         <PlusIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
                         Add Item
@@ -1024,7 +1024,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                     <div className="flex justify-end pt-2">
                         <button 
                             onClick={() => onSaveClient(invoice.client)}
-                            className="flex items-center gap-1.5 text-[11px] font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-md transition-colors border border-teal-100"
+                            className="flex items-center gap-1.5 text-[11px] font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-md transition-colors border border-teal-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
                         >
                             <SaveIcon className="w-3.5 h-3.5" />
                             Save Client
@@ -1153,7 +1153,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                                         updateInvoice('nrsValidationMessage', 'All compliance checks passed.');
                                     }
                                 }}
-                                className="flex-1 py-2.5 bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-teal-900/20 flex items-center justify-center gap-2"
+                                className="flex-1 py-2.5 bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-teal-900/20 flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
                             >
                                 <SparklesIcon className="w-4 h-4" />
                                 Validate & Transmit
@@ -1162,7 +1162,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = React.memo(({ invoice, up
                             {onSaveInvoice && (
                                 <button 
                                     onClick={() => onSaveInvoice(invoice)}
-                                    className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2"
+                                    className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
                                 >
                                     <SaveIcon className="w-4 h-4" />
                                     Record in History
