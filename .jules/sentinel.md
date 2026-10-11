@@ -50,3 +50,7 @@
 **Vulnerability:** `stampDuty.ts` securely generated a receipt number in `calculateStampDuty`, but `generateStampReceipt` subsequently overwrote it with a predictable `SD-${invoice.id}-${Date.now()}`. A similar issue existed in `whrCalculator.ts` for WHT certificates.
 **Learning:** Functions that wrap or extend core logic may inadvertently regress security enhancements (like secure IDs) if they attempt to rebuild or customize identifiers locally without including the necessary entropy.
 **Prevention:** Always reuse the securely generated identifier from the base object rather than recreating it, or ensure all layers use `generateSecureId` when generating public-facing identifiers like receipt or certificate numbers to prevent enumeration.
+## 2024-10-24 - Fix CSV Injection in AccountingDashboard
+**Vulnerability:** The CSV export functions in `AccountingDashboard.tsx` did not sanitize fields starting with formula characters (`=`, `+`, `-`, `@`), enabling CSV Injection (Formula Injection) attacks.
+**Learning:** Manual CSV string construction is highly prone to CSV injection vulnerabilities if user input is not properly escaped. Always use a centralized CSV generation utility or rigorously sanitize all string inputs.
+**Prevention:** Always prepend a single quote (`'`) to any CSV value starting with `=, +, -, or @` before wrapping in double quotes, and enforce the use of centralized, secure CSV escaping utilities.
