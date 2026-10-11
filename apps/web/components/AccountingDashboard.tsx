@@ -213,16 +213,28 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ invoic
   const visibleExpenses = isPro ? filteredExpenses : filteredExpenses.slice(0, 10);
 
   const handleExportCSV = (type: 'expenses' | 'invoices') => {
+    const escapeCSV = (value: string | number | undefined): string => {
+      let sanitized = String(value || '');
+      // Security: Prevent CSV Injection (Formula Injection)
+      if (/^[=+\-@]/.test(sanitized)) {
+        sanitized = "'" + sanitized;
+      }
+      if (sanitized.includes(',') || sanitized.includes('"') || sanitized.includes('\n')) {
+        return `"${sanitized.replace(/"/g, '""')}"`;
+      }
+      return sanitized;
+    };
+
     let csvContent: string[];
     if (type === 'expenses') {
       csvContent = ["Date,Description,Category,Vendor,Amount"];
       filteredExpenses.forEach(exp => {
-        csvContent.push(`${exp.date},"${exp.description}",${exp.category},"${exp.vendor || ''}",${exp.amount}`);
+        csvContent.push(`${escapeCSV(exp.date)},${escapeCSV(exp.description)},${escapeCSV(exp.category)},${escapeCSV(exp.vendor)},${exp.amount}`);
       });
     } else {
       csvContent = ["InvoiceNumber,Client,Date,DueDate,Status,Subtotal,VAT,WHT,Total,NRSStatus"];
       filteredInvoices.forEach(inv => {
-        csvContent.push(`${inv.invoiceNumber},"${inv.client.name}",${inv.issueDate},${inv.dueDate},${inv.status},${inv.subtotal || 0},${inv.tax || 0},${inv.whtAmount || 0},${inv.total || 0},${inv.nrsStatus || 'Draft'}`);
+        csvContent.push(`${escapeCSV(inv.invoiceNumber)},${escapeCSV(inv.client.name)},${escapeCSV(inv.issueDate)},${escapeCSV(inv.dueDate)},${escapeCSV(inv.status)},${inv.subtotal || 0},${inv.tax || 0},${inv.whtAmount || 0},${inv.total || 0},${escapeCSV(inv.nrsStatus || 'Draft')}`);
       });
     }
     const blob = new Blob([csvContent.join("\n")], { type: 'text/csv;charset=utf-8;' });
