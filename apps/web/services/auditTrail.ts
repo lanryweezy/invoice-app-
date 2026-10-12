@@ -35,12 +35,21 @@ function generateId(): string {
 }
 
 async function getAllEntries(): Promise<AuditEntry[]> {
-  const entries = await localforage.getItem<AuditEntry[]>('entries');
-  return entries ?? [];
+  try {
+    const entries = await localforage.getItem<AuditEntry[]>('entries');
+    return entries ?? [];
+  } catch (error) {
+    console.warn('Failed to read audit trail from local storage:', error);
+    return [];
+  }
 }
 
 async function saveEntries(entries: AuditEntry[]): Promise<void> {
-  await localforage.setItem('entries', entries);
+  try {
+    await localforage.setItem('entries', entries);
+  } catch (error) {
+    console.warn('Failed to save audit trail to local storage:', error);
+  }
 }
 
 export async function logAction(

@@ -39,3 +39,7 @@
 ## 2026-08-06 - Nodemailer SMTP Hangs in Serverless Functions
 **Learning:** Default Nodemailer configurations do not have explicit connection or socket timeouts. If the external SMTP server hangs without closing the TCP connection, `transporter.sendMail()` can block indefinitely. In a serverless environment like Vercel API routes, this causes the function to hang until it is forcibly terminated, dropping requests and potentially leading to connection exhaustion.
 **Action:** Always pass explicit `connectionTimeout` (e.g., 10000ms) and `socketTimeout` (e.g., 15000ms) inside the `nodemailer.createTransport()` configuration block, not just in background jobs, but also in real-time API endpoints.
+
+## 2026-08-26 - Unhandled IndexedDB (localforage) Failures
+**Learning:** `localforage.getItem` and `localforage.setItem` return Promises that can reject if IndexedDB is disabled, blocked (common in private browsing modes), or if the storage quota is exceeded. If these calls are `await`ed without a `try/catch` block (as seen in `apps/web/services/auditTrail.ts`), they result in unhandled promise rejections that crash the application flow, rather than gracefully degrading the non-critical feature (e.g. losing audit trail logs but keeping the app working).
+**Action:** Always wrap `localforage` read/write operations in a `try/catch` block. On failure, return a safe fallback value (like `[]` or `null`) and log a warning to ensure the core application flow can continue uninterrupted.

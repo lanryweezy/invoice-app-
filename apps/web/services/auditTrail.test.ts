@@ -1,44 +1,31 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { logAction, getAuditTrail, searchAuditTrail, getAuditSummary, exportAuditTrail, registerAuditExportStrategy } from './auditTrail';
 import localforage from 'localforage';
-import type { Invoice } from '../types';
+import {
+  logAction,
+  getAuditTrail,
+  searchAuditTrail,
+  getAuditSummary,
+  exportAuditTrail,
+  registerAuditExportStrategy
+} from './auditTrail';
 
 vi.mock('localforage', () => ({
   default: {
     config: vi.fn(),
     getItem: vi.fn(),
     setItem: vi.fn(),
-  },
+  }
 }));
-
-// Mock crypto.getRandomValues
-if (!global.crypto) {
-    (global as any).crypto = {
-        getRandomValues: vi.fn((arr) => {
-            for (let i = 0; i < arr.length; i++) {
-                arr[i] = Math.floor(Math.random() * 256);
-            }
-            return arr;
-        }),
-    };
-} else {
-    vi.spyOn(crypto, 'getRandomValues').mockImplementation((arr: any) => {
-        for (let i = 0; i < arr.length; i++) {
-            arr[i] = Math.floor(Math.random() * 256);
-        }
-        return arr;
-    });
-}
 
 describe('auditTrail', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2024-01-01T12:00:00Z'));
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
   describe('logAction', () => {
@@ -64,6 +51,23 @@ describe('auditTrail', () => {
 
       expect(localforage.setItem).toHaveBeenCalledWith('entries', [entry]);
     });
+
+    it('gracefully handles localforage.getItem failures', async () => {
+      vi.mocked(localforage.getItem).mockRejectedValue(new Error('IndexedDB blocked'));
+      const entry = await logAction('inv-123', 'create', 'user-abc', {});
+
+      expect(entry.invoiceId).toBe('inv-123');
+      expect(localforage.setItem).toHaveBeenCalledWith('entries', [entry]);
+    });
+
+    it('gracefully handles localforage.setItem failures', async () => {
+      vi.mocked(localforage.getItem).mockResolvedValue([]);
+      vi.mocked(localforage.setItem).mockRejectedValue(new Error('IndexedDB blocked'));
+
+      const entry = await logAction('inv-123', 'create', 'user-abc', {});
+
+      expect(entry.invoiceId).toBe('inv-123'); // Should still return the entry even if save fails
+    });
   });
 
   describe('getAuditTrail', () => {
@@ -79,6 +83,12 @@ describe('auditTrail', () => {
       expect(trail).toHaveLength(2);
       expect(trail[0].id).toBe('3'); // 12:00 is most recent
       expect(trail[1].id).toBe('1'); // 10:00 is oldest
+    });
+
+    it('returns empty array if localforage.getItem fails', async () => {
+        vi.mocked(localforage.getItem).mockRejectedValue(new Error('IndexedDB error'));
+        const trail = await getAuditTrail('inv-123');
+        expect(trail).toEqual([]);
     });
   });
 
@@ -98,6 +108,12 @@ describe('auditTrail', () => {
       const results = await searchAuditTrail({ invoiceId: 'inv-1' });
       expect(results).toHaveLength(2);
       expect(results.map((r) => r.id)).toEqual(['2', '1']); // Sorted descending
+    });
+
+    it('returns empty array if localforage.getItem fails', async () => {
+        vi.mocked(localforage.getItem).mockRejectedValue(new Error('IndexedDB error'));
+        const trail = await searchAuditTrail({ invoiceId: 'inv-1' });
+        expect(trail).toEqual([]);
     });
 
     it('filters by userId', async () => {
