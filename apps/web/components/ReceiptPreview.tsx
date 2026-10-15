@@ -20,10 +20,11 @@ export const ReceiptPreview: React.FC<ReceiptPreviewProps> = ({ receipt, templat
         if (!receiptRef.current) return;
 
         try {
-            const { toJpeg } = await import('html-to-image');
+            const html2canvas = (await import('html2canvas')).default;
             const { jsPDF } = await import('jspdf');
 
-            const imgData = await toJpeg(receiptRef.current, { quality: 1.0, pixelRatio: 2 });
+            const canvas = await html2canvas(receiptRef.current, { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' });
+            const imgData = canvas.toDataURL('image/jpeg', 1.0);
 
             // Get dimensions for aspect ratio
             const img = new Image();
