@@ -396,17 +396,17 @@ const App: React.FC = () => {
       showToast('Generating PDF...', 'success');
       trackEvent('download_pdf_start', { invoice_id: invoice.invoiceNumber });
 
-      const { toJpeg } = await import('html-to-image');
+      const html2canvas = (await import('html2canvas')).default;
       const { jsPDF } = await import('jspdf');
 
-      const imgData = await toJpeg(sourceElement, {
-        quality: 0.95,
-        pixelRatio: 2,
-        backgroundColor: '#ffffff',
-        style: {
-          transform: 'none',
-        },
+      const canvas = await html2canvas(sourceElement, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
       });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
