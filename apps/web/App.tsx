@@ -113,11 +113,6 @@ const App: React.FC = () => {
   const [isPaymentDetailsOpen, setIsPaymentDetailsOpen] = useState(false);
   const [complianceScore, setComplianceScore] = useState(0);
 
-  // Toast State
-  const [toast, setToast] = useState<{ message: string; isVisible: boolean; type?: 'success' | 'error' }>({
-    message: '',
-    isVisible: false
-  });
 
     const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
       if (type === 'error') {
@@ -406,6 +401,8 @@ const App: React.FC = () => {
         style: {
           transform: 'none',
         },
+        fontEmbedCSS: '',
+        skipFonts: true,
       });
 
       const pdf = new jsPDF('p', 'mm', 'a4');

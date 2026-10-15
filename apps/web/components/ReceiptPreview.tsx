@@ -23,7 +23,7 @@ export const ReceiptPreview: React.FC<ReceiptPreviewProps> = ({ receipt, templat
             const { toJpeg } = await import('html-to-image');
             const { jsPDF } = await import('jspdf');
 
-            const imgData = await toJpeg(receiptRef.current, { quality: 1.0, pixelRatio: 2 });
+            const imgData = await toJpeg(receiptRef.current, { quality: 1.0, pixelRatio: 2, fontEmbedCSS: '', skipFonts: true });
 
             // Get dimensions for aspect ratio
             const img = new Image();

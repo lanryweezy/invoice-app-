@@ -1,0 +1,23 @@
+--- apps/web/App.tsx
++++ apps/web/App.tsx
+@@ -113,11 +113,6 @@
+   const [isPaymentDetailsOpen, setIsPaymentDetailsOpen] = useState(false);
+   const [complianceScore, setComplianceScore] = useState(0);
+
+-  // Toast State
+-  const [toast, setToast] = useState<{ message: string; isVisible: boolean; type?: 'success' | 'error' }>({
+-    message: '',
+-    isVisible: false
+-  });
+
+     const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
+       if (type === 'error') {
+@@ -403,6 +398,8 @@
+         style: {
+           transform: 'none',
+         },
++        fontEmbedCSS: '',
++        skipFonts: true,
+       });
+
+       const pdf = new jsPDF('p', 'mm', 'a4');

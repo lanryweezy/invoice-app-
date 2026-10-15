@@ -41,7 +41,7 @@ export const InvoicePreview: React.FC<InvoicePreviewProps> = React.memo(({ invoi
   const isCenterAligned = template === 'minimalist' || template === 'elegant';
 
   return (
-    <article className={`text-slate-900 h-full flex flex-col relative overflow-hidden ${template === 'elegant' ? 'font-serif' : template === 'tech' ? 'font-mono' : 'font-sans'}`}>
+    <article id="invoice-preview-container" className={`text-slate-900 h-full flex flex-col relative overflow-hidden ${template === 'elegant' ? 'font-serif' : template === 'tech' ? 'font-mono' : 'font-sans'}`}>
       
       {/* Paid Stamp/Watermark */}
       {status === 'Paid' && (
