@@ -11,7 +11,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, children }) => {
 
   return (
     <div 
-        className="relative inline-flex items-center group"
+        className="relative inline-flex items-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1 focus-within:ring-2 focus-within:ring-teal-500 focus-within:ring-offset-1 rounded"
         onMouseEnter={() => setIsVisible(true)}
         onMouseLeave={() => setIsVisible(false)}
         onFocus={() => setIsVisible(true)}
