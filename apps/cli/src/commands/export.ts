@@ -49,13 +49,22 @@ registerExportStrategy({
   serialize: (data) => JSON.stringify(data, null, 2),
 });
 
+function sanitizeCsvField(value: string | undefined): string {
+  if (!value) return '';
+  // 🛡️ Sentinel: Prevent CSV Injection by prepending a single quote to fields starting with formula characters
+  if (/^[=+\-@]/.test(value)) {
+    return `'${value}`;
+  }
+  return value;
+}
+
 registerExportStrategy({
   id: 'csv',
   serialize: (data) => {
     const header = 'Invoice #,Client Name,Client Email,Issue Date,Due Date,Subtotal,Tax,WHT,Total,Status,Currency';
     const lines = data.map(
       (d) =>
-        `"${d.invoiceNumber}","${d.clientName}","${d.clientEmail}","${formatDate(d.issueDate)}","${formatDate(d.dueDate)}",${d.subtotal},${d.tax},${d.wht},${d.total},"${d.status}","${d.currency}"`
+        `"${sanitizeCsvField(d.invoiceNumber)}","${sanitizeCsvField(d.clientName)}","${sanitizeCsvField(d.clientEmail)}","${formatDate(d.issueDate)}","${formatDate(d.dueDate)}",${d.subtotal},${d.tax},${d.wht},${d.total},"${sanitizeCsvField(String(d.status))}","${sanitizeCsvField(d.currency)}"`
     );
     return [header, ...lines].join('\n');
   },
