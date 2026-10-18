@@ -54,3 +54,8 @@
 **Vulnerability:** The CSV export functions in `AccountingDashboard.tsx` did not sanitize fields starting with formula characters (`=`, `+`, `-`, `@`), enabling CSV Injection (Formula Injection) attacks.
 **Learning:** Manual CSV string construction is highly prone to CSV injection vulnerabilities if user input is not properly escaped. Always use a centralized CSV generation utility or rigorously sanitize all string inputs.
 **Prevention:** Always prepend a single quote (`'`) to any CSV value starting with `=, +, -, or @` before wrapping in double quotes, and enforce the use of centralized, secure CSV escaping utilities.
+
+## 2024-05-24 - CSV Injection in Export Command
+**Vulnerability:** The `export` command in `apps/cli/src/commands/export.ts` exports invoice data to CSV without sanitizing fields that could begin with formula characters (`=`, `+`, `-`, `@`).
+**Learning:** Fields like `clientName` or `clientEmail` can contain malicious formulas which would be executed if a user opens the exported CSV file in spreadsheet software like Excel or Google Sheets.
+**Prevention:** Always sanitize user inputs when generating CSVs by prepending a single quote (`'`) to any field starting with a formula character, as noted in the memory constraints: `When implementing CSV export features, ensure that values starting with formula characters ('=', '+', '-', '@') are sanitized by prepending a single quote ("'") to prevent CSV Injection (Formula Injection) vulnerabilities.`
