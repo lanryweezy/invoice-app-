@@ -7,7 +7,7 @@ export const InstallBanner: React.FC = () => {
   if (isInstalled || !isInstallable) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 sm:p-6">
+    <div role="status" aria-live="polite" className="fixed bottom-0 left-0 right-0 z-50 p-4 sm:p-6">
       <div className="max-w-lg mx-auto bg-gradient-to-r from-teal-600 to-emerald-600 rounded-2xl shadow-2xl shadow-teal-900/30 p-5 text-white">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
