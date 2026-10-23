@@ -91,7 +91,7 @@ export const SupportPage: React.FC = () => {
                 </p>
                 <button
                   onClick={() => setSubmitted(false)}
-                  className="mt-4 text-teal-600 hover:underline text-sm font-medium"
+                  className="mt-4 text-teal-600 hover:underline text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 rounded"
                 >
                   Send another message
                 </button>
