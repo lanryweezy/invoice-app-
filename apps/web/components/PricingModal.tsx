@@ -198,7 +198,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
         {/* Footer */}
         <div className="p-4 bg-slate-50 border-t border-slate-100">
           {error && (
-            <p className="text-sm text-red-600 text-center mb-3">{error}</p>
+            <p role="alert" aria-live="assertive" className="text-sm text-red-600 text-center mb-3">{error}</p>
           )}
           <div className="flex justify-between items-center">
             <p className="text-xs text-slate-400">Secure payment powered by Paystack</p>
