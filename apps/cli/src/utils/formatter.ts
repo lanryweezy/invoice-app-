@@ -36,6 +36,15 @@ export function getTodayISODate(): string {
   return new Date().toISOString().split('T')[0];
 }
 
+export function sanitizeCsvField(value: string | undefined): string {
+  if (!value) return '';
+  // 🛡️ Sentinel: Prevent CSV Injection by prepending a single quote to fields starting with formula characters
+  if (/^[=+\-@]/.test(value)) {
+    return `'${value}`;
+  }
+  return value;
+}
+
 export function parseItemsString(items: string): { description: string; amount: number }[] {
   if (!items) return [];
   return items.split(',').map((item) => {

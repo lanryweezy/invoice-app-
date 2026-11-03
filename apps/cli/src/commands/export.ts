@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { ensureAuthenticated } from '../lib/config';
 import { getDb } from '../lib/firebase-client';
 import { Invoice, InvoiceStatus } from '../types';
-import { formatDate } from '../utils/formatter';
+import { formatDate, sanitizeCsvField } from '../utils/formatter';
 import { createSpinner, succeed, fail, handleCliError } from '../utils/spinner';
 
 
@@ -48,15 +48,6 @@ registerExportStrategy({
   id: 'json',
   serialize: (data) => JSON.stringify(data, null, 2),
 });
-
-function sanitizeCsvField(value: string | undefined): string {
-  if (!value) return '';
-  // 🛡️ Sentinel: Prevent CSV Injection by prepending a single quote to fields starting with formula characters
-  if (/^[=+\-@]/.test(value)) {
-    return `'${value}`;
-  }
-  return value;
-}
 
 registerExportStrategy({
   id: 'csv',

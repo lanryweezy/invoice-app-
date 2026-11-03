@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { ensureAuthenticated } from '../lib/config';
 import { getDb } from '../lib/firebase-client';
-import { formatCurrency, formatDate } from '../utils/formatter';
+import { formatCurrency, formatDate, sanitizeCsvField } from '../utils/formatter';
 import { createSpinner, succeed, fail } from '../utils/spinner';
 import { Invoice } from '../types';
 
@@ -58,11 +58,11 @@ registerOutputStrategy('json', (invoices) => {
 registerOutputStrategy('csv', (invoices) => {
   const headers = ['Invoice #', 'Client', 'Total', 'Currency', 'Status', 'Due Date', 'Created'];
   const rows = invoices.map((inv) => [
-    inv.invoiceNumber,
-    inv.client.name,
+    sanitizeCsvField(inv.invoiceNumber),
+    sanitizeCsvField(inv.client.name),
     (inv.total || 0).toString(),
-    inv.currency,
-    inv.status,
+    sanitizeCsvField(inv.currency),
+    sanitizeCsvField(inv.status),
     inv.dueDate ? formatDate(inv.dueDate) : 'N/A',
     formatDate(inv.createdAt || '')
   ]);

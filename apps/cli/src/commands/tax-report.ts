@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { ensureAuthenticated } from '../lib/config';
 import { getDb } from '../lib/firebase-client';
 import { Invoice } from '../types';
-import { formatCurrency, formatDate } from '../utils/formatter';
+import { formatCurrency, formatDate, sanitizeCsvField } from '../utils/formatter';
 import { createSpinner, succeed, fail } from '../utils/spinner';
 import Table from 'cli-table3';
 
@@ -37,7 +37,7 @@ registerTaxReportOutputStrategy({
   serialize: (rows, totals) => {
     const header = 'Invoice #,Client,Subtotal,VAT,WHT,Stamp Duty,Net,Date';
     const lines = rows.map(
-      (r) => `"${r.number}","${r.client}",${r.subtotal},${r.vat},${r.wht},${r.stampDuty},${r.net},"${formatDate(r.date)}"`
+      (r) => `"${sanitizeCsvField(r.number)}","${sanitizeCsvField(r.client)}",${r.subtotal},${r.vat},${r.wht},${r.stampDuty},${r.net},"${formatDate(r.date)}"`
     );
     lines.push('');
     lines.push(`TOTALS,,,,,${totals.subtotal},${totals.vat},${totals.wht},${totals.stampDuty},${totals.net}`);
