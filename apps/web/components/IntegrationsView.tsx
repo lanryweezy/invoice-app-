@@ -326,7 +326,7 @@ export const IntegrationsView: React.FC<{ onUpgrade: () => void }> = ({ onUpgrad
         <p className="text-sm text-slate-600 mb-4">
           We're constantly adding new integrations. Let us know what you need and we'll prioritize it.
         </p>
-        <button className="text-sm font-medium text-teal-600 hover:text-teal-700">
+        <button className="text-sm font-medium text-teal-600 hover:text-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 rounded">
           Request Integration →
         </button>
       </div>
